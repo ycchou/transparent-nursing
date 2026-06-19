@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F1FAEE"/>
+      <stop offset="100%" stop-color="#E0F0EC"/>
+    </linearGradient>
+    <linearGradient id="logoBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2E86AB"/>
+      <stop offset="100%" stop-color="#5BA8C6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Decorative circles -->
+  <circle cx="1080" cy="80" r="240" fill="#2E86AB" opacity="0.07"/>
+  <circle cx="80" cy="570" r="200" fill="#A8DADC" opacity="0.35"/>
+  <circle cx="950" cy="500" r="120" fill="#06A77D" opacity="0.08"/>
+
+  <!-- Logo block -->
+  <g transform="translate(80, 130)">
+    <rect width="140" height="140" rx="32" fill="url(#logoBg)"/>
+    <path d="M70 119.9 c-32.7 -22.2 -53.7 -47.8 -53.7 -75.8 a26.8 26.8 0 0 1 53.7 -5.8 a26.8 26.8 0 0 1 53.7 5.8 c0 28 -21 53.7 -53.7 75.8 z"
+          fill="white"/>
+    <path d="M32.7 59.3 h19.8 l8.2 -15.2 l14 30.3 l8.2 -18.7 h32.7"
+          stroke="#E63946" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+
+  <!-- Title -->
+  <text x="252" y="195"
+        font-family="Noto Sans TC, PingFang TC, Microsoft JhengHei, sans-serif"
+        font-size="68" font-weight="700" fill="#1D3557" letter-spacing="-1">
+    護理職場透明化運動
+  </text>
+
+  <!-- Subtitle -->
+  <text x="252" y="252"
+        font-family="Noto Sans TC, PingFang TC, sans-serif"
+        font-size="32" font-weight="400" fill="#46557A" letter-spacing="1">
+    讓真實的職場資訊，被下一個護理師看見
+  </text>
+
+  <!-- Divider -->
+  <rect x="80" y="350" width="60" height="6" rx="3" fill="#2E86AB"/>
+
+  <!-- Body text -->
+  <text x="80" y="410" font-family="Noto Sans TC, sans-serif" font-size="26" fill="#1D3557">
+    集結 9 大護理工作場域的真實資料 ・ 完全匿名分享 ・ 不可追溯
+  </text>
+  <text x="80" y="448" font-family="Noto Sans TC, sans-serif" font-size="22" fill="#6B7C93">
+    病房 ・ 加護病房 ・ 急診 ・ 門診 ・ 洗腎室 ・ 手術房 ・ 特殊檢查 ・ 其他
+  </text>
+
+  <!-- Tags row -->
+  <g transform="translate(80, 510)">
+    <rect width="180" height="62" rx="31" fill="#2E86AB"/>
+    <text x="90" y="42" font-family="Noto Sans TC, sans-serif" font-size="24" font-weight="600" fill="white" text-anchor="middle">護病比透明</text>
+  </g>
+  <g transform="translate(278, 510)">
+    <rect width="180" height="62" rx="31" fill="#06A77D"/>
+    <text x="90" y="42" font-family="Noto Sans TC, sans-serif" font-size="24" font-weight="600" fill="white" text-anchor="middle">加班費合規</text>
+  </g>
+  <g transform="translate(476, 510)">
+    <rect width="180" height="62" rx="31" fill="#E63946"/>
+    <text x="90" y="42" font-family="Noto Sans TC, sans-serif" font-size="24" font-weight="600" fill="white" text-anchor="middle">真實推薦指數</text>
+  </g>
+  <g transform="translate(674, 510)">
+    <rect width="200" height="62" rx="31" fill="#F4A261"/>
+    <text x="100" y="42" font-family="Noto Sans TC, sans-serif" font-size="24" font-weight="600" fill="white" text-anchor="middle">300+ 筆社群分享</text>
+  </g>
+</svg>

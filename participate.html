@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2E86AB" />
+
+  <!-- SEO -->
+  <title>填寫表單 — 護理職場透明化運動</title>
+  <meta name="description" content="3-5 分鐘分享你的護理職場資訊。完全匿名、不蒐集 IP/email、不可追溯、送出後不可撤回。你的經驗將為下一位求職護理師提供真實參考。" />
+  <meta name="keywords" content="護理職場分享, 護理職場問卷, 匿名分享, 護病比填寫, 護理師職涯" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <link rel="canonical" href="https://transparentnursing.example.org/participate.html" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon-180.png" />
+  <link rel="apple-touch-icon" sizes="167x167" href="assets/apple-touch-icon-167.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="assets/apple-touch-icon-152.png" />
+  <link rel="apple-touch-icon" sizes="120x120" href="assets/apple-touch-icon-120.png" />
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- iOS PWA / 加入主畫面行為 -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="護理職場透明化" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="護理職場透明化運動" />
+  <meta property="og:title" content="填寫表單 — 護理職場透明化運動" />
+  <meta property="og:description" content="3-5 分鐘分享你的職場資訊。完全匿名、不可追溯。為下一位護理師點亮一盞燈。" />
+  <meta property="og:image" content="https://transparentnursing.example.org/assets/og-image.svg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:url" content="https://transparentnursing.example.org/participate.html" />
+  <meta property="og:locale" content="zh_TW" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="填寫表單 — 護理職場透明化運動" />
+  <meta name="twitter:description" content="3-5 分鐘完全匿名分享，為下一位護理師留下指引。" />
+  <meta name="twitter:image" content="https://transparentnursing.example.org/assets/og-image.svg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css?v=16" />
+
+    <!-- modulepreload：平行載入 ES module 鏈（首次造訪快 30-50%） -->
+  <link rel="modulepreload" href="./js/config.js?v=16" />
+  <link rel="modulepreload" href="./js/components.js?v=16" />
+  <link rel="modulepreload" href="./js/icons.js?v=16" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=16" />
+
+  <!-- 強制清除舊版 cache -->
+  <script>
+    (function() {
+      try {
+        var FV = 'v16', FLAG = '__nursing_force_' + FV;
+        if (!localStorage.getItem(FLAG)) {
+          Object.keys(localStorage).forEach(function(k) {
+            if (k.indexOf('nursing_csv_') === 0 ||
+                (k.indexOf('__nursing_force_') === 0 && k !== FLAG)) {
+              localStorage.removeItem(k);
+            }
+          });
+          localStorage.setItem(FLAG, String(Date.now()));
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <section style="padding-top:48px;padding-bottom:24px;">
+    <div class="container container-narrow" style="text-align:center;">
+      <span class="eyebrow">Participate</span>
+      <h1 style="margin:4px 0 12px;">分享你的職場資訊，<br class="md-only"/>幫助下一個護理師</h1>
+      <p style="color:var(--muted);font-size:1.05rem;line-height:1.75;">
+        填寫時間約 3-5 分鐘。<strong style="color:var(--ink);">送出後即直接公開於資料平台</strong>，僅作為求職與職涯參考。
+        我們不收集姓名、員工編號、IP 或 email；表單完全匿名、不可追溯、<strong style="color:var(--danger);">送出後無法撤回</strong>。
+      </p>
+    </div>
+  </section>
+
+  <!-- 5 張表單卡 -->
+  <section style="padding-top:24px;">
+    <div class="container">
+      <div class="grid grid-3" id="form-cards"></div>
+    </div>
+  </section>
+
+  <!-- 隱私與資料使用 -->
+  <section>
+    <div class="container container-narrow">
+      <div style="text-align:center;margin-bottom:32px;">
+        <span class="eyebrow">填寫前請務必了解</span>
+        <h2 style="margin:0;">隱私與資料使用</h2>
+      </div>
+      <div class="grid grid-3">
+        <div class="card card-flat">
+          <div style="color:var(--primary);margin-bottom:12px;">
+            <span data-icon="shield-check" data-size="28"></span>
+          </div>
+          <h3>完全匿名</h3>
+          <p style="color:var(--muted);margin:0;">
+            不要求姓名、員工編號、出生年月日。
+            我們也不收集 IP、不綁定 Google 帳號、不蒐集任何登入資訊——表單與你的身分之間沒有任何技術連結。
+          </p>
+        </div>
+        <div class="card card-flat">
+          <div style="color:var(--primary);margin-bottom:12px;">
+            <span data-icon="share" data-size="28"></span>
+          </div>
+          <h3>直接公開</h3>
+          <p style="color:var(--muted);margin:0;">
+            送出後資料會直接顯示在資料平台供瀏覽，<strong style="color:var(--ink);">沒有審核或延遲</strong>。
+            這代表你填的每一個欄位都會被看見——填寫前請審視欄位內容，量力分享。
+          </p>
+        </div>
+        <div class="card card-flat" style="border:2px solid var(--danger);">
+          <div style="color:var(--danger);margin-bottom:12px;">
+            <span data-icon="info" data-size="28"></span>
+          </div>
+          <h3 style="color:var(--danger);">不可撤回</h3>
+          <p style="color:var(--muted);margin:0;">
+            因為完全匿名、沒有任何識別資料，<strong style="color:var(--ink);">我們無法找到你的特定那一筆資料來刪除</strong>。
+            送出 = 不可逆。請在送出前再三確認內容無誤、無讓你後悔的個資描述。
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 加到主畫面 CTA -->
+  <section style="padding-top:0;">
+    <div class="container container-narrow">
+      <div class="card" style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:24px;">
+        <div style="width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,var(--primary),var(--primary-soft));display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="32" height="32" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 20.6 c-5.6 -3.8 -9.2 -8.2 -9.2 -13.0 a4.6 4.6 0 0 1 9.2 -1 a4.6 4.6 0 0 1 9.2 1 c0 4.8 -3.6 9.2 -9.2 13.0 z" fill="white"/>
+            <path d="M5.6 10.2 h3.4 l1.4 -2.6 l2.4 5.2 l1.4 -3.2 h5.6" stroke="#E63946" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+        </div>
+        <div style="flex:1;min-width:200px;">
+          <h3 style="margin:0 0 4px;">把網站加到主畫面，像 App 一樣使用</h3>
+          <p style="margin:0;color:var(--muted);font-size:0.92rem;line-height:1.6;">
+            iPhone / Android / 桌面都支援，全螢幕開啟、無需下載、隨時可移除。
+          </p>
+        </div>
+        <button type="button" class="btn btn-primary"
+          onclick="window.__nursingShowInstallGuide&&window.__nursingShowInstallGuide();"
+          style="flex-shrink:0;">
+          看教學
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section style="background:rgba(168,218,220,0.15);">
+    <div class="container container-narrow">
+      <div style="text-align:center;margin-bottom:32px;">
+        <span class="eyebrow">FAQ</span>
+        <h2 style="margin:0;">常見問題</h2>
+      </div>
+      <div class="faq">
+        <details>
+          <summary>我可以同時分享多份經歷嗎？</summary>
+          <p>可以，建議「每個機構」或「每個重要轉職點」各填一份。例如你曾在 A 醫院 ICU 工作 3 年、現在 B 診所，可分開填兩次。</p>
+        </details>
+        <details>
+          <summary>我填的機構名稱會被公開嗎？</summary>
+          <p>會。但你可以選擇填寫到「機構等級 + 縣市」，例如「某醫學中心（北部）」。重點是讓讀者能比較，而不是揭露個人。</p>
+        </details>
+        <details>
+          <summary>填了會不會被認出來？</summary>
+          <p>
+            因為我們<strong>不審核、不延遲、直接公開</strong>，是否會被認出來，<strong style="color:var(--ink);">需要你自己評估與承擔</strong>。
+            建議在送出前自我檢視：
+          </p>
+          <ul style="color:var(--muted);line-height:1.85;padding-left:1.2rem;margin:8px 0 0;">
+            <li>你的單位若全院只有 1-2 人填寫，被同事/主管推測出來的機會就高</li>
+            <li>機構名稱可選擇模糊填寫（例如「某醫學中心（北部）」）以降低風險</li>
+            <li>短評欄位如果寫到具體事件、人名、特定時間點，辨識度會大幅上升</li>
+            <li>薪資數字過於精準（例如 928,450 元）會比區間值更易被認出</li>
+          </ul>
+          <p style="margin-top:8px;color:var(--muted);">分享前請評估你能承擔的風險上限，再決定要填多細。</p>
+        </details>
+        <details>
+          <summary>填錯了或後悔了怎麼辦？可以撤回嗎？</summary>
+          <p>
+            <strong style="color:var(--danger);">無法撤回</strong>。因為我們完全不蒐集任何能識別你身分的資料（連 IP、email、Google 帳號都沒有），技術上我們無法分辨「哪一筆是你的」。
+            這是匿名性的代價，也是我們刻意的設計——換取你不會被反向追查的安全。
+            <br/><br/>
+            請在送出前再三檢查內容；若覺得不放心，建議模糊化、區間化、或者乾脆不填那一題。
+          </p>
+        </details>
+        <details>
+          <summary>為什麼門診/病房/急診的表單還沒上線？</summary>
+          <p>我們正在分階段建立。每一份表單都需要與第一線護理師討論欄位設計，請耐心等候——或寫信告訴我們你的需求。</p>
+        </details>
+        <details>
+          <summary>資料會被拿去做什麼？</summary>
+          <p>1) 公開呈現於資料平台與統計頁；2) 作為工會倡議、學術研究的引用素材；3) 整理成年度報告。所有用途以匿名、彙整方式進行。</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <div id="app-footer"></div>
+
+  <script type="module">
+    import { CATEGORIES } from './js/config.js?v=16';
+    import { mountLayout } from './js/components.js?v=16';
+    import { icon, renderIcons } from './js/icons.js?v=16';
+
+    mountLayout();
+
+    const cards = document.getElementById('form-cards');
+    cards.innerHTML = CATEGORIES.map((c) => {
+      const isLive = c.formStatus === 'live';
+      // 站內表單（相對路徑 .html）走同分頁、外部連結（Google Forms）走新分頁
+      const isExternal = /^https?:\/\//i.test(c.formUrl || '');
+      const linkAttrs = isExternal ? 'target="_blank" rel="noopener"' : '';
+      const linkIcon = isExternal ? 'arrow-up-right' : 'arrow-right';
+      return `
+        <div class="card card-hover form-card">
+          <span class="form-status ${isLive ? 'form-status-live' : 'form-status-soon'}">
+            ${isLive ? '已上線' : 'COMING SOON'}
+          </span>
+          <div class="cat-icon-wrap" style="background:${c.color};">
+            ${icon(c.icon, { size: 28 })}
+          </div>
+          <h3>${c.name}</h3>
+          <p style="color:var(--muted);margin:0 0 12px;font-size:0.92rem;line-height:1.65;">
+            ${c.description}
+          </p>
+          <div class="form-cta">
+            ${isLive
+              ? `<a href="${c.formUrl}" ${linkAttrs} class="btn btn-primary" style="width:100%;">
+                   開始填寫 <span data-icon="${linkIcon}" data-size="16"></span>
+                 </a>`
+              : `<button class="btn btn-secondary" style="width:100%;" disabled>即將推出</button>`}
+          </div>
+        </div>`;
+    }).join('');
+    renderIcons();
+  </script>
+</body>
+</html>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2E86AB" />
+
+  <!-- SEO 基本 -->
+  <title>護理職場透明化運動 — 讓真實的職場資訊被下一個護理師看見</title>
+  <meta name="description" content="集結 9 大護理工作場域（病房、加護病房、急診、手術房、門診、洗腎室、精神科、檢查/介入、其他）的真實職場資訊。完全匿名分享、不可追溯、不可撤回；包含護病比、加班費合規、推薦指數、薪資範圍等資料，幫助護理師做出更好的職涯選擇。" />
+  <meta name="keywords" content="護理師, 護理職場, 職場透明化, 護病比, 加班費, 醫院評價, 護理工會, 職場分享, 護理薪資, ICU, 急診, 病房, 護理人力, 工作環境" />
+  <meta name="author" content="護理職場透明化運動" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <link rel="canonical" href="https://transparentnursing.example.org/" />
+
+  <!-- Favicon / App icons -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon-180.png" />
+  <link rel="apple-touch-icon" sizes="167x167" href="assets/apple-touch-icon-167.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="assets/apple-touch-icon-152.png" />
+  <link rel="apple-touch-icon" sizes="120x120" href="assets/apple-touch-icon-120.png" />
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- iOS PWA / 加入主畫面行為 -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="護理職場透明化" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <!-- Open Graph (Facebook, LinkedIn, LINE) -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="護理職場透明化運動" />
+  <meta property="og:title" content="護理職場透明化運動 — 讓真實的職場資訊被下一個護理師看見" />
+  <meta property="og:description" content="集結 9 大護理工作場域的真實職場資料。完全匿名、不可追溯。包含護病比、加班費、推薦指數，幫助護理師做更好的職涯選擇。" />
+  <meta property="og:image" content="https://transparentnursing.example.org/assets/og-image.svg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="護理職場透明化運動 ── 9 大工作場域分眾收集、完全匿名分享" />
+  <meta property="og:url" content="https://transparentnursing.example.org/" />
+  <meta property="og:locale" content="zh_TW" />
+
+  <!-- Twitter / X Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="護理職場透明化運動" />
+  <meta name="twitter:description" content="讓真實的護理職場資訊，被下一個護理師看見。完全匿名、不可追溯、300+ 筆社群分享。" />
+  <meta name="twitter:image" content="https://transparentnursing.example.org/assets/og-image.svg" />
+
+  <!-- 字型 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css?v=16" />
+
+    <!-- modulepreload：平行載入 ES module 鏈（首次造訪快 30-50%） -->
+  <link rel="modulepreload" href="./js/config.js?v=16" />
+  <link rel="modulepreload" href="./js/components.js?v=16" />
+  <link rel="modulepreload" href="./js/icons.js?v=16" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=16" />
+  <link rel="modulepreload" href="./js/data-loader.js?v=16" />
+
+  <!-- 強制清除舊版 cache（只在版本更新時跑一次） -->
+  <script>
+    (function() {
+      try {
+        var FV = 'v16', FLAG = '__nursing_force_' + FV;
+        if (!localStorage.getItem(FLAG)) {
+          Object.keys(localStorage).forEach(function(k) {
+            if (k.indexOf('nursing_csv_') === 0 ||
+                (k.indexOf('__nursing_force_') === 0 && k !== FLAG)) {
+              localStorage.removeItem(k);
+            }
+          });
+          localStorage.setItem(FLAG, String(Date.now()));
+          console.info('[purge] 已強制清除舊 cache，升級到 ' + FV);
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- JSON-LD Structured Data：Organization + WebSite -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Organization",
+        "@id": "https://transparentnursing.example.org/#org",
+        "name": "護理職場透明化運動",
+        "alternateName": "Transparent Nursing",
+        "url": "https://transparentnursing.example.org/",
+        "logo": "https://transparentnursing.example.org/assets/logo.svg",
+        "description": "由社群共同維護的護理職場資訊分享平台，致敬呼吸治療師勞動分享平台模式，分眾收集 9 大護理工作場域的真實資料。",
+        "areaServed": "TW",
+        "sameAs": []
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://transparentnursing.example.org/#site",
+        "url": "https://transparentnursing.example.org/",
+        "name": "護理職場透明化運動",
+        "description": "讓真實的護理職場資訊，被下一個護理師看見。",
+        "inLanguage": "zh-Hant-TW",
+        "publisher": { "@id": "https://transparentnursing.example.org/#org" }
+      }
+    ]
+  }
+  </script>
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-grid">
+        <div>
+          <span class="hero-eyebrow">A community-led movement</span>
+          <h1 class="hero-title">讓 <em>護理職場</em> 的真實樣貌<br class="md-only"/>被下一個夥伴看見</h1>
+          <p class="hero-sub">
+            從 ICU 到門診，從醫學中心到診所——每一個願意分享的護理師，都在為下一個求職者點亮一盞燈。
+            資料匿名彙整、公開呈現，<strong style="color:var(--ink);">真實，是改變的第一步。</strong>
+          </p>
+          <div class="hero-cta">
+            <a href="participate.html" class="btn btn-primary">
+              <span data-icon="share" data-size="16"></span> 我也要分享
+            </a>
+            <a href="platform.html" class="btn btn-secondary">
+              <span data-icon="bar-chart-3" data-size="16"></span> 看資料平台
+            </a>
+          </div>
+        </div>
+        <div class="hero-art">
+          <!-- 抽象 SVG art -->
+          <svg viewBox="0 0 400 300" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"
+               xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#A8DADC" />
+                <stop offset="100%" stop-color="#2E86AB" />
+              </linearGradient>
+            </defs>
+            <circle cx="120" cy="140" r="80" fill="url(#g1)" opacity="0.35" />
+            <circle cx="260" cy="180" r="100" fill="#2E86AB" opacity="0.25" />
+            <circle cx="200" cy="100" r="50" fill="#06A77D" opacity="0.4" />
+            <!-- Stylized heart -->
+            <g transform="translate(160,110)">
+              <path d="M40 70 C 10 50, 0 30, 0 20 a 20 20 0 0 1 40 -5 a 20 20 0 0 1 40 5 c 0 10 -10 30 -40 50 z"
+                    fill="white" stroke="#1D3557" stroke-width="2.5" stroke-linejoin="round"/>
+              <path d="M10 25 h 15 l 5 -10 l 10 25 l 5 -10 h 15"
+                    fill="none" stroke="#E63946" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 動態統計 -->
+  <section style="padding-top:0;">
+    <div class="container">
+      <div class="grid grid-3">
+        <div class="card stat-card">
+          <div class="stat-num" id="stat-total">—</div>
+          <div class="stat-label">累計分享筆數</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-num" id="stat-institutions">—</div>
+          <div class="stat-label">涵蓋醫療機構數</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-num" id="stat-updated" style="font-size:1.4rem;line-height:1.4;padding-top:14px;">—</div>
+          <div class="stat-label">最後更新時間</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5 大類別卡片 -->
+  <section>
+    <div class="container">
+      <div style="text-align:center;margin-bottom:40px;">
+        <span class="eyebrow" id="category-count-label">護理職場類別</span>
+        <h2 style="margin:0;">從急診到長照，每個現場都值得被看見</h2>
+        <p style="color:var(--muted);max-width:560px;margin:12px auto 0;">
+          每個單位的人力配置、值班制度、業務內容差異極大，
+          我們依照工作場域分類收集，讓資訊更貼近真實情境。
+        </p>
+      </div>
+      <div class="grid grid-3" id="category-cards"></div>
+    </div>
+  </section>
+
+  <!-- 運動主張 -->
+  <section style="background:linear-gradient(180deg, transparent 0%, rgba(168,218,220,0.18) 100%);">
+    <div class="container">
+      <div style="text-align:center;margin-bottom:40px;">
+        <span class="eyebrow">為什麼是現在</span>
+        <h2 style="margin:0;">透明，是改變最溫和卻最有力的工具</h2>
+      </div>
+      <div class="manifesto-grid">
+        <div class="card card-flat">
+          <div class="num">01</div>
+          <h3>讓資訊對等</h3>
+          <p style="color:var(--muted);margin:0;">
+            求職者在面試前往往拿不到真實的人力、加班、薪資資訊。當社群一起分享，資訊不再不對稱。
+          </p>
+        </div>
+        <div class="card card-flat">
+          <div class="num">02</div>
+          <h3>保護分享者</h3>
+          <p style="color:var(--muted);margin:0;">
+            表單匿名、不要求個資、機構名稱可選擇模糊。我們把資料安全放在每一個技術決定之前。
+          </p>
+        </div>
+        <div class="card card-flat">
+          <div class="num">03</div>
+          <h3>推動制度討論</h3>
+          <p style="color:var(--muted);margin:0;">
+            真實數據是工會倡議、政策對話、醫院內部改革最有說服力的支點，每一筆都重要。
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section>
+    <div class="container">
+      <div class="card" style="background:var(--ink);color:white;text-align:center;padding:56px 32px;">
+        <h2 style="color:white;margin:0 0 16px;">分享 5 分鐘，照亮下一位護理師的選擇</h2>
+        <p style="color:rgba(255,255,255,0.75);max-width:520px;margin:0 auto 28px;">
+          填寫表單僅需 3-5 分鐘，全程匿名。你的經驗，是別人的指南針。
+        </p>
+        <a href="participate.html" class="btn btn-primary">填寫表單 <span data-icon="arrow-right" data-size="16"></span></a>
+      </div>
+    </div>
+  </section>
+
+  <div id="app-footer"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
+  <script type="module">
+    import { CATEGORIES } from './js/config.js?v=16';
+    import { mountLayout, fmt } from './js/components.js?v=16';
+    import { icon, renderIcons } from './js/icons.js?v=16';
+    import { getStats, startAutoRefresh } from './js/data-loader.js?v=16';
+
+    mountLayout();
+
+    // 動態類別數字
+    document.getElementById('category-count-label').textContent = `${CATEGORIES.length} 大護理職場類別`;
+
+    // 類別卡片
+    const cards = document.getElementById('category-cards');
+    cards.innerHTML = CATEGORIES.map((c) => `
+      <a href="platform.html#${c.slug}" class="card card-hover cat-card" style="text-decoration:none;display:block;">
+        <div class="cat-icon-wrap" style="background:${c.color};">
+          ${icon(c.icon, { size: 28 })}
+        </div>
+        <h3>${c.name}</h3>
+        <p>${c.description}</p>
+        <div class="cat-meta">
+          <span class="tag tag-${c.slug}" id="cat-count-${c.slug}">—</span>
+          <span class="cat-cta">進入查看 →</span>
+        </div>
+      </a>
+    `).join('');
+    renderIcons();
+
+    // 動態統計
+    async function renderStats() {
+      const stats = await getStats();
+      document.getElementById('stat-total').textContent = stats.total.toLocaleString();
+      document.getElementById('stat-institutions').textContent = stats.institutionCount;
+      document.getElementById('stat-updated').textContent = stats.lastUpdated ? fmt.datetime(stats.lastUpdated) : '—';
+      CATEGORIES.forEach((c) => {
+        const el = document.getElementById('cat-count-' + c.slug);
+        if (el) el.textContent = `${stats.byCategory[c.slug] || 0} 筆`;
+      });
+    }
+
+    try {
+      await renderStats();
+      // 每 10 分鐘背景靜默刷新 — 只更新 cache、不重畫當前畫面
+      startAutoRefresh();
+    } catch (e) {
+      console.error(e);
+    }
+  </script>
+</body>
+</html>

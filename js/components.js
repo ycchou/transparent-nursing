@@ -1,0 +1,185 @@
+// 共用 header / footer 注入 + 工具函式
+import { SITE, CATEGORIES } from './config.js?v=16';
+import { icon, renderIcons } from './icons.js?v=16';
+import { initPWAPrompt, showInstallGuide } from './pwa-prompt.js?v=16';
+
+const NAV_ITEMS = [
+  { href: 'index.html',       label: '首頁',     match: ['index.html', ''] },
+  { href: 'platform.html',    label: '資料平台', match: ['platform.html'] },
+  { href: 'stats.html',       label: '統計摘要', match: ['stats.html'] },
+  { href: 'violations.html',  label: '勞檢紀錄', match: ['violations.html'] },
+  { href: 'participate.html', label: '填寫表單', match: ['participate.html'] },
+  { href: 'about.html',       label: '關於',     match: ['about.html'] },
+];
+
+// Logo 標誌：白色心型 + 紅色 ECG 線（以 apple-touch-icon 為基準 1.5× 等比放大，
+// 顯示尺寸 26px 在 32px 色塊內 → 心型佔 32px 方塊約 62% 寬度）
+const HEART_PULSE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" style="display:block;">
+  <path d="M12 20.6 c-5.6 -3.8 -9.2 -8.2 -9.2 -13.0 a4.6 4.6 0 0 1 9.2 -1 a4.6 4.6 0 0 1 9.2 1 c0 4.8 -3.6 9.2 -9.2 13.0 z" fill="white"/>
+  <path d="M5.6 10.2 h3.4 l1.4 -2.6 l2.4 5.2 l1.4 -3.2 h5.6" stroke="#E63946" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>`;
+
+function currentPage() {
+  const path = location.pathname.split('/').pop() || 'index.html';
+  return path;
+}
+
+function headerHTML() {
+  const page = currentPage();
+  return `
+    <header class="site-header">
+      <div class="container">
+        <div class="nav-wrap">
+          <a href="index.html" class="site-logo">
+            <span class="site-logo-mark">${HEART_PULSE_SVG}</span>
+            <span>護理職場透明化</span>
+          </a>
+          <nav class="site-nav" id="site-nav">
+            ${NAV_ITEMS.map((it) => `
+              <a href="${it.href}" class="${it.match.includes(page) ? 'active' : ''}">${it.label}</a>
+            `).join('')}
+          </nav>
+          <button class="nav-toggle" id="nav-toggle" aria-label="開啟選單">
+            ${icon('menu')}
+          </button>
+        </div>
+      </div>
+    </header>
+  `;
+}
+
+function footerHTML() {
+  return `
+    <footer class="site-footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div>
+            <div class="site-logo" style="color:white;margin-bottom:16px">
+              <span class="site-logo-mark">${HEART_PULSE_SVG}</span>
+              <span>${SITE.name}</span>
+            </div>
+            <p style="color:rgba(255,255,255,0.65);font-size:0.92rem;line-height:1.75;">
+              ${SITE.tagline}<br/>讓護理職場的真實情境，被看見、被討論、被改變。
+            </p>
+          </div>
+          <div>
+            <h4>探索</h4>
+            <ul>
+              <li><a href="platform.html">資料平台</a></li>
+              <li><a href="stats.html">統計摘要</a></li>
+              <li><a href="violations.html">勞檢紀錄</a></li>
+              <li><a href="participate.html">填寫表單</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4>類別</h4>
+            <ul>
+              ${CATEGORIES.map((c) =>
+                `<li><a href="platform.html#${c.slug}">${c.name}</a></li>`
+              ).join('')}
+            </ul>
+          </div>
+          <div>
+            <h4>聯絡</h4>
+            <ul>
+              <li><a href="mailto:${SITE.contactEmail}">${SITE.contactEmail}</a></li>
+              <li><a href="about.html">運動緣起</a></li>
+              <li><a href="participate.html">填寫表單</a></li>
+              <li><a href="#" onclick="event.preventDefault();window.__nursingShowInstallGuide&&window.__nursingShowInstallGuide();">加到主畫面 (App 化)</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>© ${new Date().getFullYear()} 護理職場透明化運動 · Prototype</span>
+          <span>致敬 <a href="https://trtu.org.tw/RT_platform/" target="_blank" rel="noopener">呼吸治療師勞動分享平台</a></span>
+        </div>
+      </div>
+    </footer>
+  `;
+}
+
+export function mountLayout() {
+  // header
+  const headerSlot = document.getElementById('app-header');
+  if (headerSlot) headerSlot.innerHTML = headerHTML();
+  // footer
+  const footerSlot = document.getElementById('app-footer');
+  if (footerSlot) footerSlot.innerHTML = footerHTML();
+  // toggle
+  const toggle = document.getElementById('nav-toggle');
+  const nav = document.getElementById('site-nav');
+  if (toggle && nav) {
+    toggle.addEventListener('click', () => nav.classList.toggle('open'));
+  }
+  // render any remaining icons
+  renderIcons();
+  // PWA「加到主畫面」自動引導（10 秒後行動裝置彈出 banner）
+  initPWAPrompt();
+
+  // 背景預載 platform 資料：使用者切到資料平台時即時顯示，無需等待 fetch
+  // 動態 import 避免循環依賴與初始 parse 成本
+  import('./data-loader.js?v=16')
+    .then(({ preloadAll }) => preloadAll && preloadAll())
+    .catch(() => { /* 預載失敗不影響任何 UI */ });
+
+  // 背景預載勞檢紀錄資料：同樣讓使用者切過去時即時顯示
+  import('./violations.js?v=16')
+    .then(({ preloadViolations }) => preloadViolations && preloadViolations())
+    .catch(() => { /* 預載失敗不影響任何 UI */ });
+}
+
+/** Format helpers */
+export const fmt = {
+  date: (s) => {
+    if (!s) return '—';
+    const d = new Date(s);
+    if (isNaN(d)) return s;
+    return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
+  },
+  // 顯示到分鐘；若原始字串沒帶時間（純日期）則退回 date 格式
+  datetime: (s) => {
+    if (!s) return '—';
+    const d = new Date(s);
+    if (isNaN(d)) return s;
+    const hasTime = typeof s === 'string' && /\d{1,2}:\d{2}/.test(s);
+    const Y = d.getFullYear();
+    const M = String(d.getMonth() + 1).padStart(2, '0');
+    const D = String(d.getDate()).padStart(2, '0');
+    if (!hasTime && !(s instanceof Date)) return `${Y}/${M}/${D}`;
+    const h = String(d.getHours()).padStart(2, '0');
+    const m = String(d.getMinutes()).padStart(2, '0');
+    return `${Y}/${M}/${D} ${h}:${m}`;
+  },
+  // 相對時間，e.g. "2 分鐘前"
+  relative: (s) => {
+    if (!s) return '—';
+    const d = s instanceof Date ? s : new Date(s);
+    if (isNaN(d)) return s;
+    const diff = Date.now() - d.getTime();
+    const min = Math.floor(diff / 60000);
+    if (min < 1) return '剛剛';
+    if (min < 60) return `${min} 分鐘前`;
+    const hr = Math.floor(min / 60);
+    if (hr < 24) return `${hr} 小時前`;
+    const day = Math.floor(hr / 24);
+    if (day < 7) return `${day} 天前`;
+    return fmt.datetime(s);
+  },
+  number: (n) => (n === null || n === undefined || n === '') ? '—' : Number(n).toLocaleString(),
+  empty: (v) => (v === null || v === undefined || v === '' || v === '—') ? '—' : v,
+};
+
+/** Recommend index to pill (1-5) */
+export function recommendPill(value) {
+  const v = Number(value);
+  if (!v) return '<span class="text-muted">—</span>';
+  const labels = { 5: '非常推薦', 4: '推薦', 3: '保留', 2: '不推薦', 1: '非常不推薦' };
+  return `<span class="pill pill-rec-${v}">${labels[v] || v}</span>`;
+}
+
+/** Category to tag */
+export function categoryTag(slug) {
+  const cat = CATEGORIES.find((c) => c.slug === slug);
+  if (!cat) return '';
+  return `<span class="tag tag-${slug}">${cat.name}</span>`;
+}

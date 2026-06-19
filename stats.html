@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2E86AB" />
+
+  <!-- SEO -->
+  <title>統計摘要 — 護理職場透明化運動</title>
+  <meta name="description" content="從工時分布、加班費合規率、護病比、推薦指數等視覺化圖表，看護理職場的整體樣貌與 9 大工作場域的差異。資料即時更新，每 10 分鐘自動刷新。" />
+  <meta name="keywords" content="護理統計, 護病比分布, 工時分布, 加班費合規率, 護理職場數據, 醫療勞動統計" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <link rel="canonical" href="https://transparentnursing.example.org/stats.html" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon-180.png" />
+  <link rel="apple-touch-icon" sizes="167x167" href="assets/apple-touch-icon-167.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="assets/apple-touch-icon-152.png" />
+  <link rel="apple-touch-icon" sizes="120x120" href="assets/apple-touch-icon-120.png" />
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- iOS PWA / 加入主畫面行為 -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="護理職場透明化" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="護理職場透明化運動" />
+  <meta property="og:title" content="統計摘要 — 護理職場透明化運動" />
+  <meta property="og:description" content="工時、加班、護病比、推薦指數視覺化，看護理職場的整體樣貌。" />
+  <meta property="og:image" content="https://transparentnursing.example.org/assets/og-image.svg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:url" content="https://transparentnursing.example.org/stats.html" />
+  <meta property="og:locale" content="zh_TW" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="統計摘要 — 護理職場透明化運動" />
+  <meta name="twitter:description" content="6 大圖表呈現護理職場真實樣貌。" />
+  <meta name="twitter:image" content="https://transparentnursing.example.org/assets/og-image.svg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css?v=16" />
+
+    <!-- modulepreload：平行載入 ES module 鏈（首次造訪快 30-50%） -->
+  <link rel="modulepreload" href="./js/config.js?v=16" />
+  <link rel="modulepreload" href="./js/components.js?v=16" />
+  <link rel="modulepreload" href="./js/icons.js?v=16" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=16" />
+  <link rel="modulepreload" href="./js/data-loader.js?v=16" />
+  <link rel="modulepreload" href="./js/charts.js?v=16" />
+  <link rel="modulepreload" href="./js/official-stats.js?v=16" />
+
+  <!-- 強制清除舊版 cache -->
+  <script>
+    (function() {
+      try {
+        var FV = 'v16', FLAG = '__nursing_force_' + FV;
+        if (!localStorage.getItem(FLAG)) {
+          Object.keys(localStorage).forEach(function(k) {
+            if (k.indexOf('nursing_csv_') === 0 ||
+                (k.indexOf('__nursing_force_') === 0 && k !== FLAG)) {
+              localStorage.removeItem(k);
+            }
+          });
+          localStorage.setItem(FLAG, String(Date.now()));
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <section style="padding-top:48px;padding-bottom:16px;">
+    <div class="container">
+      <span class="eyebrow">Statistics</span>
+      <h1 style="margin:4px 0 8px;">統計摘要</h1>
+      <p style="color:var(--muted);max-width:680px;">
+        以下圖表呈現所有分享資料的整體分布。可使用篩選器只看特定類別。
+      </p>
+    </div>
+  </section>
+
+  <!-- 頂部分頁 -->
+  <section style="padding:0 0 24px;">
+    <div class="container">
+      <div class="tabs" id="stats-tabs">
+        <button class="tab active" data-tab="user">
+          <span data-icon="users" data-size="16"></span>
+          <span>使用者分享</span>
+        </button>
+        <button class="tab" data-tab="official">
+          <span data-icon="building" data-size="16"></span>
+          <span>官方參考數據</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================== -->
+  <!-- Tab A：使用者分享統計（原本內容）              -->
+  <!-- ============================================== -->
+  <div id="stats-tab-user">
+
+  <!-- 整體 KPI -->
+  <section style="padding-top:0;padding-bottom:32px;">
+    <div class="container">
+      <div class="grid grid-4">
+        <div class="card stat-card">
+          <div class="stat-num kpi-num" id="kpi-total">—</div>
+          <div class="stat-label">總分享筆數</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-num kpi-num" id="kpi-avg-hours">—</div>
+          <div class="stat-label">最多工時區間</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-num kpi-num" id="kpi-rec">—</div>
+          <div class="stat-label">平均推薦指數</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-num kpi-num" id="kpi-overtime">—</div>
+          <div class="stat-label">
+            加班費合規率
+            <span class="kpi-info" tabindex="0" role="button" aria-label="算法說明">
+              <span data-icon="info" data-size="14"></span>
+              <span class="kpi-info-tip">
+                <strong>合規率 = (「一律給」+「合理範圍給」) ÷ 有填寫加班費政策的筆數</strong><br/>
+                <span style="opacity:.85;">分母排除未填寫此題者；「主管判斷」「一律不給」算入分母但不計合規。「合理範圍」常為雇主自訂上限，定義較寬鬆，僅供概覽。</span>
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 篩選條件：單位類型 + 機構類別 + 地點（預設收折） -->
+  <section style="padding:0 0 32px;">
+    <div class="container">
+      <details class="filter-panel stat-filter-panel">
+        <summary>
+          <span class="stat-filter-title">
+            <span data-icon="filter" data-size="16" style="color:var(--primary);"></span>
+            <span>篩選條件</span>
+            <span class="stat-filter-badge" id="stat-filter-badge" hidden>已套用</span>
+          </span>
+          <span class="stat-filter-chev" aria-hidden="true">
+            <span data-icon="chevron-down" data-size="18"></span>
+          </span>
+        </summary>
+        <div class="stat-filter-body">
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+            <strong style="color:var(--ink);min-width:84px;">單位類型：</strong>
+            <div class="filter-options" id="stat-cat-filter"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+            <strong style="color:var(--ink);min-width:84px;">機構類別：</strong>
+            <div class="filter-options" id="stat-inst-filter"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+            <strong style="color:var(--ink);min-width:84px;">地點：</strong>
+            <div class="filter-options" id="stat-loc-filter"></div>
+          </div>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- 圖表 grid -->
+  <section style="padding-top:0;">
+    <div class="container">
+      <div class="grid grid-2">
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h3>各類別投稿分布</h3>
+              <div class="chart-sub">了解各工作場域回應比例</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap"><canvas id="chart-category"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h3>機構類別 × 工作場域</h3>
+              <div class="chart-sub">回應來自哪些等級的醫療機構</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap"><canvas id="chart-institution"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h3>每週工時分布</h3>
+              <div class="chart-sub">紅色為 55 小時以上，過勞警訊區</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap"><canvas id="chart-hours"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h3>加班費合規情況</h3>
+              <div class="chart-sub">綠色=完全給；紅色=完全不給</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap"><canvas id="chart-overtime"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h3>整體推薦指數</h3>
+              <div class="chart-sub">填寫者願意推薦這份工作的程度</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap"><canvas id="chart-recommend"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h3>各類別工作氣氛平均</h3>
+              <div class="chart-sub">1=最差 ~ 5=最佳</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap"><canvas id="chart-atmosphere"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h3>地點分布</h3>
+              <div class="chart-sub">各縣市分享筆數（依數量降冪排序）</div>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap" style="height:380px;"><canvas id="chart-location"></canvas></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div>
+              <h3>年薪分布（萬元）</h3>
+            </div>
+          </div>
+          <div class="chart-canvas-wrap"><canvas id="chart-salary"></canvas></div>
+          <div id="salary-stats" class="salary-stats"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  </div><!-- /#stats-tab-user -->
+
+  <!-- ============================================== -->
+  <!-- Tab B：官方參考數據                            -->
+  <!-- ============================================== -->
+  <div id="stats-tab-official" hidden>
+
+    <!-- 照護司「醫院護理職場資訊」查詢入口（顯眼位置，最上方 CTA） -->
+    <section style="padding-top:0;padding-bottom:20px;">
+      <div class="container">
+        <a class="mohw-entry-strip" target="_blank" rel="noopener"
+           href="https://nurse.mohw.gov.tw/sp-memb-survey-entrance-1-761ff-2.html">
+          <div class="mohw-strip-icon">
+            <span data-icon="building" data-size="22"></span>
+          </div>
+          <div class="mohw-strip-body">
+            <div class="mohw-strip-title">
+              想查特定醫院的薪資、福利、職涯發展？
+              <span class="mohw-strip-badge">官方平台</span>
+            </div>
+            <div class="mohw-strip-desc">
+              照護司「醫院護理職場資訊」收錄各醫院主動公開資料 · 依縣市 / 鄉鎮 / 機構名稱查詢
+            </div>
+          </div>
+          <div class="mohw-strip-cta">
+            前往查詢 <span data-icon="arrow-up-right" data-size="14"></span>
+          </div>
+        </a>
+      </div>
+    </section>
+
+    <!-- 簡介卡 -->
+    <section style="padding-top:0;padding-bottom:24px;">
+      <div class="container">
+        <div class="card card-flat" style="background:rgba(168,218,220,0.18);">
+          <div style="display:flex;gap:14px;align-items:flex-start;">
+            <div style="color:var(--primary);flex-shrink:0;padding-top:2px;">
+              <span data-icon="info" data-size="22"></span>
+            </div>
+            <div style="color:var(--ink-soft);font-size:0.95rem;line-height:1.8;">
+              <strong style="color:var(--ink);">資料來源：政府與護理全聯會公開報告</strong>
+              <br/>
+              本頁為政府與全國性公會公開報告的整理，與「使用者分享」是兩個獨立來源。
+              所有資料均為原報告引用、未經本站修改；如需引用請以原報告為準。
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 報告分頁切換（在官方數據分頁內） -->
+    <section style="padding-top:0;padding-bottom:20px;">
+      <div class="container">
+        <div class="off-subtabs" id="off-subtabs">
+          <button class="off-subtab active" data-sub="A">
+            <span class="off-subtab-pill">衛福部</span>
+            <span>112 年 醫院護理服務量</span>
+          </button>
+          <button class="off-subtab" data-sub="B">
+            <span class="off-subtab-pill off-subtab-pill-alt">護理全聯會</span>
+            <span>111 年 薪資及人力</span>
+          </button>
+          <button class="off-subtab" data-sub="C">
+            <span class="off-subtab-pill off-subtab-pill-alt">護理全聯會</span>
+            <span>114 年 人力監測指標</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 來源 1：衛福部 112 年 -->
+    <div id="off-sub-A">
+    <section style="padding-top:0;padding-bottom:24px;">
+      <div class="container">
+        <div class="official-tag-line">
+          <span class="off-source-pill">衛福部 · 112 年</span>
+          <h2 style="margin:0;">醫院護理服務量調查</h2>
+        </div>
+        <p class="official-meta">
+          發布者：<strong>衛福部護理及健康照護司</strong>　·
+          樣本：471 家醫院、回填 456 家（回填率 96.82%）　·
+          調查期間：113 年 1 月 22 日 ~ 2 月 19 日
+          <a class="off-pdf-link" target="_blank" rel="noopener"
+             href="https://www.nurse.org.tw/filecenter/B/8DDC60185347C25058/%e8%a1%9b%e7%a6%8f%e9%83%a8112%e5%b9%b4%e9%86%ab%e9%99%a2%e8%ad%b7%e7%90%86%e6%9c%8d%e5%8b%99%e9%87%8f%e8%aa%bf%e6%9f%a5%e7%b5%90%e6%9e%9c.pdf">
+            下載 PDF <span data-icon="arrow-up-right" data-size="12"></span>
+          </a>
+        </p>
+
+        <!-- KPI -->
+        <div class="grid grid-4" style="margin-top:16px;">
+          <div class="card stat-card">
+            <div class="stat-num kpi-num" id="off-kpi-salary">—</div>
+            <div class="stat-label">護理師整體平均年薪 · 112 年</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-num kpi-num" id="off-kpi-night-sm">—</div>
+            <div class="stat-label">小夜班費 · 三班固定 · 112 年</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-num kpi-num" id="off-kpi-night-lg">—</div>
+            <div class="stat-label">大夜班費 · 三班固定 · 112 年</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-num kpi-num" id="off-kpi-cert">—</div>
+            <div class="stat-label">護理師證照津貼 · 112 年</div>
+          </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid grid-2" style="margin-top:24px;">
+          <div class="chart-card">
+            <div class="chart-card-header"><div>
+              <h3>平均年薪 × 年資 × 醫院層級</h3>
+              <div class="chart-sub">＊未滿一年原為月薪，此處以月薪 × 12 估算為年化</div>
+            </div></div>
+            <div class="chart-canvas-wrap" style="height:320px;"><canvas id="chart-off-salary-tenure"></canvas></div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-card-header"><div>
+              <h3>平均年薪歷年趨勢 × 醫院層級</h3>
+              <div class="chart-sub">護理師（不含護士）</div>
+            </div></div>
+            <div class="chart-canvas-wrap" style="height:320px;"><canvas id="chart-off-salary-trend"></canvas></div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-card-header"><div>
+              <h3>公立 vs 私立醫院 · 護理師平均年薪</h3>
+              <div class="chart-sub">公立醫院長期高於私立，差距約 10% 以上</div>
+            </div></div>
+            <div class="chart-canvas-wrap" style="height:280px;"><canvas id="chart-off-pubpri"></canvas></div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-card-header"><div>
+              <h3>夜班費 × 班制 × 層級</h3>
+              <div class="chart-sub">單位：元/班次</div>
+            </div></div>
+            <div class="chart-canvas-wrap" style="height:320px;"><canvas id="chart-off-night"></canvas></div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-card-header"><div>
+              <h3>專業證照津貼歷年趨勢</h3>
+              <div class="chart-sub">月平均（單位：元）</div>
+            </div></div>
+            <div class="chart-canvas-wrap" style="height:280px;"><canvas id="chart-off-cert"></canvas></div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-card-header"><div>
+              <h3>教育程度分布</h3>
+              <div class="chart-sub">大學佔 70% 為主力</div>
+            </div></div>
+            <div class="chart-canvas-wrap" style="height:280px;"><canvas id="chart-off-education"></canvas></div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-card-header"><div>
+              <h3>近五年護理人員離職率</h3>
+              <div class="chart-sub">109 年因 Covid-19 暫停資料收集</div>
+            </div></div>
+            <div class="chart-canvas-wrap" style="height:280px;"><canvas id="chart-off-turnover"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    </div><!-- /#off-sub-A -->
+
+    <!-- 來源 2：護理全聯會 111 年 -->
+    <div id="off-sub-B" hidden>
+    <section style="padding-top:0;padding-bottom:32px;">
+      <div class="container">
+        <div class="official-tag-line">
+          <span class="off-source-pill off-source-pill-alt">護理全聯會 · 111 年</span>
+          <h2 style="margin:0;">醫院護理人員薪資及人力調查</h2>
+        </div>
+        <p class="official-meta">
+          發布者：<strong>護理全聯會</strong>　·
+          樣本：259 家醫院、回覆 185 家（回覆率 71.4%）　·
+          調查期間：2023 年 4 月 26 日 ~ 5 月 11 日
+          <a class="off-pdf-link" target="_blank" rel="noopener"
+             href="https://www.nurse.org.tw/filecenter/B/8DC3229C9DD3514030/20230512-111%e5%b9%b4%e9%86%ab%e9%99%a2%e8%ad%b7%e7%90%86%e4%ba%ba%e5%93%a1%e8%96%aa%e8%b3%87%e5%8f%8a%e4%ba%ba%e5%8a%9b%e8%aa%bf%e6%9f%a5%e5%a0%b1%e5%91%8a(%e5%85%ac%e5%91%8a%e7%89%88).pdf">
+            下載 PDF <span data-icon="arrow-up-right" data-size="12"></span>
+          </a>
+        </p>
+
+        <!-- 薪資範圍（平均 + 跨家 min ~ max；可切換 全部/北/中/南/東/離島） -->
+        <div class="chart-card" style="margin-top:18px;">
+          <div class="chart-card-header"><div>
+            <h3>護理人員薪資範圍</h3>
+            <div class="chart-sub">點地區切換；數字下方為跨家最低 ~ 最高值</div>
+          </div></div>
+          <div class="filter-options" id="off-region-chips" style="margin-bottom:14px;"></div>
+          <div id="off-region-table"></div>
+        </div>
+      </div>
+    </section>
+    </div><!-- /#off-sub-B -->
+
+    <!-- 來源 3：護理全聯會「114 年護理人力監測指標」-->
+    <div id="off-sub-C" hidden>
+    <section style="padding-top:0;padding-bottom:32px;">
+      <div class="container">
+        <div class="official-tag-line">
+          <span class="off-source-pill off-source-pill-alt">護理全聯會 · 114 年</span>
+          <h2 style="margin:0;">護理人力監測指標</h2>
+        </div>
+        <p class="official-meta">
+          發布者：<strong>護理全聯會</strong>　·
+          發布日期：115 年 1 月 5 日　·
+          年度涵蓋：105 ~ 114 年（共 10 年）
+          <a class="off-pdf-link" target="_blank" rel="noopener"
+             href="https://www.nurse.org.tw/filecenter/B/8DE57369055FC22058/114%e5%b9%b4%e8%ad%b7%e7%90%86%e4%ba%ba%e5%8a%9b%e7%9b%a3%e6%b8%ac%e6%8c%87%e6%a8%99.pdf">
+            下載 PDF <span data-icon="arrow-up-right" data-size="12"></span>
+          </a>
+        </p>
+
+        <div class="grid grid-2" style="margin-top:16px;">
+          <div class="chart-card">
+            <div class="chart-card-header"><div>
+              <h3>護理工作職場人數分布比例</h3>
+              <div class="chart-sub">醫院使用右軸（60~68%）、其他場域使用左軸（8~20%），避免比例差距遮蓋變化趨勢</div>
+            </div></div>
+            <div class="chart-canvas-wrap" style="height:320px;"><canvas id="chart-off-workplace"></canvas></div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-card-header"><div>
+              <h3>執業會員平均護理工作年資</h3>
+              <div class="chart-sub">單位：年（105 ~ 114 年）</div>
+            </div></div>
+            <div class="chart-canvas-wrap" style="height:320px;"><canvas id="chart-off-tenure"></canvas></div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-card-header"><div>
+              <h3>近十年首次執業人數</h3>
+              <div class="chart-sub">單位：人（105 ~ 114 年）</div>
+            </div></div>
+            <div class="chart-canvas-wrap" style="height:300px;"><canvas id="chart-off-firsttime"></canvas></div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-card-header"><div>
+              <h3>執業會員淨增加人數及成長率</h3>
+              <div class="chart-sub">藍柱：淨增加人數（左軸）　·　紅線：年成長率（右軸）</div>
+            </div></div>
+            <div class="chart-canvas-wrap" style="height:300px;"><canvas id="chart-off-netgrowth"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    </div><!-- /#off-sub-C -->
+
+  </div><!-- /#stats-tab-official -->
+
+  <div id="app-footer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
+  <script type="module">
+    import { CATEGORIES } from './js/config.js?v=16';
+    import { mountLayout } from './js/components.js?v=16';
+    import { renderIcons } from './js/icons.js?v=16';
+    import { loadAll, startAutoRefresh } from './js/data-loader.js?v=16';
+    import {
+      chartCategoryDistribution, chartInstitutionStacked, chartHoursHistogram,
+      chartOvertimePolicy, chartRecommend, chartAtmosphereByCategory,
+      chartLocationDistribution, chartSalaryDistribution,
+    } from './js/charts.js?v=16';
+    import {
+      renderOfficialSourceA, renderOfficialSourceB, renderOfficialSourceC,
+    } from './js/official-stats.js?v=16';
+
+    mountLayout();
+    renderIcons();
+
+    // ===== 報告分頁的 lazy render（每個 sub-tab 首次顯示時才畫圖）=====
+    const renderedSubs = new Set();
+    const subRenderers = { A: renderOfficialSourceA, B: renderOfficialSourceB, C: renderOfficialSourceC };
+    function switchSubTab(name) {
+      document.querySelectorAll('#off-subtabs .off-subtab').forEach((b) => {
+        b.classList.toggle('active', b.dataset.sub === name);
+      });
+      ['A', 'B', 'C'].forEach((k) => {
+        const el = document.getElementById('off-sub-' + k);
+        if (el) el.hidden = (k !== name);
+      });
+      if (!renderedSubs.has(name)) {
+        try { subRenderers[name](); renderedSubs.add(name); }
+        catch (e) { console.warn('[official sub-' + name + '] render error:', e.message); }
+      }
+    }
+    document.querySelectorAll('#off-subtabs .off-subtab').forEach((btn) => {
+      btn.addEventListener('click', () => switchSubTab(btn.dataset.sub));
+    });
+
+    // ===== 頂部分頁切換（使用者 / 官方）=====
+    let officialReady = false;
+    function switchTab(name) {
+      document.querySelectorAll('#stats-tabs .tab').forEach((b) => {
+        b.classList.toggle('active', b.dataset.tab === name);
+      });
+      const userTab = document.getElementById('stats-tab-user');
+      const offTab = document.getElementById('stats-tab-official');
+      if (userTab) userTab.hidden = (name !== 'user');
+      if (offTab)  offTab.hidden  = (name !== 'official');
+
+      // 首次切到「官方參考數據」→ 預設渲染 sub-A
+      if (name === 'official' && !officialReady) {
+        switchSubTab('A');
+        officialReady = true;
+      }
+      try { history.replaceState({}, '', name === 'official' ? '#official' : '#'); } catch {}
+    }
+    document.querySelectorAll('#stats-tabs .tab').forEach((btn) => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+    if (location.hash === '#official') switchTab('official');
+
+    // 台灣全部縣市（與 filters.js 一致）
+    const LOCATIONS = [
+      '台北市', '新北市', '基隆市', '桃園市', '新竹市', '新竹縣',
+      '苗栗縣', '台中市', '彰化縣', '南投縣', '雲林縣',
+      '嘉義市', '嘉義縣', '台南市', '高雄市', '屏東縣',
+      '宜蘭縣', '花蓮縣', '台東縣',
+      '澎湖縣', '金門縣', '連江縣',
+    ];
+
+    // 機構類別（與 filters.js / 表格一致）
+    const INSTITUTION_TYPES = ['醫學中心', '區域醫院', '地區醫院', '診所', '其他'];
+
+    const state = { category: 'all', institutionType: 'all', location: 'all', rows: [] };
+
+    const catFilterEl  = document.getElementById('stat-cat-filter');
+    const instFilterEl = document.getElementById('stat-inst-filter');
+    const locFilterEl  = document.getElementById('stat-loc-filter');
+
+    function makeChipRenderer(el, stateKey, items, rerender) {
+      el.innerHTML = items.map((it) =>
+        `<span class="filter-chip ${state[stateKey] === it.slug ? 'active' : ''}" data-slug="${it.slug}">${it.name}</span>`
+      ).join('');
+      el.querySelectorAll('.filter-chip').forEach((chip) => {
+        chip.addEventListener('click', () => {
+          state[stateKey] = chip.dataset.slug;
+          rerender();
+          renderAll();
+        });
+      });
+    }
+
+    function renderCatFilter() {
+      const items = [{ slug: 'all', name: '全部' }, ...CATEGORIES.map((c) => ({ slug: c.slug, name: c.name }))];
+      makeChipRenderer(catFilterEl, 'category', items, renderCatFilter);
+    }
+
+    function renderInstFilter() {
+      const items = [{ slug: 'all', name: '全部' }, ...INSTITUTION_TYPES.map((t) => ({ slug: t, name: t }))];
+      makeChipRenderer(instFilterEl, 'institutionType', items, renderInstFilter);
+    }
+
+    function renderLocFilter() {
+      const items = [{ slug: 'all', name: '全部' }, ...LOCATIONS.map((l) => ({ slug: l, name: l }))];
+      makeChipRenderer(locFilterEl, 'location', items, renderLocFilter);
+    }
+
+    function filtered() {
+      let rs = state.rows;
+      if (state.category !== 'all') rs = rs.filter((r) => r._category === state.category);
+      if (state.institutionType !== 'all') rs = rs.filter((r) => r.institutionType === state.institutionType);
+      if (state.location !== 'all') rs = rs.filter((r) => r.location === state.location);
+      return rs;
+    }
+
+    function setKpi(id, html, opts = {}) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.innerHTML = html;
+      el.classList.toggle('is-text', !!opts.isText);
+    }
+
+    function renderKPI() {
+      const rs = filtered();
+
+      // 總分享筆數 → 「N + 筆」
+      setKpi('kpi-total', `${rs.length.toLocaleString()}<span class="kpi-unit">筆</span>`);
+
+      // 最多工時區間（文字格式 "40-45"）→ 「N + 小時」
+      const hoursCount = {};
+      rs.forEach((r) => { if (r.weeklyHours) hoursCount[r.weeklyHours] = (hoursCount[r.weeklyHours] || 0) + 1; });
+      const topHours = Object.entries(hoursCount).sort((a,b)=>b[1]-a[1])[0];
+      setKpi('kpi-avg-hours',
+        topHours ? `${topHours[0]}<span class="kpi-unit">小時</span>` : '—',
+        { isText: true });
+
+      // 平均推薦（小數）→ 「N + /5」
+      const recVals = rs.map((r) => Number(r.recommendIndex)).filter((v) => Number.isFinite(v) && v > 0);
+      const avg = recVals.length ? (recVals.reduce((a,b)=>a+b,0) / recVals.length) : 0;
+      setKpi('kpi-rec',
+        avg ? `${avg.toFixed(2)}<span class="kpi-unit">/5</span>` : '—');
+
+      // 加班費合規率 → 「N + %」
+      const compliant = rs.filter((r) => r.overtimePolicy === '一律給' || r.overtimePolicy === '合理範圍給').length;
+      const totalOT = rs.filter((r) => r.overtimePolicy).length;
+      setKpi('kpi-overtime',
+        totalOT ? `${Math.round(compliant / totalOT * 100)}<span class="kpi-unit">%</span>` : '—');
+    }
+
+    function updateFilterBadge() {
+      const badge = document.getElementById('stat-filter-badge');
+      if (!badge) return;
+      const active = state.category !== 'all' || state.institutionType !== 'all' || state.location !== 'all';
+      badge.hidden = !active;
+    }
+
+    function renderAll() {
+      const rs = filtered();
+      renderKPI();
+      updateFilterBadge();
+      const byCat = {};
+      CATEGORIES.forEach((c) => { byCat[c.slug] = state.rows.filter((r) => r._category === c.slug).length; });
+
+      // 圖 1 永遠用全部資料（顯示類別比例）
+      chartCategoryDistribution(document.getElementById('chart-category'), byCat);
+      // 其餘圖根據 filter
+      chartInstitutionStacked(document.getElementById('chart-institution'), rs);
+      chartHoursHistogram(document.getElementById('chart-hours'), rs);
+      chartOvertimePolicy(document.getElementById('chart-overtime'), rs);
+      chartRecommend(document.getElementById('chart-recommend'), rs);
+      chartAtmosphereByCategory(document.getElementById('chart-atmosphere'), state.rows /* 永遠跨類別 */);
+      chartLocationDistribution(document.getElementById('chart-location'), rs);
+      chartSalaryDistribution(document.getElementById('chart-salary'), rs, document.getElementById('salary-stats'));
+    }
+
+    try {
+      state.rows = await loadAll();
+      renderCatFilter();
+      renderInstFilter();
+      renderLocFilter();
+      renderAll();
+      // 每 10 分鐘背景靜默刷新 — 只更新 cache、不重畫當前畫面
+      startAutoRefresh();
+    } catch (e) {
+      console.error(e);
+      document.body.insertAdjacentHTML('beforeend',
+        `<div style="text-align:center;color:var(--danger);padding:40px;">資料載入失敗：${e.message}</div>`);
+    }
+  </script>
+</body>
+</html>

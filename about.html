@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2E86AB" />
+
+  <!-- SEO -->
+  <title>關於 — 護理職場透明化運動</title>
+  <meta name="description" content="為什麼要做這件事？運動緣起、8 大主張（資訊對等、完全匿名不可追溯、分眾收集、共同維護、不貼標籤、支持制度討論、不販售不營利、持續迭代）、隱私設計、聯絡方式。致敬呼吸治療師勞動分享平台的開創性實踐。" />
+  <meta name="keywords" content="護理運動, 運動緣起, 護理工會, 職場透明化, 護理勞動, 公共財" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <link rel="canonical" href="https://transparentnursing.example.org/about.html" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon-180.png" />
+  <link rel="apple-touch-icon" sizes="167x167" href="assets/apple-touch-icon-167.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="assets/apple-touch-icon-152.png" />
+  <link rel="apple-touch-icon" sizes="120x120" href="assets/apple-touch-icon-120.png" />
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- iOS PWA / 加入主畫面行為 -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="護理職場透明化" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="護理職場透明化運動" />
+  <meta property="og:title" content="關於 — 護理職場透明化運動" />
+  <meta property="og:description" content="運動緣起、8 大主張、隱私設計。致敬呼吸治療師勞動分享平台。" />
+  <meta property="og:image" content="https://transparentnursing.example.org/assets/og-image.svg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:url" content="https://transparentnursing.example.org/about.html" />
+  <meta property="og:locale" content="zh_TW" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="關於 — 護理職場透明化運動" />
+  <meta name="twitter:description" content="為什麼要做？8 大主張、隱私設計。" />
+  <meta name="twitter:image" content="https://transparentnursing.example.org/assets/og-image.svg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css?v=16" />
+
+    <!-- modulepreload：平行載入 ES module 鏈（首次造訪快 30-50%） -->
+  <link rel="modulepreload" href="./js/components.js?v=16" />
+  <link rel="modulepreload" href="./js/icons.js?v=16" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=16" />
+
+  <!-- 強制清除舊版 cache -->
+  <script>
+    (function() {
+      try {
+        var FV = 'v16', FLAG = '__nursing_force_' + FV;
+        if (!localStorage.getItem(FLAG)) {
+          Object.keys(localStorage).forEach(function(k) {
+            if (k.indexOf('nursing_csv_') === 0 ||
+                (k.indexOf('__nursing_force_') === 0 && k !== FLAG)) {
+              localStorage.removeItem(k);
+            }
+          });
+          localStorage.setItem(FLAG, String(Date.now()));
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <section style="padding-top:48px;">
+    <div class="container container-narrow">
+      <span class="eyebrow">About</span>
+      <h1 style="margin:4px 0 24px;">為什麼要做這件事？</h1>
+
+      <p class="about-lead">
+        因為太多護理師，是進去之後才知道事情不對。
+      </p>
+
+      <p class="about-context">
+        畢業選第一份工作、想轉到另一家醫院、考慮從病房調去 ICU、甚至想離開臨床——
+        每一個轉折點上，我們都曾經渴望一個簡單的答案：
+        <strong>「這個單位真的像他們講的那樣嗎？」</strong>
+      </p>
+
+      <div class="faq-block">
+        <div class="faq-item">
+          <h3 class="faq-q">Q. 為什麼要做這件事？</h3>
+          <p class="faq-a">
+            求職時，雇主握有全部資訊——人力、加班、流動率、薪資結構，
+            求職者卻只能在 30 分鐘面試裡盲猜。
+            真正知道單位狀況的人，是那些<strong>在裡面待過、做過、撐過的同行</strong>，
+            但他們的觀察從未被有系統地集合起來——
+            反而是包裝過的招募話術、美化的職缺描述，在求職者眼中主導了「這家醫院長什麼樣」。
+          </p>
+        </div>
+
+        <div class="faq-item">
+          <h3 class="faq-q">Q. Threads、Dcard 上不是已經有很多分享了嗎？</h3>
+          <div class="faq-a">
+            <p>
+              有，但訊息散落、難以對齊比較。
+              光是「月薪 6 萬」這句話，背後可能是天差地遠的工時與保障，
+              因為影響薪水的維度多到難以一句話講清楚：
+            </p>
+            <ul class="faq-list">
+              <li>月薪 / 底薪 / 獎金結構</li>
+              <li>獎金發放頻率（按月、按季、按半年）</li>
+              <li>年資差距</li>
+              <li>護理進階 N1 / N2 / N3 / N4</li>
+              <li>特殊單位津貼（ICU、急診、手術房、洗腎室⋯⋯）</li>
+              <li>多重執照加給（如護理師＋助產師、護理師＋呼吸治療師）</li>
+            </ul>
+            <p>
+              每一個維度都會讓「同職稱、同醫院」的薪水出現可觀落差。
+              我們做的，是把這些散亂的維度<strong>拆解成可以對齊比較的欄位</strong>，
+              讓每筆分享，都站在同一條基準線上判讀。
+            </p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <h3 class="faq-q">Q. 為什麼要分 9 大工作場域？</h3>
+          <div class="faq-a">
+            <p>
+              ICU 的「人均 1:2」和門診的「每診掛號 80 人」，根本不是同一個維度的事。
+              把所有護理職場混在一起談，反而看不清楚自己面對的會是什麼。
+              因此我們把資料依工作場域分成 9 大類：
+            </p>
+            <div class="grid grid-3 about-cat-grid" id="about-category-cards"></div>
+            <p>
+              每類用對應的關鍵欄位收集。
+              本運動也致敬 <a href="https://trtu.org.tw/RT_platform/" target="_blank" rel="noopener">呼吸治療師勞動分享平台</a> 的開創性實踐。
+            </p>
+          </div>
+        </div>
+
+        <div class="faq-item">
+          <h3 class="faq-q">Q. 累積這些資料，能改變什麼？</h3>
+          <p class="faq-a">
+            當足夠多的真實資訊累積起來——
+            <strong>好的職場會被看見、被選擇；不好的職場再也無處藏身，必須被逼著面對改變</strong>。
+            下一個猶豫不決的護理師，會有比我們當年更好的判斷依據；
+            願意善待員工的醫療機構，也終能得到應有的肯定。
+          </p>
+        </div>
+      </div>
+
+      <hr class="divider" />
+
+      <h2 style="margin:40px 0 20px;">運動主張</h2>
+
+      <div style="color:var(--ink-soft);line-height:1.85;">
+
+        <h3 style="margin:24px 0 8px;font-size:1.15rem;color:var(--primary);">1. 資訊對等</h3>
+        <p style="color:var(--muted);margin:0 0 12px;">
+          求職時，雇主握有全部資訊（人力配置、加班頻率、流動率、薪資結構），
+          求職者卻只能在 30 分鐘的面試裡盲猜。這種不對等不應被視為常態。
+          當社群一起分享，資訊不再被單方面壟斷。
+        </p>
+
+        <h3 style="margin:24px 0 8px;font-size:1.15rem;color:var(--primary);">2. 完全匿名、不可追溯</h3>
+        <p style="color:var(--muted);margin:0 0 12px;">
+          分享資訊的人不應該承擔任何被秋後算帳的風險。我們刻意設計成<strong style="color:var(--ink);">不蒐集 IP、不綁定帳號、不留下任何識別痕跡</strong>——
+          代價是「送出後不可撤回」，但換來「永遠無法被反查」。
+          這個取捨，我們選擇站在分享者這邊。
+        </p>
+
+        <h3 style="margin:24px 0 8px;font-size:1.15rem;color:var(--primary);">3. 分眾收集、貼近實情</h3>
+        <p style="color:var(--muted);margin:0 0 12px;">
+          ICU 的「人均 1:2」和門診的「每診掛號 80 人」根本不是同一個維度的事情。
+          我們依工作場域分 9 大類，每類用對應的關鍵欄位收集，
+          讓比較有意義、讓求職者真正看得懂自己面對的是什麼。
+        </p>
+
+        <h3 style="margin:24px 0 8px;font-size:1.15rem;color:var(--primary);">4. 共同維護、公共財精神</h3>
+        <p style="color:var(--muted);margin:0 0 12px;">
+          這不是任何單一團體、工會、學校、媒體的資料庫，
+          而是整個護理社群共同累積的公共財。資料公開、欄位設計接受社群討論與建議。
+          這套模式不限定使用對象，任何願意推動透明化的職類社群都可以複製、改寫。
+        </p>
+
+        <h3 style="margin:24px 0 8px;font-size:1.15rem;color:var(--primary);">5. 不替任何一家醫院下定論</h3>
+        <p style="color:var(--muted);margin:0 0 12px;">
+          一筆分享代表一個人在<strong style="color:var(--ink);">某段時間、某個單位</strong>的真實經驗，
+          而不是整間醫院的全貌——同一家醫院，內科病房與 ICU、白班與大夜、五年前與今年，都可能是兩個世界。
+          所以我們堅持把每一筆資料放回「<strong style="color:var(--ink);">同等級機構、同工作場域、同地區</strong>」的脈絡裡呈現，
+          讓你看見的是一個機構在群體中的相對位置，而不是被抽離脈絡的單薄標籤。
+          <br/><br/>
+          我們提供的是<strong style="color:var(--ink);">判讀的素材</strong>，不是「黑名單」或「白名單」。
+          結論留給每一位實際要做選擇的護理師——你的處境、你的優先順序，只有你自己最清楚。
+        </p>
+
+        <h3 style="margin:24px 0 8px;font-size:1.15rem;color:var(--primary);">6. 支持制度討論、不淪為情緒宣洩</h3>
+        <p style="color:var(--muted);margin:0 0 12px;">
+          資料的目的是成為工會倡議、政策對話、醫院內部改革時最有說服力的支點。
+          我們鼓勵填寫時用「<strong style="color:var(--ink);">可客觀觀察的事實</strong>」取代「情緒性指控」——
+          例：「主管常 stand-by 不夠」優於「主管很爛」。
+        </p>
+
+        <h3 style="margin:24px 0 8px;font-size:1.15rem;color:var(--primary);">7. 不販售、不營利、不操作</h3>
+        <p style="color:var(--muted);margin:0 0 12px;">
+          資料不會被賣給任何人力公司、醫院顧問、行銷單位。
+          我們也不接受可能影響中立性的贊助。技術成本由社群志工自願維護——
+          這是一個<strong style="color:var(--ink);">沒有商業模式的網站</strong>，這正是它能存在的前提。
+        </p>
+      </div>
+
+      <hr class="divider" />
+
+      <h2 style="margin:32px 0 16px;">聯絡我們</h2>
+      <div class="card card-flat" style="margin-top:16px;">
+        <div style="color:var(--primary);margin-bottom:8px;">
+          <span data-icon="mail" data-size="24"></span>
+        </div>
+        <h3 style="margin:0 0 4px;">Email</h3>
+        <p style="margin:0 0 6px;color:var(--muted);">
+          <a href="mailto:transparentnursing@example.org">transparentnursing@example.org</a>
+        </p>
+        <p style="margin:0;color:var(--muted);font-size:0.92rem;">
+          有任何建議、欄位修改提案、或想參與運動推廣，歡迎來信。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <div id="app-footer"></div>
+
+  <script type="module">
+    import { CATEGORIES } from './js/config.js?v=16';
+    import { mountLayout } from './js/components.js?v=16';
+    import { icon, renderIcons } from './js/icons.js?v=16';
+    mountLayout();
+
+    // 渲染 9 大工作場域字卡（樣式參考 participate.html 的 form-card，但移除狀態與 CTA）
+    const grid = document.getElementById('about-category-cards');
+    if (grid) {
+      grid.innerHTML = CATEGORIES.map((c) => `
+        <div class="card card-flat about-cat-card">
+          <div class="cat-icon-wrap" style="background:${c.color};width:44px;height:44px;border-radius:12px;margin-bottom:10px;">
+            ${icon(c.icon, { size: 22 })}
+          </div>
+          <div class="about-cat-name">${c.name}</div>
+        </div>
+      `).join('');
+    }
+    renderIcons();
+  </script>
+</body>
+</html>

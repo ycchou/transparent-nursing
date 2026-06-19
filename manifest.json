@@ -1,0 +1,68 @@
+{
+  "name": "護理職場透明化運動",
+  "short_name": "護理職場透明化",
+  "description": "讓真實的護理職場資訊，被下一個護理師看見。集結 9 大工作場域的匿名分享。",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F1FAEE",
+  "theme_color": "#2E86AB",
+  "lang": "zh-Hant-TW",
+  "categories": ["health", "medical", "social", "education"],
+  "icons": [
+    {
+      "src": "assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/apple-touch-icon-120.png",
+      "sizes": "120x120",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/apple-touch-icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/apple-touch-icon-167.png",
+      "sizes": "167x167",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/apple-touch-icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "assets/logo.svg",
+      "sizes": "256x256 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "查看資料平台",
+      "url": "/platform.html",
+      "description": "瀏覽社群分享的職場資料"
+    },
+    {
+      "name": "填寫表單",
+      "url": "/participate.html",
+      "description": "分享你的職場資訊"
+    },
+    {
+      "name": "統計摘要",
+      "url": "/stats.html",
+      "description": "看護理職場的整體樣貌"
+    }
+  ]
+}

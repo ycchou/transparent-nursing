@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2E86AB" />
+
+  <!-- SEO -->
+  <title>資料平台 — 護理職場透明化運動</title>
+  <meta name="description" content="瀏覽 300+ 筆來自全台醫療機構的護理職場真實資料。9 大工作場域分眾收集，支援地點、機構類別、工時、推薦指數多重篩選；深度比較單位、班別、加班費合規等資訊。" />
+  <meta name="keywords" content="護理職場資料, 護病比查詢, 加班費合規, 護理師薪資, 醫院評價, 工時統計, 護理工會資料" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <link rel="canonical" href="https://transparentnursing.example.org/platform.html" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon-180.png" />
+  <link rel="apple-touch-icon" sizes="167x167" href="assets/apple-touch-icon-167.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="assets/apple-touch-icon-152.png" />
+  <link rel="apple-touch-icon" sizes="120x120" href="assets/apple-touch-icon-120.png" />
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- iOS PWA / 加入主畫面行為 -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="護理職場透明化" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="護理職場透明化運動" />
+  <meta property="og:title" content="資料平台 — 護理職場透明化運動" />
+  <meta property="og:description" content="300+ 筆全台 9 大護理工作場域資料，支援多維度篩選與深度比較。" />
+  <meta property="og:image" content="https://transparentnursing.example.org/assets/og-image.svg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:url" content="https://transparentnursing.example.org/platform.html" />
+  <meta property="og:locale" content="zh_TW" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="資料平台 — 護理職場透明化運動" />
+  <meta name="twitter:description" content="300+ 筆真實護理職場資料，分眾比較。" />
+  <meta name="twitter:image" content="https://transparentnursing.example.org/assets/og-image.svg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css?v=16" />
+
+    <!-- modulepreload：平行載入 ES module 鏈（首次造訪快 30-50%） -->
+  <link rel="modulepreload" href="./js/config.js?v=16" />
+  <link rel="modulepreload" href="./js/components.js?v=16" />
+  <link rel="modulepreload" href="./js/icons.js?v=16" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=16" />
+  <link rel="modulepreload" href="./js/data-loader.js?v=16" />
+  <link rel="modulepreload" href="./js/table.js?v=16" />
+  <link rel="modulepreload" href="./js/filters.js?v=16" />
+  <link rel="modulepreload" href="./js/share-card.js?v=16" />
+  <link rel="modulepreload" href="./js/stats-kpi.js?v=16" />
+
+  <!-- 強制清除舊版 cache -->
+  <script>
+    (function() {
+      try {
+        var FV = 'v16', FLAG = '__nursing_force_' + FV;
+        if (!localStorage.getItem(FLAG)) {
+          Object.keys(localStorage).forEach(function(k) {
+            if (k.indexOf('nursing_csv_') === 0 ||
+                (k.indexOf('__nursing_force_') === 0 && k !== FLAG)) {
+              localStorage.removeItem(k);
+            }
+          });
+          localStorage.setItem(FLAG, String(Date.now()));
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <section style="padding-top:48px;padding-bottom:24px;">
+    <div class="container">
+      <span class="eyebrow">Platform</span>
+      <h1 style="margin:4px 0 8px;">資料平台</h1>
+      <p style="color:var(--muted);max-width:680px;">
+        瀏覽社群分享的職場資料。資料皆匿名彙整、未經編輯，僅作為求職與工作評估的參考。
+      </p>
+    </div>
+  </section>
+
+  <!-- Tabs -->
+  <section style="padding:0 0 16px;">
+    <div class="container">
+      <div class="tabs" id="category-tabs"></div>
+    </div>
+  </section>
+
+  <!-- KPI strip：依目前篩選即時計算的百分位數摘要 -->
+  <section style="padding:0 0 16px;">
+    <div class="container">
+      <div id="kpi-strip"></div>
+    </div>
+  </section>
+
+  <!-- Main grid -->
+  <section style="padding:0 0 16px;">
+    <div class="container">
+      <div style="display:grid;grid-template-columns:280px 1fr;gap:24px;" id="platform-grid">
+        <!-- Filters -->
+        <aside id="filter-panel-wrap">
+          <button id="filter-toggle" class="btn btn-secondary" style="width:100%;justify-content:space-between;display:none;">
+            <span><span data-icon="filter" data-size="16"></span> 篩選條件</span>
+            <span id="filter-active-count" style="font-size:0.8rem;color:var(--muted);"></span>
+          </button>
+          <div id="filter-panel"></div>
+        </aside>
+
+        <!-- Table -->
+        <div style="min-width:0;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap;">
+            <div style="color:var(--muted);font-size:0.92rem;" id="result-count">載入中...</div>
+            <div class="view-switch" id="view-switch">
+              <button data-view="table" class="active">表格</button>
+              <button data-view="card">卡片</button>
+            </div>
+          </div>
+          <div id="table-container"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA 倒流到 participate -->
+  <section style="padding:0 0 56px;">
+    <div class="container">
+      <div class="platform-cta-row">
+        <a href="participate.html" class="platform-cta-card">
+          <div class="platform-cta-icon">
+            <span data-icon="heart" data-size="28"></span>
+          </div>
+          <div class="platform-cta-body">
+            <h3>看完別人的分享了嗎？輪到你了</h3>
+            <p>5 分鐘為下一位徬徨的求職護理師留下真實的指引。<strong>完全匿名、不收集任何個人資料。</strong></p>
+          </div>
+          <div class="platform-cta-action">
+            <span class="btn btn-primary">
+              分享我的職場 <span data-icon="arrow-right" data-size="14"></span>
+            </span>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div id="app-footer"></div>
+
+  <style>
+    @media (max-width: 980px) {
+      #platform-grid { grid-template-columns: 1fr !important; }
+      #filter-panel-wrap { order: -1; }
+      #filter-toggle { display: flex !important; margin-bottom: 12px; }
+      #filter-panel { display: none; }
+      #filter-panel.open { display: block; }
+    }
+    @media (max-width: 768px) {
+      #table-container .table-view { display: none !important; }
+      #table-container .card-view  { display: block !important; }
+      #view-switch { display: none; }
+    }
+  </style>
+
+  <!-- PapaParse 必須先載（CSV 解析）；html2canvas 改為點「產生分享圖」時 lazy load -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
+  <script type="module">
+    import { CATEGORIES } from './js/config.js?v=16';
+    import { mountLayout } from './js/components.js?v=16';
+    import { icon, renderIcons } from './js/icons.js?v=16';
+    import { loadCategory, loadAll, startAutoRefresh } from './js/data-loader.js?v=16';
+    import { renderTable, setView, showDetailModal } from './js/table.js?v=16';
+    import { createFilterState, renderFilters, applyFilters } from './js/filters.js?v=16';
+    import { renderKpiStrip, mountCalculator } from './js/stats-kpi.js?v=16';
+
+    mountLayout();
+
+    // ===== Deep-link & toast helpers =====
+    function parseDeepLinkId() {
+      const raw = new URL(location.href).searchParams.get('id');
+      if (!raw) return null;
+      const n = Number(raw);
+      return Number.isFinite(n) && n > 0 ? n : null;
+    }
+    function setDeepLinkUrl(id, replace = false) {
+      const u = new URL(location.href);
+      if (id == null) u.searchParams.delete('id');
+      else u.searchParams.set('id', String(id));
+      const fn = replace ? 'replaceState' : 'pushState';
+      history[fn]({ id: id ?? null }, '', u.toString());
+    }
+    function showToast(msg, kind = 'info') {
+      let host = document.getElementById('toast-host');
+      if (!host) {
+        host = document.createElement('div');
+        host.id = 'toast-host';
+        host.className = 'toast-host';
+        document.body.appendChild(host);
+      }
+      const el = document.createElement('div');
+      el.className = `toast toast-${kind}`;
+      el.textContent = msg;
+      host.appendChild(el);
+      requestAnimationFrame(() => el.classList.add('show'));
+      setTimeout(() => {
+        el.classList.remove('show');
+        setTimeout(() => el.remove(), 250);
+      }, 3000);
+    }
+    function openModalForRow(row) {
+      showDetailModal(row, {
+        onClose: () => setDeepLinkUrl(null, true),
+      });
+    }
+
+    // State
+    const initialSlug = (location.hash || '').replace('#', '') || 'all';
+    const state = {
+      slug: initialSlug,
+      filterState: createFilterState(),
+      allData: [], // per-slug 或 all
+      counts: {},
+      pendingDeepLinkId: parseDeepLinkId(),
+    };
+
+    // Tabs
+    const tabsEl = document.getElementById('category-tabs');
+    function renderTabs() {
+      const items = [{ slug: 'all', name: '全部', icon: 'layout' }, ...CATEGORIES];
+      tabsEl.innerHTML = items.map((it) => `
+        <button class="tab ${state.slug === it.slug ? 'active' : ''}" data-slug="${it.slug}">
+          ${icon(it.icon, { size: 16 })}
+          <span>${it.name}</span>
+          <span class="badge">${state.counts[it.slug] != null ? state.counts[it.slug] : '·'}</span>
+        </button>
+      `).join('');
+      tabsEl.querySelectorAll('.tab').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.slug = btn.dataset.slug;
+          location.hash = state.slug === 'all' ? '' : state.slug;
+          loadAndRender();
+        });
+      });
+    }
+
+    // Filters
+    const filterEl = document.getElementById('filter-panel');
+    renderFilters(filterEl, state.filterState, () => { refreshTable(); updateFilterCount(); });
+
+    // Mobile filter toggle
+    const filterToggle = document.getElementById('filter-toggle');
+    filterToggle.addEventListener('click', () => filterEl.classList.toggle('open'));
+    function updateFilterCount() {
+      const s = state.filterState;
+      const n = (s.q ? 1 : 0) + (s.location ? s.location.size : 0)
+              + s.institutionType.size + s.weeklyHours.size
+              + s.overtimePolicy.size + s.recommendIndex.size;
+      const el = document.getElementById('filter-active-count');
+      el.textContent = n ? `已套用 ${n} 項` : '';
+    }
+    renderIcons(filterToggle.parentElement);
+    // 處理 CTA 區段內的 data-icon 占位符
+    renderIcons(document.querySelector('.platform-cta-card'));
+
+    // Table container
+    const tableContainer = document.getElementById('table-container');
+    tableContainer.dataset.view = 'table';
+
+    // KPI 條 + 浮動氣泡試算工具：mount 一次，calc 透過 closure 讀取最新篩選結果
+    const kpiEl = document.getElementById('kpi-strip');
+    let currentFiltered = [];
+
+    // 把當前篩選狀態翻譯成「比較條件」陣列，計算結果會顯示
+    const RECOMMEND_LABELS = { 5: '非常推薦', 4: '推薦', 3: '保留', 2: '不推薦', 1: '非常不推薦' };
+    function describeCurrentConditions() {
+      const out = [];
+      // 類別（tab）
+      if (state.slug !== 'all') {
+        const cat = CATEGORIES.find((c) => c.slug === state.slug);
+        if (cat) out.push({ label: '類別', value: cat.name });
+      }
+      const f = state.filterState;
+      if (f.institutionType.size) out.push({ label: '機構', value: Array.from(f.institutionType).join('、') });
+      if (f.location && f.location.size) out.push({ label: '地點', value: Array.from(f.location).join('、') });
+      if (f.weeklyHours.size) out.push({ label: '工時', value: Array.from(f.weeklyHours).join('、') + ' 小時' });
+      if (f.overtimePolicy.size) out.push({ label: '加班費', value: Array.from(f.overtimePolicy).join('、') });
+      if (f.recommendIndex.size) {
+        out.push({ label: '推薦', value: Array.from(f.recommendIndex).map((v) => RECOMMEND_LABELS[v] || v).join('、') });
+      }
+      if (f.q) out.push({ label: '關鍵字', value: f.q });
+      return out;
+    }
+
+    mountCalculator(() => currentFiltered, describeCurrentConditions);
+
+    // View switch
+    document.querySelectorAll('#view-switch button').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#view-switch button').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        setView(tableContainer, btn.dataset.view);
+      });
+    });
+
+    async function loadAndRender() {
+      renderTabs();
+      // Skeleton
+      tableContainer.innerHTML = `
+        <div class="data-table-wrap" style="padding:24px;">
+          ${Array.from({length:6}).map(() =>
+            `<div class="skeleton" style="height:36px;margin-bottom:8px;"></div>`
+          ).join('')}
+        </div>`;
+      document.getElementById('result-count').textContent = '載入中...';
+
+      try {
+        // 若有 pending deep-link，先決定該筆所屬類別，必要時切 tab
+        if (state.pendingDeepLinkId) {
+          const allFirst = await loadAll();
+          const target = allFirst.find((r) => r._seq === state.pendingDeepLinkId);
+          if (target && state.slug !== 'all' && state.slug !== target._category) {
+            state.slug = target._category;
+          }
+        }
+
+        if (state.slug === 'all') {
+          state.allData = await loadAll();
+        } else {
+          state.allData = await loadCategory(state.slug);
+        }
+
+        // 計算 counts（一次性 fetch 全部來算 badge）
+        const all = await loadAll();
+        const counts = { all: all.length };
+        CATEGORIES.forEach((c) => { counts[c.slug] = all.filter((r) => r._category === c.slug).length; });
+        state.counts = counts;
+        renderTabs();
+        refreshTable();
+
+        // 處理 pending deep-link：找到對應 row → 開 modal
+        if (state.pendingDeepLinkId) {
+          const id = state.pendingDeepLinkId;
+          state.pendingDeepLinkId = null; // 一次性
+          const target = all.find((r) => r._seq === id);
+          if (target) {
+            openModalForRow(target);
+          } else {
+            showToast(`找不到 #${id} 這筆資料`, 'warn');
+            setDeepLinkUrl(null, true);
+          }
+        }
+      } catch (e) {
+        console.error(e);
+        tableContainer.innerHTML = `<div class="card" style="text-align:center;color:var(--danger);">資料載入失敗：${e.message}</div>`;
+      }
+    }
+
+    function refreshTable() {
+      const filtered = applyFilters(state.allData, state.filterState);
+      currentFiltered = filtered;
+      renderKpiStrip(kpiEl, filtered);
+      document.getElementById('result-count').textContent =
+        `共 ${filtered.length} 筆${state.allData.length !== filtered.length ? `（已套用篩選 / 全部 ${state.allData.length} 筆）` : ''}`;
+      renderTable(tableContainer, filtered, {
+        slug: state.slug,
+        onRowClick: (row) => {
+          if (row._seq != null) setDeepLinkUrl(row._seq);
+          openModalForRow(row);
+        },
+      });
+    }
+
+    // 處理上一頁/下一頁：URL 變化時開關 modal
+    window.addEventListener('popstate', async () => {
+      const id = parseDeepLinkId();
+      const modal = document.getElementById('detail-modal');
+      if (id) {
+        // 有 ?id= → 開該筆 modal
+        try {
+          const all = await loadAll();
+          const target = all.find((r) => r._seq === id);
+          if (target) openModalForRow(target);
+        } catch (e) { console.error(e); }
+      } else if (modal && modal.classList.contains('open')) {
+        // 沒 id 但 modal 還開著 → 關掉（不再 push history）
+        modal.classList.remove('open');
+      }
+    });
+
+    loadAndRender();
+
+    // 每 10 分鐘背景靜默刷新 — 只更新 cache、不重畫當前畫面，下次造訪才換新版
+    startAutoRefresh();
+  </script>
+</body>
+</html>

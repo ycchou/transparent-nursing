@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2E86AB" />
+
+  <!-- SEO -->
+  <title>洗腎室職場資料分享 — 護理職場透明化運動</title>
+  <meta name="description" content="洗腎室 HD/PD 護理師專屬表單。匿名分享機構類別、護病比、值班制度、薪資、工作氣氛等真實資訊，為下一位求職護理師留下指引。" />
+  <meta name="robots" content="noindex" />
+  <link rel="canonical" href="https://transparentnursing.example.org/participate-dialysis.html" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon-180.png" />
+  <link rel="apple-touch-icon" sizes="167x167" href="assets/apple-touch-icon-167.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="assets/apple-touch-icon-152.png" />
+  <link rel="apple-touch-icon" sizes="120x120" href="assets/apple-touch-icon-120.png" />
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="護理職場透明化" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="護理職場透明化運動" />
+  <meta property="og:title" content="洗腎室職場資料分享" />
+  <meta property="og:description" content="匿名分享 HD/PD 護理師的真實職場資訊，5-8 分鐘完成。" />
+  <meta property="og:image" content="https://transparentnursing.example.org/assets/og-image.svg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:locale" content="zh_TW" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css?v=16" />
+
+  <link rel="modulepreload" href="./js/config.js?v=16" />
+  <link rel="modulepreload" href="./js/components.js?v=16" />
+  <link rel="modulepreload" href="./js/icons.js?v=16" />
+  <link rel="modulepreload" href="./js/form-dialysis.js?v=16" />
+
+  <!-- 強制清除舊版 cache -->
+  <script>
+    (function() {
+      try {
+        var FV = 'v16', FLAG = '__nursing_force_' + FV;
+        if (!localStorage.getItem(FLAG)) {
+          Object.keys(localStorage).forEach(function(k) {
+            if (k.indexOf('nursing_csv_') === 0 ||
+                (k.indexOf('__nursing_force_') === 0 && k !== FLAG)) {
+              localStorage.removeItem(k);
+            }
+          });
+          localStorage.setItem(FLAG, String(Date.now()));
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <!-- Hero -->
+  <section style="padding-top:48px;padding-bottom:24px;">
+    <div class="container container-narrow">
+      <span class="eyebrow">Participate / 洗腎室</span>
+      <h1 style="margin:4px 0 12px;">洗腎室職場資料分享</h1>
+      <p style="color:var(--muted);line-height:1.75;">
+        以下資料將 <strong style="color:var(--ink);">匿名彙整</strong>，作為其他護理師求職與工作評估的真實參考。
+        填寫時請以客觀事實為主，避免情緒性敘述。完成需約 5-8 分鐘。
+      </p>
+      <div class="dform-callout">
+        <span data-icon="shield-check" data-size="18"></span>
+        <span>本表單不會記錄你的 IP 或任何可識別資訊。</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Form -->
+  <section style="padding-top:0;padding-bottom:64px;">
+    <div class="container container-narrow">
+      <div id="dform-draft-banner-host"></div>
+
+      <form id="dform" class="dform" novalidate>
+        <p class="dform-required-note dform-required-note-top">標 <span class="dform-required">*</span> 為必填</p>
+        <div id="dform-fields"></div>
+
+        <!-- 送出前警語 -->
+        <div class="dform-warning-card">
+          <div class="dform-warning-title">⚠️ 送出前請確認</div>
+          <ul class="dform-warning-list">
+            <li>本表單<strong>不收集帳號、IP、Email</strong>或任何可識別你個人的資訊</li>
+            <li>送出後資料會<strong>立即公開</strong>於資料平台，<strong>沒有審核或延遲</strong></li>
+            <li>因為完全匿名、無任何識別資料，<strong class="dform-warning-danger">送出後無法撤回或編輯任何單一筆資料</strong></li>
+            <li>請在送出前再三確認內容無誤、無讓你後悔的個資描述</li>
+          </ul>
+        </div>
+
+        <!-- 驗證碼（CSS span 顯示，不依賴 canvas / font 載入） -->
+        <div class="dform-field dform-captcha-field" id="dform-captcha-field" data-name="captcha" data-required="1">
+          <label class="dform-label" for="captcha-input">
+            驗證碼<span class="dform-required" aria-hidden="true">*</span>
+          </label>
+          <div class="dform-help">輸入下方的英數字，不分大小寫</div>
+          <div class="dform-captcha-row">
+            <div id="captcha-display" class="dform-captcha-display" aria-label="驗證碼"></div>
+            <button type="button" id="captcha-refresh" class="dform-captcha-refresh" aria-label="重新產生驗證碼" title="重新產生">↻</button>
+            <input type="text" id="captcha-input" class="dform-input dform-captcha-input"
+                   maxlength="4" autocomplete="off" inputmode="text"
+                   placeholder="輸入左方 4 碼" />
+          </div>
+          <div class="dform-error-msg" id="err-captcha">驗證碼錯誤，請重新輸入</div>
+        </div>
+
+        <div class="dform-submit-bar">
+          <button type="submit" class="btn btn-primary dform-submit-btn">
+            <span>送出表單</span>
+            <span data-icon="arrow-right" data-size="14"></span>
+          </button>
+        </div>
+      </form>
+
+      <div id="dform-thanks" hidden></div>
+    </div>
+  </section>
+
+  <div id="app-footer"></div>
+
+  <script type="module" src="./js/form-dialysis.js?v=16"></script>
+</body>
+</html>

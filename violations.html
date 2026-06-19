@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2E86AB" />
+
+  <!-- SEO -->
+  <title>勞檢紀錄 — 護理職場透明化運動</title>
+  <meta name="description" content="整合勞動部公開的醫療院所勞檢違規紀錄，呈現各家醫院、診所違反勞動基準法的時間、條款、罰鍰金額。資料來源為政府公開資料，幫助護理師了解醫療機構的勞動法遵情況。" />
+  <meta name="keywords" content="勞檢, 勞動基準法, 醫院違規, 罰鍰, 加班費, 工時, 護理勞動權益, 勞動部" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <link rel="canonical" href="https://transparentnursing.example.org/violations.html" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon-180.png" />
+  <link rel="apple-touch-icon" sizes="167x167" href="assets/apple-touch-icon-167.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="assets/apple-touch-icon-152.png" />
+  <link rel="apple-touch-icon" sizes="120x120" href="assets/apple-touch-icon-120.png" />
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="護理職場透明化" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="護理職場透明化運動" />
+  <meta property="og:title" content="勞檢紀錄 — 護理職場透明化運動" />
+  <meta property="og:description" content="整合勞動部公開資料，呈現醫療院所違反勞基法的紀錄。" />
+  <meta property="og:image" content="https://transparentnursing.example.org/assets/og-image.svg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:url" content="https://transparentnursing.example.org/violations.html" />
+  <meta property="og:locale" content="zh_TW" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="勞檢紀錄 — 護理職場透明化運動" />
+  <meta name="twitter:description" content="政府公開的醫院勞基法違規紀錄整合。" />
+  <meta name="twitter:image" content="https://transparentnursing.example.org/assets/og-image.svg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css?v=16" />
+
+  <!-- modulepreload -->
+  <link rel="modulepreload" href="./js/config.js?v=16" />
+  <link rel="modulepreload" href="./js/components.js?v=16" />
+  <link rel="modulepreload" href="./js/icons.js?v=16" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=16" />
+  <link rel="modulepreload" href="./js/violations.js?v=16" />
+
+  <!-- 強制清除舊版 cache -->
+  <script>
+    (function() {
+      try {
+        var FV = 'v16', FLAG = '__nursing_force_' + FV;
+        if (!localStorage.getItem(FLAG)) {
+          Object.keys(localStorage).forEach(function(k) {
+            if (k.indexOf('nursing_csv_') === 0 ||
+                (k.indexOf('__nursing_force_') === 0 && k !== FLAG) ||
+                k.indexOf('nursing_viol_') === 0) {
+              localStorage.removeItem(k);
+            }
+          });
+          localStorage.setItem(FLAG, String(Date.now()));
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <section style="padding-top:48px;padding-bottom:20px;">
+    <div class="container">
+      <span class="eyebrow">Labor Violations</span>
+      <h1 style="margin:4px 0 8px;">勞檢紀錄</h1>
+      <p style="color:var(--muted);max-width:760px;line-height:1.75;">
+        整合勞動部公開的醫療院所勞檢違規紀錄，呈現各家醫院、診所違反
+        <strong style="color:var(--ink);">勞動基準法</strong> 的時間、條款、罰鍰金額。
+      </p>
+      <p style="color:var(--muted-light);font-size:0.85rem;margin-top:10px;">
+        資料來源：<a href="https://announcement.mol.gov.tw/" target="_blank" rel="noopener" style="color:var(--primary);text-decoration:underline;text-underline-offset:2px;">勞動部公開資料</a>，本站定期同步。
+      </p>
+    </div>
+  </section>
+
+  <!-- 看資料前請先了解（從底部移到這裡，避免使用者誤判數據） -->
+  <section style="padding:0 0 24px;">
+    <div class="container">
+      <div class="viol-notice">
+        <div class="viol-notice-icon">
+          <span data-icon="info" data-size="22"></span>
+        </div>
+        <div class="viol-notice-body">
+          <div class="viol-notice-title">看資料前請先了解</div>
+          <ul class="viol-notice-list">
+            <li>來源為<strong>勞動部公開的事業單位違反勞動法令裁處資料</strong>，本站只是把醫療相關事業單位整理出來方便查閱。</li>
+            <li><strong>一次違規不代表機構整體勞動環境差</strong> — 大型醫院因規模大、被檢查機會多，自然容易出現紀錄。</li>
+            <li><strong>沒有違規紀錄也不代表完全合規</strong> — 可能只是還沒被檢查到。</li>
+            <li>建議與「<a href="platform.html">資料平台</a>」上實際工作者的匿名分享一起判讀。</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- KPI -->
+  <section style="padding-top:0;padding-bottom:32px;">
+    <div class="container">
+      <div class="grid grid-4">
+        <div class="card stat-card">
+          <div class="stat-num kpi-num" id="viol-kpi-total">—</div>
+          <div class="stat-label">總紀錄筆數</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-num kpi-num" id="viol-kpi-orgs">—</div>
+          <div class="stat-label">違規機構數</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-num kpi-num" id="viol-kpi-fine">—</div>
+          <div class="stat-label">最高單筆罰鍰</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-num kpi-num" id="viol-kpi-latest">—</div>
+          <div class="stat-label">最新處分日期</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 篩選條件 -->
+  <section style="padding:0 0 24px;">
+    <div class="container">
+      <details class="filter-panel stat-filter-panel">
+        <summary>
+          <span class="stat-filter-title">
+            <span data-icon="filter" data-size="16" style="color:var(--primary);"></span>
+            <span>篩選條件</span>
+            <span class="stat-filter-badge" id="viol-filter-badge" hidden>已套用</span>
+          </span>
+          <span class="stat-filter-chev" aria-hidden="true">
+            <span data-icon="chevron-down" data-size="18"></span>
+          </span>
+        </summary>
+        <div class="stat-filter-body">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <strong style="color:var(--ink);min-width:84px;">關鍵字：</strong>
+            <input id="viol-search" type="search" placeholder="搜尋機構名稱、條款、敘述..."
+              style="flex:1;min-width:200px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.92rem;font-family:inherit;color:var(--ink);" />
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <strong style="color:var(--ink);min-width:84px;">地點：</strong>
+            <div class="filter-options" id="viol-loc-filter"></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+            <strong style="color:var(--ink);min-width:84px;">違反法條：</strong>
+            <div class="filter-options" id="viol-law-filter"></div>
+          </div>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <!-- 表格 -->
+  <section style="padding-top:0;">
+    <div class="container">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:12px;flex-wrap:wrap;">
+        <div style="color:var(--muted);font-size:0.92rem;" id="viol-count">載入中⋯</div>
+      </div>
+      <div id="viol-table-container"></div>
+    </div>
+  </section>
+
+  <div id="app-footer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
+  <script type="module">
+    import { mountLayout } from './js/components.js?v=16';
+    import { renderIcons } from './js/icons.js?v=16';
+    import { initViolations } from './js/violations.js?v=16';
+
+    mountLayout();
+    renderIcons();
+    initViolations();
+  </script>
+</body>
+</html>

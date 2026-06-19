@@ -1,0 +1,13 @@
+# 護理職場透明化運動 — robots.txt
+# 歡迎所有搜尋引擎索引本網站
+# 真實的職場資訊，越多人看見越好
+
+User-agent: *
+Allow: /
+
+# 不索引 mock data CSV 與工具腳本
+Disallow: /data/mock/
+Disallow: /tools/
+
+# Sitemap
+Sitemap: https://transparentnursing.example.org/sitemap.xml
