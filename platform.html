@@ -58,6 +58,7 @@
   <link rel="modulepreload" href="./js/filters.js?v=16" />
   <link rel="modulepreload" href="./js/share-card.js?v=16" />
   <link rel="modulepreload" href="./js/stats-kpi.js?v=16" />
+  <link rel="modulepreload" href="./js/contribution-gate.js?v=16" />
 
   <!-- 強制清除舊版 cache -->
   <script>
@@ -181,6 +182,7 @@
     import { renderTable, setView, showDetailModal } from './js/table.js?v=16';
     import { createFilterState, renderFilters, applyFilters } from './js/filters.js?v=16';
     import { renderKpiStrip, mountCalculator } from './js/stats-kpi.js?v=16';
+    import { getGate } from './js/contribution-gate.js?v=16';
 
     mountLayout();
 
@@ -368,10 +370,17 @@
       const filtered = applyFilters(state.allData, state.filterState);
       currentFiltered = filtered;
       renderKpiStrip(kpiEl, filtered);
-      document.getElementById('result-count').textContent =
-        `共 ${filtered.length} 筆${state.allData.length !== filtered.length ? `（已套用篩選 / 全部 ${state.allData.length} 筆）` : ''}`;
+
+      const gate = getGate(state.filterState);
+      const willGate = gate.gated && filtered.length > gate.limit;
+      const shown = willGate ? gate.limit : filtered.length;
+      document.getElementById('result-count').textContent = willGate
+        ? `顯示前 ${shown} 筆 · 共 ${filtered.length} 筆${gate.isFilteredView ? '（已套用篩選）' : ''}`
+        : `共 ${filtered.length} 筆${state.allData.length !== filtered.length ? `（已套用篩選 / 全部 ${state.allData.length} 筆）` : ''}`;
+
       renderTable(tableContainer, filtered, {
         slug: state.slug,
+        gate,
         onRowClick: (row) => {
           if (row._seq != null) setDeepLinkUrl(row._seq);
           openModalForRow(row);

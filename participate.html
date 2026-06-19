@@ -53,6 +53,7 @@
   <link rel="modulepreload" href="./js/components.js?v=16" />
   <link rel="modulepreload" href="./js/icons.js?v=16" />
   <link rel="modulepreload" href="./js/pwa-prompt.js?v=16" />
+  <link rel="modulepreload" href="./js/contribution-gate.js?v=16" />
 
   <!-- 強制清除舊版 cache -->
   <script>
@@ -90,6 +91,21 @@
   <section style="padding-top:24px;">
     <div class="container">
       <div class="grid grid-3" id="form-cards"></div>
+    </div>
+  </section>
+
+  <!-- Soft Give-to-Get：自助勾選已分享過 -->
+  <section style="padding-top:24px;padding-bottom:0;">
+    <div class="container container-narrow">
+      <div class="g2g-self-claim" id="g2g-self-claim">
+        <div class="g2g-self-claim-body">
+          <h3>已經分享過了嗎？</h3>
+          <p>如果你已經透過 Google 表單分享過你的職場資訊，可以在這裡標記，解鎖資料平台的完整內容。</p>
+        </div>
+        <button type="button" id="g2g-claim-btn" class="btn btn-primary g2g-claim-btn">
+          ✓ 我已完成分享，解鎖資料平台
+        </button>
+      </div>
     </div>
   </section>
 
@@ -217,8 +233,31 @@
     import { CATEGORIES } from './js/config.js?v=16';
     import { mountLayout } from './js/components.js?v=16';
     import { icon, renderIcons } from './js/icons.js?v=16';
+    import { hasContributed, markContributed } from './js/contribution-gate.js?v=16';
 
     mountLayout();
+
+    // 自助勾選：已透過 Google 表單分享過 → 解鎖資料平台
+    const claimWrap = document.getElementById('g2g-self-claim');
+    const claimBtn = document.getElementById('g2g-claim-btn');
+    function renderClaimState() {
+      if (hasContributed()) {
+        claimWrap.classList.add('g2g-claimed');
+        claimWrap.innerHTML = `
+          <div class="g2g-self-claim-body">
+            <h3>✓ 已解鎖完整資料</h3>
+            <p>感謝你的分享。<a href="platform.html">前往資料平台 →</a></p>
+          </div>
+        `;
+      }
+    }
+    renderClaimState();
+    if (claimBtn) {
+      claimBtn.addEventListener('click', () => {
+        markContributed();
+        renderClaimState();
+      });
+    }
 
     const cards = document.getElementById('form-cards');
     cards.innerHTML = CATEGORIES.map((c) => {

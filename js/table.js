@@ -6,6 +6,21 @@ import { generateShareCard, showSharePreview } from './share-card.js?v=16';
 import { ensureTooltip } from './tooltip.js?v=16';
 import { pageSlice, renderPagination } from './pagination.js?v=16';
 
+function gateCtaHtml(shownCount, fullCount, isFilteredView) {
+  const reasonText = isFilteredView ? '（篩選結果）' : '';
+  return `
+    <div class="g2g-cta-block">
+      <div class="g2g-cta-text">
+        目前顯示前 <strong>${shownCount}</strong> 筆 · 共 <strong>${fullCount}</strong> 筆${reasonText}
+      </div>
+      <a href="participate.html" class="btn btn-primary g2g-cta-btn">
+        📝 分享你的職場資訊，解鎖完整資料 →
+      </a>
+      <div class="g2g-cta-sub">完全匿名、3-5 分鐘填完。分享後即解鎖。</div>
+    </div>
+  `;
+}
+
 const DEFAULT_TABLE_COLUMNS = {
   // 欄位順序：地點 → 機構類別 → 機構名稱 → 單位名稱 → [類別專屬] → 工時 → 推薦
   all:        ['_category', 'location', 'institutionType', 'institutionName', 'unitName', 'weeklyHours', 'recommendIndex'],
@@ -159,6 +174,15 @@ export function renderTable(container, rows, opts = {}) {
     });
   }
 
+  // Soft Give-to-Get：未貢獻者切到限筆數，已貢獻者完整資料
+  const gate = opts.gate;
+  const fullCount = sorted.length;
+  const willGate = gate && gate.gated && fullCount > gate.limit;
+  if (willGate) {
+    sorted = sorted.slice(0, gate.limit);
+    state.page = 1; // 限筆數版本不分頁
+  }
+
   // 切到當前頁（每頁 100 筆，由 pagination.js 預設）
   const pageInfo = pageSlice(sorted, state.page);
   const pageRows = pageInfo.items;
@@ -228,14 +252,23 @@ export function renderTable(container, rows, opts = {}) {
     <div class="table-view" style="display:${container.dataset.view === 'card' ? 'none' : 'block'}">${tableHtml}</div>
     <div class="card-view"  style="display:${container.dataset.view === 'card' ? 'block' : 'none'}">${cardHtml}</div>
     <div class="pagination-mount"></div>
+    <div class="g2g-cta-mount"></div>
   `;
 
-  // 渲染分頁列（只有一頁時自動隱藏）
-  renderPagination(container.querySelector('.pagination-mount'), pageInfo, (newPage) => {
-    state.page = newPage;
-    renderTable(container, rows, opts);
-    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
+  // 限筆數版本：用 CTA 取代分頁；否則正常顯示分頁
+  if (willGate) {
+    container.querySelector('.g2g-cta-mount').innerHTML = gateCtaHtml(
+      sorted.length,
+      fullCount,
+      gate.isFilteredView,
+    );
+  } else {
+    renderPagination(container.querySelector('.pagination-mount'), pageInfo, (newPage) => {
+      state.page = newPage;
+      renderTable(container, rows, opts);
+      container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
 
   // Header click → sort（排序變動也回到第 1 頁，讓使用者看見新排序的頭部）
   container.querySelectorAll('thead th[data-sort]').forEach((th) => {

@@ -3409,3 +3409,77 @@ body.dform-thanks-open { overflow: hidden; }
   .dform-submit-bar { flex-direction: column; align-items: stretch; gap: 12px; }
   .dform-submit-btn { width: 100%; min-width: 0; }
 }
+
+/* ============================================================
+   Soft Give-to-Get：未貢獻者限筆數 CTA + participate 自助勾選
+   ============================================================ */
+.g2g-cta-block {
+  margin-top: 18px;
+  padding: 26px 28px;
+  background: linear-gradient(135deg, rgba(46, 134, 171, 0.08) 0%, rgba(168, 218, 220, 0.20) 100%);
+  border: 1px solid rgba(46, 134, 171, 0.22);
+  border-radius: 16px;
+  text-align: center;
+}
+.g2g-cta-text {
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  margin-bottom: 14px;
+  line-height: 1.65;
+}
+.g2g-cta-text strong { color: var(--ink); font-weight: 700; }
+.g2g-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 1rem;
+  padding: 12px 22px;
+}
+.g2g-cta-sub {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.g2g-self-claim {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 22px 26px;
+  background: rgba(168, 218, 220, 0.15);
+  border: 1px dashed rgba(46, 134, 171, 0.35);
+  border-radius: 14px;
+  flex-wrap: wrap;
+}
+.g2g-self-claim.g2g-claimed {
+  background: rgba(46, 134, 171, 0.08);
+  border-style: solid;
+  border-color: rgba(46, 134, 171, 0.30);
+}
+.g2g-self-claim-body {
+  flex: 1;
+  min-width: 220px;
+}
+.g2g-self-claim-body h3 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+.g2g-self-claim-body p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+.g2g-self-claim-body a {
+  color: var(--primary);
+  font-weight: 600;
+}
+.g2g-claim-btn {
+  flex-shrink: 0;
+}
+@media (max-width: 640px) {
+  .g2g-self-claim { flex-direction: column; align-items: stretch; gap: 14px; }
+  .g2g-claim-btn { width: 100%; justify-content: center; }
+  .g2g-cta-block { padding: 22px 18px; }
+}

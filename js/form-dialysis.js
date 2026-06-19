@@ -4,6 +4,7 @@
 import { mountLayout } from './components.js?v=16';
 import { renderIcons, icon } from './icons.js?v=16';
 import { HOSPITALS } from './hospitals.js?v=16';
+import { markContributed } from './contribution-gate.js?v=16';
 
 const DRAFT_KEY = 'dform_draft_dialysis';
 const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 避開易混字元 0/O/1/I/L
@@ -529,6 +530,9 @@ async function onSubmit(e) {
 }
 
 function showThanks() {
+  // Soft Give-to-Get：成功送出 = 解鎖資料平台完整資料
+  markContributed();
+
   const form = document.getElementById('dform');
   const banner = document.getElementById('dform-draft-banner-host');
   if (banner) banner.innerHTML = '';
