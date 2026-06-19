@@ -305,7 +305,7 @@
           <p>如果你還沒分享過自己的職場，按下這個鍵 — 就是在拿同行的真實付出走人，自己卻一份都沒留下。</p>
           <p class="g2g-modal-question"><strong>還沒填過的話 — 還來得及。按取消，去填一份吧。</strong><br/>已經填過了 — 按確定，5 分鐘後解鎖。</p>
           <div class="g2g-modal-actions">
-            <button type="button" id="g2g-modal-cancel-btn" class="btn btn-ghost">取消，我去填一份</button>
+            <a href="#form-cards" id="g2g-modal-cancel-btn" class="btn btn-ghost">↑ 取消，我去填一份</a>
             <button type="button" id="g2g-modal-confirm-btn" class="btn btn-danger">我已填過，開始等待</button>
           </div>
         </div>
@@ -323,7 +323,15 @@
       const escHandler = (e) => { if (e.key === 'Escape') closeModal(); };
       document.addEventListener('keydown', escHandler);
 
-      modal.querySelector('#g2g-modal-cancel-btn').addEventListener('click', closeModal);
+      modal.querySelector('#g2g-modal-cancel-btn').addEventListener('click', (e) => {
+        e.preventDefault();
+        closeModal();
+        // 等 modal close 動畫跑完再捲，避免 body.overflow:hidden 干擾
+        setTimeout(() => {
+          const target = document.getElementById('form-cards');
+          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 220);
+      });
       modal.querySelector('#g2g-modal-confirm-btn').addEventListener('click', () => {
         closeModal();
         writeStartedAt(Date.now());
