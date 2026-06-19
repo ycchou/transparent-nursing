@@ -3134,11 +3134,7 @@ body.dform-picker-open {
 }
 .dform-submit-btn { min-width: 160px; }
 .dform-submit-btn[disabled] { opacity: 0.6; cursor: not-allowed; }
-.dform-required-note {
-  font-size: 0.82rem;
-  color: var(--muted);
-  margin: 0;
-}
+/* （舊基底 .dform-required-note 已棄用，統一用 .dform-required-note-top） */
 .dform-spinner {
   display: inline-block;
   width: 14px;
@@ -3177,15 +3173,18 @@ body.dform-picker-open {
 .dform-warning-list strong { color: var(--ink); font-weight: 600; }
 .dform-warning-danger { color: var(--danger) !important; }
 
-/* 「標 * 為必填」放在表單最上方 */
+/* 「標 * 為必填」放在表單最上方（簡潔小字、右對齊） */
 .dform-required-note-top {
-  margin: 0 0 18px;
-  padding: 8px 14px;
-  background: var(--surface-soft);
-  border-radius: 8px;
+  margin: 0 0 8px;
   font-size: 0.82rem;
   color: var(--muted);
-  text-align: left;
+  text-align: right;
+  padding: 0;
+  background: transparent;
+}
+.dform-required-note-top .dform-required {
+  font-weight: 700;
+  margin: 0 1px;
 }
 
 /* 驗證碼欄位 */
@@ -3201,9 +3200,9 @@ body.dform-picker-open {
   display: inline-flex;
   align-items: center;
   justify-content: space-around;
-  width: 160px;
+  width: 220px;
   height: 56px;
-  padding: 0 12px;
+  padding: 0 14px;
   background: linear-gradient(135deg, #F0F7FA 0%, #E8F1F5 100%);
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -3270,7 +3269,7 @@ body.dform-picker-open {
 
 @media (max-width: 480px) {
   .dform-captcha-row { gap: 8px; }
-  .dform-captcha-display { width: 140px; height: 48px; font-size: 22px; }
+  .dform-captcha-display { width: 190px; height: 48px; font-size: 20px; padding: 0 10px; }
   .dform-captcha-input { min-width: 0; flex: 1 1 100%; order: 3; }
 }
 
@@ -3409,5 +3408,4 @@ body.dform-thanks-open { overflow: hidden; }
   .dform-option { padding: 10px 14px; font-size: 0.92rem; }
   .dform-submit-bar { flex-direction: column; align-items: stretch; gap: 12px; }
   .dform-submit-btn { width: 100%; min-width: 0; }
-  .dform-required-note { text-align: center; }
 }

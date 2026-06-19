@@ -900,7 +900,7 @@ function attachInstitutionAutocomplete() {
 // ===== 驗證碼 =====
 function generateCaptcha() {
   currentCaptcha = '';
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 6; i++) {
     currentCaptcha += CAPTCHA_CHARS[Math.floor(Math.random() * CAPTCHA_CHARS.length)];
   }
   drawCaptcha();
