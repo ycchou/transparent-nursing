@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>護理職場透明化運動 — 與臺護產討論</title>
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reset.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/theme/white.css" id="theme">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --r-primary:        #2E86AB;
+      --r-primary-dark:   #1F5F7A;
+      --r-accent:         #A8DADC;
+      --r-ink:            #1D3557;
+      --r-muted:          #6B7C93;
+      --r-line:           #E5EAF0;
+      --r-bg:             #FAFBFC;
+      --r-danger:         #E63946;
+      --r-success:        #06A77D;
+    }
+
+    /* === 整體底色：簡約偏暖灰白，極淡左上光暈 === */
+    html, body, .reveal-viewport, .reveal {
+      background:
+        radial-gradient(ellipse 70% 50% at 0% 0%, rgba(46, 134, 171, 0.05) 0%, transparent 70%),
+        var(--r-bg) !important;
+    }
+
+    .reveal {
+      font-family: 'Noto Sans TC', 'PingFang TC', sans-serif;
+      color: var(--r-ink);
+    }
+
+    /* === slide 基本：照抄 trtu 規格 === */
+    .reveal .slides { text-align: left; }
+    .reveal .slides section {
+      box-sizing: border-box;
+      width: 100%;
+      height: 100%;
+      padding: 42px 56px 52px;
+      overflow: hidden;
+    }
+
+    /* === 封面 / Q&A：深底 ＋ 幾何裝飾 === */
+    .reveal .slides section.cover {
+      background: linear-gradient(180deg, #1D3557 0%, #1A2C49 100%);
+      color: #fff;
+      text-align: center;
+      padding: 70px 60px;
+      display: flex !important;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .reveal section.cover h1,
+    .reveal section.cover h2,
+    .reveal section.cover p,
+    .reveal section.cover li { color: #fff !important; }
+
+    /* === 字體階層 === */
+    .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+      font-family: 'Noto Serif TC', 'Lora', serif;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      text-transform: none;
+      margin-top: 0;
+    }
+    .reveal h2 {
+      color: var(--r-ink);
+      font-size: 1.32em;
+      line-height: 1.2;
+      margin: 0 0 0.5em;
+      padding-bottom: 0.3em;
+      border-bottom: 1px solid var(--r-line);
+    }
+    .reveal section.cover h1 { color: #fff; font-size: 2.2em; }
+    .reveal section.cover h2 { border: 0; padding: 0; }
+
+    .reveal p, .reveal li {
+      line-height: 1.45;
+      font-size: 0.52em;
+      margin: 0 0 0.32em;
+    }
+    .reveal ul { margin: 0.22em 0 0.4em 1em; padding: 0; }
+    .reveal li { margin-bottom: 0.14em; }
+    .reveal ul ul { margin-top: 0.14em; font-size: 0.95em; }
+    .reveal strong { color: var(--r-primary); font-weight: 600; }
+    .reveal .danger { color: var(--r-danger); font-weight: 600; }
+    .reveal .success { color: var(--r-success); font-weight: 600; }
+    .reveal .muted { color: var(--r-muted); font-size: 0.85em; }
+
+    /* === 議題 tag：細邊框 outline 風格 === */
+    .reveal .agenda-tag {
+      display: inline-block;
+      padding: 3px 12px;
+      background: transparent;
+      color: var(--r-primary);
+      border: 1px solid var(--r-primary);
+      border-radius: 4px;
+      font-size: 0.45em;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      margin-bottom: 0.7em;
+      font-family: 'Noto Sans TC', sans-serif;
+      text-transform: uppercase;
+    }
+
+    /* === 表格：細線條、無圓角無陰影 === */
+    .reveal table {
+      font-size: 0.45em;
+      border-collapse: collapse;
+      margin: 0.35em 0;
+      width: 100%;
+    }
+    .reveal table th {
+      background: transparent;
+      color: var(--r-ink);
+      font-weight: 700;
+      padding: 6px 11px 5px;
+      border: 0;
+      border-bottom: 2px solid var(--r-primary);
+      text-align: left;
+      font-family: 'Noto Sans TC', sans-serif;
+      letter-spacing: 0.02em;
+    }
+    .reveal table td {
+      padding: 6px 11px;
+      border: 0;
+      border-bottom: 1px solid var(--r-line);
+      vertical-align: top;
+      background: transparent;
+      color: var(--r-ink);
+    }
+    .reveal table tr:last-child td { border-bottom: 0; }
+
+    /* === blockquote：細邊、無底色 === */
+    .reveal blockquote {
+      background: transparent;
+      border-left: 3px solid var(--r-primary);
+      padding: 3px 0 3px 13px;
+      font-size: 0.5em;
+      border-radius: 0;
+      box-shadow: none;
+      font-style: normal;
+      color: var(--r-muted);
+      margin: 0.35em 0;
+      width: auto;
+    }
+    .reveal blockquote strong { color: var(--r-ink); }
+
+    /* === 封面內元素 === */
+    .reveal section.cover .cover-h1 {
+      font-size: 2.4em;
+      margin: 0 0 0.2em;
+      letter-spacing: 0.02em;
+      font-weight: 700;
+    }
+    .reveal section.cover .cover-sub {
+      font-size: 0.95em;
+      margin: 0 0 0.8em;
+      color: rgba(255, 255, 255, 0.85) !important;
+      font-weight: 400;
+      position: relative;
+    }
+    .reveal section.cover .cover-sub::after {
+      content: '';
+      display: block;
+      width: 48px;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.3);
+      margin: 1.2em auto 0;
+    }
+    .reveal section.cover .muted {
+      font-size: 0.82em;
+      color: rgba(255, 255, 255, 0.7) !important;
+    }
+    .reveal section.cover .cover-meta {
+      font-size: 0.55em;
+      letter-spacing: 0.08em;
+      margin-top: 2em;
+      line-height: 2;
+      color: rgba(255, 255, 255, 0.65) !important;
+    }
+
+    /* === key-stat chip：outline 簡約版 === */
+    .reveal .key-stat {
+      display: inline-block;
+      padding: 3px 12px;
+      margin: 2px 3px;
+      background: transparent;
+      border: 1px solid var(--r-line);
+      color: var(--r-ink);
+      border-radius: 4px;
+      font-size: 0.62em;
+      font-weight: 500;
+      font-family: 'Noto Sans TC', sans-serif;
+    }
+    .reveal section.cover .key-stat {
+      background: transparent;
+      border-color: rgba(255, 255, 255, 0.30);
+      color: #fff !important;
+    }
+
+    /* === Reveal 控制元件 === */
+    .reveal .controls { color: var(--r-primary); }
+    .reveal .progress {
+      color: var(--r-primary);
+      background: var(--r-line);
+      height: 2px;
+    }
+    .reveal .slide-number {
+      color: var(--r-muted);
+      background: transparent;
+      padding: 0;
+      font-size: 0.42em;
+      font-family: 'Noto Sans TC', sans-serif;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      right: 24px;
+      bottom: 14px;
+    }
+
+    /* === 連結 === */
+    .reveal a {
+      color: var(--r-primary);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(46, 134, 171, 0.25);
+      padding-bottom: 1px;
+    }
+    .reveal a:hover { color: var(--r-primary-dark); border-bottom-color: var(--r-primary); }
+    .reveal section.cover a {
+      color: var(--r-accent) !important;
+      border-bottom-color: rgba(168, 218, 220, 0.4);
+    }
+
+    /* === 封面幾何裝飾 === */
+    .cover-deco {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .cover-deco-circle {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(168, 218, 220, 0.14);
+    }
+    .cover-deco-circle.cd-1 {
+      width: 760px; height: 760px;
+      top: -260px; right: -260px;
+      border-color: rgba(168, 218, 220, 0.10);
+    }
+    .cover-deco-circle.cd-2 {
+      width: 440px; height: 440px;
+      bottom: -200px; left: -180px;
+      border-color: rgba(168, 218, 220, 0.08);
+    }
+    .cover-deco-circle.cd-3 {
+      width: 200px; height: 200px;
+      top: 60px; left: 11%;
+      border-color: rgba(168, 218, 220, 0.06);
+    }
+    .cover-deco-dot {
+      position: absolute;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(168, 218, 220, 0.45);
+    }
+    .cover-deco-dot.dd-1 { top: 100px; right: 22%; }
+    .cover-deco-dot.dd-2 { bottom: 90px; left: 18%; width: 4px; height: 4px; opacity: 0.6; }
+    .cover-deco-bar {
+      position: absolute;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(168, 218, 220, 0.35), transparent);
+    }
+    .cover-deco-bar.db-top { top: 50px; left: 25%; width: 50%; }
+    .cover-deco-bar.db-bottom { bottom: 50px; left: 30%; width: 40%; }
+
+    /* === 封面 logo === */
+    .reveal .cover-logo {
+      width: 84px;
+      height: 84px;
+      margin: 0 auto 1.3em;
+      border-radius: 18px;
+      overflow: hidden;
+      position: relative;
+      z-index: 1;
+      box-shadow:
+        0 18px 38px rgba(0, 0, 0, 0.28),
+        0 0 0 1px rgba(255, 255, 255, 0.06);
+    }
+    .reveal .cover-logo svg { display: block; width: 100%; height: 100%; }
+
+    /* 封面內元素提升到裝飾之上 */
+    .reveal section.cover > h1,
+    .reveal section.cover > h2,
+    .reveal section.cover > p,
+    .reveal section.cover > div:not(.cover-deco) {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* === 自動縮放容器（讓溢出內容自動 scale-down 來符合 16:9） === */
+    .slide-fit {
+      display: block;
+      box-sizing: border-box;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+<div class="reveal">
+  <div class="slides">
+
+    <!-- ========== 1. 封面 ========== -->
+    <section class="cover">
+      <div class="cover-deco">
+        <div class="cover-deco-circle cd-1"></div>
+        <div class="cover-deco-circle cd-2"></div>
+        <div class="cover-deco-circle cd-3"></div>
+        <div class="cover-deco-dot dd-1"></div>
+        <div class="cover-deco-dot dd-2"></div>
+        <div class="cover-deco-bar db-top"></div>
+        <div class="cover-deco-bar db-bottom"></div>
+      </div>
+      <div class="cover-logo" aria-hidden="true">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="lgCover1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#2E86AB"/>
+              <stop offset="100%" stop-color="#A8DADC"/>
+            </linearGradient>
+          </defs>
+          <rect width="100" height="100" rx="22" fill="url(#lgCover1)"/>
+          <path d="M50 85.7 c-23.3 -15.8 -38.3 -34.2 -38.3 -54.2 a19.2 19.2 0 0 1 38.3 -4.2 a19.2 19.2 0 0 1 38.3 4.2 c0 20 -15 38.3 -38.3 54.2 z" fill="#ffffff"/>
+          <path d="M23.3 42.4 h14.2 l5.8 -10.8 l10 21.7 l5.8 -13.3 h23.3" stroke="#E63946" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <h1 class="cover-h1">護理職場透明化運動</h1>
+      <p class="cover-sub">平台介紹 ＋ 12 項討論議題</p>
+      <p class="muted">讓真實的職場資訊，被下一個護理師看見</p>
+      <p class="cover-meta">
+        協作對象：臺灣護理產業工會（臺護產）<br>
+        會議日期：2026 年 6 月
+      </p>
+    </section>
+
+    <!-- ========== 2. 為什麼做這個 ========== -->
+    <section>
+      <span class="agenda-tag">背景</span>
+      <h2>為什麼做這個？</h2>
+      <p>護理職場資訊長期不對稱 — 求職時最關心的事，最難取得：</p>
+      <ul>
+        <li><strong>真實薪水</strong>（不是醫院公布的範圍上限）</li>
+        <li><strong>真實護病比</strong>（不是評鑑書面上的）</li>
+        <li><strong>加班費政策</strong>（是否被切割、報帳機制）</li>
+        <li>工作氣氛、值班強度、暴力風險</li>
+      </ul>
+      <p><strong>目前現有管道</strong>：</p>
+      <ul>
+        <li>PTT 評論 → 無法量化、易失真</li>
+        <li>口耳相傳 → 仰賴個人人脈</li>
+        <li>醫院官方 → 只展示優勢、迴避負面</li>
+      </ul>
+      <p class="muted">→ 缺少「可結構化檢索、可比較、可累積」的開放資料</p>
+    </section>
+
+    <!-- ========== 3. 平台是什麼 ========== -->
+    <section>
+      <span class="agenda-tag">定位</span>
+      <h2>平台是什麼？</h2>
+      <p>一個讓護理師<strong>匿名分享自己職場真實樣貌</strong>的平台</p>
+      <p>把過去只能線下密語的職場資訊：</p>
+      <p>
+        <span class="key-stat">薪水</span>
+        <span class="key-stat">護病比</span>
+        <span class="key-stat">值班制度</span>
+        <span class="key-stat">加班費政策</span>
+        <span class="key-stat">工作氣氛</span>
+      </p>
+      <p>變成<strong>公開查閱、橫向比較</strong>的開放資料庫。</p>
+      <blockquote>
+        <strong>致敬</strong>：呼吸治療師工會（RT 工會）的「<a href="https://trtu.org.tw/RT_platform/" target="_blank">勞動分享平台</a>」 — 率先示範了「業界自己揭露職場資訊」的可能性，本案借鑑這個精神延伸至護理場域。
+      </blockquote>
+    </section>
+
+    <!-- ========== 4. 主要功能（1）========== -->
+    <section>
+      <span class="agenda-tag">功能</span>
+      <h2>主要功能（1/2）</h2>
+      <p><strong>📊 資料平台</strong></p>
+      <ul>
+        <li>9 大護理工作場域分眾收集（病房 / ICU / 急診 / 手術房 / 門診 / 洗腎 / 精神 / 檢查介入 / 其他）</li>
+        <li>600+ 筆樣本（目前為 mock data 示範）</li>
+        <li>多重篩選：地點、機構等級、工時、推薦指數、加班費合規</li>
+      </ul>
+      <p><strong>📈 統計摘要</strong></p>
+      <ul>
+        <li>投稿視覺化：工時分布、加班費合規率、推薦指數</li>
+        <li><strong>整合 3 份官方報告</strong>作為對照基準：
+          <ul>
+            <li>衛福部 112 年 醫院護理服務量調查</li>
+            <li>護理全聯會 111 年 薪資及人力調查</li>
+            <li>護理全聯會 114 年 人力監測指標</li>
+          </ul>
+        </li>
+      </ul>
+    </section>
+
+    <!-- ========== 5. 主要功能（2）========== -->
+    <section>
+      <span class="agenda-tag">功能</span>
+      <h2>主要功能（2/2）</h2>
+      <p><strong>🧮 薪資百分位試算</strong></p>
+      <ul>
+        <li>輸入年薪 → 立刻得知在同條件護理師中排第幾百分位</li>
+        <li>可隱藏具體數字、產生分享圖到社群（IG / FB / Threads）</li>
+      </ul>
+      <p><strong>⚠️ 勞檢紀錄</strong></p>
+      <ul>
+        <li>整合勞動部公開的醫療機構勞檢違規紀錄</li>
+        <li>看哪間醫院被罰過幾次、違反哪些勞基法條款、罰鍰多少</li>
+      </ul>
+      <p><strong>📝 填寫表單</strong></p>
+      <ul>
+        <li>9 個工作場域對應 9 份表單</li>
+        <li>目前：洗腎室（站內自建表單）、ICU（Google Form）已上線</li>
+      </ul>
+    </section>
+
+    <!-- ========== 6. 匿名性與技術 ========== -->
+    <section>
+      <span class="agenda-tag">承諾</span>
+      <h2>匿名性 ＋ 技術細節</h2>
+      <p><strong>我們不收集</strong>：</p>
+      <ul>
+        <li>❌ IP 位址 ❌ Email ❌ Cookie / 登入狀態 ❌ 設備指紋</li>
+      </ul>
+      <p><strong>送出後資料立即公開</strong>，沒有審核延遲。代價：</p>
+      <p class="danger">⚠️ 送出後無法撤回任何單一筆資料（這也是議題 5 要討論的）</p>
+      <p><strong>技術架構</strong>：純靜態網站、Google Forms + Sheets → CSV → 前端讀取</p>
+      <ul>
+        <li>零後端、零維運成本、GitHub Pages 託管（每年 0 元）</li>
+        <li>未來資料量達 5000+ 筆才需要考慮架構升級</li>
+      </ul>
+      <p class="muted">🌐 <a href="https://ycchou.github.io/transparent-nursing/" target="_blank">ycchou.github.io/transparent-nursing</a></p>
+    </section>
+
+    <!-- ========== 7. 議題 1 — 名義發布 ========== -->
+    <section>
+      <span class="agenda-tag">議題 1</span>
+      <h2>用什麼名義發布？</h2>
+      <table>
+        <thead>
+          <tr><th>選項</th><th>優勢</th><th>風險</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>獨立企劃</td><td>不被特定團體框定、中立公正</td><td>缺乏組織背書、推廣難</td></tr>
+          <tr><td>台醫聯</td><td>跨醫療職類、廣度大</td><td>護理特定議題被稀釋</td></tr>
+          <tr><td><strong>臺護產</strong></td><td>直接相關、護理本位</td><td>較聚焦特定立場</td></tr>
+          <tr><td>RT 工會</td><td>有成功經驗可借鑑</td><td>不符護理本業</td></tr>
+        </tbody>
+      </table>
+      <p style="margin-top: 0.8em;"><strong>討論方向</strong>：</p>
+      <ul>
+        <li>哪個 brand 最有助於資料收集 + 公信力 + 後續推廣？</li>
+        <li>是否考慮聯名發布（如「臺護產 × 台醫聯」）？</li>
+      </ul>
+    </section>
+
+    <!-- ========== 8. 議題 2 — 特殊單位 ========== -->
+    <section>
+      <span class="agenda-tag">議題 2</span>
+      <h2>特殊單位是否納入？</h2>
+      <p>目前 9 大類別：病房 / 加護病房 / 急診 / 手術房 / 門診 / 洗腎 / 精神 / 檢查介入 / 其他</p>
+      <p><strong>待釐清的特殊單位</strong>：</p>
+      <p>
+        <span class="key-stat">RCC</span><span class="key-stat">RCW</span><span class="key-stat">POR</span>
+        <span class="key-stat">嬰兒床</span><span class="key-stat">嬰兒病床</span>
+        <span class="key-stat">新生兒中重度</span><span class="key-stat">產房</span>
+      </p>
+      <p><strong>選項</strong>：</p>
+      <ul>
+        <li><strong>A.</strong> 併入既有類別（如 ICU / 病房），用子欄位區分</li>
+        <li><strong>B.</strong> 開新類別「特殊單位」（會擠到 10 類）</li>
+        <li><strong>C.</strong> 「檢查介入」改名「特殊單位」一併涵蓋</li>
+      </ul>
+      <p class="muted">考量：類別過細會稀釋每類樣本量，過粗會喪失差異性</p>
+    </section>
+
+    <!-- ========== 9. 議題 3 — 特殊職類別 ========== -->
+    <section>
+      <span class="agenda-tag">議題 3</span>
+      <h2>特殊職類別是否納入？</h2>
+      <p>目前所有類別假設「<strong>一般護理師</strong>」為主要受訪族群</p>
+      <p><strong>待討論的特殊職類別</strong>：</p>
+      <ul>
+        <li><strong>專科護理師（NP）</strong> — 工作型態、薪資結構、責任範圍與一般護理師差異大</li>
+        <li><strong>個案管理師</strong> — 多在門診 / 慢性病管理場域</li>
+      </ul>
+      <p><strong>選項</strong>：</p>
+      <ul>
+        <li><strong>A.</strong> 不納入，未來再開</li>
+        <li><strong>B.</strong> 在「職稱」欄位加上 enum 選項即可</li>
+        <li><strong>C.</strong> 開獨立分類，工作型態完全不同</li>
+      </ul>
+      <p class="muted">考量：樣本量是否足以撐起獨立分類？混合會否稀釋資訊？</p>
+    </section>
+
+    <!-- ========== 10. 議題 4 — 表單負責人 ========== -->
+    <section>
+      <span class="agenda-tag">議題 4</span>
+      <h2>各表單負責人 / 意願者招募</h2>
+      <p><strong>目前狀態</strong>：</p>
+      <ul>
+        <li class="success">✅ 洗腎室：已完成（站內自建）</li>
+        <li class="success">✅ ICU：已完成（Google Forms）</li>
+        <li class="danger">❌ 其餘 7 個類別：未做</li>
+      </ul>
+      <p><strong>每份表單需要</strong>：</p>
+      <ul>
+        <li>熟悉該場域工作流程的護理師</li>
+        <li>設計題目、確認用詞、找測試者</li>
+        <li>上線後協助推廣至該場域社群</li>
+      </ul>
+      <p><strong>討論方向</strong>：</p>
+      <ul>
+        <li>工會內是否有意願者？</li>
+        <li>是否發起公開招募？</li>
+        <li>一個負責人 vs. 工作小組？</li>
+      </ul>
+    </section>
+
+    <!-- ========== 11. 議題 5 — 刪改 ========== -->
+    <section>
+      <span class="agenda-tag">議題 5</span>
+      <h2>填答後可否刪改？</h2>
+      <p><strong>核心矛盾</strong>：</p>
+      <ul>
+        <li>「完全匿名」= 我們不知道哪筆是誰的 → <strong>技術上無法定向刪改</strong></li>
+        <li>「可刪改」需要驗證身分（email 連結 / token）→ <strong>破壞匿名承諾</strong></li>
+      </ul>
+      <p><strong>選項</strong>：</p>
+      <table>
+        <thead><tr><th>選項</th><th>說明</th></tr></thead>
+        <tbody>
+          <tr><td>A. 維持「不可刪改」</td><td>強調匿名、與 Glassdoor 等主流平台同</td></tr>
+          <tr><td>B. 提供 email 收 token</td><td>可刪改但破壞匿名承諾</td></tr>
+          <tr><td>C. 加強送出前確認 + 24h grace</td><td>不要求身分但限時可改</td></tr>
+          <tr><td>D. 提供「追加更新」表單</td><td>不是修改原筆、是新增補充</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ========== 12. 議題 6 — 填一筆才能看 ========== -->
+    <section>
+      <span class="agenda-tag">議題 6</span>
+      <h2>填寫一筆才可預覽？</h2>
+      <p><strong>Glassdoor 模式</strong>：先填一筆才能看其他人的</p>
+      <table>
+        <thead><tr><th>Pro</th><th>Con</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>
+              平台資料量自動成長<br>
+              用戶因「想看」而主動分享<br>
+              過濾純看不貢獻者
+            </td>
+            <td>
+              早期種子用戶反感<br>
+              護理本來就是高度被剝削族群，再要求「以資料換資料」道德上有爭議<br>
+              部分人會亂填只為過關
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p><strong>選項</strong>：</p>
+      <ul>
+        <li><strong>A.</strong> 完全開放瀏覽（原本作法）</li>
+        <li><strong>B.</strong> 強制 1 筆才能看（Glassdoor）</li>
+        <li><strong>C.</strong> 軟引導（看到第 N 筆時提示但不擋）</li>
+        <li class="success"><strong>D.</strong> 誠實商店模式（已實作，下一頁說明）</li>
+      </ul>
+    </section>
+
+    <!-- ========== 12b. 議題 6 — 已實作：誠實商店模式 ========== -->
+    <section>
+      <span class="agenda-tag">議題 6 · 已實作</span>
+      <h2>選 D：誠實商店模式</h2>
+      <p><strong>精神</strong>：軟引導 + 道德摩擦，<strong>不破壞「完全匿名」承諾</strong> — 寧可被繞過、不蓋一個會洩漏身分的防火牆</p>
+      <table>
+        <thead><tr><th style="width:32%;">五層機制</th><th>實作細節</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>① 限筆數預覽</strong></td>
+            <td>未貢獻者預設看前 <strong>50</strong> 筆；套任一篩選 → 只剩 <strong>5</strong> 筆<br><span class="muted">底下顯示「分享解鎖完整資料 →」CTA</span></td>
+          </tr>
+          <tr>
+            <td><strong>② 自助勾選按鈕</strong></td>
+            <td>填表單頁有「✓ 我已完成分享，解鎖資料平台」按鈕<br><span class="muted">適用於走 Google Form 的人（外部填完無法回呼）</span></td>
+          </tr>
+          <tr>
+            <td><strong>③ 情緒勒索 modal</strong></td>
+            <td>按下後跳全屏對話框：「你正在拿同行的真實付出走人，自己卻一份都沒留下」<br><span class="muted">[取消，我去填一份] 或 [我已填過，開始等待]</span></td>
+          </tr>
+          <tr>
+            <td><strong>④ 5 分鐘強制等待</strong></td>
+            <td>確定後 wall-clock 5 分鐘倒數，期間引導「趁這時間去填一份」<br><span class="muted">用 localStorage 存起算時間 → 關掉頁面再回來不重新計時</span></td>
+          </tr>
+          <tr>
+            <td><strong>⑤ 自動解鎖</strong></td>
+            <td>5 分鐘到 / 任一表單送出成功 → 立即解鎖完整資料<br><span class="muted">填表單的人會比按按鈕等的人更快解鎖（誘因）</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="muted">⚠️ 開無痕視窗 / 清 localStorage 都能繞過 — <strong>這是刻意的</strong>。把這視為「對誠實人有效、對作弊者不糾纏」的設計取捨。</p>
+    </section>
+
+    <!-- ========== 13. 議題 7 — 平台管理 ========== -->
+    <section>
+      <span class="agenda-tag">議題 7</span>
+      <h2>平台管理條款</h2>
+      <p>待釐清的權限與政策：</p>
+      <p><strong>① 內容審查權</strong></p>
+      <ul>
+        <li>是否保留「下架明顯違規或不當內容」的權力？</li>
+        <li>評判標準？由誰決定？</li>
+      </ul>
+      <p><strong>② 清理髒數據</strong></p>
+      <ul>
+        <li>明顯亂填（薪資 1 元、99999 元、機構名稱亂打）</li>
+        <li>自動清理？人工檢核？臨界值？</li>
+      </ul>
+      <p><strong>③ 標註可疑數據</strong></p>
+      <ul>
+        <li>不刪除但加「待驗證」標籤</li>
+        <li>例如某醫院只有 1 筆數據時的可信度提示</li>
+      </ul>
+      <p class="muted">核心衝突：透明化運動精神 vs. 資料品質維護</p>
+    </section>
+
+    <!-- ========== 14. 議題 8 — Email ========== -->
+    <section>
+      <span class="agenda-tag">議題 8</span>
+      <h2>是否蒐集 Email？</h2>
+      <p><strong>目前</strong>：完全不收</p>
+      <table>
+        <thead><tr><th>收 Email 的好處</th><th>收 Email 的壞處</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>
+              後續推廣資訊管道<br>
+              工會活動通知<br>
+              新功能上線通知<br>
+              累積支持者名單
+            </td>
+            <td>
+              <span class="danger">破壞「完全匿名」最強承諾</span><br>
+              用戶心理門檻提高<br>
+              資料庫安全責任<br>
+              個資法 / GDPR 合規負擔
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p><strong>折衷選項</strong>：</p>
+      <ul>
+        <li><strong>A.</strong> 表單末加選填欄位，明確標示「僅供工會聯繫、與職場資料完全不關聯」</li>
+        <li><strong>B.</strong> 完全分離 — 在 about 頁加訂閱列、不在投稿表單上問</li>
+        <li><strong>C.</strong> 維持不收</li>
+      </ul>
+    </section>
+
+    <!-- ========== 15. 議題 9 — 連動照護司 ========== -->
+    <section>
+      <span class="agenda-tag">議題 9</span>
+      <h2>連動衛福部照護司？</h2>
+      <p><strong>衛福部照護司「醫院護理職場資訊」</strong></p>
+      <blockquote>
+        各醫院主動公開的薪資、福利、職涯發展資訊<br>
+        🔗 nurse.mohw.gov.tw/sp-memb-survey-entrance-1-761ff-2.html
+      </blockquote>
+      <p><strong>連動方式</strong>：</p>
+      <ul>
+        <li><strong>A.</strong> 每筆資料 detail 旁加「查官方公開資料」連結</li>
+        <li><strong>B.</strong> 統計摘要頁加「對照欄」秀官方數字 vs. 用戶投稿差異</li>
+        <li><strong>C.</strong> 不做（避免官方資料蓋住用戶聲音）</li>
+      </ul>
+      <p class="muted">考量：官方資料是醫院「自填」、本站資料是員工「親述」，兩種視角並陳會更完整</p>
+    </section>
+
+    <!-- ========== 16. 議題 10 — 連動爭議通報平台 ========== -->
+    <section>
+      <span class="agenda-tag">議題 10</span>
+      <h2>連動爭議通報平台 / 提供工會服務？</h2>
+      <p><strong>護理職場爭議通報平台</strong>（工會既有服務）</p>
+      <p><strong>連動方式</strong>：</p>
+      <ul>
+        <li><strong>A.</strong> 在勞檢紀錄頁加 CTA：「你也遇到嗎？點此通報工會」</li>
+        <li><strong>B.</strong> 在每筆「加班費一律不給」之類負面項目下方加按鈕</li>
+        <li><strong>C.</strong> 全站 footer 放工會聯絡資訊</li>
+      </ul>
+      <p><strong>更高層的討論</strong>：</p>
+      <ul>
+        <li>本平台是否明確定位為「工會招募 / 服務入口」？</li>
+        <li>還是維持中立的「資料平台」、與工會服務鬆耦合？</li>
+      </ul>
+    </section>
+
+    <!-- ========== 17. 議題 11 — 討論區 ========== -->
+    <section>
+      <span class="agenda-tag">議題 11</span>
+      <h2>是否設討論區 / 群組？</h2>
+      <p><strong>可行方案</strong>：</p>
+      <ul>
+        <li>每筆資料下加留言（用 Cusdis / Giscus 後端）</li>
+        <li>設整體討論區（Discord / LINE 群）</li>
+        <li>分縣市 / 分職場類別子社群</li>
+      </ul>
+      <table>
+        <thead><tr><th>Pro</th><th>Con</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>
+              護理師可橫向討論<br>
+              黏著度與回訪率提升<br>
+              社群效應有助推廣
+            </td>
+            <td>
+              內容審查工作量大<br>
+              需要管理員值班<br>
+              法律風險（毀謗 / 個資）<br>
+              拉低平台「資料導向」定位
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <p><strong>選項</strong>：</p>
+      <ul>
+        <li><strong>A.</strong> 短期不設、僅單向資料平台</li>
+        <li><strong>B.</strong> 設限定議題討論串（如「薪資合理性」）</li>
+        <li><strong>C.</strong> 連結到既有 PTT / Threads / FB 社團</li>
+      </ul>
+    </section>
+
+    <!-- ========== 18. 議題 12 — 後續推進 ========== -->
+    <section>
+      <span class="agenda-tag">議題 12</span>
+      <h2>後續推進方式</h2>
+      <p><strong>短期（1 個月內）</strong></p>
+      <ul>
+        <li>確認名義 + brand</li>
+        <li>議題 1-3 分組認領、深化討論</li>
+        <li>排定二次會時間</li>
+      </ul>
+      <p><strong>中期（3 個月內）</strong></p>
+      <ul>
+        <li>上線 3-5 個工作場域表單</li>
+        <li>啟動公開推廣（社群、學校、醫院）</li>
+        <li>累積 200-500 筆真實投稿</li>
+      </ul>
+      <p><strong>長期（半年內）</strong></p>
+      <ul>
+        <li>達 1000+ 筆真實投稿</li>
+        <li>評估擴展至獨立網域、自架伺服器</li>
+        <li>評估連動工會其他服務</li>
+      </ul>
+      <p><strong>今日要決議</strong>：分組怎麼分？下次會議時間？</p>
+    </section>
+
+    <!-- ========== 19. 結語 ========== -->
+    <section>
+      <span class="agenda-tag">結語</span>
+      <h2>運動核心價值 ＋ 需要工會的協助</h2>
+      <p><strong>🩺 本運動的三個核心</strong>：</p>
+      <ul>
+        <li><strong>匿名</strong> — 保護揭露者</li>
+        <li><strong>透明</strong> — 保護下一個求職者</li>
+        <li><strong>永續</strong> — 低維運成本，可長期運作</li>
+      </ul>
+      <p><strong>✋ 需要工會的協助</strong>：</p>
+      <ul>
+        <li>公信力背書</li>
+        <li>推廣管道（會員、社群、活動）</li>
+        <li>持續貢獻者招募</li>
+        <li>議題凝聚與政策對話</li>
+      </ul>
+      <p class="muted" style="margin-top: 1em;">
+        🌐 <a href="https://ycchou.github.io/transparent-nursing/" target="_blank">ycchou.github.io/transparent-nursing</a><br>
+        📂 <a href="https://github.com/ycchou/transparent-nursing" target="_blank">github.com/ycchou/transparent-nursing</a>
+      </p>
+    </section>
+
+    <!-- ========== 20. Q&A ========== -->
+    <section class="cover">
+      <div class="cover-deco">
+        <div class="cover-deco-circle cd-1"></div>
+        <div class="cover-deco-circle cd-2"></div>
+        <div class="cover-deco-circle cd-3"></div>
+        <div class="cover-deco-dot dd-1"></div>
+        <div class="cover-deco-dot dd-2"></div>
+        <div class="cover-deco-bar db-top"></div>
+        <div class="cover-deco-bar db-bottom"></div>
+      </div>
+      <div class="cover-logo" aria-hidden="true">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="lgCover2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#2E86AB"/>
+              <stop offset="100%" stop-color="#A8DADC"/>
+            </linearGradient>
+          </defs>
+          <rect width="100" height="100" rx="22" fill="url(#lgCover2)"/>
+          <path d="M50 85.7 c-23.3 -15.8 -38.3 -34.2 -38.3 -54.2 a19.2 19.2 0 0 1 38.3 -4.2 a19.2 19.2 0 0 1 38.3 4.2 c0 20 -15 38.3 -38.3 54.2 z" fill="#ffffff"/>
+          <path d="M23.3 42.4 h14.2 l5.8 -10.8 l10 21.7 l5.8 -13.3 h23.3" stroke="#E63946" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      </div>
+      <h1 class="cover-h1" style="font-size: 2.6em;">討論時間</h1>
+      <p class="cover-sub">請各位踴躍提問與建議</p>
+      <p class="muted" style="margin-top: 1.4em;">
+        感謝臺護產夥伴撥冗會議<br>
+        期待後續合作
+      </p>
+    </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5.1.0/dist/reveal.js"></script>
+<script>
+  // 16:9 強制比例，reveal 會自動依瀏覽器視窗縮放（保持寬高比）
+  Reveal.initialize({
+    hash: true,
+    progress: true,
+    slideNumber: 'c/t',
+    transition: 'slide',
+    backgroundTransition: 'fade',
+    controls: true,
+    center: false,
+    width: 1280,
+    height: 720,
+    margin: 0.04,
+    minScale: 0.2,
+    maxScale: 2.0,
+    keyboard: true,
+    touch: true,
+    embedded: false,
+  }).then(() => {
+    // 確保 reveal 容器可接收鍵盤事件
+    const reveal = document.querySelector('.reveal');
+    if (reveal) {
+      reveal.setAttribute('tabindex', '0');
+      reveal.focus();
+    }
+  });
+
+  // 全域鍵盤後備：即使 reveal 內部 handler 因焦點問題沒收到，也能翻頁
+  document.addEventListener('keydown', (e) => {
+    if (e.defaultPrevented) return;
+    if (!window.Reveal || typeof Reveal.next !== 'function') return;
+    // 避免在輸入框內觸發
+    const tag = (e.target && e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+    switch (e.key) {
+      case 'ArrowRight':
+      case 'ArrowDown':
+      case 'PageDown':
+      case ' ':
+        Reveal.next();
+        break;
+      case 'ArrowLeft':
+      case 'ArrowUp':
+      case 'PageUp':
+        Reveal.prev();
+        break;
+      case 'Home':
+        Reveal.slide(0);
+        break;
+      case 'End':
+        Reveal.slide(Number.MAX_SAFE_INTEGER);
+        break;
+      default:
+        return;
+    }
+    e.preventDefault();
+  });
+
+  // 點任何地方就把焦點搶回 reveal（防止點到外部元素導致鍵盤失效）
+  document.addEventListener('click', () => {
+    const reveal = document.querySelector('.reveal');
+    if (reveal && document.activeElement !== reveal) {
+      // 不搶輸入框/連結等可互動元素的焦點
+      const active = document.activeElement;
+      const tag = active && active.tagName ? active.tagName.toLowerCase() : '';
+      if (tag !== 'input' && tag !== 'textarea' && tag !== 'a' && tag !== 'button') {
+        reveal.focus();
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
