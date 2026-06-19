@@ -3522,6 +3522,83 @@ body.dform-thanks-open { overflow: hidden; }
 }
 .g2g-go-fill-btn { flex-shrink: 0; }
 
+/* G2G 確認 modal — 額外一層情緒勒索的確認對話框 */
+body.g2g-modal-open { overflow: hidden; }
+.g2g-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.g2g-modal-backdrop.open { opacity: 1; }
+.g2g-modal {
+  background: #fff;
+  border-radius: 18px;
+  padding: 36px 38px 30px;
+  max-width: 520px;
+  width: 100%;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.32);
+  transform: translateY(20px) scale(0.96);
+  transition: transform 0.22s ease;
+  border-top: 6px solid var(--danger);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+.g2g-modal-backdrop.open .g2g-modal { transform: translateY(0) scale(1); }
+.g2g-modal-icon {
+  text-align: center;
+  font-size: 2.8rem;
+  margin-bottom: 8px;
+  line-height: 1;
+}
+.g2g-modal h2 {
+  margin: 0 0 18px;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--danger);
+  text-align: center;
+}
+.g2g-modal p {
+  margin: 0 0 12px;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+.g2g-modal p strong { color: var(--ink); }
+.g2g-modal-question {
+  margin-top: 18px !important;
+  padding: 14px 16px;
+  background: rgba(230, 57, 70, 0.06);
+  border-left: 3px solid var(--danger);
+  border-radius: 6px;
+  color: var(--ink) !important;
+}
+.g2g-modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+.g2g-modal-actions .btn { flex: 1; justify-content: center; min-width: 0; }
+
+/* 通用 danger 按鈕 (給 confirm modal 用) */
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+  border: 1px solid var(--danger);
+}
+.btn-danger:hover {
+  background: #c5303d;
+  border-color: #c5303d;
+  color: #fff;
+}
+
 @media (max-width: 640px) {
   .g2g-self-claim { flex-direction: column; align-items: stretch; gap: 14px; }
   .g2g-claim-btn { width: 100%; justify-content: center; }
@@ -3530,4 +3607,9 @@ body.dform-thanks-open { overflow: hidden; }
   .g2g-countdown-big { font-size: 2.6rem; margin-bottom: 16px; }
   .g2g-confirm-actions { flex-direction: column-reverse; align-items: stretch; }
   .g2g-confirm-actions .btn { width: 100%; justify-content: center; }
+  .g2g-modal { padding: 28px 24px 22px; border-radius: 14px; }
+  .g2g-modal h2 { font-size: 1.18rem; }
+  .g2g-modal p { font-size: 0.92rem; }
+  .g2g-modal-actions { flex-direction: column-reverse; }
+  .g2g-modal-actions .btn { width: 100%; }
 }
