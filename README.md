@@ -1,172 +1,131 @@
-# 護理職場透明化運動 — Prototype
+# 護理職場透明化運動
 
-> 致敬 [呼吸治療師勞動分享平台](https://trtu.org.tw/RT_platform/) 的開創性實踐。
-> 本專案以 5 大護理工作場域（門診 / 病房 / 加護病房 / 急診 / 洗腎室）為主軸，
-> 收集匿名職場資訊並公開呈現。
+> **讓真實的職場資訊，被下一個護理師看見。**
 
-## 技術棧
+🌐 **網站**：https://ycchou.github.io/transparent-nursing/
 
-- 純 HTML / CSS / JS（無 build step）
-- Tailwind 自訂 design token（在 `css/styles.css`）
-- [Chart.js](https://www.chartjs.org/) 視覺化（CDN）
-- [PapaParse](https://www.papaparse.com/) CSV 解析（CDN）
-- Google Fonts：Noto Sans TC + Lora
-- 託管：GitHub Pages
+---
 
-## 本機開發
+## 這是什麼？
 
-任何靜態檔案 server 即可：
+一個讓護理師**匿名分享自己職場真實樣貌**的平台 — 你的薪水、護病比、值班制度、加班費政策、工作氣氛，全部開放給其他護理師參考。
 
-```bash
-# Python 3
-python -m http.server 8000
+把多年來只能口耳相傳、線下密語的職場資訊，變成可以**公開查閱、橫向比較**的資料庫。
 
-# Node
-npx serve .
-```
+## 為什麼要做這個？
 
-開啟 http://localhost:8000 即可。**不要直接用 file:// 開啟**，因為使用 ES Modules + fetch。
+求職時，你可能聽過：
 
-## 部署到 GitHub Pages
+- 「那間醫院薪水很高啦，但你不知道夜班費被切了一半」
+- 「A 醫院 ICU 1:2 護病比，B 醫院寫得很漂亮其實是 1:4」
+- 「進去之後才發現加班從來不報，反正主管會 hold 住」
 
-1. 把整個目錄 push 到 GitHub repo
-2. Repo Settings → Pages → Source 選 `main` branch 根目錄
-3. 等候幾分鐘，網址會在 Settings 頁顯示
+**這些資訊明明對護理師至關重要，卻完全沒有公開比較的管道。** 醫院官方介紹只放福利、薪資範圍給的是上限、PTT 評論又無法量化。
 
-### ⚠️ 部署前必做：替換 SEO 網域
+於是這個平台想做的事情就一句話：**把護理職場的「事實」攤在陽光下**。資料來自每一位願意分享的護理師，匿名彙整、公開呈現、零中介、零審核延遲。
 
-所有 SEO meta tag、Open Graph、Canonical URL、sitemap、robots.txt 都用 `https://transparentnursing.example.org` 作為**佔位網址**。部署前請整批替換：
+## 平台功能
 
-```bash
-# Linux / macOS / Git Bash on Windows
-grep -rl "transparentnursing.example.org" . --include="*.html" --include="*.xml" --include="*.txt" --include="*.json" \
-  | xargs sed -i 's|https://transparentnursing.example.org|https://你的網域.com|g'
+### 📊 [資料平台](https://ycchou.github.io/transparent-nursing/platform.html)
+600+ 筆來自全台醫院的真實職場資料。9 大護理工作場域分眾呈現：
 
-# PowerShell
-Get-ChildItem -Recurse -Include *.html,*.xml,*.txt,*.json |
-  ForEach-Object { (Get-Content $_) -replace 'https://transparentnursing.example.org', 'https://你的網域.com' | Set-Content $_ }
-```
+> 病房 / 加護病房 / 急診 / 手術房 / 門診 / 洗腎室 / 精神科 / 檢查介入 / 其他
 
-替換後檢查的檔案：
-- 5 個 HTML 的 `<link rel="canonical">`、`og:url`、`og:image`、`twitter:image`、JSON-LD
-- `sitemap.xml` 的 `<loc>`
-- `robots.txt` 的 `Sitemap:` 行
-- `manifest.json` 的 `start_url` / `scope`（用相對路徑，通常不用改）
+可以依**地點、機構等級、工時、推薦指數、加班費合規**多重篩選，看到每一筆的：護病比、薪資、年資、推薦指數、個人短評等。
 
-## SEO / 社群分享資產
+### 📈 [統計摘要](https://ycchou.github.io/transparent-nursing/stats.html)
+社群分享資料的全景視覺化：
 
-| 檔案 | 用途 |
+- 各類別投稿分布、機構類別 × 工作場域交叉
+- 每週工時分布（紅色警示區是 55hr+）
+- 加班費合規情況
+- 整體推薦指數
+- 年薪分布（含 Q1/中位數/Q3）
+- 地點分布
+
+**還整合了三份官方報告**作為對照基準：
+- 衛福部 112 年醫院護理服務量調查（薪資、夜班費、離職率等）
+- 護理全聯會 111 年薪資調查（依縣市、層級、年資）
+- 護理全聯會 114 年人力監測指標（職場流向、年資、淨增減）
+
+### 🧮 薪資百分位試算
+在資料平台輸入你的年薪 → 立刻告訴你**在同條件護理師中排第幾百分位**。可以隱藏具體數字後**產生分享圖到社群**，跟同行討論你的薪水合不合理。
+
+### ⚠️ [勞檢紀錄](https://ycchou.github.io/transparent-nursing/violations.html)
+整合勞動部公開的醫療機構勞檢違規紀錄 — 哪間醫院被罰過幾次、違反哪些勞基法條款、罰鍰多少，一目了然。
+
+### 📝 [填寫表單](https://ycchou.github.io/transparent-nursing/participate.html)
+9 個工作場域對應 9 份表單，目前洗腎室與加護病房已上線。其他陸續開放中。
+
+## 匿名性與隱私 — 重要承諾
+
+這個平台的設計理念是「**完全匿名、不可追溯、送出即公開**」：
+
+| 我們不收集 | 為什麼 |
 |---|---|
-| `assets/favicon.svg` | 瀏覽器分頁圖示（100×100） |
-| `assets/apple-touch-icon.svg` | iOS 加入主畫面圖示（180×180） |
-| `assets/logo.svg` | 主 logo（256×256，含 ECG 線+心型） |
-| `assets/og-image.svg` | 社群分享預覽圖（1200×630，符合 OG / Twitter Card 規範） |
-| `manifest.json` | PWA 設定，支援「加入主畫面」 |
-| `robots.txt` | 搜尋引擎爬蟲指令，允許全站索引 |
-| `sitemap.xml` | 站台地圖，加速 Google / Bing 索引 |
+| **IP 位址** | 不留下任何網路足跡 |
+| **Email** | 不要求帳號登入 |
+| **Cookie / 登入狀態** | 不綁定任何身分 |
+| **設備指紋** | 不用瀏覽器特徵反推誰是誰 |
+| **時間戳記精確到秒** | 防止與其他資料比對 |
 
-每頁 head 都包含：
-- `<title>` + `<meta name="description">`（針對該頁優化文案）
-- Open Graph 完整 5 標籤（FB / LINE / LinkedIn 預覽）
-- Twitter Card `summary_large_image`
-- `<link rel="canonical">` 防止重複內容
-- `<meta name="theme-color">` 配合 PWA 主題色
-- 首頁 `index.html` 額外含 **JSON-LD Organization + WebSite** 結構化資料
+**送出後資料立即公開**，沒有後台審核延遲。但同時也代表：
 
-### OG image 注意事項
+⚠️ **送出後無法撤回任何單一筆資料** — 因為我們不知道哪一筆是你的。請在送出前審慎評估你填的內容。
 
-`assets/og-image.svg` 是 SVG 格式。**Facebook / LINE / 老 X 不支援 SVG OG**，他們需要 PNG/JPG/GIF。
+## 怎麼參與？
 
-如果你希望這些平台正確顯示預覽圖，建議：
-1. 把 `assets/og-image.svg` 用線上工具或 `sharp` / `puppeteer` 轉成 `assets/og-image.png` (1200×630 PNG)
-2. 把所有 HTML 的 `og:image` / `twitter:image` 路徑改成 `.png`
+### 我想分享我的職場
+直接到 [填寫表單](https://ycchou.github.io/transparent-nursing/participate.html)。3-5 分鐘填完即可。完全匿名。
 
-簡單轉檔指令（Node 環境）：
+**建議**：
+
+- 你的單位若全院只有 1-2 人填寫，被同事/主管推測出來的機會就高。可選擇模糊填寫機構名稱（例如「某醫學中心（北部）」）
+- 短評欄位避免寫到具體事件、人名、特定時間點
+- 薪資數字過於精準（例如 928,450 元）會比區間值更易被認出
+
+### 我想幫忙改善這個平台
+- 在 [GitHub Issues](https://github.com/ycchou/transparent-nursing/issues) 回報 bug 或提建議
+- 直接送 Pull Request
+- 把這個網站介紹給身邊的護理師
+
+## 資料來源
+
+| 資料類型 | 來源 |
+|---|---|
+| 護理師職場分享 | 本站社群投稿，完全匿名 |
+| 醫院薪資 / 夜班費 / 離職率 | [衛福部 112 年醫院護理服務量調查](https://www.nurse.org.tw/) |
+| 區域薪資調查（185 家醫院） | [護理全聯會 111 年薪資及人力調查](https://www.nurse.org.tw/) |
+| 人力監測指標（10 年趨勢） | [護理全聯會 114 年人力監測指標](https://www.nurse.org.tw/) |
+| 勞檢違規紀錄 | 勞動部 [公開資料](https://announcement.mol.gov.tw/) |
+| 醫院評鑑名單（409 家） | [衛福部 108-114 年醫院評鑑合格名單](https://www.mohw.gov.tw/) |
+
+## 致敬與感謝
+
+本專案致敬 **[台灣呼吸治療產業工會](https://trtu.org.tw/)** 的 **[勞動分享平台](https://trtu.org.tw/RT_platform/)** — 他們率先示範了「業界自己揭露職場資訊」的可能性，本站借鑑這個精神延伸到護理場域。
+
+## 技術細節（給開發者）
+
+完全靜態網站，無後端：
+
+- 純 HTML / CSS / vanilla JS（無 build step）
+- [Chart.js](https://www.chartjs.org/) 視覺化 / [PapaParse](https://www.papaparse.com/) CSV 解析 / [html2canvas](https://html2canvas.hertzen.com/) 分享圖生成 — 全部 CDN 載入
+- 託管：GitHub Pages
+- 表單：目前用 Google Forms，未來規劃自建表單（部分已上線）
+
+**本地開發**：
 ```bash
-npm i -g svgexport
-svgexport assets/og-image.svg assets/og-image.png 1200:630
+python -m http.server 8000  # 或 npx serve .
 ```
+開啟 http://localhost:8000
 
-完成後 X / LINE / FB 分享連結都會出現大圖預覽。
-
-## 檔案結構
-
-```
-TransparentNursing/
-├── index.html          # 首頁
-├── platform.html       # 資料平台（5 類 tabs + 篩選 + 表格/卡片）
-├── stats.html          # 統計摘要（6 個 Chart.js 圖表）
-├── participate.html    # 填寫表單入口（5 張表單卡）
-├── about.html          # 關於頁
-├── css/styles.css      # 全站樣式（design token、卡片、表格、modal）
-├── js/
-│   ├── config.js       # 站台設定、5 類別 metadata、欄位 schema
-│   ├── icons.js        # Lucide-style 內嵌 SVG icon
-│   ├── components.js   # 共用 header/footer 注入 + 格式工具
-│   ├── data-loader.js  # CSV fetch + PapaParse + 記憶體 cache
-│   ├── table.js        # 表格/卡片渲染 + 排序 + 詳情 Modal
-│   ├── filters.js      # 篩選器 UI + 套用邏輯
-│   └── charts.js       # 6 種圖表封裝
-├── data/mock/          # Prototype 假資料（之後改成 Google Sheet CSV）
-│   ├── icu.csv         # 加護病房（16 筆）
-│   ├── dialysis.csv    # 洗腎室（15 筆）
-│   ├── er.csv          # 急診（15 筆）
-│   ├── ward.csv        # 病房（16 筆）
-│   └── outpatient.csv  # 門診（15 筆）
-└── docs/
-    ├── form-drafts/    # 3 份未做表單的 Markdown 草稿
-    │   ├── outpatient.md
-    │   ├── ward.md
-    │   └── er.md
-    └── sheet-setup.md  # Google Sheet → CSV 設定教學
-```
-
-## 從 Prototype 進入正式版
-
-### Step 1：建立 3 份 Google 表單
-
-使用 `docs/form-drafts/` 內的草稿建立：
-- 門診（outpatient.md）
-- 病房（ward.md）
-- 急診（er.md）
-
-### Step 2：把 5 個 Google Sheet 發布為 CSV
-
-照著 `docs/sheet-setup.md` 步驟做。每個 Sheet 取得一個 CSV URL。
-
-### Step 3：更新 `js/config.js`
-
-把每個類別的 `csvUrl` 從 `data/mock/xxx.csv` 改成 Google Sheet 的 CSV URL：
-
-```js
-{
-  slug: 'icu',
-  csvUrl: 'https://docs.google.com/spreadsheets/d/e/...../pub?gid=0&single=true&output=csv',
-  // ...
-}
-```
-
-### Step 4：欄位對齊
-
-Google Sheet 的第一欄是「時間戳記」，後面的欄位順序需跟 `js/config.js` 的 `COMMON_FIELDS + specificFields` 對得起來，或在 `js/data-loader.js` 加 mapping。
-
-> 簡單方式：把 Google Form 的題目「短名稱」改成 config 裡的 `key`，這樣 sheet header 就會一致。
-
-## 設計系統
-
-- 主色：`#2E86AB`（寧靜藍）
-- 輔色：`#A8DADC`（薄荷綠）
-- 背景：`#F1FAEE`（暖白）
-- 字型：標題 Lora（襯線）+ 內文 Noto Sans TC
-- 圓角：卡片 16px、按鈕 10px、tag 999px
-
-修改全站色系：直接改 `css/styles.css` 最上方的 `:root` CSS variables。
+更詳細的 dev 文件未來會整理進 `/docs/`。
 
 ## License
 
-預計採 MIT。Prototype 階段尚未確定。
+預計採 MIT。Prototype 階段尚未正式採用 license，但專案碼本身歡迎自由參考、改作。
 
-## Credits
+---
 
-- 致敬：[台灣呼吸治療產業工會](https://trtu.org.tw/) 的勞動分享平台
-- Icons：[Lucide](https://lucide.dev/)
+**這份運動的成果，取決於每一位願意分享的護理師。**
+**你的真實經驗，會成為下一位求職者最有用的指引。**
