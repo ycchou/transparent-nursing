@@ -3478,8 +3478,56 @@ body.dform-thanks-open { overflow: hidden; }
 .g2g-claim-btn {
   flex-shrink: 0;
 }
+
+/* 等待解鎖中：紅色調 + 大字倒數，讓「按下這個動作」感覺有重量 */
+.g2g-self-claim.g2g-confirming {
+  display: block;
+  background: rgba(230, 57, 70, 0.05);
+  border-color: rgba(230, 57, 70, 0.30);
+  border-style: solid;
+  padding: 26px 28px;
+}
+.g2g-confirm h3 {
+  margin: 0 0 16px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: center;
+}
+.g2g-countdown-big {
+  font-size: 3.2rem;
+  font-weight: 700;
+  color: var(--danger);
+  text-align: center;
+  margin: 0 0 20px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  line-height: 1;
+}
+.g2g-confirm p {
+  margin: 0 0 12px;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  line-height: 1.75;
+}
+.g2g-confirm p strong { color: var(--ink); }
+.g2g-confirm p:last-of-type { margin-bottom: 18px; }
+.g2g-confirm-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.g2g-go-fill-btn { flex-shrink: 0; }
+
 @media (max-width: 640px) {
   .g2g-self-claim { flex-direction: column; align-items: stretch; gap: 14px; }
   .g2g-claim-btn { width: 100%; justify-content: center; }
   .g2g-cta-block { padding: 22px 18px; }
+  .g2g-self-claim.g2g-confirming { padding: 22px 18px; }
+  .g2g-countdown-big { font-size: 2.6rem; margin-bottom: 16px; }
+  .g2g-confirm-actions { flex-direction: column-reverse; align-items: stretch; }
+  .g2g-confirm-actions .btn { width: 100%; justify-content: center; }
 }

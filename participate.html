@@ -100,7 +100,7 @@
       <div class="g2g-self-claim" id="g2g-self-claim">
         <div class="g2g-self-claim-body">
           <h3>已經分享過了嗎？</h3>
-          <p>如果你已經透過 Google 表單分享過你的職場資訊，可以在這裡標記，解鎖資料平台的完整內容。</p>
+          <p>如果你已經透過表單分享過你的職場資訊，可以在這裡標記，解鎖資料平台的完整內容。</p>
         </div>
         <button type="button" id="g2g-claim-btn" class="btn btn-primary g2g-claim-btn">
           ✓ 我已完成分享，解鎖資料平台
@@ -237,26 +237,130 @@
 
     mountLayout();
 
-    // 自助勾選：已透過 Google 表單分享過 → 解鎖資料平台
+    // 自助勾選：三段式狀態機 — initial / waiting (真實 5 分鐘 wall-clock) / claimed
+    // 用 localStorage 記下「開始等待的 epoch ms」，跳走再回來用真實流逝時間算，
+    // 不會逼使用者回來再等完整 5 分鐘 — 過 5 分鐘真實時間就自動解鎖。
+    const COUNTDOWN_SECONDS = 5 * 60; // 5 分鐘
+    const CLAIM_START_KEY = 'tn:claim_started_at';
     const claimWrap = document.getElementById('g2g-self-claim');
-    const claimBtn = document.getElementById('g2g-claim-btn');
-    function renderClaimState() {
-      if (hasContributed()) {
-        claimWrap.classList.add('g2g-claimed');
-        claimWrap.innerHTML = `
-          <div class="g2g-self-claim-body">
-            <h3>✓ 已解鎖完整資料</h3>
-            <p>感謝你的分享。<a href="platform.html">前往資料平台 →</a></p>
-          </div>
-        `;
-      }
+    let countdownTimerId = null;
+
+    function readStartedAt() {
+      try {
+        const raw = localStorage.getItem(CLAIM_START_KEY);
+        if (!raw) return null;
+        const n = Number(raw);
+        return Number.isFinite(n) && n > 0 ? n : null;
+      } catch { return null; }
     }
-    renderClaimState();
-    if (claimBtn) {
-      claimBtn.addEventListener('click', () => {
-        markContributed();
-        renderClaimState();
+    function writeStartedAt(ts) { try { localStorage.setItem(CLAIM_START_KEY, String(ts)); } catch {} }
+    function clearStartedAt() { try { localStorage.removeItem(CLAIM_START_KEY); } catch {} }
+    function remainingSeconds() {
+      const startedAt = readStartedAt();
+      if (startedAt == null) return null;
+      const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+      return Math.max(0, COUNTDOWN_SECONDS - elapsed);
+    }
+    function formatMMSS(totalSeconds) {
+      const m = Math.floor(totalSeconds / 60);
+      const s = totalSeconds % 60;
+      return `${m}:${String(s).padStart(2, '0')}`;
+    }
+    function stopTimer() {
+      if (countdownTimerId) { clearInterval(countdownTimerId); countdownTimerId = null; }
+    }
+
+    function renderInitial() {
+      stopTimer();
+      claimWrap.classList.remove('g2g-claimed', 'g2g-confirming');
+      claimWrap.innerHTML = `
+        <div class="g2g-self-claim-body">
+          <h3>已經分享過了嗎？</h3>
+          <p>如果你已經透過表單分享過你的職場資訊，可以在這裡標記，解鎖資料平台的完整內容。</p>
+        </div>
+        <button type="button" id="g2g-claim-btn" class="btn btn-primary g2g-claim-btn">
+          ✓ 我已完成分享，解鎖資料平台
+        </button>
+      `;
+      claimWrap.querySelector('#g2g-claim-btn').addEventListener('click', () => {
+        writeStartedAt(Date.now());
+        renderWaiting();
       });
+    }
+
+    function renderWaiting() {
+      stopTimer();
+      claimWrap.classList.remove('g2g-claimed');
+      claimWrap.classList.add('g2g-confirming');
+
+      const initial = remainingSeconds() ?? COUNTDOWN_SECONDS;
+      claimWrap.innerHTML = `
+        <div class="g2g-confirm">
+          <h3>等待解鎖中...</h3>
+          <div class="g2g-countdown-big" id="g2g-countdown-big">${formatMMSS(initial)}</div>
+          <p>你正在看的這些薪資、護病比、工時 — 是其他護理師一筆一筆真心打字分享出來的。他們沒有要求「先看別人才肯填」，只是想著「至少能幫到下一個求職的同行」就按了送出。</p>
+          <p><strong>如果你現在直接按下解鎖、卻一份都沒填過 — 等同於把同行的真實付出當免費資源拿走。</strong>下一位徬徨的求職護理師，能不能看到夠多筆資料判斷自己要不要進那家醫院？取決於你現在的選擇。</p>
+          <p>這 5 分鐘的等待是給你想清楚的緩衝時間。<strong>如果心裡有那麼一點疙瘩 — 去填一份吧。</strong>3-5 分鐘填完，表單會自動為你解鎖，根本不用等到時間結束。</p>
+          <div class="g2g-confirm-actions">
+            <button type="button" id="g2g-cancel-btn" class="btn btn-ghost">取消等待</button>
+            <a href="#form-cards" class="btn btn-primary g2g-go-fill-btn">↑ 去填寫表單</a>
+          </div>
+        </div>
+      `;
+
+      const numEl = claimWrap.querySelector('#g2g-countdown-big');
+      const tick = () => {
+        const r = remainingSeconds();
+        if (r == null) { renderInitial(); return; }
+        if (numEl) numEl.textContent = formatMMSS(r);
+        if (r <= 0) {
+          stopTimer();
+          markContributed();
+          clearStartedAt();
+          renderClaimed();
+        }
+      };
+      countdownTimerId = setInterval(tick, 1000);
+      tick();
+
+      claimWrap.querySelector('#g2g-cancel-btn').addEventListener('click', () => {
+        stopTimer();
+        clearStartedAt();
+        renderInitial();
+      });
+    }
+
+    function renderClaimed() {
+      stopTimer();
+      clearStartedAt();
+      claimWrap.classList.remove('g2g-confirming');
+      claimWrap.classList.add('g2g-claimed');
+      claimWrap.innerHTML = `
+        <div class="g2g-self-claim-body">
+          <h3>✓ 已解鎖完整資料</h3>
+          <p>感謝你的分享。<a href="platform.html">前往資料平台 →</a></p>
+        </div>
+      `;
+    }
+
+    // 進入頁面狀態判定：
+    //  hasContributed() → claimed
+    //  否則看 tn:claim_started_at：
+    //    - 沒設過 → initial
+    //    - 已過 5 分鐘真實時間 → 自動解鎖 (不逼使用者回來等)
+    //    - 還在 5 分鐘內 → 繼續顯示剩餘時間的 waiting
+    if (hasContributed()) {
+      renderClaimed();
+    } else {
+      const r = remainingSeconds();
+      if (r == null) {
+        renderInitial();
+      } else if (r === 0) {
+        markContributed();
+        renderClaimed();
+      } else {
+        renderWaiting();
+      }
     }
 
     const cards = document.getElementById('form-cards');
