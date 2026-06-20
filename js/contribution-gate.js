@@ -8,9 +8,9 @@ const STORAGE_KEY = 'tn:contributed';
 // 改數字不會影響已貢獻者（hasContributed() 在 getGate 早期 return、跳過 limit 計算），
 // 也不會讓 tn:contributed / tn:claim_started_at 失效。
 export const GATE_LIMITS = Object.freeze({
-  none: 50,    // 0 個篩選：landing 預設視圖
-  single: 15,  // 1 個篩選：使用者在探索
-  multi: 5,    // 2+ 個篩選：鎖定具體查詢
+  none: 80,    // 0 個篩選：landing 預設視圖
+  single: 20,  // 1 個篩選：使用者在探索
+  multi: 10,   // 2+ 個篩選：鎖定具體查詢
 });
 
 export function hasContributed() {
