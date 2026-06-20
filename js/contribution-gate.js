@@ -20,24 +20,44 @@ export function clearContributed() {
 // filterState shape 來自 js/filters.js createFilterState():
 //   { q, location:Set, institutionType:Set, weeklyHours:Set, overtimePolicy:Set, recommendIndex:Set }
 // slug 是上方分頁選的工作場域，'all' 代表全部、其他值代表特定場域 — 也算縮小範圍。
+// 每個獨立維度算 1 個篩選項目（同一個 chip 群組內勾多個算 1）。
+
+const CHIP_GROUPS = ['location', 'institutionType', 'weeklyHours', 'overtimePolicy', 'recommendIndex'];
+
+export function countActiveFilters(filterState, slug) {
+  let n = 0;
+  if (slug && slug !== 'all') n += 1;
+  if (filterState && filterState.q) n += 1;
+  if (filterState) {
+    for (const k of CHIP_GROUPS) {
+      if (filterState[k] && filterState[k].size > 0) n += 1;
+    }
+  }
+  return n;
+}
+
 export function isFiltered(filterState, slug) {
-  if (slug && slug !== 'all') return true;
-  if (!filterState) return false;
-  if (filterState.q) return true;
-  const sets = ['location', 'institutionType', 'weeklyHours', 'overtimePolicy', 'recommendIndex'];
-  return sets.some((k) => filterState[k] && filterState[k].size > 0);
+  return countActiveFilters(filterState, slug) > 0;
+}
+
+// 三段式 limit：0 個篩選 → 50 筆；1 個 → 15 筆；2 個以上 → 5 筆
+function limitForFilterCount(n) {
+  if (n === 0) return 50;
+  if (n === 1) return 15;
+  return 5;
 }
 
 // 回傳閘門設定 — 不直接 slice，由 table.js 在 sort 後 slice，
 // 這樣使用者切排序欄位時看到的是新排序的前 N 筆。
 export function getGate(filterState, slug) {
   if (hasContributed()) {
-    return { gated: false, limit: Infinity, isFilteredView: false };
+    return { gated: false, limit: Infinity, isFilteredView: false, activeFilterCount: 0 };
   }
-  const filtered = isFiltered(filterState, slug);
+  const n = countActiveFilters(filterState, slug);
   return {
     gated: true,
-    limit: filtered ? 5 : 50,
-    isFilteredView: filtered,
+    limit: limitForFilterCount(n),
+    isFilteredView: n > 0,
+    activeFilterCount: n,
   };
 }
