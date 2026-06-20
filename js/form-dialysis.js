@@ -632,11 +632,17 @@ function attachInstitutionAutocomplete() {
   hint.innerHTML = `💡 偵測到您選擇了 <strong>醫學中心 / 區域醫院 / 地區醫院</strong>，請優先從下拉建議中選取<strong>系統列出的完整名稱</strong>（依<a href="https://www.mohw.gov.tw/dl-99552-9299c250-c16f-4227-b655-506ad172b598.html" target="_blank" rel="noopener" class="dform-suggest-link">衛福部 108–114 年評鑑名單<span data-icon="arrow-up-right" data-size="11"></span></a>）；統一名稱可大幅提升資料統計與圖表的精準度。`;
   nameField.insertBefore(hint, nameInput);
 
-  // 建議下拉容器
+  // 把 input 包進 anchor 容器，讓建議下拉可以用 absolute 飄在底下不擠掉下方欄位
+  const anchor = document.createElement('div');
+  anchor.className = 'dform-input-anchor';
+  nameInput.parentNode.insertBefore(anchor, nameInput);
+  anchor.appendChild(nameInput);
+
+  // 建議下拉容器（floating popover）
   const wrap = document.createElement('div');
   wrap.className = 'dform-suggest-host';
   wrap.hidden = true;
-  nameInput.parentNode.insertBefore(wrap, nameInput.nextSibling);
+  anchor.appendChild(wrap);
 
   function selectedLevel() {
     const r = document.querySelector('input[name="institutionType"]:checked');
@@ -867,8 +873,19 @@ function attachInstitutionAutocomplete() {
     if (!isMobile()) renderInline();
   });
 
+  // blur 後延遲關閉，給 radio change 重新 focus 的機會（避免切類別時下拉一閃就消失）
+  let blurHideTimerId = null;
   nameInput.addEventListener('blur', () => {
-    setTimeout(() => { wrap.hidden = true; }, 180);
+    if (blurHideTimerId) clearTimeout(blurHideTimerId);
+    blurHideTimerId = setTimeout(() => {
+      blurHideTimerId = null;
+      // 真的失焦才 hide；如果中間 focus 又回到 input，這個 timer 也會被 clearTimeout 取消
+      if (document.activeElement !== nameInput) wrap.hidden = true;
+    }, 180);
+  });
+  // focus 回來：取消正在等待的 hide
+  nameInput.addEventListener('focus', () => {
+    if (blurHideTimerId) { clearTimeout(blurHideTimerId); blurHideTimerId = null; }
   });
 
   // 雙條件齊備 → 手機開 sheet（欄位空才開）、桌機 focus + inline
