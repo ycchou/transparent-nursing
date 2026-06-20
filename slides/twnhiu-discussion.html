@@ -862,38 +862,9 @@
     }
   });
 
-  // 全域鍵盤後備：即使 reveal 內部 handler 因焦點問題沒收到，也能翻頁
-  document.addEventListener('keydown', (e) => {
-    if (e.defaultPrevented) return;
-    if (!window.Reveal || typeof Reveal.next !== 'function') return;
-    // 避免在輸入框內觸發
-    const tag = (e.target && e.target.tagName || '').toLowerCase();
-    if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
-    switch (e.key) {
-      case 'ArrowRight':
-      case 'ArrowDown':
-      case 'PageDown':
-      case ' ':
-        Reveal.next();
-        break;
-      case 'ArrowLeft':
-      case 'ArrowUp':
-      case 'PageUp':
-        Reveal.prev();
-        break;
-      case 'Home':
-        Reveal.slide(0);
-        break;
-      case 'End':
-        Reveal.slide(Number.MAX_SAFE_INTEGER);
-        break;
-      default:
-        return;
-    }
-    e.preventDefault();
-  });
-
   // 點任何地方就把焦點搶回 reveal（防止點到外部元素導致鍵盤失效）
+  // 注意：千萬不要再加全域 keydown fallback — reveal.js v5 內建 handler 已經夠用，
+  // 多加一層會跟內建同時觸發 Reveal.next()，造成「按一次右鍵跳兩張」的 bug。
   document.addEventListener('click', () => {
     const reveal = document.querySelector('.reveal');
     if (reveal && document.activeElement !== reveal) {
