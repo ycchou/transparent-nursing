@@ -4,6 +4,15 @@
 
 const STORAGE_KEY = 'tn:contributed';
 
+// Soft G2G 限筆數 — 未來想根據實際數據（訪客量 / 填表轉換率）調整就改這裡。
+// 改數字不會影響已貢獻者（hasContributed() 在 getGate 早期 return、跳過 limit 計算），
+// 也不會讓 tn:contributed / tn:claim_started_at 失效。
+export const GATE_LIMITS = Object.freeze({
+  none: 50,    // 0 個篩選：landing 預設視圖
+  single: 15,  // 1 個篩選：使用者在探索
+  multi: 5,    // 2+ 個篩選：鎖定具體查詢
+});
+
 export function hasContributed() {
   try { return localStorage.getItem(STORAGE_KEY) === '1'; }
   catch { return false; }
@@ -40,11 +49,11 @@ export function isFiltered(filterState, slug) {
   return countActiveFilters(filterState, slug) > 0;
 }
 
-// 三段式 limit：0 個篩選 → 50 筆；1 個 → 15 筆；2 個以上 → 5 筆
+// 三段式 limit — 數字定義在頂端 GATE_LIMITS
 function limitForFilterCount(n) {
-  if (n === 0) return 50;
-  if (n === 1) return 15;
-  return 5;
+  if (n === 0) return GATE_LIMITS.none;
+  if (n === 1) return GATE_LIMITS.single;
+  return GATE_LIMITS.multi;
 }
 
 // 回傳閘門設定 — 不直接 slice，由 table.js 在 sort 後 slice，
