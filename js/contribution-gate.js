@@ -19,7 +19,9 @@ export function clearContributed() {
 
 // filterState shape 來自 js/filters.js createFilterState():
 //   { q, location:Set, institutionType:Set, weeklyHours:Set, overtimePolicy:Set, recommendIndex:Set }
-export function isFiltered(filterState) {
+// slug 是上方分頁選的工作場域，'all' 代表全部、其他值代表特定場域 — 也算縮小範圍。
+export function isFiltered(filterState, slug) {
+  if (slug && slug !== 'all') return true;
   if (!filterState) return false;
   if (filterState.q) return true;
   const sets = ['location', 'institutionType', 'weeklyHours', 'overtimePolicy', 'recommendIndex'];
@@ -28,11 +30,11 @@ export function isFiltered(filterState) {
 
 // 回傳閘門設定 — 不直接 slice，由 table.js 在 sort 後 slice，
 // 這樣使用者切排序欄位時看到的是新排序的前 N 筆。
-export function getGate(filterState) {
+export function getGate(filterState, slug) {
   if (hasContributed()) {
     return { gated: false, limit: Infinity, isFilteredView: false };
   }
-  const filtered = isFiltered(filterState);
+  const filtered = isFiltered(filterState, slug);
   return {
     gated: true,
     limit: filtered ? 5 : 50,

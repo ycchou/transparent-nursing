@@ -1087,6 +1087,10 @@ h1[id], h2[id], h3[id] {
 .data-table thead th:hover { color: var(--primary); }
 .data-table thead th.sort-asc::after { content: ' ↑'; color: var(--primary); }
 .data-table thead th.sort-desc::after { content: ' ↓'; color: var(--primary); }
+/* 未貢獻者：thead 鎖住 — 不可 hover 變色、不顯示箭頭、cursor 改 default */
+.data-table thead th.g2g-sort-locked,
+.data-table thead th.g2g-sort-locked:hover { cursor: default; color: var(--muted); }
+.data-table thead th.g2g-sort-locked::after { content: none; }
 
 /* 序號欄（不可排序、固定窄寬、置中） */
 .data-table th.seq-col,

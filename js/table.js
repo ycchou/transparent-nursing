@@ -149,6 +149,15 @@ export function renderTable(container, rows, opts = {}) {
     state.lastRowsRef = rows;
   }
 
+  // Soft Give-to-Get：未貢獻者連排序功能都鎖住，強制按填寫時間 desc。
+  // 必須在 sort 之前重置，否則使用者切過排序欄位之後仍會殘留 state。
+  const gate = opts.gate;
+  const isGated = !!(gate && gate.gated);
+  if (isGated) {
+    state.sortKey = 'timestamp';
+    state.sortDir = 'desc';
+  }
+
   let sorted = rows.slice();
   if (state.sortKey) {
     const isTimeKey = state.sortKey === 'timestamp';
@@ -174,27 +183,31 @@ export function renderTable(container, rows, opts = {}) {
     });
   }
 
-  // Soft Give-to-Get：未貢獻者切到限筆數，已貢獻者完整資料
-  const gate = opts.gate;
+  // 限筆數：未貢獻者切到 gate.limit 筆
   const fullCount = sorted.length;
-  const willGate = gate && gate.gated && fullCount > gate.limit;
+  const willGate = isGated && fullCount > gate.limit;
   if (willGate) {
     sorted = sorted.slice(0, gate.limit);
-    state.page = 1; // 限筆數版本不分頁
+    state.page = 1;
   }
 
   // 切到當前頁（每頁 100 筆，由 pagination.js 預設）
   const pageInfo = pageSlice(sorted, state.page);
   const pageRows = pageInfo.items;
 
+  // 未貢獻者：thead 不掛 data-sort、不顯示排序箭頭、cursor 改 default，視覺上鎖住
+  const sortAttr = (k) => (isGated ? '' : ` data-sort="${k}"`);
+  const sortCls  = (k) => (!isGated && state.sortKey === k ? 'sort-' + state.sortDir : '');
+  const lockedCls = isGated ? ' g2g-sort-locked' : '';
+
   const tableHtml = `
     <div class="data-table-wrap">
       <table class="data-table">
         <thead>
           <tr>
-            <th class="seq-col ${state.sortKey === '_seq' ? 'sort-' + state.sortDir : ''}" data-sort="_seq">#</th>
+            <th class="seq-col ${sortCls('_seq')}${lockedCls}"${sortAttr('_seq')}>#</th>
             ${cols.map((k) => `
-              <th data-sort="${k}" class="${state.sortKey===k ? 'sort-' + state.sortDir : ''}">
+              <th class="${sortCls(k)}${lockedCls}"${sortAttr(k)}>
                 ${KEY_LABELS[k] || k}
               </th>`).join('')}
           </tr>

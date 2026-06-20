@@ -371,7 +371,7 @@
       currentFiltered = filtered;
       renderKpiStrip(kpiEl, filtered);
 
-      const gate = getGate(state.filterState);
+      const gate = getGate(state.filterState, state.slug);
       const willGate = gate.gated && filtered.length > gate.limit;
       const shown = willGate ? gate.limit : filtered.length;
       document.getElementById('result-count').textContent = willGate
