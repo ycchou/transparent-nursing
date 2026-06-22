@@ -541,21 +541,45 @@
           </a>
         </p>
 
-        <!-- KPI：114 年護理人員月薪 -->
-        <div style="margin-top:16px;max-width:420px;">
+        <!-- KPI：114 年最新值（3 張）-->
+        <div class="grid grid-3" style="margin-top:16px;">
           <div class="card stat-card">
             <div class="stat-num kpi-num" id="off-mol-kpi-salary">—</div>
-            <div class="stat-label">護理人員 7 月經常性薪資 · 114 年</div>
+            <div class="stat-label">7 月經常性薪資 · 114 年</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-num kpi-num" id="off-mol-kpi-income">—</div>
+            <div class="stat-label">去年（113）全年薪資所得</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-num kpi-num" id="off-mol-kpi-headcount">—</div>
+            <div class="stat-label">全國護理人員 · 114 年 7 月底</div>
           </div>
         </div>
 
-        <!-- 護理人員 3 年薪資趨勢圖 -->
-        <div class="chart-card" style="margin-top:24px;">
-          <div class="chart-card-header"><div>
-            <h3>護理人員 7 月經常性薪資 · 3 年趨勢</h3>
-            <div class="chart-sub">112 / 113 / 114 年 7 月份統計值（單位：元）</div>
-          </div></div>
-          <div class="chart-canvas-wrap" style="height:320px;"><canvas id="chart-off-mol-trend"></canvas></div>
+        <!-- 3 張獨立趨勢圖（各自實際金額/人數，不做指數化） -->
+        <div class="grid grid-3" style="margin-top:24px;">
+          <div class="chart-card">
+            <div class="chart-card-header"><div>
+              <h3>7 月經常性薪資 · 3 年趨勢</h3>
+              <div class="chart-sub">單位：元 / 月</div>
+            </div></div>
+            <div class="chart-canvas-wrap" style="height:240px;"><canvas id="chart-off-mol-salary"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-header"><div>
+              <h3>全年薪資所得 · 3 年趨勢</h3>
+              <div class="chart-sub">調查當年的「上一年」全年所得（含獎金）</div>
+            </div></div>
+            <div class="chart-canvas-wrap" style="height:240px;"><canvas id="chart-off-mol-income"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <div class="chart-card-header"><div>
+              <h3>全時受僱員工人數 · 3 年趨勢</h3>
+              <div class="chart-sub">每年 7 月底全國護理人員（職類 222090）</div>
+            </div></div>
+            <div class="chart-canvas-wrap" style="height:240px;"><canvas id="chart-off-mol-headcount"></canvas></div>
+          </div>
         </div>
       </div>
     </section>

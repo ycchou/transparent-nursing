@@ -864,8 +864,8 @@ export function renderOfficialSourceB() {
   renderRegionalSalary(byId('off-region-chips'), byId('off-region-table'));
 }
 
-/** 勞動部 — 護理人員 7 月經常性薪資 3 年趨勢（單線、實際金額） */
-export function chartMolTrend(canvas) {
+/** 勞動部小工具：建立單一指標的 3 年折線圖 */
+function makeMolLineChart(canvas, { data, color, yTitle, tickFmt, tooltipFmt }) {
   destroyIfExists(canvas);
   const d = MOL_NURSE_TREND;
   const labels = d.years.map((y) => y + ' 年 7 月');
@@ -874,9 +874,9 @@ export function chartMolTrend(canvas) {
     data: {
       labels,
       datasets: [
-        { label: '7 月經常性薪資', data: d.monthlySalary,
-          borderColor: '#2E86AB', backgroundColor: '#2E86AB33',
-          tension: 0.3, borderWidth: 2.5, pointRadius: 6, pointBackgroundColor: '#2E86AB',
+        { label: yTitle, data,
+          borderColor: color, backgroundColor: color + '33',
+          tension: 0.3, borderWidth: 2.5, pointRadius: 6, pointBackgroundColor: color,
           fill: true },
       ],
     },
@@ -885,31 +885,67 @@ export function chartMolTrend(canvas) {
         ...baseOpts.plugins,
         legend: { display: false },
         tooltip: { ...baseOpts.plugins.tooltip,
-          callbacks: { label: (ctx) => fmtTWD(ctx.parsed.y) + ' / 月' } },
+          callbacks: { label: (ctx) => tooltipFmt(ctx.parsed.y) } },
       },
       scales: {
         x: baseOpts.scales.x,
         y: { ...baseOpts.scales.y, beginAtZero: false,
-             title: { display: true, text: '月薪 (元)', color: '#46557A',
+             title: { display: true, text: yTitle, color: '#46557A',
                       font: { family: FONT_FAMILY, size: 11 } },
-             ticks: { ...baseOpts.scales.y.ticks,
-                      callback: (v) => Number(v).toLocaleString() } },
+             ticks: { ...baseOpts.scales.y.ticks, callback: tickFmt } },
       },
     }),
   });
 }
 
-/** 渲染來源 D：勞動部 114 年職類別薪資調查 — 護理人員月薪 KPI + 3 年趨勢 */
+/** 勞動部 — 護理人員 7 月經常性薪資 3 年趨勢 */
+export function chartMolSalary(canvas) {
+  return makeMolLineChart(canvas, {
+    data: MOL_NURSE_TREND.monthlySalary, color: '#2E86AB',
+    yTitle: '月薪 (元)',
+    tickFmt: (v) => Number(v).toLocaleString(),
+    tooltipFmt: (v) => fmtTWD(v) + ' / 月',
+  });
+}
+
+/** 勞動部 — 護理人員上年全年薪資所得 3 年趨勢 */
+export function chartMolIncome(canvas) {
+  return makeMolLineChart(canvas, {
+    data: MOL_NURSE_TREND.annualIncome, color: '#1D3557',
+    yTitle: '全年所得 (萬元)',
+    tickFmt: (v) => (v / 10000).toFixed(0) + ' 萬',
+    tooltipFmt: (v) => (v / 10000).toFixed(1) + ' 萬元',
+  });
+}
+
+/** 勞動部 — 護理人員受僱人數 3 年趨勢 */
+export function chartMolHeadcount(canvas) {
+  return makeMolLineChart(canvas, {
+    data: MOL_NURSE_TREND.headcount, color: '#06A77D',
+    yTitle: '受僱人數',
+    tickFmt: (v) => (v / 1000).toFixed(0) + ' 千',
+    tooltipFmt: (v) => Number(v).toLocaleString() + ' 人',
+  });
+}
+
+/** 渲染來源 D：勞動部 114 年職類別薪資調查 — 3 個 KPI + 3 條折線 */
 export function renderOfficialSourceD() {
   if (typeof Chart === 'undefined') return;
   const byId = (id) => document.getElementById(id);
   const d = MOL_NURSE_TREND;
-  const lastIdx = d.years.length - 1; // 114 年
-  const salaryEl = byId('off-mol-kpi-salary');
-  if (salaryEl) salaryEl.innerHTML =
-    `<strong>${Number(d.monthlySalary[lastIdx]).toLocaleString()}</strong> <span class="kpi-unit">元</span>`;
+  const lastIdx = d.years.length - 1;
+  const setHtml = (id, html) => { const el = byId(id); if (el) el.innerHTML = html; };
 
-  if (byId('chart-off-mol-trend')) chartMolTrend(byId('chart-off-mol-trend'));
+  setHtml('off-mol-kpi-salary',
+    `<strong>${Number(d.monthlySalary[lastIdx]).toLocaleString()}</strong> <span class="kpi-unit">元</span>`);
+  setHtml('off-mol-kpi-income',
+    `<strong>${(d.annualIncome[lastIdx] / 10000).toFixed(1)}</strong> <span class="kpi-unit">萬元</span>`);
+  setHtml('off-mol-kpi-headcount',
+    `<strong>${Number(d.headcount[lastIdx]).toLocaleString()}</strong> <span class="kpi-unit">人</span>`);
+
+  if (byId('chart-off-mol-salary'))    chartMolSalary(byId('chart-off-mol-salary'));
+  if (byId('chart-off-mol-income'))    chartMolIncome(byId('chart-off-mol-income'));
+  if (byId('chart-off-mol-headcount')) chartMolHeadcount(byId('chart-off-mol-headcount'));
 }
 
 /** 渲染來源 C：護理全聯會 114 年人力監測指標 */
