@@ -40,6 +40,27 @@ export const SALARY_BY_LEVEL_TREND = {
   note: '單位：元。涵蓋護理師（不含護士）。',
 };
 
+// ===== 來源 D：勞動部 114 年職類別薪資調查 =====
+// 醫療保健業（行業別）→ 護理人員（職類 222090）
+// 包含 112/113/114 三年同期數據（每年 7 月底人數、7 月經常性薪資、上年全年薪資所得）
+export const MOL_SOURCE = {
+  title: '114 年職類別薪資調查',
+  publisher: '勞動部',
+  queryUrl: 'https://pswst.mol.gov.tw/PSDN/Query/wFrmQuery01.aspx',
+  surveyYear: 114,
+  industry: '醫療保健業',
+  occupation: '護理人員 (222090)',
+};
+
+export const MOL_NURSE_TREND = {
+  years: [112, 113, 114],
+  headcount:    [159469, 160822, 163954],   // 7 月底全時受僱員工人數
+  monthlySalary: [49880, 51391, 53882],     // 7 月經常性薪資 (元)
+  annualIncome: [722000, 742000, 786000],   // 上年全年薪資所得 (元；72.2 / 74.2 / 78.6 萬)
+  // 註：annualIncome 對應「調查當年的上一年」全年所得（即 111/112/113 全年）；
+  // 圖表 X 軸用調查年(112-114)以方便三組指標對齊
+};
+
 // 護理師平均年薪（公立 vs 私立）— 來源衛福部 112 年調查
 export const SALARY_PUBLIC_PRIVATE = {
   years: [108, 110, 111, 112],
@@ -843,6 +864,80 @@ export function renderOfficialSourceB() {
   renderRegionalSalary(byId('off-region-chips'), byId('off-region-table'));
 }
 
+/** 勞動部 — 護理人員 3 年指標趨勢（指數化 112=100，比較三組指標的相對成長） */
+export function chartMolTrend(canvas) {
+  destroyIfExists(canvas);
+  const d = MOL_NURSE_TREND;
+  const labels = d.years.map((y) => y + ' 年');
+  const idx = (arr) => arr.map((v) => +(v / arr[0] * 100).toFixed(2));
+  const COLOR_HC = '#06A77D';  // 受僱人數
+  const COLOR_MS = '#2E86AB';  // 月薪
+  const COLOR_AS = '#1D3557';  // 全年薪資
+  // 為了 tooltip 能顯示原始值，把原始陣列塞進 dataset 用
+  return new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label: '受僱員工人數 (7月底)', data: idx(d.headcount),
+          _raw: d.headcount, _fmt: (v) => Number(v).toLocaleString() + ' 人',
+          borderColor: COLOR_HC, backgroundColor: COLOR_HC + '33',
+          tension: 0.3, borderWidth: 2.5, pointRadius: 5, pointBackgroundColor: COLOR_HC },
+        { label: '7 月經常性薪資', data: idx(d.monthlySalary),
+          _raw: d.monthlySalary, _fmt: fmtTWD,
+          borderColor: COLOR_MS, backgroundColor: COLOR_MS + '33',
+          tension: 0.3, borderWidth: 2.5, pointRadius: 5, pointBackgroundColor: COLOR_MS },
+        { label: '上年全年薪資所得', data: idx(d.annualIncome),
+          _raw: d.annualIncome, _fmt: (v) => (v / 10000).toFixed(1) + ' 萬元',
+          borderColor: COLOR_AS, backgroundColor: COLOR_AS + '33',
+          tension: 0.3, borderWidth: 2.5, pointRadius: 5, pointBackgroundColor: COLOR_AS },
+      ],
+    },
+    options: freshOpts({
+      plugins: {
+        ...baseOpts.plugins,
+        tooltip: { ...baseOpts.plugins.tooltip,
+          callbacks: {
+            label: (ctx) => {
+              const ds = ctx.dataset;
+              const raw = ds._raw && ds._raw[ctx.dataIndex];
+              const indexVal = ctx.parsed.y.toFixed(1);
+              const rawStr = ds._fmt && raw != null ? ds._fmt(raw) : '';
+              return `${ds.label}: ${rawStr}（指數 ${indexVal}）`;
+            },
+          },
+        },
+      },
+      scales: {
+        x: baseOpts.scales.x,
+        y: { ...baseOpts.scales.y, beginAtZero: false,
+             title: { display: true, text: '指數（112 年 = 100）', color: '#46557A',
+                      font: { family: FONT_FAMILY, size: 11 } },
+             ticks: { ...baseOpts.scales.y.ticks,
+                      callback: (v) => v } },
+      },
+    }),
+  });
+}
+
+/** 渲染來源 D：勞動部 114 年職類別薪資調查 — KPI + 趨勢 */
+export function renderOfficialSourceD() {
+  if (typeof Chart === 'undefined') return;
+  const byId = (id) => document.getElementById(id);
+  const d = MOL_NURSE_TREND;
+  const lastIdx = d.years.length - 1; // 114 年
+  const setHtml = (id, html) => { const el = byId(id); if (el) el.innerHTML = html; };
+
+  setHtml('off-mol-kpi-salary',
+    `<strong>${Number(d.monthlySalary[lastIdx]).toLocaleString()}</strong> <span class="kpi-unit">元</span>`);
+  setHtml('off-mol-kpi-income',
+    `<strong>${(d.annualIncome[lastIdx] / 10000).toFixed(1)}</strong> <span class="kpi-unit">萬元</span>`);
+  setHtml('off-mol-kpi-headcount',
+    `<strong>${Number(d.headcount[lastIdx]).toLocaleString()}</strong> <span class="kpi-unit">人</span>`);
+
+  if (byId('chart-off-mol-trend')) chartMolTrend(byId('chart-off-mol-trend'));
+}
+
 /** 渲染來源 C：護理全聯會 114 年人力監測指標 */
 export function renderOfficialSourceC() {
   if (typeof Chart === 'undefined') return;
@@ -858,4 +953,5 @@ export function renderAllOfficial() {
   renderOfficialSourceA();
   renderOfficialSourceB();
   renderOfficialSourceC();
+  renderOfficialSourceD();
 }

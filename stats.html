@@ -328,6 +328,10 @@
             <span class="off-subtab-pill off-subtab-pill-alt">護理全聯會</span>
             <span>114 年 人力監測指標</span>
           </button>
+          <button class="off-subtab" data-sub="D">
+            <span class="off-subtab-pill off-subtab-pill-alt">勞動部</span>
+            <span>114 年 職類別薪資調查</span>
+          </button>
         </div>
       </div>
     </section>
@@ -518,6 +522,57 @@
     </section>
     </div><!-- /#off-sub-C -->
 
+    <!-- 來源 4：勞動部 114 年職類別薪資調查 -->
+    <div id="off-sub-D" hidden>
+    <section style="padding-top:0;padding-bottom:32px;">
+      <div class="container">
+        <div class="official-tag-line">
+          <span class="off-source-pill off-source-pill-alt">勞動部 · 114 年</span>
+          <h2 style="margin:0;">職類別薪資調查（醫療保健業 · 護理人員）</h2>
+        </div>
+        <p class="official-meta">
+          發布者：<strong>勞動部</strong>　·
+          職類：護理人員（職類代碼 222090）　·
+          所屬行業：醫療保健業　·
+          資料年度：112 / 113 / 114 年同期
+          <a class="off-pdf-link" target="_blank" rel="noopener"
+             href="https://pswst.mol.gov.tw/PSDN/Query/wFrmQuery01.aspx">
+            前往查詢系統 <span data-icon="arrow-up-right" data-size="12"></span>
+          </a>
+        </p>
+
+        <!-- KPI：114 年最新值 -->
+        <div class="grid grid-3" style="margin-top:16px;">
+          <div class="card stat-card">
+            <div class="stat-num kpi-num" id="off-mol-kpi-salary">—</div>
+            <div class="stat-label">7 月經常性薪資 · 114 年</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-num kpi-num" id="off-mol-kpi-income">—</div>
+            <div class="stat-label">去年（113）全年薪資所得</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-num kpi-num" id="off-mol-kpi-headcount">—</div>
+            <div class="stat-label">全國護理人員 · 114 年 7 月底</div>
+          </div>
+        </div>
+
+        <!-- 3 年趨勢圖 -->
+        <div class="chart-card" style="margin-top:24px;">
+          <div class="chart-card-header"><div>
+            <h3>3 年指標趨勢（指數化，112 年 = 100）</h3>
+            <div class="chart-sub">同圖比較三組規模差距大的指標的相對成長率；hover 看每點原始值</div>
+          </div></div>
+          <div class="chart-canvas-wrap" style="height:340px;"><canvas id="chart-off-mol-trend"></canvas></div>
+        </div>
+
+        <p class="official-meta" style="margin-top:18px;">
+          備註：「7 月經常性薪資」為每年 7 月份統計值；「全年薪資所得」為「調查當年的上一年」全年所得，因此圖上 114 年的全年薪資對應的是 113 年（民國）。
+        </p>
+      </div>
+    </section>
+    </div><!-- /#off-sub-D -->
+
   </div><!-- /#stats-tab-official -->
 
   <div id="app-footer"></div>
@@ -535,7 +590,7 @@
       chartLocationDistribution, chartSalaryDistribution,
     } from './js/charts.js?v=16';
     import {
-      renderOfficialSourceA, renderOfficialSourceB, renderOfficialSourceC,
+      renderOfficialSourceA, renderOfficialSourceB, renderOfficialSourceC, renderOfficialSourceD,
     } from './js/official-stats.js?v=16';
 
     mountLayout();
@@ -543,12 +598,12 @@
 
     // ===== 報告分頁的 lazy render（每個 sub-tab 首次顯示時才畫圖）=====
     const renderedSubs = new Set();
-    const subRenderers = { A: renderOfficialSourceA, B: renderOfficialSourceB, C: renderOfficialSourceC };
+    const subRenderers = { A: renderOfficialSourceA, B: renderOfficialSourceB, C: renderOfficialSourceC, D: renderOfficialSourceD };
     function switchSubTab(name) {
       document.querySelectorAll('#off-subtabs .off-subtab').forEach((b) => {
         b.classList.toggle('active', b.dataset.sub === name);
       });
-      ['A', 'B', 'C'].forEach((k) => {
+      ['A', 'B', 'C', 'D'].forEach((k) => {
         const el = document.getElementById('off-sub-' + k);
         if (el) el.hidden = (k !== name);
       });
