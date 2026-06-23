@@ -40,25 +40,40 @@ export const SALARY_BY_LEVEL_TREND = {
   note: '單位：元。涵蓋護理師（不含護士）。',
 };
 
-// ===== 來源 D：勞動部 114 年職類別薪資調查 =====
+// ===== 來源 D：勞動部 職類別薪資調查（107~114 年） =====
 // 醫療保健業（行業別）→ 護理人員（職類 222090）
-// 包含 112/113/114 三年同期數據（每年 7 月底人數、7 月經常性薪資、上年全年薪資所得）
+// 跨 8 年數據合併三份原始檔（107~110、111、112~114）
 export const MOL_SOURCE = {
-  title: '114 年職類別薪資調查',
+  title: '107~114 年職類別薪資調查',
   publisher: '勞動部',
   queryUrl: 'https://pswst.mol.gov.tw/PSDN/Query/wFrmQuery01.aspx',
-  surveyYear: 114,
+  surveyYearLatest: 114,
   industry: '醫療保健業',
   occupation: '護理人員 (222090)',
 };
 
+// 統計範圍變更：107-110 是「各業受僱員工」(含部分工時)，111+ 是「各業全時受僱員工」(僅全時)
+// 因此圖表 107-110 段用虛線標示，提醒讀者範圍差異
+export const MOL_SCOPE_CHANGE_YEAR = 111;
+export const MOL_DASH_BEFORE_IDX = 4; // years 陣列中 111 的索引
+
 export const MOL_NURSE_TREND = {
-  years: [112, 113, 114],
-  headcount:    [159469, 160822, 163954],   // 7 月底全時受僱員工人數
-  monthlySalary: [49880, 51391, 53882],     // 7 月經常性薪資 (元)
-  annualIncome: [722000, 742000, 786000],   // 上年全年薪資所得 (元；72.2 / 74.2 / 78.6 萬)
-  // 註：annualIncome 對應「調查當年的上一年」全年所得（即 111/112/113 全年）；
-  // 圖表 X 軸用調查年(112-114)以方便三組指標對齊
+  years: [107, 108, 109, 110, 111, 112, 113, 114],
+  // 每年 7 月底受僱員工人數
+  // 107-110：各業受僱員工（含部分工時）；111-114：全時
+  headcount: [151080, 159623, 162025, 162776, 161475, 159469, 160822, 163954],
+  // 7 月經常性薪資 (元)
+  // 107-110：各業（含部分工時）；111-114：全時。樣本範圍變更導致 110→111 跳升
+  monthlySalary: [41932, 43243, 43617, 42750, 47716, 49880, 51391, 53882],
+  // 全年薪資所得 (元)
+  // 107-110：原始資料無此欄位，由月總薪資 × 12 推估（月總薪資 46,770 / 48,131 / 48,072 / 46,752）
+  // 111：勞動部公布「過去一年總薪資」(110/8~111/7 滾動 12 個月) = 69.9 萬
+  // 112-114：勞動部公布「去年全年薪資所得」(上年 1~12 月日曆年) = 72.2 / 74.2 / 78.6 萬
+  annualIncome: [
+    46770 * 12, 48131 * 12, 48072 * 12, 46752 * 12,  // 107-110 推估
+    699000,                                            // 111 滾動 12 個月
+    722000, 742000, 786000,                            // 112-114 日曆年
+  ],
 };
 
 // 護理師平均年薪（公立 vs 私立）— 來源衛福部 112 年調查
@@ -864,20 +879,27 @@ export function renderOfficialSourceB() {
   renderRegionalSalary(byId('off-region-chips'), byId('off-region-table'));
 }
 
-/** 勞動部小工具：建立單一指標的 3 年折線圖 */
-function makeMolLineChart(canvas, { data, color, yTitle, tickFmt, tooltipFmt }) {
+/** 勞動部小工具：建立單一指標的 8 年折線圖
+ *  dashBeforeIdx：傳入年份索引，該索引「之前」(< idx) 的線段用虛線、之後實線 — 用來標示統計範圍變更
+ */
+function makeMolLineChart(canvas, { data, color, yTitle, tickFmt, tooltipFmt, dashBeforeIdx = MOL_DASH_BEFORE_IDX }) {
   destroyIfExists(canvas);
   const d = MOL_NURSE_TREND;
-  const labels = d.years.map((y) => y + ' 年 7 月');
+  const labels = d.years.map((y) => y + ' 年');
   return new Chart(canvas, {
     type: 'line',
     data: {
       labels,
       datasets: [
         { label: yTitle, data,
-          borderColor: color, backgroundColor: color + '33',
-          tension: 0.3, borderWidth: 2.5, pointRadius: 6, pointBackgroundColor: color,
-          fill: true },
+          borderColor: color, backgroundColor: color + '22',
+          tension: 0.3, borderWidth: 2.5, pointRadius: 5, pointBackgroundColor: color,
+          fill: true,
+          // 統計範圍變更前的段落用虛線（含部分工時 → 僅全時）
+          segment: {
+            borderDash: (ctx) => (ctx.p1DataIndex <= dashBeforeIdx - 1 ? [6, 4] : undefined),
+          },
+        },
       ],
     },
     options: freshOpts({
