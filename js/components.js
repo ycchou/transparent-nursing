@@ -6,8 +6,8 @@ import { initPWAPrompt, showInstallGuide } from './pwa-prompt.js?v=16';
 // 主辦/協作工會 — 共用資料（footer / hero strip / about 都引用）
 export const ORGS = {
   lead: [
-    { id: 'tfmu',  name: '台灣醫療工會聯合會', short: '台醫聯',  logo: 'assets/orgs/tfmu.jpg',  href: '' },
-    { id: 'tnpiu', name: '臺灣護理產業工會',    short: '臺護產',  logo: 'assets/orgs/tnpiu.png', href: '' },
+    { id: 'tfmu',  name: '台灣醫療工會聯合會', short: '台醫聯',  logo: 'assets/orgs/tfmu.jpg',  href: 'https://www.facebook.com/TFMU.org?locale=zh_TW' },
+    { id: 'tnpiu', name: '臺灣護理產業工會',    short: '臺護產',  logo: 'assets/orgs/tnpiu.png', href: 'https://www.facebook.com/tnu.org?locale=zh_TW' },
   ],
   tech: [
     { id: 'trtu',  name: '台灣呼吸治療產業工會', short: 'RT 工會', logo: 'assets/orgs/trtu.png',  href: 'https://trtu.org.tw/' },
@@ -26,11 +26,11 @@ export function orgStripHTML(opts = {}) {
   return `
     <div class="${cls}">
       <div class="org-strip-section">
-        <span class="org-strip-role">👥 主導製作</span>
+        <span class="org-strip-role">主導製作</span>
         ${ORGS.lead.map(orgChipHTML).join('')}
       </div>
       <div class="org-strip-section">
-        <span class="org-strip-role">🔧 技術支援</span>
+        <span class="org-strip-role">技術支援</span>
         ${ORGS.tech.map(orgChipHTML).join('')}
       </div>
     </div>

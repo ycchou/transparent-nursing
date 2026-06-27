@@ -3552,11 +3552,23 @@ body.dform-thanks-open { overflow: hidden; }
   justify-content: center;
 }
 .org-strip-role {
-  font-size: 0.82rem;
-  font-weight: 600;
+  position: relative;
+  font-size: 0.78rem;
+  font-weight: 700;
   color: var(--muted);
-  letter-spacing: 0.04em;
+  letter-spacing: 0.12em;
   white-space: nowrap;
+  padding-left: 14px;
+}
+.org-strip-role::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 1.5px;
+  background: var(--primary);
 }
 .org-chip {
   display: inline-flex;
@@ -3580,16 +3592,17 @@ body.dform-thanks-open { overflow: hidden; }
   color: var(--ink);
 }
 .org-chip img {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
-  border-radius: 50%;
   background: #fff;
+  border-radius: 4px;
   flex-shrink: 0;
 }
 
 /* Footer 上的 org strip：白色 chip 在深色 footer 反差好看 */
-.site-footer .org-strip-role { color: rgba(255, 255, 255, 0.65); }
+.site-footer .org-strip-role { color: rgba(255, 255, 255, 0.7); }
+.site-footer .org-strip-role::before { background: var(--accent, #A8DADC); }
 .site-footer .org-strip { margin: 18px 0 14px; justify-content: flex-start; }
 .site-footer .org-strip-divider {
   width: 100%;
@@ -3597,6 +3610,9 @@ body.dform-thanks-open { overflow: hidden; }
   background: rgba(255, 255, 255, 0.10);
   margin: 18px 0 4px;
 }
+/* 蓋掉 .site-footer a 的白色文字（specificity 0,2,1 勝過 .site-footer a 0,1,1）*/
+.site-footer a.org-chip,
+.site-footer a.org-chip:hover { color: var(--ink); }
 
 /* Hero 下方 trust strip：較小尺寸、淡背景 */
 .hero-trust-strip {
@@ -3639,11 +3655,12 @@ body.dform-thanks-open { overflow: hidden; }
   color: var(--ink);
 }
 .org-card-img {
-  width: 78px;
-  height: 78px;
+  width: 110px;
+  height: 110px;
   object-fit: contain;
-  border-radius: 50%;
   background: #fff;
+  border-radius: 12px;
+  padding: 6px;
   margin-bottom: 12px;
 }
 .org-card-role {
