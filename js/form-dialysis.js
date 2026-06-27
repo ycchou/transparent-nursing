@@ -504,7 +504,7 @@ async function onSubmit(e) {
       consentCard.classList.add('has-error');
       consentCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-    showToast('請勾選全部 5 項法律聲明後再送出', 'warn');
+    showToast('請勾選全部 3 項法律聲明後再送出', 'warn');
     return;
   }
 
