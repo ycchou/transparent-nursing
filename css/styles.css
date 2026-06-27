@@ -2386,15 +2386,17 @@ select.chart-select {
 
 .platform-cta-card {
   display: flex;
-  align-items: center;
-  gap: 22px;
-  padding: 26px 28px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 24px 26px;
   background: linear-gradient(135deg, rgba(46, 134, 171, 0.08) 0%, rgba(168, 218, 220, 0.20) 100%);
   border: 1px solid rgba(46, 134, 171, 0.22);
   border-radius: 16px;
   text-decoration: none;
   color: var(--ink);
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  height: 100%; /* 兩卡同高 */
 }
 .platform-cta-card:hover {
   transform: translateY(-2px);
@@ -2404,22 +2406,23 @@ select.chart-select {
 }
 .platform-cta-icon {
   flex-shrink: 0;
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-soft) 100%);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.platform-cta-body { flex: 1; min-width: 0; }
+.platform-cta-body { width: 100%; min-width: 0; flex: 1; }
 .platform-cta-body h3 {
   margin: 0 0 6px;
   font-size: 1.15rem;
   font-weight: 700;
   color: var(--ink);
   letter-spacing: 0.01em;
+  line-height: 1.4;
 }
 .platform-cta-body p {
   margin: 0;
@@ -2429,7 +2432,10 @@ select.chart-select {
 }
 .platform-cta-body strong { color: var(--ink); font-weight: 600; }
 
-.platform-cta-action { flex-shrink: 0; }
+.platform-cta-action {
+  flex-shrink: 0;
+  margin-top: auto; /* 按鈕釘在卡底，兩卡視覺對齊 */
+}
 .platform-cta-action .btn {
   pointer-events: none; /* 整片 <a> 已可點，按鈕只當視覺 */
 }
