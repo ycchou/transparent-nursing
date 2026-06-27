@@ -3253,13 +3253,20 @@ body.dform-picker-open {
   align-items: flex-start;
   gap: 12px;
   padding: 10px 14px;
-  background: #fff;
-  border: 1px solid rgba(46, 134, 171, 0.20);
+  background: transparent;
+  border: 1px solid rgba(46, 134, 171, 0.18);
   border-radius: 8px;
   cursor: pointer;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
-.dform-consent-item:hover { border-color: var(--primary); background: rgba(46, 134, 171, 0.04); }
+.dform-consent-item:hover {
+  border-color: var(--primary);
+  background: rgba(46, 134, 171, 0.06);
+}
+.dform-consent-item:has(input:checked) {
+  background: rgba(46, 134, 171, 0.10);
+  border-color: rgba(46, 134, 171, 0.45);
+}
 .dform-consent-item input[type="checkbox"] {
   margin: 4px 0 0;
   width: 18px;
