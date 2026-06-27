@@ -3214,6 +3214,77 @@ body.dform-picker-open {
 .dform-warning-list strong { color: var(--ink); font-weight: 600; }
 .dform-warning-danger { color: var(--danger) !important; }
 
+/* 法律同意條款卡（藍色 callout，比 warning 更正式）*/
+.dform-consent-card {
+  margin-top: 24px;
+  padding: 22px 24px;
+  background: rgba(46, 134, 171, 0.06);
+  border: 2px solid rgba(46, 134, 171, 0.30);
+  border-radius: 12px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.dform-consent-card.has-error {
+  border-color: var(--danger);
+  background: rgba(230, 57, 70, 0.06);
+}
+.dform-consent-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--primary);
+  letter-spacing: 0.01em;
+  margin-bottom: 6px;
+}
+.dform-consent-hint {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 14px;
+  line-height: 1.6;
+}
+.dform-consent-hint a { color: var(--primary); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+.dform-consent-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.dform-consent-list li { margin-bottom: 10px; }
+.dform-consent-list li:last-child { margin-bottom: 0; }
+.dform-consent-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid rgba(46, 134, 171, 0.20);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.dform-consent-item:hover { border-color: var(--primary); background: rgba(46, 134, 171, 0.04); }
+.dform-consent-item input[type="checkbox"] {
+  margin: 4px 0 0;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+.dform-consent-item input[type="checkbox"]:checked + .dform-consent-text { color: var(--ink); }
+.dform-consent-text {
+  flex: 1;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--ink-soft);
+}
+.dform-consent-text strong { color: var(--ink); font-weight: 700; }
+.dform-consent-card .dform-error-msg {
+  display: none;
+  margin-top: 10px;
+  color: var(--danger);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+.dform-consent-card.has-error .dform-error-msg { display: block; }
+
 /* 「標 * 為必填」放在表單最上方（簡潔小字、右對齊） */
 .dform-required-note-top {
   margin: 0 0 8px;

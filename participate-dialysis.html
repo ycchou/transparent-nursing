@@ -118,6 +118,55 @@
           <div class="dform-error-msg" id="err-captcha">驗證碼錯誤，請重新輸入</div>
         </div>
 
+        <!-- 法律同意條款 — 5 個 checkbox 必須全勾才能送出 -->
+        <div class="dform-consent-card" id="dform-consent-card">
+          <div class="dform-consent-title">📝 送出前最後確認（法律聲明）</div>
+          <div class="dform-consent-hint">以下 5 項為投稿條件，請逐項閱讀並勾選；完整條款請參閱 <a href="terms.html" target="_blank" rel="noopener">服務條款</a>。</div>
+          <ul class="dform-consent-list">
+            <li>
+              <label class="dform-consent-item">
+                <input type="checkbox" id="consent-1" data-consent="1" />
+                <span class="dform-consent-text">
+                  <strong>①</strong> 我聲明所填內容皆為<strong>「親身經歷的真實情況」</strong>；若因內容不實導致法律糾紛，由本人承擔民刑事責任。
+                </span>
+              </label>
+            </li>
+            <li>
+              <label class="dform-consent-item">
+                <input type="checkbox" id="consent-2" data-consent="1" />
+                <span class="dform-consent-text">
+                  <strong>②</strong> 我已確認短評中<strong>未揭露任何能識別第三人</strong>（同事、主管、病人、家屬）的姓名。
+                </span>
+              </label>
+            </li>
+            <li>
+              <label class="dform-consent-item">
+                <input type="checkbox" id="consent-3" data-consent="1" />
+                <span class="dform-consent-text">
+                  <strong>③</strong> 我未填寫任何涉及<strong>病人病情、兒童及少年、性侵害被害人</strong>的可識別資訊。
+                </span>
+              </label>
+            </li>
+            <li>
+              <label class="dform-consent-item">
+                <input type="checkbox" id="consent-4" data-consent="1" />
+                <span class="dform-consent-text">
+                  <strong>④</strong> 我了解<strong>送出即公開、無法事後撤回</strong>特定單筆資料。
+                </span>
+              </label>
+            </li>
+            <li>
+              <label class="dform-consent-item">
+                <input type="checkbox" id="consent-5" data-consent="1" />
+                <span class="dform-consent-text">
+                  <strong>⑤</strong> 我同意若內容經查明違法、不實或經第三方合理檢舉時，<strong>平台有權逕予下架或修訂</strong>。
+                </span>
+              </label>
+            </li>
+          </ul>
+          <div class="dform-error-msg" id="err-consent">請勾選全部 5 項條款後再送出</div>
+        </div>
+
         <div class="dform-submit-bar">
           <button type="submit" class="btn btn-primary dform-submit-btn">
             <span>送出表單</span>

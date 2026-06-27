@@ -119,6 +119,7 @@ function footerHTML() {
               <li><a href="mailto:${SITE.contactEmail}">${SITE.contactEmail}</a></li>
               <li><a href="about.html">運動緣起</a></li>
               <li><a href="participate.html">填寫表單</a></li>
+              <li><a href="terms.html">服務條款</a></li>
               <li><a href="#" onclick="event.preventDefault();window.__nursingShowInstallGuide&&window.__nursingShowInstallGuide();">加到主畫面 (App 化)</a></li>
             </ul>
           </div>

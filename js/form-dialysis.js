@@ -495,6 +495,18 @@ async function onSubmit(e) {
     showToast('驗證碼錯誤，已重新產生', 'warn');
     return;
   }
+  // 法律條款 — 5 項 checkbox 必須全勾才能送出
+  const consentCard = document.getElementById('dform-consent-card');
+  const consents = consentCard ? consentCard.querySelectorAll('input[data-consent="1"]') : [];
+  const allChecked = consents.length > 0 && Array.from(consents).every((cb) => cb.checked);
+  if (!allChecked) {
+    if (consentCard) {
+      consentCard.classList.add('has-error');
+      consentCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    showToast('請勾選全部 5 項法律聲明後再送出', 'warn');
+    return;
+  }
 
   const btn = document.querySelector('.dform-submit-btn');
   const origHtml = btn.innerHTML;
@@ -978,3 +990,13 @@ renderIcons();
 
 const formEl = document.getElementById('dform');
 if (formEl) formEl.addEventListener('submit', onSubmit);
+
+// 法律條款 checkbox 任一切換 → 清掉錯誤狀態
+const consentCardEl = document.getElementById('dform-consent-card');
+if (consentCardEl) {
+  consentCardEl.addEventListener('change', (e) => {
+    if (e.target && e.target.matches('input[data-consent="1"]')) {
+      consentCardEl.classList.remove('has-error');
+    }
+  });
+}
