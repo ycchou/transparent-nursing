@@ -91,33 +91,6 @@
         <p class="dform-required-note-top">標 <span class="dform-required">*</span> 為必填</p>
         <div id="dform-fields"></div>
 
-        <!-- 送出前警語 -->
-        <div class="dform-warning-card">
-          <div class="dform-warning-title">⚠️ 送出前請確認</div>
-          <ul class="dform-warning-list">
-            <li>本表單<strong>不收集帳號、IP、Email</strong>或任何可識別你個人的資訊</li>
-            <li>送出後資料會<strong>立即公開</strong>於資料平台，<strong>沒有審核或延遲</strong></li>
-            <li>因為完全匿名、無任何識別資料，<strong class="dform-warning-danger">送出後無法撤回或編輯任何單一筆資料</strong></li>
-            <li>請在送出前再三確認內容無誤、無讓你後悔的個資描述</li>
-          </ul>
-        </div>
-
-        <!-- 驗證碼（CSS span 顯示，不依賴 canvas / font 載入） -->
-        <div class="dform-field dform-captcha-field" id="dform-captcha-field" data-name="captcha" data-required="1">
-          <label class="dform-label" for="captcha-input">
-            驗證碼<span class="dform-required" aria-hidden="true">*</span>
-          </label>
-          <div class="dform-help">輸入下方的英數字，不分大小寫</div>
-          <div class="dform-captcha-row">
-            <div id="captcha-display" class="dform-captcha-display" aria-label="驗證碼"></div>
-            <button type="button" id="captcha-refresh" class="dform-captcha-refresh" aria-label="重新產生驗證碼" title="重新產生">↻</button>
-            <input type="text" id="captcha-input" class="dform-input dform-captcha-input"
-                   maxlength="6" autocomplete="off" inputmode="text"
-                   placeholder="輸入左方 6 碼" />
-          </div>
-          <div class="dform-error-msg" id="err-captcha">驗證碼錯誤，請重新輸入</div>
-        </div>
-
         <!-- 法律同意條款 — 3 個 checkbox 必須全勾才能送出 -->
         <div class="dform-consent-card" id="dform-consent-card">
           <div class="dform-consent-title">📝 送出前最後確認（法律聲明）</div>
@@ -149,6 +122,22 @@
             </li>
           </ul>
           <div class="dform-error-msg" id="err-consent">請勾選全部 3 項條款後再送出</div>
+        </div>
+
+        <!-- 驗證碼（送出按鈕上方最後一關） -->
+        <div class="dform-field dform-captcha-field" id="dform-captcha-field" data-name="captcha" data-required="1">
+          <label class="dform-label" for="captcha-input">
+            驗證碼<span class="dform-required" aria-hidden="true">*</span>
+          </label>
+          <div class="dform-help">輸入下方的英數字，不分大小寫</div>
+          <div class="dform-captcha-row">
+            <div id="captcha-display" class="dform-captcha-display" aria-label="驗證碼"></div>
+            <button type="button" id="captcha-refresh" class="dform-captcha-refresh" aria-label="重新產生驗證碼" title="重新產生">↻</button>
+            <input type="text" id="captcha-input" class="dform-input dform-captcha-input"
+                   maxlength="6" autocomplete="off" inputmode="text"
+                   placeholder="輸入左方 6 碼" />
+          </div>
+          <div class="dform-error-msg" id="err-captcha">驗證碼錯誤，請重新輸入</div>
         </div>
 
         <div class="dform-submit-bar">
