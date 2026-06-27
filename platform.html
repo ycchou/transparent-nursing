@@ -105,6 +105,20 @@
     </div>
   </section>
 
+  <!-- 薪資百分位試算入口（取代右下角隱形浮動氣泡） -->
+  <section style="padding:0 0 20px;">
+    <div class="container">
+      <button type="button" id="calc-trigger" class="calc-trigger-card">
+        <span class="calc-trigger-icon" aria-hidden="true">🧮</span>
+        <div class="calc-trigger-body">
+          <div class="calc-trigger-title">試算你的年薪在這群人中排第幾百分位</div>
+          <div class="calc-trigger-sub">基於目前篩選的資料即時計算，可生成匿名分享圖</div>
+        </div>
+        <span class="calc-trigger-arrow" aria-hidden="true">→</span>
+      </button>
+    </div>
+  </section>
+
   <!-- Main grid -->
   <section style="padding:0 0 16px;">
     <div class="container">
@@ -133,7 +147,7 @@
     </div>
   </section>
 
-  <!-- CTA 倒流到 participate -->
+  <!-- CTA 倒流：分享 + 諮詢 兩張卡並排 -->
   <section style="padding:0 0 56px;">
     <div class="container">
       <div class="platform-cta-row">
@@ -148,6 +162,20 @@
           <div class="platform-cta-action">
             <span class="btn btn-primary">
               分享我的職場 <span data-icon="arrow-right" data-size="14"></span>
+            </span>
+          </div>
+        </a>
+        <a href="https://www.facebook.com/tnu.org?locale=zh_TW" target="_blank" rel="noopener" class="platform-cta-card platform-cta-card-consult">
+          <div class="platform-cta-icon">
+            <span data-icon="scale" data-size="28"></span>
+          </div>
+          <div class="platform-cta-body">
+            <h3>遇到勞資爭議？臺護產可諮詢</h3>
+            <p>看完資料覺得自己職場條件異常？<strong>臺灣護理產業工會</strong>提供工會諮詢與勞動權益協助，歡迎透過 FB 粉專留言聯絡。</p>
+          </div>
+          <div class="platform-cta-action">
+            <span class="btn btn-secondary">
+              前往 FB 諮詢 <span data-icon="arrow-up-right" data-size="14"></span>
             </span>
           </div>
         </a>
@@ -181,7 +209,7 @@
     import { loadCategory, loadAll, startAutoRefresh } from './js/data-loader.js?v=16';
     import { renderTable, setView, showDetailModal } from './js/table.js?v=16';
     import { createFilterState, renderFilters, applyFilters } from './js/filters.js?v=16';
-    import { renderKpiStrip, mountCalculator } from './js/stats-kpi.js?v=16';
+    import { renderKpiStrip, mountSalaryCalculator } from './js/stats-kpi.js?v=16';
     import { getGate } from './js/contribution-gate.js?v=16';
 
     mountLayout();
@@ -302,7 +330,9 @@
       return out;
     }
 
-    mountCalculator(() => currentFiltered, describeCurrentConditions);
+    const calc = mountSalaryCalculator(() => currentFiltered, describeCurrentConditions);
+    const calcTrigger = document.getElementById('calc-trigger');
+    if (calcTrigger) calcTrigger.addEventListener('click', () => calc.open());
 
     // View switch
     document.querySelectorAll('#view-switch button').forEach((btn) => {

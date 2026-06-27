@@ -91,19 +91,22 @@ export function renderKpiStrip(container, rows) {
 }
 
 /**
- * 掛載可拖曳浮動氣泡式薪資試算工具（一次性 mount 到 document.body）
+ * 掛載薪資試算工具 — 只建 modal，回傳 { open, close } API 給外部觸發
  * @param {() => Object[]} getRows  取得目前篩選後 rows 的 callback
+ * @param {() => Object[]} getConditions  取得目前篩選條件描述的 callback
+ * @returns {{ open: () => void, close: () => void }}
  */
-export function mountCalculator(getRows, getConditions) {
-  if (document.getElementById('calc-bubble')) return; // 避免重複掛載
+export function mountSalaryCalculator(getRows, getConditions) {
+  if (document.getElementById('calc-modal')) {
+    // 已經 mount 過：回傳對既有 modal 的 open/close 操作
+    return {
+      open() { const m = document.getElementById('calc-modal'); if (m) { m.hidden = false; requestAnimationFrame(() => m.classList.add('open')); } },
+      close() { const m = document.getElementById('calc-modal'); if (m) { m.classList.remove('open'); setTimeout(() => { m.hidden = true; }, 180); } },
+    };
+  }
 
   const host = document.createElement('div');
   host.innerHTML = `
-    <button class="calc-bubble" id="calc-bubble" type="button"
-            aria-label="開啟薪資試算工具" aria-controls="calc-modal" aria-expanded="false"
-            title="薪資試算（可拖曳）">
-      <span class="calc-bubble-icon" aria-hidden="true">${icon('calculator', { size: 26 })}</span>
-    </button>
     <div class="calc-modal" id="calc-modal" hidden role="dialog" aria-modal="true" aria-labelledby="calc-modal-title">
       <div class="calc-modal-backdrop" data-close="1"></div>
       <div class="calc-modal-panel">
@@ -132,102 +135,6 @@ export function mountCalculator(getRows, getConditions) {
   `;
   document.body.appendChild(host);
 
-  // ===== 氣泡拖曳邏輯 =====
-  const bubble = document.getElementById('calc-bubble');
-  const POS_KEY = 'calc_bubble_pos';
-  const SIZE = 56;
-  const MARGIN = 12;
-
-  const clamp = (x, lo, hi) => Math.max(lo, Math.min(hi, x));
-  function clampPos(x, y) {
-    const W = window.innerWidth, H = window.innerHeight;
-    return {
-      x: clamp(x, MARGIN, W - SIZE - MARGIN),
-      y: clamp(y, MARGIN, H - SIZE - MARGIN),
-    };
-  }
-  function applyPos(p) {
-    bubble.style.left = p.x + 'px';
-    bubble.style.top = p.y + 'px';
-  }
-  // 把橫向 x 自動貼到最近的左/右邊緣（垂直保留高度）
-  function snapToNearestEdge(x, y) {
-    const W = window.innerWidth;
-    const centerX = x + SIZE / 2;
-    const newX = centerX < W / 2 ? MARGIN : W - SIZE - MARGIN;
-    return clampPos(newX, y);
-  }
-  // 預設位置：右下角
-  function defaultPos() {
-    return clampPos(window.innerWidth - SIZE - 24, window.innerHeight - SIZE - 24);
-  }
-  // 用戶是否曾經自己拖動過（localStorage 有值 = 有自定義位置）
-  function isUserPositioned() {
-    try { return localStorage.getItem(POS_KEY) !== null; } catch { return false; }
-  }
-  function loadPos() {
-    try {
-      const raw = localStorage.getItem(POS_KEY);
-      if (raw) {
-        const obj = JSON.parse(raw);
-        // 確保載入的位置一定貼邊（修復舊版 localStorage 可能存到中間的情況）
-        if (Number.isFinite(obj.x) && Number.isFinite(obj.y)) return snapToNearestEdge(obj.x, obj.y);
-      }
-    } catch {}
-    return defaultPos();
-  }
-  function savePos(p) { try { localStorage.setItem(POS_KEY, JSON.stringify(p)); } catch {} }
-
-  applyPos(loadPos());
-
-  let dragging = false, dragOffset = null, startPt = null, moved = false;
-  bubble.addEventListener('pointerdown', (e) => {
-    dragging = true;
-    moved = false;
-    try { bubble.setPointerCapture(e.pointerId); } catch {}
-    const r = bubble.getBoundingClientRect();
-    dragOffset = { dx: e.clientX - r.left, dy: e.clientY - r.top };
-    startPt = { x: e.clientX, y: e.clientY };
-    bubble.classList.add('dragging');
-  });
-  bubble.addEventListener('pointermove', (e) => {
-    if (!dragging) return;
-    const dx = e.clientX - startPt.x, dy = e.clientY - startPt.y;
-    if (Math.hypot(dx, dy) > 6) moved = true;
-    const p = clampPos(e.clientX - dragOffset.dx, e.clientY - dragOffset.dy);
-    applyPos(p);
-  });
-  function endDrag(e) {
-    if (!dragging) return;
-    dragging = false;
-    bubble.classList.remove('dragging');
-    if (moved) {
-      const r = bubble.getBoundingClientRect();
-      const snapped = snapToNearestEdge(r.left, r.top);
-      // 平滑滑到邊（拖曳過程 dragging class 已移除，這裡覆寫 transition 暫時加上 left）
-      bubble.style.transition = 'left 0.22s cubic-bezier(0.22, 1, 0.36, 1), top 0.22s cubic-bezier(0.22, 1, 0.36, 1)';
-      applyPos(snapped);
-      savePos(snapped);
-      setTimeout(() => { bubble.style.transition = ''; }, 260);
-    } else {
-      openModal();
-    }
-  }
-  bubble.addEventListener('pointerup', endDrag);
-  bubble.addEventListener('pointercancel', endDrag);
-
-  // 視窗縮放：
-  //   - 用戶曾自己拖過 → 維持靠邊（取目前位置最近的左/右），y 也跟著 clamp
-  //   - 用戶從未拖動   → 重新貼回右下角
-  window.addEventListener('resize', () => {
-    if (isUserPositioned()) {
-      const r = bubble.getBoundingClientRect();
-      applyPos(snapToNearestEdge(r.left, r.top));
-    } else {
-      applyPos(defaultPos());
-    }
-  });
-
   // ===== Modal 開關 =====
   const modal = document.getElementById('calc-modal');
   const input = document.getElementById('calc-salary');
@@ -237,13 +144,11 @@ export function mountCalculator(getRows, getConditions) {
   function openModal() {
     modal.hidden = false;
     requestAnimationFrame(() => modal.classList.add('open'));
-    bubble.setAttribute('aria-expanded', 'true');
     setTimeout(() => input.focus(), 80);
     document.addEventListener('keydown', onKey);
   }
   function closeModal() {
     modal.classList.remove('open');
-    bubble.setAttribute('aria-expanded', 'false');
     setTimeout(() => { modal.hidden = true; }, 180);
     document.removeEventListener('keydown', onKey);
   }
@@ -678,4 +583,6 @@ export function mountCalculator(getRows, getConditions) {
 
   goBtn.addEventListener('click', run);
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') run(); });
+
+  return { open: openModal, close: closeModal };
 }
