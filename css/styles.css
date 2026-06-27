@@ -1019,6 +1019,15 @@ h1[id], h2[id], h3[id] {
   border-top: 1px solid var(--border-soft);
   padding-top: 16px;
 }
+/* platform.html：收折面板裡塞 renderFilters() 的輸出，移除二重卡片邊框/底色 */
+.stat-filter-panel .stat-filter-body > #filter-panel > .filter-panel {
+  background: none;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+}
+.stat-filter-panel .stat-filter-body .filter-section { margin-bottom: 16px; }
+.stat-filter-panel .stat-filter-body .filter-section:last-of-type { margin-bottom: 12px; }
 .filter-section {
   margin-bottom: 20px;
 }

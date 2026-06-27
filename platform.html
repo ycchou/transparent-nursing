@@ -119,31 +119,38 @@
     </div>
   </section>
 
-  <!-- Main grid -->
+  <!-- 篩選條件：頂部折疊面板（仿 stats.html 樣式），預設收起來 -->
   <section style="padding:0 0 16px;">
     <div class="container">
-      <div style="display:grid;grid-template-columns:280px 1fr;gap:24px;" id="platform-grid">
-        <!-- Filters -->
-        <aside id="filter-panel-wrap">
-          <button id="filter-toggle" class="btn btn-secondary" style="width:100%;justify-content:space-between;display:none;">
-            <span><span data-icon="filter" data-size="16"></span> 篩選條件</span>
-            <span id="filter-active-count" style="font-size:0.8rem;color:var(--muted);"></span>
-          </button>
+      <details class="filter-panel stat-filter-panel" id="platform-filter-details">
+        <summary>
+          <span class="stat-filter-title">
+            <span data-icon="filter" data-size="16" style="color:var(--primary);"></span>
+            <span>篩選條件</span>
+            <span class="stat-filter-badge" id="stat-filter-badge" hidden>已套用</span>
+          </span>
+          <span class="stat-filter-chev" aria-hidden="true">
+            <span data-icon="chevron-down" data-size="18"></span>
+          </span>
+        </summary>
+        <div class="stat-filter-body">
           <div id="filter-panel"></div>
-        </aside>
+        </div>
+      </details>
+    </div>
+  </section>
 
-        <!-- Table -->
-        <div style="min-width:0;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap;">
-            <div style="color:var(--muted);font-size:0.92rem;" id="result-count">載入中...</div>
-            <div class="view-switch" id="view-switch">
-              <button data-view="table" class="active">表格</button>
-              <button data-view="card">卡片</button>
-            </div>
-          </div>
-          <div id="table-container"></div>
+  <!-- 結果表格 -->
+  <section style="padding:0 0 16px;">
+    <div class="container">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap;">
+        <div style="color:var(--muted);font-size:0.92rem;" id="result-count">載入中...</div>
+        <div class="view-switch" id="view-switch">
+          <button data-view="table" class="active">表格</button>
+          <button data-view="card">卡片</button>
         </div>
       </div>
+      <div id="table-container"></div>
     </div>
   </section>
 
@@ -186,13 +193,6 @@
   <div id="app-footer"></div>
 
   <style>
-    @media (max-width: 980px) {
-      #platform-grid { grid-template-columns: 1fr !important; }
-      #filter-panel-wrap { order: -1; }
-      #filter-toggle { display: flex !important; margin-bottom: 12px; }
-      #filter-panel { display: none; }
-      #filter-panel.open { display: block; }
-    }
     @media (max-width: 768px) {
       #table-container .table-view { display: none !important; }
       #table-container .card-view  { display: block !important; }
@@ -282,22 +282,25 @@
       });
     }
 
-    // Filters
+    // Filters：折疊面板（仿 stats.html），預設收起
     const filterEl = document.getElementById('filter-panel');
+    const filterDetails = document.getElementById('platform-filter-details');
+    const filterBadge = document.getElementById('stat-filter-badge');
     renderFilters(filterEl, state.filterState, () => { refreshTable(); updateFilterCount(); });
 
-    // Mobile filter toggle
-    const filterToggle = document.getElementById('filter-toggle');
-    filterToggle.addEventListener('click', () => filterEl.classList.toggle('open'));
     function updateFilterCount() {
       const s = state.filterState;
       const n = (s.q ? 1 : 0) + (s.location ? s.location.size : 0)
               + s.institutionType.size + s.weeklyHours.size
               + s.overtimePolicy.size + s.recommendIndex.size;
-      const el = document.getElementById('filter-active-count');
-      el.textContent = n ? `已套用 ${n} 項` : '';
+      if (filterBadge) {
+        filterBadge.hidden = n === 0;
+        filterBadge.textContent = n === 0 ? '已套用' : `已套用 ${n} 項`;
+      }
     }
-    renderIcons(filterToggle.parentElement);
+    updateFilterCount();
+    // 渲染 details summary 內的 icon
+    renderIcons(filterDetails);
     // 處理 CTA 區段內的 data-icon 占位符
     renderIcons(document.querySelector('.platform-cta-card'));
 
