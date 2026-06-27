@@ -214,6 +214,21 @@
 
       <hr class="divider" />
 
+      <h2 style="margin:32px 0 16px;">主辦與協作單位</h2>
+      <p style="color:var(--ink-soft);line-height:1.85;margin:0 0 8px;">
+        本專案由
+        <strong style="color:var(--primary);">台灣醫療工會聯合會（台醫聯）</strong>、
+        <strong style="color:var(--primary);">臺灣護理產業工會（臺護產）</strong>
+        共同主導製作；
+        <strong style="color:var(--ink);">台灣呼吸治療產業工會（RT 工會）</strong>
+        則延續其
+        <a href="https://trtu.org.tw/RT_platform/" target="_blank" rel="noopener">勞動分享平台</a>
+        的開創性實踐，提供技術經驗支援。
+      </p>
+      <div class="org-cards" id="about-org-cards"></div>
+
+      <hr class="divider" />
+
       <h2 style="margin:32px 0 16px;">聯絡我們</h2>
       <div class="card card-flat" style="margin-top:16px;">
         <div style="color:var(--primary);margin-bottom:8px;">
@@ -234,9 +249,29 @@
 
   <script type="module">
     import { CATEGORIES } from './js/config.js?v=16';
-    import { mountLayout } from './js/components.js?v=16';
+    import { mountLayout, ORGS } from './js/components.js?v=16';
     import { icon, renderIcons } from './js/icons.js?v=16';
     mountLayout();
+
+    // 主辦與協作單位卡片
+    const orgGrid = document.getElementById('about-org-cards');
+    if (orgGrid) {
+      const orgCardHTML = (o, role) => {
+        const inner = `
+          <img class="org-card-img" src="${o.logo}" alt="${o.name} logo"/>
+          <div class="org-card-role">${role}</div>
+          <div class="org-card-name">${o.name}</div>
+          <div class="org-card-short">${o.short}</div>
+        `;
+        return o.href
+          ? `<a class="org-card" href="${o.href}" target="_blank" rel="noopener">${inner}</a>`
+          : `<div class="org-card">${inner}</div>`;
+      };
+      orgGrid.innerHTML = [
+        ...ORGS.lead.map((o) => orgCardHTML(o, '主導製作')),
+        ...ORGS.tech.map((o) => orgCardHTML(o, '技術支援')),
+      ].join('');
+    }
 
     // 渲染 9 大工作場域字卡（樣式參考 participate.html 的 form-card，但移除狀態與 CTA）
     const grid = document.getElementById('about-category-cards');

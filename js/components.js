@@ -3,6 +3,40 @@ import { SITE, CATEGORIES } from './config.js?v=16';
 import { icon, renderIcons } from './icons.js?v=16';
 import { initPWAPrompt, showInstallGuide } from './pwa-prompt.js?v=16';
 
+// 主辦/協作工會 — 共用資料（footer / hero strip / about 都引用）
+export const ORGS = {
+  lead: [
+    { id: 'tfmu',  name: '台灣醫療工會聯合會', short: '台醫聯',  logo: 'assets/orgs/tfmu.jpg',  href: '' },
+    { id: 'tnpiu', name: '臺灣護理產業工會',    short: '臺護產',  logo: 'assets/orgs/tnpiu.png', href: '' },
+  ],
+  tech: [
+    { id: 'trtu',  name: '台灣呼吸治療產業工會', short: 'RT 工會', logo: 'assets/orgs/trtu.png',  href: 'https://trtu.org.tw/' },
+  ],
+};
+
+function orgChipHTML(org) {
+  const inner = `<img src="${org.logo}" alt="${org.name} logo"/><span>${org.short}</span>`;
+  return org.href
+    ? `<a class="org-chip" href="${org.href}" target="_blank" rel="noopener" title="${org.name}">${inner}</a>`
+    : `<span class="org-chip" title="${org.name}">${inner}</span>`;
+}
+
+export function orgStripHTML(opts = {}) {
+  const cls = opts.className || 'org-strip';
+  return `
+    <div class="${cls}">
+      <div class="org-strip-section">
+        <span class="org-strip-role">👥 主導製作</span>
+        ${ORGS.lead.map(orgChipHTML).join('')}
+      </div>
+      <div class="org-strip-section">
+        <span class="org-strip-role">🔧 技術支援</span>
+        ${ORGS.tech.map(orgChipHTML).join('')}
+      </div>
+    </div>
+  `;
+}
+
 const NAV_ITEMS = [
   { href: 'index.html',       label: '首頁',     match: ['index.html', ''] },
   { href: 'platform.html',    label: '資料平台', match: ['platform.html'] },
@@ -89,6 +123,8 @@ function footerHTML() {
             </ul>
           </div>
         </div>
+        <div class="org-strip-divider"></div>
+        ${orgStripHTML()}
         <div class="footer-bottom">
           <span>© ${new Date().getFullYear()} 護理職場透明化運動 · Prototype</span>
           <span>致敬 <a href="https://trtu.org.tw/RT_platform/" target="_blank" rel="noopener">呼吸治療師勞動分享平台</a></span>

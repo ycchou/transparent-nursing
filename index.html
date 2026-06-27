@@ -128,6 +128,7 @@
               <span data-icon="bar-chart-3" data-size="16"></span> 看資料平台
             </a>
           </div>
+          <div id="hero-trust-strip-mount"></div>
         </div>
         <div class="hero-art">
           <!-- 抽象 SVG art -->
@@ -242,11 +243,15 @@
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
   <script type="module">
     import { CATEGORIES } from './js/config.js?v=16';
-    import { mountLayout, fmt } from './js/components.js?v=16';
+    import { mountLayout, fmt, orgStripHTML } from './js/components.js?v=16';
     import { icon, renderIcons } from './js/icons.js?v=16';
     import { getStats, startAutoRefresh } from './js/data-loader.js?v=16';
 
     mountLayout();
+
+    // 首頁 hero 下方 trust strip
+    const trustMount = document.getElementById('hero-trust-strip-mount');
+    if (trustMount) trustMount.innerHTML = orgStripHTML({ className: 'hero-trust-strip' });
 
     // 動態類別數字
     document.getElementById('category-count-label').textContent = `${CATEGORIES.length} 大護理職場類別`;
