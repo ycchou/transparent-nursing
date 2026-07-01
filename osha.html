@@ -6,13 +6,12 @@
   <meta name="theme-color" content="#2E86AB" />
 
   <!-- SEO -->
-  <title>勞檢紀錄 — 護理職場透明化運動</title>
-  <meta name="description" content="整合勞動部公開的醫療院所勞檢違規紀錄，呈現各家醫院、診所違反勞動基準法的時間、條款、罰鍰金額。資料來源為政府公開資料，幫助護理師了解醫療機構的勞動法遵情況。" />
-  <meta name="keywords" content="勞檢, 勞動基準法, 醫院違規, 罰鍰, 加班費, 工時, 護理勞動權益, 勞動部" />
+  <title>職安紀錄 — 護理職場透明化運動</title>
+  <meta name="description" content="整合勞動部公開的醫療院所職業安全衛生法違規紀錄，包含職災通報、化學品管理、健康檢查等處分。資料來源為政府公開資料，幫助護理師了解醫療機構的職安法遵情況。" />
+  <meta name="keywords" content="職業安全衛生法, 職災, 化學品管理, 醫院違規, 護理職場安全, 勞動部" />
   <meta name="robots" content="index, follow, max-image-preview:large" />
-  <link rel="canonical" href="https://transparentnursing.example.org/violations.html" />
+  <link rel="canonical" href="https://transparentnursing.example.org/osha.html" />
 
-  <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
   <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon-180.png" />
   <link rel="apple-touch-icon" sizes="167x167" href="assets/apple-touch-icon-167.png" />
@@ -20,27 +19,24 @@
   <link rel="apple-touch-icon" sizes="120x120" href="assets/apple-touch-icon-120.png" />
   <link rel="manifest" href="manifest.json" />
 
-  <!-- iOS PWA -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="護理職場透明化" />
   <meta name="mobile-web-app-capable" content="yes" />
 
-  <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="護理職場透明化運動" />
-  <meta property="og:title" content="勞檢紀錄 — 護理職場透明化運動" />
-  <meta property="og:description" content="整合勞動部公開資料，呈現醫療院所違反勞基法的紀錄。" />
+  <meta property="og:title" content="職安紀錄 — 護理職場透明化運動" />
+  <meta property="og:description" content="整合勞動部公開資料，呈現醫療院所違反職安法的紀錄。" />
   <meta property="og:image" content="https://transparentnursing.example.org/assets/og-image.svg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:url" content="https://transparentnursing.example.org/violations.html" />
+  <meta property="og:url" content="https://transparentnursing.example.org/osha.html" />
   <meta property="og:locale" content="zh_TW" />
 
-  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="勞檢紀錄 — 護理職場透明化運動" />
-  <meta name="twitter:description" content="政府公開的醫院勞基法違規紀錄整合。" />
+  <meta name="twitter:title" content="職安紀錄 — 護理職場透明化運動" />
+  <meta name="twitter:description" content="政府公開的醫院職業安全衛生法違規紀錄整合。" />
   <meta name="twitter:image" content="https://transparentnursing.example.org/assets/og-image.svg" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -48,12 +44,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css?v=16" />
 
-  <!-- modulepreload -->
   <link rel="modulepreload" href="./js/config.js?v=16" />
   <link rel="modulepreload" href="./js/components.js?v=16" />
   <link rel="modulepreload" href="./js/icons.js?v=16" />
   <link rel="modulepreload" href="./js/pwa-prompt.js?v=16" />
-  <link rel="modulepreload" href="./js/violations.js?v=16" />
+  <link rel="modulepreload" href="./js/records-common.js?v=16" />
+  <link rel="modulepreload" href="./js/osha.js?v=16" />
 
   <!-- 強制清除舊版 cache -->
   <script>
@@ -64,7 +60,7 @@
           Object.keys(localStorage).forEach(function(k) {
             if (k.indexOf('nursing_csv_') === 0 ||
                 (k.indexOf('__nursing_force_') === 0 && k !== FLAG) ||
-                k.indexOf('nursing_viol_') === 0) {
+                k.indexOf('nursing_osha_') === 0) {
               localStorage.removeItem(k);
             }
           });
@@ -79,11 +75,11 @@
 
   <section style="padding-top:48px;padding-bottom:20px;">
     <div class="container">
-      <span class="eyebrow">Labor Violations</span>
-      <h1 style="margin:4px 0 8px;">勞檢紀錄</h1>
+      <span class="eyebrow">Occupational Safety Violations</span>
+      <h1 style="margin:4px 0 8px;">職安紀錄</h1>
       <p style="color:var(--muted);max-width:760px;line-height:1.75;">
-        整合勞動部公開的醫療院所勞檢違規紀錄，呈現各家醫院、診所違反
-        <strong style="color:var(--ink);">勞動基準法</strong> 的時間、條款、罰鍰金額。
+        整合勞動部公開的醫療院所職業安全違規紀錄，呈現各家醫院、診所違反
+        <strong style="color:var(--ink);">職業安全衛生法</strong> 的時間、條款、罰鍰金額。
       </p>
       <p style="color:var(--muted-light);font-size:0.85rem;margin-top:10px;">
         資料來源：<a href="https://announcement.mol.gov.tw/" target="_blank" rel="noopener" style="color:var(--primary);text-decoration:underline;text-underline-offset:2px;">勞動部公開資料</a>，本站定期同步。
@@ -91,7 +87,7 @@
     </div>
   </section>
 
-  <!-- 看資料前請先了解（從底部移到這裡，避免使用者誤判數據） -->
+  <!-- 看資料前請先了解 -->
   <section style="padding:0 0 24px;">
     <div class="container">
       <div class="viol-notice">
@@ -101,9 +97,9 @@
         <div class="viol-notice-body">
           <div class="viol-notice-title">看資料前請先了解</div>
           <ul class="viol-notice-list">
-            <li>來源為<strong>勞動部公開的事業單位違反勞動法令裁處資料</strong>，本站只是把醫療相關事業單位整理出來方便查閱。</li>
-            <li><strong>一次違規不代表機構整體勞動環境差</strong> — 大型醫院因規模大、被檢查機會多，自然容易出現紀錄。</li>
-            <li><strong>沒有違規紀錄也不代表完全合規</strong> — 可能只是還沒被檢查到。</li>
+            <li>來源為<strong>勞動部公開的違反職業安全衛生法裁處資料</strong>，本站將醫療相關事業單位整理出來方便查閱。</li>
+            <li>常見違規類型包含：<strong>職業災害通報延遲、化學品管理不當、健康檢查未落實</strong>等。</li>
+            <li><strong>職業災害相關記錄</strong>會在明細中顯示罹災人數、發生日期、發生地點。</li>
             <li>建議與「<a href="platform.html">資料平台</a>」上實際工作者的匿名分享一起判讀。</li>
           </ul>
         </div>
@@ -184,11 +180,11 @@
   <script type="module">
     import { mountLayout } from './js/components.js?v=16';
     import { renderIcons } from './js/icons.js?v=16';
-    import { initViolations } from './js/violations.js?v=16';
+    import { initOsha } from './js/osha.js?v=16';
 
     mountLayout();
     renderIcons();
-    initViolations();
+    initOsha();
   </script>
 </body>
 </html>

@@ -42,6 +42,8 @@ const NAV_ITEMS = [
   { href: 'platform.html',    label: '資料平台', match: ['platform.html'] },
   { href: 'stats.html',       label: '統計摘要', match: ['stats.html'] },
   { href: 'violations.html',  label: '勞檢紀錄', match: ['violations.html'] },
+  { href: 'gender.html',      label: '性平紀錄', match: ['gender.html'] },
+  { href: 'osha.html',        label: '職安紀錄', match: ['osha.html'] },
   { href: 'participate.html', label: '填寫表單', match: ['participate.html'] },
   { href: 'about.html',       label: '關於',     match: ['about.html'] },
 ];
@@ -102,6 +104,8 @@ function footerHTML() {
               <li><a href="platform.html">資料平台</a></li>
               <li><a href="stats.html">統計摘要</a></li>
               <li><a href="violations.html">勞檢紀錄</a></li>
+              <li><a href="gender.html">性平紀錄</a></li>
+              <li><a href="osha.html">職安紀錄</a></li>
               <li><a href="participate.html">填寫表單</a></li>
             </ul>
           </div>
@@ -159,9 +163,15 @@ export function mountLayout() {
     .then(({ preloadAll }) => preloadAll && preloadAll())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
 
-  // 背景預載勞檢紀錄資料：同樣讓使用者切過去時即時顯示
+  // 背景預載勞檢/性平/職安紀錄資料：同樣讓使用者切過去時即時顯示
   import('./violations.js?v=16')
     .then(({ preloadViolations }) => preloadViolations && preloadViolations())
+    .catch(() => { /* 預載失敗不影響任何 UI */ });
+  import('./gender.js?v=16')
+    .then(({ preloadGender }) => preloadGender && preloadGender())
+    .catch(() => { /* 預載失敗不影響任何 UI */ });
+  import('./osha.js?v=16')
+    .then(({ preloadOsha }) => preloadOsha && preloadOsha())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
 }
 
