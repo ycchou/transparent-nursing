@@ -265,14 +265,16 @@ h1[id], h2[id], h3[id] {
   color: var(--primary);
 }
 
-/* 「複製連結」按鈕成功狀態 */
-#modal-copylink-btn.copied {
+/* 「複製連結」按鈕成功狀態 — 給 platform 詳情 modal + violations 詳情 modal 共用 */
+#modal-copylink-btn.copied,
+#viol-modal-copylink.copied {
   background: var(--success);
   color: white;
   border-color: var(--success);
   transition: background .2s ease, color .2s ease, border-color .2s ease;
 }
-#modal-copylink-btn.copied:hover {
+#modal-copylink-btn.copied:hover,
+#viol-modal-copylink.copied:hover {
   background: var(--success);
   color: white;
   border-color: var(--success);
@@ -1252,11 +1254,37 @@ h1[id], h2[id], h3[id] {
   color: var(--danger);
   white-space: nowrap;
 }
-.viol-table .viol-desc {
-  max-width: 280px;
-  color: var(--muted);
-  font-size: 0.88rem;
+/* 機構名稱欄：拿掉舊的 cell-trunc 截斷、允許換行、給更多寬度 */
+.viol-table .viol-inst-col { min-width: 240px; }
+.viol-table .viol-inst-cell {
+  color: var(--ink);
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: normal;
+  word-break: break-word;
 }
+
+/* 每列可點：hover 高亮 + cursor 指標，讓使用者知道可以點開細節 */
+.viol-table tbody tr.viol-row { cursor: pointer; transition: background .12s ease; }
+.viol-table tbody tr.viol-row:hover { background: rgba(46, 134, 171, 0.06); }
+
+/* 詳情 modal：勞檢紀錄用的紅色 tag（跟 platform 的分類 tag 區隔）*/
+.viol-detail-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  background: rgba(230, 57, 70, 0.10);
+  color: var(--danger);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.viol-detail-modal .modal-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 600px) {
+  .viol-detail-modal .modal-grid { grid-template-columns: 1fr; }
+}
+body.viol-modal-open { overflow: hidden; }
+
 .viol-law-chip {
   display: inline-block;
   padding: 2px 8px;

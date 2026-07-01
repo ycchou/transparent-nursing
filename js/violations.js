@@ -1,7 +1,7 @@
 // 勞檢紀錄頁面：fetch CSV → 解析 → 渲染表格 + 篩選 + KPI
 // 資料來源：勞動部公開資料（透過 Google Sheets「發布到網路」CSV URL）
 
-import { renderIcons } from './icons.js?v=16';
+import { renderIcons, icon } from './icons.js?v=16';
 import { ensureTooltip } from './tooltip.js?v=16';
 import { pageSlice, renderPagination } from './pagination.js?v=16';
 
@@ -413,21 +413,19 @@ function renderTable() {
             <th class="seq-col">#</th>
             <th>處分日期</th>
             <th>地點</th>
-            <th>機構名稱</th>
+            <th class="viol-inst-col">機構名稱</th>
             <th>違反法條</th>
-            <th>法條敘述</th>
             <th style="text-align:right;">罰鍰 (元)</th>
           </tr>
         </thead>
         <tbody>
           ${pageRows.map((r) => `
-            <tr>
+            <tr class="viol-row" data-id="${r.id}">
               <td class="seq-col">#${r.id}</td>
               <td><span class="viol-date">${r.penaltyDate ? formatROCDate(r.penaltyDate) : r.penaltyDateRaw || '—'}</span></td>
               <td>${renderLocCell(r)}</td>
-              <td><span class="cell-trunc" data-key="institutionName" title="${(r.institutionName || '').replaceAll('"','&quot;')}">${r.institutionName || '—'}</span></td>
+              <td class="viol-inst-cell">${r.institutionName || '—'}</td>
               <td>${renderLawChips(r.articles, r.lawArticle)}</td>
-              <td><span class="cell-trunc viol-desc" title="${(r.lawDesc || '').replaceAll('"','&quot;')}">${r.lawDesc || '—'}</span></td>
               <td class="viol-fine">${fmtFine(r.fine)}</td>
             </tr>
           `).join('')}
@@ -436,6 +434,18 @@ function renderTable() {
     </div>
     <div class="pagination-mount"></div>
   `;
+
+  // Row click → 開 detail modal + 更新 URL
+  c.querySelectorAll('.viol-row').forEach((tr) => {
+    tr.addEventListener('click', () => {
+      const id = tr.dataset.id;
+      const row = state.rows.find((r) => r.id === id);
+      if (row) {
+        setDeepLinkUrl(id);
+        openDetailModal(row);
+      }
+    });
+  });
 
   renderPagination(c.querySelector('.pagination-mount'), pageInfo, (newPage) => {
     state.page = newPage;
@@ -492,12 +502,166 @@ export function preloadViolations() {
   }
 }
 
+// ============== Deep-link + Detail Modal ==============
+
+function parseDeepLinkId() {
+  const raw = new URL(location.href).searchParams.get('id');
+  return raw ? String(raw).trim() : null;
+}
+function setDeepLinkUrl(id, replace = false) {
+  const u = new URL(location.href);
+  if (id == null) u.searchParams.delete('id');
+  else u.searchParams.set('id', String(id));
+  const fn = replace ? 'replaceState' : 'pushState';
+  history[fn]({ id: id ?? null }, '', u.toString());
+}
+
+function openDetailModal(row) {
+  const backdrop = document.getElementById('viol-detail-modal') || (() => {
+    const el = document.createElement('div');
+    el.id = 'viol-detail-modal';
+    el.className = 'modal-backdrop';
+    document.body.appendChild(el);
+    return el;
+  })();
+
+  const dateStr = row.penaltyDate ? formatROCDate(row.penaltyDate) : (row.penaltyDateRaw || '—');
+  const pubStr  = row.publishDate ? formatROCDate(row.publishDate) : (row.publishDateRaw || '—');
+  const fineStr = row.fine ? row.fine.toLocaleString() : '—';
+  const locFull = row.locationRaw || row.location || '—';
+  const chipsHtml = renderLawChips(row.articles, row.lawArticle);
+  const escapeHtml = (s) => String(s == null ? '' : s)
+    .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+
+  backdrop.innerHTML = `
+    <div class="modal viol-detail-modal" role="dialog">
+      <div class="modal-header">
+        <div style="min-width:0;flex:1;">
+          <span class="viol-detail-tag">勞檢紀錄 · #${row.id}</span>
+          <h3 style="margin:8px 0 0;word-break:break-word;">${escapeHtml(row.institutionName) || '未填寫'}</h3>
+          <div style="color:var(--muted);font-size:0.88rem;margin-top:4px;">
+            ${escapeHtml(locFull)}${row.penaltyDate ? ' · ' + dateStr + ' 處分' : ''}
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-start;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
+          <button id="viol-modal-copylink" class="btn btn-secondary" style="padding:8px 14px;font-size:0.85rem;gap:6px;" title="複製這筆的永久連結">
+            ${icon('link', { size: 14 })}
+            <span>複製連結</span>
+          </button>
+          <button class="modal-close" aria-label="關閉">${icon('x', { size: 16 })}</button>
+        </div>
+      </div>
+      <div class="modal-grid">
+        <div>
+          <div class="key">處分日期</div>
+          <div class="val">${dateStr}</div>
+        </div>
+        <div>
+          <div class="key">公告日期</div>
+          <div class="val">${pubStr}</div>
+        </div>
+        <div>
+          <div class="key">主管機關</div>
+          <div class="val">${escapeHtml(locFull)}</div>
+        </div>
+        <div>
+          <div class="key">處分字號</div>
+          <div class="val">${escapeHtml(row.docId) || '—'}</div>
+        </div>
+        <div>
+          <div class="key">罰鍰 (元)</div>
+          <div class="val" style="font-weight:600;color:var(--danger);">${fineStr}</div>
+        </div>
+        <div>
+          <div class="key">違反法條 (標籤)</div>
+          <div class="val">${chipsHtml}</div>
+        </div>
+      </div>
+      <hr class="divider" />
+      <div>
+        <div class="key" style="color:var(--muted);font-size:0.85rem;margin-bottom:6px;">違反法規條款（完整）</div>
+        <p style="margin:0;color:var(--ink-soft);line-height:1.8;">${escapeHtml(row.lawArticle) || '—'}</p>
+      </div>
+      ${row.lawDesc ? `
+        <hr class="divider" />
+        <div>
+          <div class="key" style="color:var(--muted);font-size:0.85rem;margin-bottom:6px;">法條敘述</div>
+          <p style="margin:0;color:var(--ink-soft);line-height:1.8;">${escapeHtml(row.lawDesc)}</p>
+        </div>
+      ` : ''}
+      ${row.note ? `
+        <hr class="divider" />
+        <div>
+          <div class="key" style="color:var(--muted);font-size:0.85rem;margin-bottom:6px;">備註</div>
+          <p style="margin:0;color:var(--ink-soft);line-height:1.8;">${escapeHtml(row.note)}</p>
+        </div>
+      ` : ''}
+    </div>
+  `;
+
+  backdrop.classList.add('open');
+  document.body.classList.add('viol-modal-open');
+
+  const close = () => {
+    backdrop.classList.remove('open');
+    document.body.classList.remove('viol-modal-open');
+    setDeepLinkUrl(null, true);
+    document.removeEventListener('keydown', escHandler);
+  };
+  const escHandler = (e) => { if (e.key === 'Escape') close(); };
+  backdrop.querySelector('.modal-close').addEventListener('click', close);
+  backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(); });
+  document.addEventListener('keydown', escHandler);
+
+  // 複製連結
+  const copyBtn = backdrop.querySelector('#viol-modal-copylink');
+  const copyLabelEl = copyBtn?.querySelector('span:last-child');
+  let copyResetTimer;
+  copyBtn?.addEventListener('click', async () => {
+    const u = new URL(location.href);
+    u.searchParams.set('id', String(row.id));
+    u.hash = '';
+    const link = u.toString();
+    const flashCopied = () => {
+      copyBtn.classList.add('copied');
+      if (copyLabelEl) copyLabelEl.textContent = '已複製';
+      clearTimeout(copyResetTimer);
+      copyResetTimer = setTimeout(() => {
+        copyBtn.classList.remove('copied');
+        if (copyLabelEl) copyLabelEl.textContent = '複製連結';
+      }, 1800);
+    };
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(link);
+        flashCopied();
+      } else {
+        window.prompt('請手動複製此連結：', link);
+      }
+    } catch {
+      window.prompt('請手動複製此連結：', link);
+    }
+  });
+
+  ensureTooltip();
+}
+
+function closeDetailModal() {
+  const backdrop = document.getElementById('viol-detail-modal');
+  if (backdrop && backdrop.classList.contains('open')) {
+    backdrop.classList.remove('open');
+    document.body.classList.remove('viol-modal-open');
+  }
+}
+
 export async function initViolations() {
   const container = document.getElementById('viol-table-container');
   container.innerHTML = `
     <div class="data-table-wrap" style="padding:24px;">
       ${Array.from({length:8}).map(() => `<div class="skeleton" style="height:36px;margin-bottom:8px;"></div>`).join('')}
     </div>`;
+
+  const pendingDeepLinkId = parseDeepLinkId();
 
   try {
     state.rows = await load();
@@ -517,6 +681,28 @@ export async function initViolations() {
         renderAll();
       }, 200));
     }
+
+    // 處理 deep-link：資料就緒後找對應 row 開 modal
+    if (pendingDeepLinkId) {
+      const target = state.rows.find((r) => r.id === pendingDeepLinkId);
+      if (target) {
+        openDetailModal(target);
+      } else {
+        setDeepLinkUrl(null, true);
+        console.warn(`[violations] 找不到 #${pendingDeepLinkId} 這筆資料`);
+      }
+    }
+
+    // 處理上一頁/下一頁：URL 變化時開關 modal
+    window.addEventListener('popstate', () => {
+      const id = parseDeepLinkId();
+      if (id) {
+        const row = state.rows.find((r) => r.id === id);
+        if (row) openDetailModal(row);
+      } else {
+        closeDetailModal();
+      }
+    });
   } catch (e) {
     console.error(e);
     document.getElementById('viol-table-container').innerHTML =
