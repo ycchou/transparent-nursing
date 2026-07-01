@@ -100,8 +100,22 @@ export function mountSalaryCalculator(getRows, getConditions) {
   if (document.getElementById('calc-modal')) {
     // 已經 mount 過：回傳對既有 modal 的 open/close 操作
     return {
-      open() { const m = document.getElementById('calc-modal'); if (m) { m.hidden = false; requestAnimationFrame(() => m.classList.add('open')); } },
-      close() { const m = document.getElementById('calc-modal'); if (m) { m.classList.remove('open'); setTimeout(() => { m.hidden = true; }, 180); } },
+      open() {
+        const m = document.getElementById('calc-modal');
+        if (m) {
+          m.hidden = false;
+          requestAnimationFrame(() => m.classList.add('open'));
+          document.body.classList.add('calc-modal-open');
+        }
+      },
+      close() {
+        const m = document.getElementById('calc-modal');
+        if (m) {
+          m.classList.remove('open');
+          document.body.classList.remove('calc-modal-open');
+          setTimeout(() => { m.hidden = true; }, 180);
+        }
+      },
     };
   }
 
@@ -141,14 +155,25 @@ export function mountSalaryCalculator(getRows, getConditions) {
   const goBtn = document.getElementById('calc-go');
   const resultEl = document.getElementById('calc-result');
 
+  // 數值 clamp helper — 給結果卡的分布條 tick 定位用。
+  // NOTE: 舊版把這個 helper 混在浮動氣泡的拖曳邏輯裡；改 inline 觸發卡時砍氣泡邏輯連帶砍掉，
+  // 導致 run() 內 markerLeft / p25Left 等呼叫變成 ReferenceError → 試算按鈕整個掛掉。
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
   function openModal() {
     modal.hidden = false;
     requestAnimationFrame(() => modal.classList.add('open'));
-    setTimeout(() => input.focus(), 80);
+    document.body.classList.add('calc-modal-open');
+    setTimeout(() => {
+      input.focus();
+      // 鍵盤跳出後把輸入框捲到中央，避免被虛擬鍵盤覆蓋
+      setTimeout(() => input.scrollIntoView({ block: 'center', behavior: 'smooth' }), 250);
+    }, 80);
     document.addEventListener('keydown', onKey);
   }
   function closeModal() {
     modal.classList.remove('open');
+    document.body.classList.remove('calc-modal-open');
     setTimeout(() => { modal.hidden = true; }, 180);
     document.removeEventListener('keydown', onKey);
   }
