@@ -50,6 +50,66 @@
   <link rel="modulepreload" href="./js/pwa-prompt.js?v=16" />
   <link rel="modulepreload" href="./js/records-common.js?v=16" />
 
+  <!-- JSON-LD Structured Data：三份 Dataset（Google Dataset Search 認得） -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Dataset",
+        "@id": "https://transparentnursing.example.org/records.html?type=labor#dataset",
+        "name": "醫療院所勞動基準法違規紀錄",
+        "description": "整合勞動部公開的醫療事業單位違反勞動基準法裁處資料，含機構、時間、條款、罰鍰。",
+        "url": "https://transparentnursing.example.org/records.html?type=labor",
+        "keywords": ["勞動基準法", "勞檢", "醫院違規", "護理職場", "加班費", "工時"],
+        "creator": {
+          "@type": "GovernmentOrganization",
+          "name": "勞動部",
+          "url": "https://announcement.mol.gov.tw/"
+        },
+        "publisher": { "@type": "Organization", "name": "護理職場透明化運動", "url": "https://transparentnursing.example.org/" },
+        "isAccessibleForFree": true,
+        "license": "https://data.gov.tw/license",
+        "inLanguage": "zh-Hant-TW"
+      },
+      {
+        "@type": "Dataset",
+        "@id": "https://transparentnursing.example.org/records.html?type=gender#dataset",
+        "name": "醫療院所性別平等工作法違規紀錄",
+        "description": "整合勞動部公開的醫療事業單位違反性別平等工作法裁處資料，含性騷擾防治、育嬰留停、性別歧視等。",
+        "url": "https://transparentnursing.example.org/records.html?type=gender",
+        "keywords": ["性別平等工作法", "職場性騷擾", "育嬰留停", "性別歧視", "醫院違規"],
+        "creator": {
+          "@type": "GovernmentOrganization",
+          "name": "勞動部",
+          "url": "https://announcement.mol.gov.tw/"
+        },
+        "publisher": { "@type": "Organization", "name": "護理職場透明化運動", "url": "https://transparentnursing.example.org/" },
+        "isAccessibleForFree": true,
+        "license": "https://data.gov.tw/license",
+        "inLanguage": "zh-Hant-TW"
+      },
+      {
+        "@type": "Dataset",
+        "@id": "https://transparentnursing.example.org/records.html?type=osha#dataset",
+        "name": "醫療院所職業安全衛生法違規紀錄",
+        "description": "整合勞動部公開的醫療事業單位違反職業安全衛生法裁處資料，含職業災害通報、化學品管理、健康檢查等。",
+        "url": "https://transparentnursing.example.org/records.html?type=osha",
+        "keywords": ["職業安全衛生法", "職業災害", "化學品管理", "健康檢查", "醫院違規"],
+        "creator": {
+          "@type": "GovernmentOrganization",
+          "name": "勞動部",
+          "url": "https://announcement.mol.gov.tw/"
+        },
+        "publisher": { "@type": "Organization", "name": "護理職場透明化運動", "url": "https://transparentnursing.example.org/" },
+        "isAccessibleForFree": true,
+        "license": "https://data.gov.tw/license",
+        "inLanguage": "zh-Hant-TW"
+      }
+    ]
+  }
+  </script>
+
   <!-- 強制清除舊版 cache -->
   <script>
     (function() {

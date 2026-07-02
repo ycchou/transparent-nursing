@@ -57,6 +57,63 @@
   <link rel="modulepreload" href="./js/charts.js?v=16" />
   <link rel="modulepreload" href="./js/official-stats.js?v=16" />
 
+  <!-- JSON-LD Structured Data：官方參考數據四份資料集 -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Dataset",
+        "@id": "https://transparentnursing.example.org/stats.html#mohw-112",
+        "name": "112 年醫院護理服務量調查（衛福部）",
+        "description": "全國 471 家醫院護理師薪資、夜班費、離職率等指標調查（回填率 96.82%）。",
+        "url": "https://transparentnursing.example.org/stats.html",
+        "keywords": ["護理師薪資", "夜班費", "離職率", "護理服務量", "醫院層級"],
+        "creator": { "@type": "GovernmentOrganization", "name": "衛福部護理及健康照護司" },
+        "publisher": { "@type": "Organization", "name": "護理職場透明化運動" },
+        "isAccessibleForFree": true,
+        "inLanguage": "zh-Hant-TW"
+      },
+      {
+        "@type": "Dataset",
+        "@id": "https://transparentnursing.example.org/stats.html#tnc-111",
+        "name": "111 年醫院護理人員薪資及人力調查（護理全聯會）",
+        "description": "185 家醫院護理師薪資範圍調查，含五大地區、機構層級、年資交叉分析。",
+        "url": "https://transparentnursing.example.org/stats.html",
+        "keywords": ["護理人員薪資", "地區薪資", "醫院層級"],
+        "creator": { "@type": "Organization", "name": "社團法人臺灣護理學會（護理全聯會）" },
+        "publisher": { "@type": "Organization", "name": "護理職場透明化運動" },
+        "isAccessibleForFree": true,
+        "inLanguage": "zh-Hant-TW"
+      },
+      {
+        "@type": "Dataset",
+        "@id": "https://transparentnursing.example.org/stats.html#tnc-114",
+        "name": "114 年護理人力監測指標（護理全聯會）",
+        "description": "10 年（105~114）護理人力監測，含職場流向、平均年資、初次執業、淨增減率。",
+        "url": "https://transparentnursing.example.org/stats.html",
+        "keywords": ["護理人力", "職場流向", "護理師年資"],
+        "creator": { "@type": "Organization", "name": "社團法人臺灣護理學會（護理全聯會）" },
+        "publisher": { "@type": "Organization", "name": "護理職場透明化運動" },
+        "isAccessibleForFree": true,
+        "inLanguage": "zh-Hant-TW"
+      },
+      {
+        "@type": "Dataset",
+        "@id": "https://transparentnursing.example.org/stats.html#mol-114",
+        "name": "102~114 年職類別薪資調查・醫療保健業護理人員（勞動部）",
+        "description": "勞動部職類別薪資調查中 222090 護理人員的 13 年趨勢：7 月經常性薪資、全年薪資、受僱員工人數。",
+        "url": "https://transparentnursing.example.org/stats.html",
+        "keywords": ["護理人員薪資", "職類別薪資", "薪資趨勢", "勞動部"],
+        "creator": { "@type": "GovernmentOrganization", "name": "勞動部", "url": "https://pswst.mol.gov.tw/" },
+        "publisher": { "@type": "Organization", "name": "護理職場透明化運動" },
+        "isAccessibleForFree": true,
+        "inLanguage": "zh-Hant-TW"
+      }
+    ]
+  }
+  </script>
+
   <!-- 強制清除舊版 cache -->
   <script>
     (function() {
