@@ -1293,6 +1293,44 @@ h1[id], h2[id], h3[id] {
   .records-subtab-badge { top: 12px; right: 14px; }
 }
 
+/* ---------- records.html 緊湊型 intro strip ---------- */
+.records-intro-strip {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 14px;
+  background: rgba(46, 134, 171, 0.05);
+  border-left: 3px solid var(--primary);
+  border-radius: 6px;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  color: var(--ink-soft);
+}
+.records-intro-icon {
+  flex-shrink: 0;
+  color: var(--primary);
+  margin-top: 2px;
+  display: inline-flex;
+}
+.records-intro-body { flex: 1; min-width: 0; }
+.records-intro-tab {
+  margin: 0 0 6px;
+  color: var(--ink);
+}
+.records-intro-tab strong { color: var(--primary); font-weight: 600; }
+.records-intro-common {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+.records-intro-common strong { color: var(--ink); font-weight: 600; }
+.records-intro-common a { color: var(--primary); font-weight: 600; }
+@media (max-width: 640px) {
+  .records-intro-strip { padding: 10px 12px; font-size: 0.82rem; }
+  .records-intro-tab { margin-bottom: 4px; }
+  .records-intro-common { font-size: 0.78rem; }
+}
+
 /* ---------- 勞檢紀錄表格專屬 ---------- */
 .viol-table th { background: var(--surface-soft); }
 .viol-table .viol-date {

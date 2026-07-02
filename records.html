@@ -80,6 +80,9 @@
         <strong style="color:var(--ink);">勞動基準法、性別平等工作法、職業安全衛生法</strong>
         三大類別。選擇下方分頁瀏覽。
       </p>
+      <p style="color:var(--muted-light);font-size:0.85rem;margin-top:10px;">
+        資料來源：<a href="https://announcement.mol.gov.tw/" target="_blank" rel="noopener" style="color:var(--primary);text-decoration:underline;text-underline-offset:2px;">勞動部公開資料</a>，本站定期同步。
+      </p>
     </div>
   </section>
 
@@ -106,43 +109,26 @@
     </div>
   </section>
 
-  <!-- 看資料前請先了解（依 active tab 顯示對應說明） -->
-  <section style="padding:0 0 24px;">
+  <!-- 緊湊 info strip：上段隨 tab 換、下段共通永遠顯示 -->
+  <section style="padding:0 0 20px;">
     <div class="container">
-      <div class="viol-notice" data-intro="labor" hidden>
-        <div class="viol-notice-icon"><span data-icon="info" data-size="22"></span></div>
-        <div class="viol-notice-body">
-          <div class="viol-notice-title">看資料前請先了解</div>
-          <ul class="viol-notice-list">
-            <li>來源為<strong>勞動部公開的事業單位違反勞動法令裁處資料</strong>，本站只是把醫療相關事業單位整理出來方便查閱。</li>
-            <li><strong>一次違規不代表機構整體勞動環境差</strong> — 大型醫院因規模大、被檢查機會多，自然容易出現紀錄。</li>
-            <li><strong>沒有違規紀錄也不代表完全合規</strong> — 可能只是還沒被檢查到。</li>
-            <li>建議與「<a href="platform.html">資料平台</a>」上實際工作者的匿名分享一起判讀。</li>
-          </ul>
-        </div>
-      </div>
-      <div class="viol-notice" data-intro="gender" hidden>
-        <div class="viol-notice-icon"><span data-icon="info" data-size="22"></span></div>
-        <div class="viol-notice-body">
-          <div class="viol-notice-title">看資料前請先了解</div>
-          <ul class="viol-notice-list">
-            <li>來源為<strong>勞動部公開的違反性別平等工作法裁處資料</strong>，本站將醫療相關事業單位整理出來方便查閱。</li>
-            <li>常見違規類型包含：<strong>職場性騷擾防治不周、拒絕育嬰留停復職、生理假限制</strong>等。</li>
-            <li><strong>沒有違規紀錄不代表完全合規</strong> — 也可能只是還沒被檢查或申訴。</li>
-            <li>建議與「<a href="platform.html">資料平台</a>」上實際工作者的匿名分享一起判讀。</li>
-          </ul>
-        </div>
-      </div>
-      <div class="viol-notice" data-intro="osha" hidden>
-        <div class="viol-notice-icon"><span data-icon="info" data-size="22"></span></div>
-        <div class="viol-notice-body">
-          <div class="viol-notice-title">看資料前請先了解</div>
-          <ul class="viol-notice-list">
-            <li>來源為<strong>勞動部公開的違反職業安全衛生法裁處資料</strong>，本站將醫療相關事業單位整理出來方便查閱。</li>
-            <li>常見違規類型包含：<strong>職業災害通報延遲、化學品管理不當、健康檢查未落實</strong>等。</li>
-            <li><strong>職業災害相關記錄</strong>會在明細中顯示罹災人數、發生日期、發生地點。</li>
-            <li>建議與「<a href="platform.html">資料平台</a>」上實際工作者的匿名分享一起判讀。</li>
-          </ul>
+      <div class="records-intro-strip">
+        <span class="records-intro-icon" aria-hidden="true">
+          <span data-icon="info" data-size="16"></span>
+        </span>
+        <div class="records-intro-body">
+          <p class="records-intro-tab" data-intro="labor" hidden>
+            本資料為勞動部公開的<strong>違反勞動基準法</strong>裁處紀錄；一次違規不代表整體差 — 大醫院因規模大、被檢查機會多，自然容易出現紀錄。
+          </p>
+          <p class="records-intro-tab" data-intro="gender" hidden>
+            本資料為勞動部公開的<strong>違反性別平等工作法</strong>裁處紀錄，常見類型：<strong>職場性騷擾防治、育嬰留停復職、生理假</strong>等。
+          </p>
+          <p class="records-intro-tab" data-intro="osha" hidden>
+            本資料為勞動部公開的<strong>違反職業安全衛生法</strong>裁處紀錄，常見類型：<strong>職災通報、化學品管理、健康檢查</strong>等；明細內有職災案件之罹災人數/日期/地點。
+          </p>
+          <p class="records-intro-common">
+            <strong>沒有違規紀錄也不代表完全合規</strong> — 可能只是還沒被檢查到；建議與「<a href="platform.html">資料平台</a>」上實際工作者的匿名分享一起判讀。
+          </p>
         </div>
       </div>
     </div>
