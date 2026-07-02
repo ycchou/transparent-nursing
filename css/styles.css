@@ -4209,10 +4209,54 @@ body.g2g-modal-open { overflow: hidden; }
   border-radius: 14px;
 }
 
-/* KPI 超標時的紅字 */
-.kpi-num .over-std {
-  color: var(--danger);
+/* KPI 3 級狀態顏色（safe/watch/danger） */
+.kpi-num .status-safe   { color: #06A77D; }
+.kpi-num .status-watch  { color: #F4A261; }
+.kpi-num .status-danger { color: var(--danger); }
+/* backward compat：舊 CSS class 保留 */
+.kpi-num .over-std { color: var(--danger); }
+
+/* 「為什麼這樣分類？」展開式說明 */
+.nurse-compliance-explain {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  width: 100%;
 }
+.nurse-compliance-explain summary {
+  cursor: pointer;
+  color: var(--primary);
+  font-weight: 600;
+  padding: 4px 0;
+  list-style: none;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.nurse-compliance-explain summary::-webkit-details-marker { display: none; }
+.nurse-compliance-explain summary::before {
+  content: '▸';
+  display: inline-block;
+  transition: transform .2s ease;
+}
+.nurse-compliance-explain[open] summary::before { transform: rotate(90deg); }
+.nurse-compliance-explain summary:hover { color: var(--primary-dark, #1F5F7A); }
+.nurse-compliance-explain > div {
+  margin-top: 10px;
+  padding: 14px 18px;
+  background: rgba(46, 134, 171, 0.05);
+  border-left: 3px solid var(--primary);
+  border-radius: 6px;
+  line-height: 1.75;
+  color: var(--ink-soft);
+}
+.nurse-compliance-explain > div p { margin: 0 0 8px; }
+.nurse-compliance-explain > div p:last-child { margin-bottom: 0; }
+.nurse-compliance-explain ul { margin: 6px 0 8px; padding-left: 1.2rem; }
+.nurse-compliance-explain ul li { margin-bottom: 4px; }
+.nurse-compliance-explain .status-safe-txt   { color: #06A77D; }
+.nurse-compliance-explain .status-watch-txt  { color: #b96b1f; }
+.nurse-compliance-explain .status-danger-txt { color: var(--danger); }
 
 /* 合規篩選按鈕列（多列時排版） */
 .nurse-picker-filter-row {

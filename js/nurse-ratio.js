@@ -26,16 +26,31 @@ const COLORS = {
 };
 
 // 合規分類（依最新月份對照該層級標準）
-//   A (green): 三班全部 <= 標準（含小於）→「全達標」
-//   B (amber): 有超標但都 <= 標準 × 1.05 → 「輕度超標」
-//   C (red):   任一班超過標準 × 1.05 → 「嚴重超標」
-const COMPLIANCE_TOLERANCE = 0.05;
+//   每一班別的判定：
+//     safe   : ratio < std × 0.95         （明確低於標準 5%）
+//     watch  : std × 0.95 ≤ ratio ≤ std × 1.05  （落在標準 ±5% 邊界）
+//     danger : ratio > std × 1.05         （明顯超過標準 5%）
+//   醫院分類（取最壞班別）：
+//     A · 達標 (green)：三班全部 safe
+//     B · 觀察 (amber)：至少一班 watch，且無 danger
+//     C · 警戒 (red)  ：至少一班 danger
+const COMPLIANCE_TOLERANCE = 0.05;  // ±5%
 const COMPLIANCE_CLASSES = {
-  A: { key: 'A', label: '全達標', color: '#06A77D', bg: 'rgba(6,167,125,0.13)' },
-  B: { key: 'B', label: '輕度超標', color: '#F4A261', bg: 'rgba(244,162,97,0.15)' },
-  C: { key: 'C', label: '嚴重超標', color: '#E63946', bg: 'rgba(230,57,70,0.13)' },
+  A: { key: 'A', label: '達標', color: '#06A77D', bg: 'rgba(6,167,125,0.13)' },
+  B: { key: 'B', label: '觀察', color: '#F4A261', bg: 'rgba(244,162,97,0.15)' },
+  C: { key: 'C', label: '警戒', color: '#E63946', bg: 'rgba(230,57,70,0.13)' },
   N: { key: 'N', label: '未報', color: '#6B7C93', bg: 'rgba(107,124,147,0.10)' },
 };
+
+// 單一班別狀態
+function shiftStatus(val, std) {
+  if (val == null || std == null) return null;
+  const upper = std * (1 + COMPLIANCE_TOLERANCE);
+  const lower = std * (1 - COMPLIANCE_TOLERANCE);
+  if (val > upper) return 'danger';
+  if (val >= lower) return 'watch';
+  return 'safe';
+}
 
 function classifyHospital(hosp) {
   const std = STANDARDS[hosp.level];
@@ -47,20 +62,14 @@ function classifyHospital(hosp) {
     if (hosp.history[months[i]]) { latest = hosp.history[months[i]]; break; }
   }
   if (!latest) return 'N';
-  const shifts = [
-    { val: latest.day,   std: std.day },
-    { val: latest.eve,   std: std.eve },
-    { val: latest.night, std: std.night },
-  ].filter((s) => s.val != null);
-  if (shifts.length === 0) return 'N';
-  let anyExceedTol = false;
-  let anyExceedStd = false;
-  for (const s of shifts) {
-    if (s.val > s.std * (1 + COMPLIANCE_TOLERANCE)) anyExceedTol = true;
-    if (s.val > s.std) anyExceedStd = true;
-  }
-  if (anyExceedTol) return 'C';
-  if (anyExceedStd) return 'B';
+  const statuses = [
+    shiftStatus(latest.day, std.day),
+    shiftStatus(latest.eve, std.eve),
+    shiftStatus(latest.night, std.night),
+  ].filter((s) => s != null);
+  if (statuses.length === 0) return 'N';
+  if (statuses.includes('danger')) return 'C';
+  if (statuses.includes('watch')) return 'B';
   return 'A';
 }
 
@@ -223,10 +232,10 @@ function renderDetail(hosp) {
   const setKpi = (id, val, standard) => {
     const el = document.getElementById(id);
     if (!el) return;
-    const overStd = (val != null && standard != null && val > standard);
-    el.innerHTML = val != null
-      ? `<span class="${overStd ? 'over-std' : ''}">${val.toFixed(1)}</span>`
-      : '—';
+    if (val == null) { el.innerHTML = '—'; return; }
+    const status = shiftStatus(val, standard);  // 'safe' | 'watch' | 'danger' | null
+    const cls = status ? `status-${status}` : '';
+    el.innerHTML = `<span class="${cls}">${val.toFixed(1)}</span>`;
   };
   const kpiLabel = latestMonth ? formatRocMonth(latestMonth) : '';
   document.getElementById('kpi-day-label').textContent = `${kpiLabel} 白班護病比`;
