@@ -9,6 +9,7 @@ import {
   shortenLocation,
   createCsvLoader,
   initRecordsPage,
+  getCachedCount,
 } from './records-common.js?v=16';
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9_GMqmZfaampaPKcnetc5UqhvKueTvDYBO71LhKbTY9E1sdlie-wHM0krYmEkQFSurFRh-bdevS1_/pub?gid=1130584206&single=true&output=csv';
@@ -96,3 +97,4 @@ export const initOsha = initRecordsPage({
 });
 
 export function preloadOsha() { loader.preload(); }
+export function getOshaCount() { return getCachedCount(STORAGE_KEY); }

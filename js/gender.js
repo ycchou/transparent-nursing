@@ -8,6 +8,7 @@ import {
   shortenLocation,
   createCsvLoader,
   initRecordsPage,
+  getCachedCount,
 } from './records-common.js?v=16';
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSpvfTkfNPgrf4dtpZrpRmign7EB9ISShRslgAhVcxRu-WO3G9I4W5efjSjMan_RnId0-rDvju4gzfy/pub?gid=1540285352&single=true&output=csv';
@@ -78,3 +79,4 @@ export const initGender = initRecordsPage({
 });
 
 export function preloadGender() { loader.preload(); }
+export function getGenderCount() { return getCachedCount(STORAGE_KEY); }

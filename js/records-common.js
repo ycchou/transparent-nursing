@@ -91,6 +91,18 @@ export function debounce(fn, ms) {
   return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); };
 }
 
+// 讀 localStorage 拿目前 cache 的筆數（給 records.html 頂部 sub-tab 徽章用）
+// 完全不 fetch、不解析日期，成本極低
+export function getCachedCount(storageKey) {
+  try {
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    if (!obj || !Array.isArray(obj.data)) return null;
+    return obj.data.length;
+  } catch { return null; }
+}
+
 // HTML escape（給 modal 內文字用）
 export function escapeHtml(s) {
   return String(s == null ? '' : s)
