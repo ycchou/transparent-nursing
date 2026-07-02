@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2E86AB" />
+
+  <!-- SEO -->
+  <title>三班護病比 — 護理職場透明化運動</title>
+  <meta name="description" content="整合衛福部公開的全民健保特約醫院 VPN 登錄之各月份三班護病比（白班/小夜/大夜），以醫院為單位呈現 3 年折線圖，並比對法定護病比標準（醫學中心 1:6、區域 1:7、地區 1:10）。" />
+  <meta name="keywords" content="三班護病比, 護病比, 白班, 小夜班, 大夜班, 護理人力, 醫學中心, 區域醫院, 衛福部, VPN 登錄" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <link rel="canonical" href="https://transparentnursing.example.org/nurse-ratio.html" />
+
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon-180.png" />
+  <link rel="apple-touch-icon" sizes="167x167" href="assets/apple-touch-icon-167.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="assets/apple-touch-icon-152.png" />
+  <link rel="apple-touch-icon" sizes="120x120" href="assets/apple-touch-icon-120.png" />
+  <link rel="manifest" href="manifest.json" />
+
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="護理職場透明化" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="護理職場透明化運動" />
+  <meta property="og:title" content="三班護病比 — 護理職場透明化運動" />
+  <meta property="og:description" content="全國醫院三班護病比逐月趨勢圖，比對衛福部法定標準。" />
+  <meta property="og:image" content="https://transparentnursing.example.org/assets/og-image.svg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:url" content="https://transparentnursing.example.org/nurse-ratio.html" />
+  <meta property="og:locale" content="zh_TW" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="三班護病比 — 護理職場透明化運動" />
+  <meta name="twitter:description" content="全國醫院三班護病比逐月趨勢，比對衛福部法定標準。" />
+  <meta name="twitter:image" content="https://transparentnursing.example.org/assets/og-image.svg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css?v=16" />
+
+  <link rel="modulepreload" href="./js/config.js?v=16" />
+  <link rel="modulepreload" href="./js/components.js?v=16" />
+  <link rel="modulepreload" href="./js/icons.js?v=16" />
+  <link rel="modulepreload" href="./js/nurse-ratio.js?v=16" />
+
+  <!-- JSON-LD Structured Data：Dataset -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    "@id": "https://transparentnursing.example.org/nurse-ratio.html#dataset",
+    "name": "全國醫院三班護病比（急性一般病床）",
+    "description": "整合衛福部/健保署公開的全民健保特約醫院 VPN 登錄之各月份三班護病比（白班/小夜班/大夜班），涵蓋 469 家醫院、35 個月份的逐月數據。",
+    "url": "https://transparentnursing.example.org/nurse-ratio.html",
+    "keywords": ["三班護病比", "護病比", "護理人力", "醫院", "衛福部", "健保署"],
+    "creator": {
+      "@type": "GovernmentOrganization",
+      "name": "衛生福利部",
+      "url": "https://www.mohw.gov.tw/"
+    },
+    "publisher": { "@type": "Organization", "name": "護理職場透明化運動", "url": "https://transparentnursing.example.org/" },
+    "isAccessibleForFree": true,
+    "inLanguage": "zh-Hant-TW"
+  }
+  </script>
+
+  <!-- 強制清除舊版 cache -->
+  <script>
+    (function() {
+      try {
+        var FV = 'v16', FLAG = '__nursing_force_' + FV;
+        if (!localStorage.getItem(FLAG)) {
+          Object.keys(localStorage).forEach(function(k) {
+            if (k.indexOf('nursing_csv_') === 0 ||
+                (k.indexOf('__nursing_force_') === 0 && k !== FLAG)) {
+              localStorage.removeItem(k);
+            }
+          });
+          localStorage.setItem(FLAG, String(Date.now()));
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <section style="padding-top:48px;padding-bottom:16px;">
+    <div class="container">
+      <span class="eyebrow">Nurse-to-Patient Ratio</span>
+      <h1 style="margin:4px 0 8px;">三班護病比</h1>
+      <p style="color:var(--muted);max-width:760px;line-height:1.75;">
+        全國醫院<strong style="color:var(--ink);">白班 / 小夜班 / 大夜班</strong>三班護病比逐月變化，
+        虛線標示<strong style="color:var(--ink);">衛福部法定護病比標準</strong>（依醫院層級不同）。
+      </p>
+      <p style="color:var(--muted-light);font-size:0.85rem;margin-top:10px;">
+        資料來源：<a href="https://www.nhi.gov.tw/" target="_blank" rel="noopener" style="color:var(--primary);text-decoration:underline;text-underline-offset:2px;">衛生福利部・健保署公開資料</a>
+        （全民健保特約醫院於 VPN 登錄之各月份急性一般病床三班護病比）
+        <span id="nurse-data-updated"></span>
+      </p>
+    </div>
+  </section>
+
+  <!-- 各級醫院標準參考卡 -->
+  <section style="padding:0 0 20px;">
+    <div class="container">
+      <div class="nurse-std-card">
+        <div class="nurse-std-title">
+          <span data-icon="info" data-size="14" style="color:var(--primary);vertical-align:middle;"></span>
+          各級醫院三班護病比法定標準
+        </div>
+        <div class="nurse-std-table">
+          <div class="nurse-std-row nurse-std-head">
+            <span>醫院層級</span><span>白班</span><span>小夜班</span><span>大夜班</span>
+          </div>
+          <div class="nurse-std-row">
+            <span class="nurse-level-badge nurse-level-mc">醫學中心</span>
+            <span>1 : 6</span><span>1 : 9</span><span>1 : 11</span>
+          </div>
+          <div class="nurse-std-row">
+            <span class="nurse-level-badge nurse-level-rg">區域醫院</span>
+            <span>1 : 7</span><span>1 : 11</span><span>1 : 13</span>
+          </div>
+          <div class="nurse-std-row">
+            <span class="nurse-level-badge nurse-level-dt">地區醫院</span>
+            <span>1 : 10</span><span>1 : 13</span><span>1 : 15</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 醫院選擇區 -->
+  <section style="padding:0 0 24px;">
+    <div class="container">
+      <div class="nurse-picker">
+        <div class="nurse-picker-header">
+          <div class="nurse-picker-title">選擇醫院</div>
+          <div class="nurse-picker-count" id="hospital-count">—</div>
+        </div>
+        <div class="nurse-picker-controls">
+          <input id="hospital-search" type="search" placeholder="搜尋醫院名稱或機構代號..." class="nurse-picker-search" />
+          <div class="nurse-picker-filters">
+            <button type="button" class="nurse-level-filter active" data-level="all">全部</button>
+            <button type="button" class="nurse-level-filter" data-level="醫學中心">醫學中心</button>
+            <button type="button" class="nurse-level-filter" data-level="區域醫院">區域醫院</button>
+            <button type="button" class="nurse-level-filter" data-level="地區醫院">地區醫院</button>
+          </div>
+        </div>
+        <div id="hospital-list" class="nurse-hospital-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 醫院詳情：預設顯示 placeholder -->
+  <section style="padding:0 0 56px;">
+    <div class="container">
+      <div id="hospital-placeholder" class="card card-flat" style="text-align:center;padding:48px 24px;color:var(--muted);">
+        <div style="font-size:2rem;margin-bottom:8px;">📊</div>
+        <div>從上方清單選擇一家醫院查看其三班護病比趨勢</div>
+      </div>
+
+      <div id="hospital-detail" hidden>
+        <!-- 醫院標頭 -->
+        <div class="nurse-hosp-header">
+          <div>
+            <h2 id="hosp-name" style="margin:0 0 8px;">—</h2>
+            <span id="hosp-level" class="nurse-level-badge">—</span>
+            <div id="hosp-code" style="color:var(--muted);font-size:0.85rem;margin-top:8px;">—</div>
+          </div>
+        </div>
+
+        <!-- 3 KPI 卡：最新月份 -->
+        <div class="grid grid-3" style="margin-top:20px;">
+          <div class="card stat-card">
+            <div class="stat-num kpi-num" id="kpi-day">—</div>
+            <div class="stat-label" id="kpi-day-label">白班護病比</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-num kpi-num" id="kpi-eve">—</div>
+            <div class="stat-label" id="kpi-eve-label">小夜班護病比</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-num kpi-num" id="kpi-night">—</div>
+            <div class="stat-label" id="kpi-night-label">大夜班護病比</div>
+          </div>
+        </div>
+
+        <!-- 折線圖 -->
+        <div class="chart-card" style="margin-top:24px;">
+          <div class="chart-card-header"><div>
+            <h3>三班護病比逐月趨勢</h3>
+            <div class="chart-sub">紅色虛線：衛福部法定護病比標準；hover 看單月數字</div>
+          </div></div>
+          <div class="chart-canvas-wrap" style="height:420px;">
+            <canvas id="ratio-chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="app-footer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" defer></script>
+  <script type="module">
+    import { mountLayout } from './js/components.js?v=16';
+    import { renderIcons } from './js/icons.js?v=16';
+    import { initNurseRatio } from './js/nurse-ratio.js?v=16';
+
+    mountLayout();
+    renderIcons();
+
+    // Chart.js defer 載入後才 init（chart.umd.js 有 defer）
+    if (typeof Chart !== 'undefined') {
+      initNurseRatio();
+    } else {
+      window.addEventListener('load', () => initNurseRatio());
+    }
+  </script>
+</body>
+</html>
