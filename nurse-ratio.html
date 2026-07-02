@@ -146,11 +146,34 @@
         </div>
         <div class="nurse-picker-controls">
           <input id="hospital-search" type="search" placeholder="搜尋醫院名稱或機構代號..." class="nurse-picker-search" />
-          <div class="nurse-picker-filters">
-            <button type="button" class="nurse-level-filter active" data-level="all">全部</button>
-            <button type="button" class="nurse-level-filter" data-level="醫學中心">醫學中心</button>
-            <button type="button" class="nurse-level-filter" data-level="區域醫院">區域醫院</button>
-            <button type="button" class="nurse-level-filter" data-level="地區醫院">地區醫院</button>
+          <div class="nurse-picker-filter-row">
+            <span class="nurse-filter-label">層級：</span>
+            <div class="nurse-picker-filters">
+              <button type="button" class="nurse-level-filter active" data-level="all">全部</button>
+              <button type="button" class="nurse-level-filter" data-level="醫學中心">醫學中心</button>
+              <button type="button" class="nurse-level-filter" data-level="區域醫院">區域醫院</button>
+              <button type="button" class="nurse-level-filter" data-level="地區醫院">地區醫院</button>
+            </div>
+          </div>
+          <div class="nurse-picker-filter-row">
+            <span class="nurse-filter-label">合規：</span>
+            <div class="nurse-picker-filters">
+              <button type="button" class="nurse-compliance-filter active" data-compliance="all">
+                全部 <span class="nurse-filter-count">—</span>
+              </button>
+              <button type="button" class="nurse-compliance-filter nurse-compliance-btn-A" data-compliance="A" title="三班全部 ≤ 標準">
+                <span class="nurse-compliance-dot nurse-compliance-A"></span>
+                全達標 <span class="nurse-filter-count">—</span>
+              </button>
+              <button type="button" class="nurse-compliance-filter nurse-compliance-btn-B" data-compliance="B" title="有超標但都 ≤ 標準 × 1.05（5% 內）">
+                <span class="nurse-compliance-dot nurse-compliance-B"></span>
+                輕度超標 <span class="nurse-filter-count">—</span>
+              </button>
+              <button type="button" class="nurse-compliance-filter nurse-compliance-btn-C" data-compliance="C" title="任一班超過標準 × 1.05（>5%）">
+                <span class="nurse-compliance-dot nurse-compliance-C"></span>
+                嚴重超標 <span class="nurse-filter-count">—</span>
+              </button>
+            </div>
           </div>
         </div>
         <div id="hospital-list" class="nurse-hospital-list"></div>
@@ -172,6 +195,7 @@
           <div>
             <h2 id="hosp-name" style="margin:0 0 8px;">—</h2>
             <span id="hosp-level" class="nurse-level-badge">—</span>
+            <span id="hosp-compliance" class="nurse-compliance-badge">—</span>
             <div id="hosp-code" style="color:var(--muted);font-size:0.85rem;margin-top:8px;">—</div>
           </div>
         </div>

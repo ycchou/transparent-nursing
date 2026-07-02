@@ -25,12 +25,53 @@ const COLORS = {
   std:   'rgba(230, 57, 70, 0.55)',
 };
 
+// 合規分類（依最新月份對照該層級標準）
+//   A (green): 三班全部 <= 標準（含小於）→「全達標」
+//   B (amber): 有超標但都 <= 標準 × 1.05 → 「輕度超標」
+//   C (red):   任一班超過標準 × 1.05 → 「嚴重超標」
+const COMPLIANCE_TOLERANCE = 0.05;
+const COMPLIANCE_CLASSES = {
+  A: { key: 'A', label: '全達標', color: '#06A77D', bg: 'rgba(6,167,125,0.13)' },
+  B: { key: 'B', label: '輕度超標', color: '#F4A261', bg: 'rgba(244,162,97,0.15)' },
+  C: { key: 'C', label: '嚴重超標', color: '#E63946', bg: 'rgba(230,57,70,0.13)' },
+  N: { key: 'N', label: '未報', color: '#6B7C93', bg: 'rgba(107,124,147,0.10)' },
+};
+
+function classifyHospital(hosp) {
+  const std = STANDARDS[hosp.level];
+  if (!std) return 'N';
+  // 找最新有資料的月份
+  const months = state.data ? state.data.months : [];
+  let latest = null;
+  for (let i = months.length - 1; i >= 0; i--) {
+    if (hosp.history[months[i]]) { latest = hosp.history[months[i]]; break; }
+  }
+  if (!latest) return 'N';
+  const shifts = [
+    { val: latest.day,   std: std.day },
+    { val: latest.eve,   std: std.eve },
+    { val: latest.night, std: std.night },
+  ].filter((s) => s.val != null);
+  if (shifts.length === 0) return 'N';
+  let anyExceedTol = false;
+  let anyExceedStd = false;
+  for (const s of shifts) {
+    if (s.val > s.std * (1 + COMPLIANCE_TOLERANCE)) anyExceedTol = true;
+    if (s.val > s.std) anyExceedStd = true;
+  }
+  if (anyExceedTol) return 'C';
+  if (anyExceedStd) return 'B';
+  return 'A';
+}
+
 const state = {
   data: null,       // parsed nurse-ratio.json
   currentId: null,  // 目前選中的醫院代號
   chart: null,      // Chart.js instance
   levelFilter: 'all',
+  complianceFilter: 'all',
   searchQuery: '',
+  complianceMap: {},  // { hospitalId: 'A' | 'B' | 'C' | 'N' } — 載入後計算一次快取
 };
 
 // ROC yyyymm → 顯示字串
@@ -96,6 +137,7 @@ function renderHospitalList() {
   const q = state.searchQuery.toLowerCase();
   const filtered = state.data.hospitals.filter((h) => {
     if (state.levelFilter !== 'all' && h.level !== state.levelFilter) return false;
+    if (state.complianceFilter !== 'all' && state.complianceMap[h.id] !== state.complianceFilter) return false;
     if (q && !h.name.toLowerCase().includes(q) && !h.id.includes(q)) return false;
     return true;
   });
@@ -116,11 +158,15 @@ function renderHospitalList() {
           <span class="nurse-level-count">${grouped[lv].length} 家</span>
         </div>
         <div class="nurse-hospital-grid">
-          ${grouped[lv].map((h) => `
-            <button type="button" class="nurse-hospital-chip ${h.id === state.currentId ? 'active' : ''}" data-id="${h.id}">
-              ${escapeHtml(h.name)}
-            </button>
-          `).join('')}
+          ${grouped[lv].map((h) => {
+            const cls = state.complianceMap[h.id] || 'N';
+            return `
+              <button type="button" class="nurse-hospital-chip ${h.id === state.currentId ? 'active' : ''}" data-id="${h.id}">
+                <span class="nurse-compliance-dot nurse-compliance-${cls}" title="${COMPLIANCE_CLASSES[cls].label}"></span>
+                <span class="nurse-hospital-chip-name">${escapeHtml(h.name)}</span>
+              </button>
+            `;
+          }).join('')}
         </div>
       </div>
     `).join('');
@@ -166,6 +212,13 @@ function renderDetail(hosp) {
   document.getElementById('hosp-level').textContent = hosp.level;
   document.getElementById('hosp-level').className = `nurse-level-badge nurse-level-${levelSlug(hosp.level)}`;
   document.getElementById('hosp-code').textContent = `機構代號：${hosp.id}`;
+
+  const cls = state.complianceMap[hosp.id] || 'N';
+  const compBadge = document.getElementById('hosp-compliance');
+  if (compBadge) {
+    compBadge.textContent = COMPLIANCE_CLASSES[cls].label;
+    compBadge.className = `nurse-compliance-badge nurse-compliance-${cls}`;
+  }
 
   const setKpi = (id, val, standard) => {
     const el = document.getElementById(id);
@@ -340,6 +393,16 @@ function setupFilterControls() {
     });
   });
 
+  document.querySelectorAll('.nurse-compliance-filter').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.complianceFilter = btn.dataset.compliance;
+      document.querySelectorAll('.nurse-compliance-filter').forEach((b) => {
+        b.classList.toggle('active', b.dataset.compliance === state.complianceFilter);
+      });
+      renderHospitalList();
+    });
+  });
+
   const search = document.getElementById('hospital-search');
   if (search) {
     let timer;
@@ -353,6 +416,22 @@ function setupFilterControls() {
   }
 }
 
+function buildComplianceMap() {
+  const map = {};
+  state.data.hospitals.forEach((h) => { map[h.id] = classifyHospital(h); });
+  state.complianceMap = map;
+  // 各類別統計
+  const counts = { A: 0, B: 0, C: 0, N: 0 };
+  Object.values(map).forEach((v) => { counts[v] = (counts[v] || 0) + 1; });
+  // 更新篩選按鈕上的計數
+  Object.entries(counts).forEach(([k, v]) => {
+    const el = document.querySelector(`.nurse-compliance-filter[data-compliance="${k}"] .nurse-filter-count`);
+    if (el) el.textContent = v.toLocaleString();
+  });
+  const totalEl = document.querySelector('.nurse-compliance-filter[data-compliance="all"] .nurse-filter-count');
+  if (totalEl) totalEl.textContent = state.data.hospitals.length.toLocaleString();
+}
+
 // ===== 入口 =====
 
 export async function initNurseRatio() {
@@ -363,6 +442,7 @@ export async function initNurseRatio() {
 
   try {
     state.data = await loadData();
+    buildComplianceMap();
     setupFilterControls();
     renderHospitalList();
 

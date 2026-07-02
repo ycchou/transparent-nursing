@@ -4214,6 +4214,90 @@ body.g2g-modal-open { overflow: hidden; }
   color: var(--danger);
 }
 
+/* 合規篩選按鈕列（多列時排版） */
+.nurse-picker-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.nurse-filter-label {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.nurse-compliance-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: var(--border-soft);
+  color: var(--ink-soft);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+.nurse-compliance-filter:hover { border-color: var(--primary); }
+.nurse-compliance-filter.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+.nurse-compliance-filter.active .nurse-filter-count { color: rgba(255,255,255,0.85); }
+.nurse-filter-count {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 合規狀態 dot (chip 上的小點) + badge (詳情頁的標籤) */
+.nurse-compliance-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.nurse-compliance-dot.nurse-compliance-A { background: #06A77D; }
+.nurse-compliance-dot.nurse-compliance-B { background: #F4A261; }
+.nurse-compliance-dot.nurse-compliance-C { background: #E63946; }
+.nurse-compliance-dot.nurse-compliance-N { background: #6B7C93; }
+
+.nurse-compliance-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 12px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  margin-left: 6px;
+}
+.nurse-compliance-badge.nurse-compliance-A { background: rgba(6,167,125,0.13); color: #06A77D; }
+.nurse-compliance-badge.nurse-compliance-B { background: rgba(244,162,97,0.15); color: #b96b1f; }
+.nurse-compliance-badge.nurse-compliance-C { background: rgba(230,57,70,0.13); color: var(--danger); }
+.nurse-compliance-badge.nurse-compliance-N { background: rgba(107,124,147,0.10); color: var(--muted); }
+
+/* hospital chip：讓 dot + name 對齊 */
+.nurse-hospital-chip {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 8px;
+}
+.nurse-hospital-chip-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1;
+}
+
 @media (max-width: 640px) {
   .nurse-std-row {
     grid-template-columns: 80px 1fr 1fr 1fr;
