@@ -186,22 +186,98 @@ def extractHospitalRatios(rows):
     return out
 
 
-def loadCodeToCity():
-    """從 data/hospitals.json 讀機構代號 → 縣市對照表，給 nurse-ratio 補 city 用"""
-    path = os.path.join(ROOT, 'data', 'hospitals.json')
-    if not os.path.isfile(path):
-        print('  ⚠️  找不到 hospitals.json，city 欄位將全部為 null')
-        return {}
-    with open(path, encoding='utf-8') as f:
+HOSPITALS_JSON = os.path.join(ROOT, 'data', 'hospitals.json')
+HOSPITALS_MERGED_JSON = os.path.join(ROOT, 'data', 'hospitals-merged.json')
+
+
+def loadAccredHospitalsIndex():
+    """從 data/hospitals.json (評鑑 PDF 萃取) 讀完整醫院索引：code → full record"""
+    if not os.path.isfile(HOSPITALS_JSON):
+        print('  ⚠️  找不到 hospitals.json，將無評鑑資訊可用')
+        return {}, {}
+    with open(HOSPITALS_JSON, encoding='utf-8') as f:
         hd = json.load(f)
-    mapping = {}
+    accredIndex = {}  # code → 完整評鑑記錄
     for h in hd.get('hospitals', []):
         code = h.get('code')
-        city = h.get('city')
-        if code and city:
-            mapping[str(code).strip()] = city
-    print(f'  ✓ 從 hospitals.json 讀到 {len(mapping)} 個機構代號 → 縣市對照')
-    return mapping
+        if code:
+            accredIndex[str(code).strip()] = h
+    print(f'  ✓ 讀到評鑑名單 {len(accredIndex)} 家')
+    return accredIndex, hd
+
+
+def writeMergedHospitalsIndex(accredIndex, accredMeta, vpnHospitalsByCode):
+    """
+    產生合併版醫院總表 data/hospitals-merged.json
+    - 評鑑名單為主（保留全部欄位）
+    - VPN 有但評鑑沒收錄的醫院補進來（source='vpn-only'）
+    - 交集標 source='both'
+    每筆記錄格式：
+      { code, name, shortName, city, level, source, address?, phone?, accredResult? ... }
+    """
+    merged = {}
+
+    # 評鑑名單優先
+    for code, ac in accredIndex.items():
+        merged[code] = {
+            'code': code,
+            'name': ac.get('name'),         # 評鑑正式全名
+            'shortName': None,               # 待 VPN 填
+            'city': ac.get('city'),
+            'level': ac.get('level'),
+            'address': ac.get('address'),
+            'phone': ac.get('phone'),
+            'source': 'accred',
+        }
+
+    # VPN 補：對應到就補 shortName，對應不到就新增條目
+    for code, vp in vpnHospitalsByCode.items():
+        if code in merged:
+            merged[code]['shortName'] = vp['name']
+            merged[code]['source'] = 'both'
+        else:
+            merged[code] = {
+                'code': code,
+                'name': vp['name'],           # 沒評鑑資料，用 VPN 名稱當正式名稱
+                'shortName': vp['name'],
+                'city': None,                 # 評鑑沒收錄 = 沒 city 資料
+                'level': vp['level'],
+                'address': None,
+                'phone': None,
+                'source': 'vpn-only',
+            }
+
+    # 排序：層級 → 縣市 → 名稱
+    LEVEL_ORDER = {'醫學中心': 0, '區域醫院': 1, '地區醫院': 2}
+    orderedList = sorted(
+        merged.values(),
+        key=lambda h: (LEVEL_ORDER.get(h['level'], 99), h['city'] or 'zz', h['name'] or ''),
+    )
+
+    stats = {'both': 0, 'accred': 0, 'vpn-only': 0}
+    for h in merged.values():
+        stats[h['source']] = stats.get(h['source'], 0) + 1
+
+    tz = timezone(timedelta(hours=8))
+    output = {
+        'generatedAt': datetime.now(tz).isoformat(),
+        'sourceAccred': accredMeta.get('source'),
+        'sourceVPN': 'data/VPN登錄之各月份三班護病比/*.ods',
+        'totalHospitals': len(orderedList),
+        'sourceCounts': stats,
+        'hospitals': orderedList,
+    }
+
+    with open(HOSPITALS_MERGED_JSON, 'w', encoding='utf-8') as f:
+        json.dump(output, f, ensure_ascii=False, indent=None, separators=(',', ':'))
+
+    print(f'  ✓ 寫入合併總表 {HOSPITALS_MERGED_JSON}')
+    print(f'    - 兩表都有 (both):     {stats["both"]:>4}')
+    print(f'    - 只評鑑有 (accred):    {stats["accred"]:>4}')
+    print(f'    - 只 VPN 有 (vpn-only): {stats["vpn-only"]:>4}')
+    print(f'    - 合計：              {len(orderedList):>4}')
+
+    return merged
 
 
 def main():
@@ -210,7 +286,8 @@ def main():
         return
 
     files = sorted(
-        [f for f in os.listdir(SRC_DIR) if f.lower().endswith('.ods')]
+        [f for f in os.listdir(SRC_DIR)
+         if f.lower().endswith('.ods') and not f.startswith('~$')]  # 濾掉 Office lock 檔
     )
     if not files:
         print(f'❌ 資料夾內沒有 .ods 檔')
@@ -218,12 +295,13 @@ def main():
 
     print(f'📂 找到 {len(files)} 個 .ods 檔')
 
-    # 讀 hospitals.json 拿 code → city 對照
-    codeToCity = loadCodeToCity()
+    # 讀評鑑名單（PDF 萃取 → hospitals.json）
+    accredIndex, accredMeta = loadAccredHospitalsIndex()
 
     # 集合所有月份 + 每個醫院
-    hospitalsByCode = {}  # code → {id, name, level, city, history: {monthKey: {day, eve, night}}}
+    hospitalsByCode = {}  # code → {id, name, shortName, fullName, level, city, address, history}
     monthsSet = set()
+    vpnHospitalsByCode = {}  # 給 merged 表用（只含 VPN 出現過的醫院）
 
     for filename in files:
         monthKey = rocFilenameToKey(filename)
@@ -238,20 +316,30 @@ def main():
                 continue
             data = extractHospitalRatios(rows)
             for code, rec in data.items():
+                # 從評鑑名單查對照資訊
+                accred = accredIndex.get(code, {})
+                fullName = accred.get('name')   # 評鑑正式全名（若有）
+                city = accred.get('city')       # 縣市（若有）
+                address = accred.get('address') # 地址（若有）
+                phone = accred.get('phone')     # 電話（若有）
+
                 if code not in hospitalsByCode:
                     hospitalsByCode[code] = {
                         'id': code,
-                        'name': rec['name'],
+                        'name': rec['name'],        # VPN 簡稱作為顯示用主名稱
+                        'fullName': fullName,       # 評鑑全名 (nullable)
                         'level': rec['level'],
-                        'city': codeToCity.get(code),  # 對照不到的診所會是 None
+                        'city': city,               # nullable
+                        'address': address,         # nullable
+                        'phone': phone,             # nullable
+                        'source': 'both' if code in accredIndex else 'vpn-only',
                         'history': {},
                     }
-                # 名稱可能微調，用最新的
+                # 每月份都更新一次名稱（以最新月為準）
                 hospitalsByCode[code]['name'] = rec['name']
                 hospitalsByCode[code]['level'] = rec['level']
-                # city 也順便補（若之前是 None 但現在有）
-                if hospitalsByCode[code].get('city') is None:
-                    hospitalsByCode[code]['city'] = codeToCity.get(code)
+                # VPN 出現過的醫院也記到 vpn 集合（給 merged 表）
+                vpnHospitalsByCode[code] = { 'name': rec['name'], 'level': rec['level'] }
                 hospitalsByCode[code]['history'][monthKey] = {
                     'day': rec['day'],
                     'eve': rec['eve'],
@@ -261,6 +349,11 @@ def main():
             print(f'  ✓ {monthKey}: {len(data)} 家醫院  ← {filename}')
         except Exception as e:
             print(f'  ❌ 解析失敗: {filename} — {e}')
+
+    # 產生醫院合併總表（評鑑為主 + VPN 補）
+    print()
+    print('📋 產生合併醫院總表...')
+    writeMergedHospitalsIndex(accredIndex, accredMeta, vpnHospitalsByCode)
 
     # 排序 months
     months = sorted(monthsSet)

@@ -174,10 +174,12 @@ function renderHospitalList() {
         <div class="nurse-hospital-grid">
           ${grouped[lv].map((h) => {
             const cls = state.complianceMap[h.id] || 'N';
+            const tipInfo = [h.fullName, h.city, `代號 ${h.id}`].filter(Boolean).join(' · ');
             return `
-              <button type="button" class="nurse-hospital-chip ${h.id === state.currentId ? 'active' : ''}" data-id="${h.id}">
+              <button type="button" class="nurse-hospital-chip ${h.id === state.currentId ? 'active' : ''}" data-id="${h.id}" title="${escapeHtml(tipInfo)}">
                 <span class="nurse-compliance-dot nurse-compliance-${cls}" title="${COMPLIANCE_CLASSES[cls].label}"></span>
                 <span class="nurse-hospital-chip-name">${escapeHtml(h.name)}</span>
+                <span class="nurse-hospital-chip-code">${h.id}</span>
               </button>
             `;
           }).join('')}
@@ -225,7 +227,14 @@ function renderDetail(hosp) {
   document.getElementById('hosp-name').textContent = hosp.name;
   document.getElementById('hosp-level').textContent = hosp.level;
   document.getElementById('hosp-level').className = `nurse-level-badge nurse-level-${levelSlug(hosp.level)}`;
-  document.getElementById('hosp-code').textContent = `機構代號：${hosp.id}`;
+
+  // 詳情行：機構代號 · 全名 · 縣市 · 地址（有的才顯示）
+  const metaBits = [];
+  metaBits.push(`機構代號：${hosp.id}`);
+  if (hosp.fullName && hosp.fullName !== hosp.name) metaBits.push(`正式名稱：${hosp.fullName}`);
+  if (hosp.city) metaBits.push(hosp.city);
+  if (hosp.address) metaBits.push(hosp.address);
+  document.getElementById('hosp-code').textContent = metaBits.join(' · ');
 
   const cls = state.complianceMap[hosp.id] || 'N';
   const compBadge = document.getElementById('hosp-compliance');
@@ -326,7 +335,7 @@ function renderChart(hosp) {
     label: {
       display: true,
       content: `${shiftLabel}標準 1:${value}`,
-      position: 'start',
+      position: 'end',           // 標籤放最右邊
       backgroundColor: 'rgba(255,255,255,0.85)',
       color: '#B22234',
       font: { family: "'Noto Sans TC', sans-serif", size: 10, weight: 'bold' },
