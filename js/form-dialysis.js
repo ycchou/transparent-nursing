@@ -1,10 +1,10 @@
 // 洗腎室自建表單頁面：欄位 schema、渲染、驗證、序列化、送出、草稿
 // 未來 Apps Script 串接時，把 SUBMIT_ENDPOINT 填入即可
 
-import { mountLayout } from './components.js?v=16';
-import { renderIcons, icon } from './icons.js?v=16';
-import { HOSPITALS } from './hospitals.js?v=16';
-import { markContributed } from './contribution-gate.js?v=16';
+import { mountLayout } from './components.js?v=17';
+import { renderIcons, icon } from './icons.js?v=17';
+import { HOSPITALS } from './hospitals.js?v=17';
+import { markContributed } from './contribution-gate.js?v=17';
 
 const DRAFT_KEY = 'dform_draft_dialysis';
 const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 避開易混字元 0/O/1/I/L
@@ -630,6 +630,29 @@ function showThanks() {
 
 const ACCRED_LEVELS = new Set(['醫學中心', '區域醫院', '地區醫院']);
 
+// 從 hospitals-merged.json 讀簡稱 map（accred 正式名稱 → VPN 簡稱）
+// 供模糊搜尋用（使用者輸入簡稱關鍵字也能命中）；載入失敗靜默略過。
+const HOSPITAL_SHORT_MAP = new Map();
+let hospitalShortMapReady = false;
+(async function loadShortNames() {
+  try {
+    const r = await fetch('data/hospitals-merged.json', { cache: 'default' });
+    if (!r.ok) return;
+    const d = await r.json();
+    (d.hospitals || []).forEach((h) => {
+      if (h.name && h.shortName && h.shortName !== h.name) {
+        HOSPITAL_SHORT_MAP.set(h.name, h.shortName);
+      }
+    });
+    hospitalShortMapReady = true;
+    // 若下拉已展開，觸發重新 render 讓簡稱立即生效
+    const input = document.getElementById('f-institutionName');
+    if (input && document.activeElement === input) {
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  } catch {}
+})();
+
 function attachInstitutionAutocomplete() {
   const nameInput = document.getElementById('f-institutionName');
   if (!nameInput) return;
@@ -683,6 +706,14 @@ function attachInstitutionAutocomplete() {
       + safeName.slice(idx + safeQ.length);
   }
 
+  // q 是否命中該醫院（正式名稱或簡稱）
+  function matchesQuery(h, q) {
+    if (!q) return true;
+    if (h.name.toLowerCase().includes(q)) return true;
+    const short = HOSPITAL_SHORT_MAP.get(h.name);
+    return !!(short && short.toLowerCase().includes(q));
+  }
+
   // 共用 filter（桌機 inline 與手機 sheet 共用）
   function getMatches(level, loc, q) {
     const cap = (loc || q) ? Infinity : 15;
@@ -690,14 +721,14 @@ function attachInstitutionAutocomplete() {
       .filter((h) => {
         if (h.level !== level) return false;
         if (loc && normalizeCity(h.city) !== loc) return false;
-        if (q && !h.name.toLowerCase().includes(q)) return false;
+        if (!matchesQuery(h, q)) return false;
         return true;
       })
       .slice(0, cap);
     let crossLevel = [];
     if (q && loc) {
       crossLevel = HOSPITALS.filter((h) =>
-        h.level !== level && normalizeCity(h.city) === loc && h.name.toLowerCase().includes(q));
+        h.level !== level && normalizeCity(h.city) === loc && matchesQuery(h, q));
     }
     return { primary, crossLevel };
   }
@@ -729,12 +760,16 @@ function attachInstitutionAutocomplete() {
     }
     wrap.hidden = false;
 
-    const itemHtml = (h, isCross) => `
+    const itemHtml = (h, isCross) => {
+      const short = HOSPITAL_SHORT_MAP.get(h.name);
+      const shortHtml = short ? `<span class="suggest-short">簡稱：${highlightMatch(short, q)}</span>` : '';
+      return `
       <li class="dform-suggest-item${isCross ? ' is-cross' : ''}" role="option" data-name="${safeAttr(h.name)}">
         <span class="suggest-name">${highlightMatch(h.name, q)}</span>
-        <span class="suggest-meta">${isCross ? `<span class="suggest-level">${safeAttr(h.level)}</span> · ` : ''}${safeAttr(h.city)}</span>
+        <span class="suggest-meta">${isCross ? `<span class="suggest-level">${safeAttr(h.level)}</span> · ` : ''}${safeAttr(h.city)}${shortHtml ? ' · ' + shortHtml : ''}</span>
       </li>
     `;
+    };
 
     let html = '';
     if (primary.length > 0) {
@@ -840,12 +875,16 @@ function attachInstitutionAutocomplete() {
     const loc = normalizeCity(selectedLocation());
     const { primary, crossLevel } = getMatches(level, loc, q);
 
-    const itemHtml = (h, isCross) => `
+    const itemHtml = (h, isCross) => {
+      const short = HOSPITAL_SHORT_MAP.get(h.name);
+      const shortHtml = short ? ` · <span class="picker-short">簡稱：${highlightMatch(short, q)}</span>` : '';
+      return `
       <li class="dform-picker-item${isCross ? ' is-cross' : ''}" data-name="${safeAttr(h.name)}">
         <span class="picker-name">${highlightMatch(h.name, q)}</span>
-        <span class="picker-meta">${isCross ? `<span class="picker-level">${safeAttr(h.level)}</span> · ` : ''}${safeAttr(h.city)}</span>
+        <span class="picker-meta">${isCross ? `<span class="picker-level">${safeAttr(h.level)}</span> · ` : ''}${safeAttr(h.city)}${shortHtml}</span>
       </li>
     `;
+    };
     let html = '';
     if (primary.length === 0 && crossLevel.length === 0) {
       html = `<div class="dform-picker-empty">🔍 找不到符合的醫院<br><small>可調整關鍵字或點下方「找不到？自行輸入」</small></div>`;

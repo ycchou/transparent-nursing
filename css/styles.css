@@ -3060,6 +3060,15 @@ body.calc-modal-open { overflow: hidden; }
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
+.suggest-short, .picker-short {
+  color: var(--ink-soft);
+}
+.suggest-short mark, .picker-short mark {
+  background: rgba(46, 134, 171, 0.20);
+  color: var(--ink);
+  padding: 0 2px;
+  border-radius: 3px;
+}
 
 /* 跨等級備援區塊：橘色 divider + 不同色的等級 badge */
 .dform-suggest-divider {
