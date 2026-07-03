@@ -41,7 +41,7 @@ const NAV_ITEMS = [
   { href: 'index.html',       label: '首頁',     match: ['index.html', ''] },
   { href: 'platform.html',    label: '資料平台', match: ['platform.html'] },
   { href: 'stats.html',       label: '統計摘要', match: ['stats.html'] },
-  { href: 'nurse-ratio.html', label: '三班護病比', match: ['nurse-ratio.html'] },
+  { href: 'nurse-ratio.html', label: '護病比', match: ['nurse-ratio.html'] },
   // 3 個違規紀錄合併進 records.html，match 陣列同時涵蓋舊 URL 讓 nav highlight 保留
   { href: 'records.html',     label: '違規紀錄', match: ['records.html', 'violations.html', 'gender.html', 'osha.html'] },
   { href: 'participate.html', label: '填寫表單', match: ['participate.html'] },
@@ -103,7 +103,7 @@ function footerHTML() {
             <ul>
               <li><a href="platform.html">資料平台</a></li>
               <li><a href="stats.html">統計摘要</a></li>
-              <li><a href="nurse-ratio.html">三班護病比</a></li>
+              <li><a href="nurse-ratio.html">護病比</a></li>
               <li><a href="records.html?type=labor">勞檢紀錄</a></li>
               <li><a href="records.html?type=gender">性平紀錄</a></li>
               <li><a href="records.html?type=osha">職安紀錄</a></li>

@@ -186,6 +186,24 @@ def extractHospitalRatios(rows):
     return out
 
 
+def loadCodeToCity():
+    """從 data/hospitals.json 讀機構代號 → 縣市對照表，給 nurse-ratio 補 city 用"""
+    path = os.path.join(ROOT, 'data', 'hospitals.json')
+    if not os.path.isfile(path):
+        print('  ⚠️  找不到 hospitals.json，city 欄位將全部為 null')
+        return {}
+    with open(path, encoding='utf-8') as f:
+        hd = json.load(f)
+    mapping = {}
+    for h in hd.get('hospitals', []):
+        code = h.get('code')
+        city = h.get('city')
+        if code and city:
+            mapping[str(code).strip()] = city
+    print(f'  ✓ 從 hospitals.json 讀到 {len(mapping)} 個機構代號 → 縣市對照')
+    return mapping
+
+
 def main():
     if not os.path.isdir(SRC_DIR):
         print(f'❌ 找不到來源資料夾: {SRC_DIR}')
@@ -200,8 +218,11 @@ def main():
 
     print(f'📂 找到 {len(files)} 個 .ods 檔')
 
+    # 讀 hospitals.json 拿 code → city 對照
+    codeToCity = loadCodeToCity()
+
     # 集合所有月份 + 每個醫院
-    hospitalsByCode = {}  # code → {id, name, level, history: {monthKey: {day, eve, night}}}
+    hospitalsByCode = {}  # code → {id, name, level, city, history: {monthKey: {day, eve, night}}}
     monthsSet = set()
 
     for filename in files:
@@ -222,11 +243,15 @@ def main():
                         'id': code,
                         'name': rec['name'],
                         'level': rec['level'],
+                        'city': codeToCity.get(code),  # 對照不到的診所會是 None
                         'history': {},
                     }
                 # 名稱可能微調，用最新的
                 hospitalsByCode[code]['name'] = rec['name']
                 hospitalsByCode[code]['level'] = rec['level']
+                # city 也順便補（若之前是 None 但現在有）
+                if hospitalsByCode[code].get('city') is None:
+                    hospitalsByCode[code]['city'] = codeToCity.get(code)
                 hospitalsByCode[code]['history'][monthKey] = {
                     'day': rec['day'],
                     'eve': rec['eve'],

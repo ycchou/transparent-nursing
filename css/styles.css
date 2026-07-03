@@ -4038,9 +4038,10 @@ body.g2g-modal-open { overflow: hidden; }
   letter-spacing: 0.02em;
   white-space: nowrap;
 }
-.nurse-level-badge.nurse-level-mc { background: rgba(6, 167, 125, 0.13); color: #06A77D; }
+/* 層級 badge：紫/藍/灰藍三色，跟合規三色（綠/橙/紅）錯開避免誤讀 */
+.nurse-level-badge.nurse-level-mc { background: rgba(124, 58, 237, 0.13); color: #7C3AED; }
 .nurse-level-badge.nurse-level-rg { background: rgba(46, 134, 171, 0.13); color: var(--primary); }
-.nurse-level-badge.nurse-level-dt { background: rgba(244, 162, 97, 0.15); color: #b96b1f; }
+.nurse-level-badge.nurse-level-dt { background: rgba(100, 116, 139, 0.13); color: #64748B; }
 
 /* 標準參考卡（頁面上方，摘要 3 級標準）*/
 .nurse-std-card {
@@ -4257,6 +4258,30 @@ body.g2g-modal-open { overflow: hidden; }
 .nurse-compliance-explain .status-safe-txt   { color: #06A77D; }
 .nurse-compliance-explain .status-watch-txt  { color: #b96b1f; }
 .nurse-compliance-explain .status-danger-txt { color: var(--danger); }
+
+/* 地點篩選：跟合規按鈕同款樣式（不同 data attribute） */
+.nurse-city-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  background: var(--border-soft);
+  color: var(--ink-soft);
+  border: 1px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+.nurse-city-filter:hover { border-color: var(--primary); }
+.nurse-city-filter.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+.nurse-city-filter.active span { color: rgba(255,255,255,0.85) !important; }
 
 /* 合規篩選按鈕列（多列時排版） */
 .nurse-picker-filter-row {

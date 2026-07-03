@@ -10,7 +10,7 @@ import { renderIcons } from './icons.js?v=16';
 
 const DATA_URL = 'data/nurse-ratio.json?v=16';
 
-// 三班護病比法定標準（依醫院層級）
+// 三班護病比・衛福部公告標準（依醫院層級）
 const STANDARDS = {
   '醫學中心': { day: 6, eve: 9, night: 11 },
   '區域醫院': { day: 7, eve: 11, night: 13 },
@@ -79,6 +79,7 @@ const state = {
   chart: null,      // Chart.js instance
   levelFilter: 'all',
   complianceFilter: 'all',
+  cityFilter: 'all',
   searchQuery: '',
   complianceMap: {},  // { hospitalId: 'A' | 'B' | 'C' | 'N' } — 載入後計算一次快取
 };
@@ -147,6 +148,10 @@ function renderHospitalList() {
   const filtered = state.data.hospitals.filter((h) => {
     if (state.levelFilter !== 'all' && h.level !== state.levelFilter) return false;
     if (state.complianceFilter !== 'all' && state.complianceMap[h.id] !== state.complianceFilter) return false;
+    if (state.cityFilter !== 'all') {
+      const c = h.city || '(未知)';
+      if (c !== state.cityFilter) return false;
+    }
     if (q && !h.name.toLowerCase().includes(q) && !h.id.includes(q)) return false;
     return true;
   });
@@ -254,6 +259,11 @@ function renderChart(hosp) {
   const canvas = document.getElementById('ratio-chart');
   if (!canvas || typeof Chart === 'undefined') return;
 
+  // 註冊 annotation plugin（重複註冊無害）
+  if (window['chartjs-plugin-annotation'] && typeof Chart.register === 'function') {
+    try { Chart.register(window['chartjs-plugin-annotation']); } catch {}
+  }
+
   // Destroy 舊 chart
   const existing = Chart.getChart(canvas);
   if (existing) existing.destroy();
@@ -265,19 +275,6 @@ function renderChart(hosp) {
   const nightData = months.map((m) => hosp.history[m]?.night ?? null);
 
   const std = STANDARDS[hosp.level] || {};
-
-  // 常數水平線 = dataset 中所有值都相同 → 畫成水平線
-  const stdDataset = (label, value, color) => ({
-    label,
-    data: months.map(() => value),
-    borderColor: color,
-    borderDash: [8, 4],
-    borderWidth: 1.5,
-    pointRadius: 0,
-    tension: 0,
-    fill: false,
-    order: 999,  // 畫在後面（虛線在資料線後）
-  });
 
   const datasets = [
     {
@@ -318,10 +315,29 @@ function renderChart(hosp) {
     },
   ];
 
-  // 加入 3 條標準虛線（若層級有對應標準）
-  if (std.day) datasets.push(stdDataset(`白班標準 1:${std.day}`, std.day, COLORS.std));
-  if (std.eve) datasets.push(stdDataset(`小夜標準 1:${std.eve}`, std.eve, COLORS.std));
-  if (std.night) datasets.push(stdDataset(`大夜標準 1:${std.night}`, std.night, COLORS.std));
+  // 用 chartjs-plugin-annotation 畫 3 條標準虛線，各自帶「白班標準 1:6」等左上標籤
+  const stdAnnotations = {};
+  const makeStdLine = (shiftLabel, value) => ({
+    type: 'line',
+    yMin: value, yMax: value,
+    borderColor: COLORS.std,
+    borderDash: [8, 4],
+    borderWidth: 1.5,
+    label: {
+      display: true,
+      content: `${shiftLabel}標準 1:${value}`,
+      position: 'start',
+      backgroundColor: 'rgba(255,255,255,0.85)',
+      color: '#B22234',
+      font: { family: "'Noto Sans TC', sans-serif", size: 10, weight: 'bold' },
+      padding: { top: 2, bottom: 2, left: 6, right: 6 },
+      yAdjust: -10,
+      borderRadius: 4,
+    },
+  });
+  if (std.day) stdAnnotations.stdDay = makeStdLine('白班', std.day);
+  if (std.eve) stdAnnotations.stdEve = makeStdLine('小夜', std.eve);
+  if (std.night) stdAnnotations.stdNight = makeStdLine('大夜', std.night);
 
   new Chart(canvas, {
     type: 'line',
@@ -338,7 +354,6 @@ function renderChart(hosp) {
             color: '#46557A',
             usePointStyle: true,
             padding: 12,
-            filter: (item) => !item.text.includes('標準 1:'),  // legend 只列 3 條實線
           },
         },
         tooltip: {
@@ -349,12 +364,12 @@ function renderChart(hosp) {
           cornerRadius: 8,
           callbacks: {
             label: (ctx) => {
-              if (ctx.dataset.label && ctx.dataset.label.includes('標準 1:')) return null;
               const v = ctx.parsed.y;
               return v == null ? null : `${ctx.dataset.label}: ${v.toFixed(1)}`;
             },
           },
         },
+        annotation: { annotations: stdAnnotations },
       },
       scales: {
         x: {
@@ -390,6 +405,37 @@ function renderChart(hosp) {
 }
 
 // ===== 篩選/搜尋事件 =====
+
+function renderCityFilter() {
+  const el = document.getElementById('city-filter');
+  if (!el) return;
+  const counts = {};
+  state.data.hospitals.forEach((h) => {
+    const c = h.city || '(未知)';
+    counts[c] = (counts[c] || 0) + 1;
+  });
+  // 依醫院數 desc 排序，(未知) 排到最後
+  const sorted = Object.entries(counts).sort((a, b) => {
+    if (a[0] === '(未知)') return 1;
+    if (b[0] === '(未知)') return -1;
+    return b[1] - a[1];
+  });
+  el.innerHTML = `
+    <button type="button" class="nurse-city-filter active" data-city="all">全部</button>
+    ${sorted.map(([c, n]) => `
+      <button type="button" class="nurse-city-filter" data-city="${escapeHtml(c)}">${escapeHtml(c)} <span style="opacity:.6;font-size:0.78em;">${n}</span></button>
+    `).join('')}
+  `;
+  el.querySelectorAll('.nurse-city-filter').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.cityFilter = btn.dataset.city;
+      el.querySelectorAll('.nurse-city-filter').forEach((b) => {
+        b.classList.toggle('active', b.dataset.city === state.cityFilter);
+      });
+      renderHospitalList();
+    });
+  });
+}
 
 function setupFilterControls() {
   document.querySelectorAll('.nurse-level-filter').forEach((btn) => {
@@ -452,6 +498,7 @@ export async function initNurseRatio() {
   try {
     state.data = await loadData();
     buildComplianceMap();
+    renderCityFilter();
     setupFilterControls();
     renderHospitalList();
 
