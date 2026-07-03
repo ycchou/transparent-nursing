@@ -138,6 +138,16 @@ async function loadData() {
   return data;
 }
 
+// 手動 city overlay（因評鑑 PDF 未收錄 74 家療養院/精神專科/軍醫分院等，
+// 使用者可在 data/hospitals-manual-city.json 手動補上 { 機構代號: 縣市 } 對照）。
+async function loadManualCityOverlay() {
+  try {
+    const r = await fetch('data/hospitals-manual-city.json?v=1', { cache: 'no-store' });
+    if (!r.ok) return {};
+    return await r.json();
+  } catch { return {}; }
+}
+
 // ===== 醫院清單渲染 =====
 
 function renderHospitalList() {
@@ -179,7 +189,6 @@ function renderHospitalList() {
               <button type="button" class="nurse-hospital-chip ${h.id === state.currentId ? 'active' : ''}" data-id="${h.id}" title="${escapeHtml(tipInfo)}">
                 <span class="nurse-compliance-dot nurse-compliance-${cls}" title="${COMPLIANCE_CLASSES[cls].label}"></span>
                 <span class="nurse-hospital-chip-name">${escapeHtml(h.name)}</span>
-                <span class="nurse-hospital-chip-code">${h.id}</span>
               </button>
             `;
           }).join('')}
@@ -225,14 +234,27 @@ function renderDetail(hosp) {
   const std = STANDARDS[hosp.level] || {};
 
   document.getElementById('hosp-name').textContent = hosp.name;
+
+  // 縣市 badge（排在層級 badge 前面；未知者顯示「未分類」灰色）
+  const cityEl = document.getElementById('hosp-city');
+  if (cityEl) {
+    if (hosp.city) {
+      cityEl.textContent = hosp.city;
+      cityEl.classList.remove('unknown');
+    } else {
+      cityEl.textContent = '未分類';
+      cityEl.classList.add('unknown');
+    }
+    cityEl.hidden = false;
+  }
+
   document.getElementById('hosp-level').textContent = hosp.level;
   document.getElementById('hosp-level').className = `nurse-level-badge nurse-level-${levelSlug(hosp.level)}`;
 
-  // 詳情行：機構代號 · 全名 · 縣市 · 地址（有的才顯示）
+  // 詳情行：機構代號 · 全名 · 地址（縣市已升為 badge，此處不重複）
   const metaBits = [];
   metaBits.push(`機構代號：${hosp.id}`);
   if (hosp.fullName && hosp.fullName !== hosp.name) metaBits.push(`正式名稱：${hosp.fullName}`);
-  if (hosp.city) metaBits.push(hosp.city);
   if (hosp.address) metaBits.push(hosp.address);
   document.getElementById('hosp-code').textContent = metaBits.join(' · ');
 
@@ -506,6 +528,11 @@ export async function initNurseRatio() {
 
   try {
     state.data = await loadData();
+    // 套用手動 city overlay（僅補 city == null 的醫院；overlay 缺檔則 no-op）
+    const cityOverlay = await loadManualCityOverlay();
+    if (cityOverlay && Object.keys(cityOverlay).length) {
+      state.data.hospitals.forEach((h) => { if (!h.city && cityOverlay[h.id]) h.city = cityOverlay[h.id]; });
+    }
     buildComplianceMap();
     renderCityFilter();
     setupFilterControls();
