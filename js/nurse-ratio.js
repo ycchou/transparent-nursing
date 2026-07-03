@@ -6,9 +6,9 @@
 //     hospitals: [{ id, name, level, history: { "11207": {day, eve, night} } }]
 //   }
 
-import { renderIcons } from './icons.js?v=19';
+import { renderIcons } from './icons.js?v=20';
 
-const DATA_URL = 'data/nurse-ratio.json?v=19';
+const DATA_URL = 'data/nurse-ratio.json?v=20';
 
 // 三班護病比・衛福部公告標準（依醫院層級）
 const STANDARDS = {
@@ -251,12 +251,13 @@ function renderDetail(hosp) {
   document.getElementById('hosp-level').textContent = hosp.level;
   document.getElementById('hosp-level').className = `nurse-level-badge nurse-level-${levelSlug(hosp.level)}`;
 
-  // 詳情行：機構代號 · 全名 · 地址（縣市已升為 badge，此處不重複）
-  const metaBits = [];
-  metaBits.push(`機構代號：${hosp.id}`);
-  if (hosp.fullName && hosp.fullName !== hosp.name) metaBits.push(`正式名稱：${hosp.fullName}`);
-  if (hosp.address) metaBits.push(hosp.address);
-  document.getElementById('hosp-code').textContent = metaBits.join(' · ');
+  // 詳情：第 1 行 正式名稱；第 2 行 機構代號 · 地址（縣市已升為 badge，此處不重複）
+  const lines = [];
+  if (hosp.fullName && hosp.fullName !== hosp.name) lines.push(`正式名稱：${escapeHtml(hosp.fullName)}`);
+  const bottomBits = [`機構代號：${escapeHtml(hosp.id)}`];
+  if (hosp.address) bottomBits.push(escapeHtml(hosp.address));
+  lines.push(bottomBits.join(' · '));
+  document.getElementById('hosp-code').innerHTML = lines.map((l) => `<div>${l}</div>`).join('');
 
   const cls = state.complianceMap[hosp.id] || 'N';
   const compBadge = document.getElementById('hosp-compliance');
