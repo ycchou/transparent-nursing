@@ -6,9 +6,9 @@
 //     hospitals: [{ id, name, level, history: { "11207": {day, eve, night} } }]
 //   }
 
-import { renderIcons } from './icons.js?v=18';
+import { renderIcons } from './icons.js?v=19';
 
-const DATA_URL = 'data/nurse-ratio.json?v=18';
+const DATA_URL = 'data/nurse-ratio.json?v=19';
 
 // 三班護病比・衛福部公告標準（依醫院層級）
 const STANDARDS = {
@@ -518,6 +518,88 @@ function buildComplianceMap() {
   if (totalEl) totalEl.textContent = state.data.hospitals.length.toLocaleString();
 }
 
+// ===== 合規總覽儀表板 =====
+//   - 4 顆總覽 KPI（達標/觀察/警戒/未報 家數 + 佔全國%）
+//   - 3 條各層級堆疊條（醫學中心/區域/地區，內含 A/B/C/N 分段）
+function renderOverview() {
+  const total = state.data.hospitals.length;
+  const CLASS_KEYS = ['A', 'B', 'C', 'N'];
+
+  // 全國總計
+  const globalCounts = { A: 0, B: 0, C: 0, N: 0 };
+  Object.values(state.complianceMap).forEach((k) => { globalCounts[k] = (globalCounts[k] || 0) + 1; });
+
+  // 各層級 × 各分類
+  const byLevel = {};
+  ['醫學中心', '區域醫院', '地區醫院'].forEach((lv) => { byLevel[lv] = { A: 0, B: 0, C: 0, N: 0, total: 0 }; });
+  state.data.hospitals.forEach((h) => {
+    const lv = byLevel[h.level];
+    if (!lv) return;
+    const cls = state.complianceMap[h.id] || 'N';
+    lv[cls] += 1;
+    lv.total += 1;
+  });
+
+  // 副標
+  const subEl = document.getElementById('nurse-overview-sub');
+  if (subEl) {
+    const monthLatest = state.data.months[state.data.months.length - 1];
+    subEl.textContent = monthLatest ? `依 ${formatRocMonth(monthLatest)} 資料分類（共 ${total.toLocaleString()} 家）` : `共 ${total.toLocaleString()} 家`;
+  }
+
+  // 4 KPI
+  const kpiEl = document.getElementById('nurse-overview-kpis');
+  if (kpiEl) {
+    kpiEl.innerHTML = CLASS_KEYS.map((k) => {
+      const n = globalCounts[k] || 0;
+      const pct = total ? (100 * n / total) : 0;
+      const meta = COMPLIANCE_CLASSES[k];
+      return `
+        <div class="nurse-overview-kpi" style="border-color:${meta.color};">
+          <div class="nurse-overview-kpi-label" style="color:${meta.color};">
+            <span class="nurse-compliance-dot nurse-compliance-${k}"></span>
+            ${meta.label}
+          </div>
+          <div class="nurse-overview-kpi-num" style="color:${meta.color};">${n.toLocaleString()}</div>
+          <div class="nurse-overview-kpi-pct">${pct.toFixed(1)}%</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // 各層級堆疊條
+  const matrixEl = document.getElementById('nurse-overview-matrix');
+  if (matrixEl) {
+    matrixEl.innerHTML = Object.entries(byLevel).map(([lv, row]) => {
+      if (row.total === 0) return '';
+      const segments = CLASS_KEYS.map((k) => {
+        const n = row[k];
+        if (!n) return '';
+        const pct = 100 * n / row.total;
+        const meta = COMPLIANCE_CLASSES[k];
+        return `<span class="nurse-overview-seg nurse-compliance-${k}" style="width:${pct}%;background:${meta.color};" title="${meta.label} ${n} 家 (${pct.toFixed(1)}%)"></span>`;
+      }).join('');
+      const legend = CLASS_KEYS.map((k) => {
+        const n = row[k];
+        if (!n) return '';
+        const pct = 100 * n / row.total;
+        const meta = COMPLIANCE_CLASSES[k];
+        return `<span class="nurse-overview-legend-item"><span class="nurse-compliance-dot nurse-compliance-${k}"></span>${meta.label} <strong>${n}</strong> <span class="nurse-overview-legend-pct">${pct.toFixed(1)}%</span></span>`;
+      }).filter(Boolean).join('');
+      return `
+        <div class="nurse-overview-row">
+          <div class="nurse-overview-row-header">
+            <span class="nurse-level-badge nurse-level-${levelSlug(lv)}">${lv}</span>
+            <span class="nurse-overview-row-total">${row.total.toLocaleString()} 家</span>
+          </div>
+          <div class="nurse-overview-bar">${segments}</div>
+          <div class="nurse-overview-legend">${legend}</div>
+        </div>
+      `;
+    }).join('');
+  }
+}
+
 // ===== 入口 =====
 
 export async function initNurseRatio() {
@@ -534,6 +616,7 @@ export async function initNurseRatio() {
       state.data.hospitals.forEach((h) => { if (!h.city && cityOverlay[h.id]) h.city = cityOverlay[h.id]; });
     }
     buildComplianceMap();
+    renderOverview();
     renderCityFilter();
     setupFilterControls();
     renderHospitalList();

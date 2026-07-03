@@ -4059,6 +4059,137 @@ body.g2g-modal-open { overflow: hidden; }
   align-items: center;
   gap: 6px;
 }
+/* details 版本：預設收起，summary 可點展開 */
+.nurse-std-details > summary {
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  margin-bottom: 0;
+}
+.nurse-std-details > summary::-webkit-details-marker { display: none; }
+.nurse-std-details[open] > summary { margin-bottom: 12px; }
+.nurse-std-caret {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 0.9rem;
+  transition: transform .2s ease;
+}
+.nurse-std-details[open] .nurse-std-caret { transform: rotate(90deg); }
+
+/* 合規總覽儀表板 */
+.nurse-overview {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 24px;
+}
+.nurse-overview-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.nurse-overview-sub {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+.nurse-overview-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.nurse-overview-kpi {
+  background: var(--bg);
+  border: 1.5px solid transparent;
+  border-radius: 10px;
+  padding: 12px 14px;
+  text-align: left;
+}
+.nurse-overview-kpi-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 6px;
+}
+.nurse-overview-kpi-num {
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.nurse-overview-kpi-pct {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+.nurse-overview-matrix {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.nurse-overview-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.nurse-overview-row-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+.nurse-overview-row-total {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.nurse-overview-bar {
+  display: flex;
+  height: 14px;
+  border-radius: 4px;
+  overflow: hidden;
+  background: var(--border-soft);
+}
+.nurse-overview-seg {
+  display: block;
+  height: 100%;
+  transition: opacity .15s ease;
+}
+.nurse-overview-seg:hover { opacity: 0.8; }
+.nurse-overview-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+.nurse-overview-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.nurse-overview-legend-item strong {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.nurse-overview-legend-pct {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .nurse-overview { padding: 16px 18px; }
+  .nurse-overview-kpis { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .nurse-overview-kpi-num { font-size: 1.5rem; }
+}
 .nurse-std-table {
   display: grid;
   gap: 0;

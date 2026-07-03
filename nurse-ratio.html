@@ -42,12 +42,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=18" />
+  <link rel="stylesheet" href="css/styles.css?v=19" />
 
-  <link rel="modulepreload" href="./js/config.js?v=18" />
-  <link rel="modulepreload" href="./js/components.js?v=18" />
-  <link rel="modulepreload" href="./js/icons.js?v=18" />
-  <link rel="modulepreload" href="./js/nurse-ratio.js?v=18" />
+  <link rel="modulepreload" href="./js/config.js?v=19" />
+  <link rel="modulepreload" href="./js/components.js?v=19" />
+  <link rel="modulepreload" href="./js/icons.js?v=19" />
+  <link rel="modulepreload" href="./js/nurse-ratio.js?v=19" />
 
   <!-- JSON-LD Structured Data：Dataset -->
   <script type="application/ld+json">
@@ -107,14 +107,32 @@
     </div>
   </section>
 
-  <!-- 各級醫院標準參考卡 -->
+  <!-- 合規總覽儀表板：全國聚合 + 各層級分布 -->
+  <section style="padding:0 0 24px;">
+    <div class="container">
+      <div class="nurse-overview" id="nurse-overview">
+        <div class="nurse-overview-title">
+          <span data-icon="info" data-size="14" style="color:var(--primary);vertical-align:middle;"></span>
+          全國護病比合規總覽
+          <span class="nurse-overview-sub" id="nurse-overview-sub">—</span>
+        </div>
+        <!-- 4 顆總覽卡（達標 / 觀察 / 警戒 / 未報，跨層級加總） -->
+        <div class="nurse-overview-kpis" id="nurse-overview-kpis"></div>
+        <!-- 各層級堆疊條 -->
+        <div class="nurse-overview-matrix" id="nurse-overview-matrix"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 各級醫院標準參考卡（預設縮起） -->
   <section style="padding:0 0 20px;">
     <div class="container">
-      <div class="nurse-std-card">
-        <div class="nurse-std-title">
+      <details class="nurse-std-card nurse-std-details">
+        <summary class="nurse-std-title">
           <span data-icon="info" data-size="14" style="color:var(--primary);vertical-align:middle;"></span>
           各級醫院三班護病比行政公告標準
-        </div>
+          <span class="nurse-std-caret">▸</span>
+        </summary>
         <div class="nurse-std-table">
           <div class="nurse-std-row nurse-std-head">
             <span>醫院層級</span><span>白班</span><span>小夜班</span><span>大夜班</span>
@@ -132,7 +150,7 @@
             <span>1 : 10</span><span>1 : 13</span><span>1 : 15</span>
           </div>
         </div>
-      </div>
+      </details>
     </div>
   </section>
 
@@ -253,9 +271,9 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js" defer></script>
   <script type="module">
-    import { mountLayout } from './js/components.js?v=18';
-    import { renderIcons } from './js/icons.js?v=18';
-    import { initNurseRatio } from './js/nurse-ratio.js?v=18';
+    import { mountLayout } from './js/components.js?v=19';
+    import { renderIcons } from './js/icons.js?v=19';
+    import { initNurseRatio } from './js/nurse-ratio.js?v=19';
 
     mountLayout();
     renderIcons();
