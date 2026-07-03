@@ -42,12 +42,12 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=17" />
+  <link rel="stylesheet" href="css/styles.css?v=18" />
 
-  <link rel="modulepreload" href="./js/config.js?v=17" />
-  <link rel="modulepreload" href="./js/components.js?v=17" />
-  <link rel="modulepreload" href="./js/icons.js?v=17" />
-  <link rel="modulepreload" href="./js/nurse-ratio.js?v=17" />
+  <link rel="modulepreload" href="./js/config.js?v=18" />
+  <link rel="modulepreload" href="./js/components.js?v=18" />
+  <link rel="modulepreload" href="./js/icons.js?v=18" />
+  <link rel="modulepreload" href="./js/nurse-ratio.js?v=18" />
 
   <!-- JSON-LD Structured Data：Dataset -->
   <script type="application/ld+json">
@@ -169,13 +169,9 @@
                 <span class="nurse-compliance-dot nurse-compliance-B"></span>
                 觀察 <span class="nurse-filter-count">—</span>
               </button>
-              <button type="button" class="nurse-compliance-filter nurse-compliance-btn-C" data-compliance="C" title="至少一班超過標準 5%~10%（明顯不合規）">
+              <button type="button" class="nurse-compliance-filter nurse-compliance-btn-C" data-compliance="C" title="至少一班超過標準 5% 以上（明顯不合規）">
                 <span class="nurse-compliance-dot nurse-compliance-C"></span>
-                超標 <span class="nurse-filter-count">—</span>
-              </button>
-              <button type="button" class="nurse-compliance-filter nurse-compliance-btn-D" data-compliance="D" title="至少一班超過標準 10% 以上（嚴重人力不足）">
-                <span class="nurse-compliance-dot nurse-compliance-D"></span>
-                爆表 <span class="nurse-filter-count">—</span>
+                警戒 <span class="nurse-filter-count">—</span>
               </button>
             </div>
           </div>
@@ -244,8 +240,7 @@
           <ul>
             <li><strong class="status-safe-txt">達標</strong>：三班護病比都比標準寬鬆 <strong>5% 以上</strong>（例：醫學中心白班 &lt; 5.7）— 人力配置有明確餘裕。</li>
             <li><strong class="status-watch-txt">觀察</strong>：至少一班處在<strong>標準 ±5% 邊界</strong>（例：醫學中心白班介於 5.7 ~ 6.3）— 貼近或剛好卡在標準線。</li>
-            <li><strong class="status-danger-txt">超標</strong>：至少一班<strong>超過標準 5%~10%</strong>（例：醫學中心白班介於 6.3 ~ 6.6）— 明顯不符合公告標準。</li>
-            <li><strong class="status-critical-txt">爆表</strong>：至少一班<strong>超過標準 10% 以上</strong>（例：醫學中心白班 &gt; 6.6）— 嚴重人力不足，護理師工作負擔遠高於公告上限。</li>
+            <li><strong class="status-danger-txt">警戒</strong>：至少一班<strong>超過標準 5% 以上</strong>（例：醫學中心白班 &gt; 6.3）— 明顯不符合公告標準。</li>
           </ul>
           <p>我們刻意把「<strong>剛好等於標準</strong>」歸為觀察類別，而非達標。就像<strong>酒駕檢測不會因為酒測值『剛好等於』上限就免除注意</strong> — 護病比也是：即使剛好達標，也代表人力配置沒有緩衝空間、隨時可能超過標準，值得被列為需觀察對象。</p>
         </div>
@@ -258,9 +253,9 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js" defer></script>
   <script type="module">
-    import { mountLayout } from './js/components.js?v=17';
-    import { renderIcons } from './js/icons.js?v=17';
-    import { initNurseRatio } from './js/nurse-ratio.js?v=17';
+    import { mountLayout } from './js/components.js?v=18';
+    import { renderIcons } from './js/icons.js?v=18';
+    import { initNurseRatio } from './js/nurse-ratio.js?v=18';
 
     mountLayout();
     renderIcons();

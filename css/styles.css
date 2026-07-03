@@ -4211,10 +4211,9 @@ body.g2g-modal-open { overflow: hidden; }
 }
 
 /* KPI 3 級狀態顏色（safe/watch/danger） */
-.kpi-num .status-safe     { color: #06A77D; }
-.kpi-num .status-watch    { color: #F4A261; }
-.kpi-num .status-danger   { color: var(--danger); }
-.kpi-num .status-critical { color: #8B0000; }
+.kpi-num .status-safe   { color: #06A77D; }
+.kpi-num .status-watch  { color: #F4A261; }
+.kpi-num .status-danger { color: var(--danger); }
 /* backward compat：舊 CSS class 保留 */
 .kpi-num .over-std { color: var(--danger); }
 
@@ -4238,10 +4237,9 @@ body.g2g-modal-open { overflow: hidden; }
 .nurse-compliance-explain-body p:last-child { margin-bottom: 0; }
 .nurse-compliance-explain-body ul { margin: 6px 0 8px; padding-left: 1.2rem; }
 .nurse-compliance-explain-body ul li { margin-bottom: 4px; }
-.nurse-compliance-explain-body .status-safe-txt     { color: #06A77D; }
-.nurse-compliance-explain-body .status-watch-txt    { color: #b96b1f; }
-.nurse-compliance-explain-body .status-danger-txt   { color: var(--danger); }
-.nurse-compliance-explain-body .status-critical-txt { color: #8B0000; }
+.nurse-compliance-explain-body .status-safe-txt   { color: #06A77D; }
+.nurse-compliance-explain-body .status-watch-txt  { color: #b96b1f; }
+.nurse-compliance-explain-body .status-danger-txt { color: var(--danger); }
 
 /* 「為什麼這樣分類？」展開式說明（保留但不再使用） */
 .nurse-compliance-explain {
@@ -4281,10 +4279,9 @@ body.g2g-modal-open { overflow: hidden; }
 .nurse-compliance-explain > div p:last-child { margin-bottom: 0; }
 .nurse-compliance-explain ul { margin: 6px 0 8px; padding-left: 1.2rem; }
 .nurse-compliance-explain ul li { margin-bottom: 4px; }
-.nurse-compliance-explain .status-safe-txt     { color: #06A77D; }
-.nurse-compliance-explain .status-watch-txt    { color: #b96b1f; }
-.nurse-compliance-explain .status-danger-txt   { color: var(--danger); }
-.nurse-compliance-explain .status-critical-txt { color: #8B0000; }
+.nurse-compliance-explain .status-safe-txt   { color: #06A77D; }
+.nurse-compliance-explain .status-watch-txt  { color: #b96b1f; }
+.nurse-compliance-explain .status-danger-txt { color: var(--danger); }
 
 /* 地點篩選：跟合規按鈕同款樣式（不同 data attribute） */
 .nurse-city-filter {
@@ -4362,7 +4359,6 @@ body.g2g-modal-open { overflow: hidden; }
 .nurse-compliance-dot.nurse-compliance-A { background: #06A77D; }
 .nurse-compliance-dot.nurse-compliance-B { background: #F4A261; }
 .nurse-compliance-dot.nurse-compliance-C { background: #E63946; }
-.nurse-compliance-dot.nurse-compliance-D { background: #8B0000; }
 .nurse-compliance-dot.nurse-compliance-N { background: #6B7C93; }
 
 .nurse-compliance-badge {
@@ -4379,7 +4375,6 @@ body.g2g-modal-open { overflow: hidden; }
 .nurse-compliance-badge.nurse-compliance-A { background: rgba(6,167,125,0.13); color: #06A77D; }
 .nurse-compliance-badge.nurse-compliance-B { background: rgba(244,162,97,0.15); color: #b96b1f; }
 .nurse-compliance-badge.nurse-compliance-C { background: rgba(230,57,70,0.13); color: var(--danger); }
-.nurse-compliance-badge.nurse-compliance-D { background: rgba(139,0,0,0.15); color: #8B0000; }
 .nurse-compliance-badge.nurse-compliance-N { background: rgba(107,124,147,0.10); color: var(--muted); }
 
 /* hospital chip：dot + 名稱（代號僅在 hover tooltip 顯示） */

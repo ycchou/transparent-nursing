@@ -6,9 +6,9 @@
 //     hospitals: [{ id, name, level, history: { "11207": {day, eve, night} } }]
 //   }
 
-import { renderIcons } from './icons.js?v=17';
+import { renderIcons } from './icons.js?v=18';
 
-const DATA_URL = 'data/nurse-ratio.json?v=17';
+const DATA_URL = 'data/nurse-ratio.json?v=18';
 
 // 三班護病比・衛福部公告標準（依醫院層級）
 const STANDARDS = {
@@ -27,32 +27,26 @@ const COLORS = {
 
 // 合規分類（依最新月份對照該層級標準）
 //   每一班別的判定：
-//     safe    : ratio < std × 0.95              （明確低於標準 5%）
-//     watch   : std × 0.95 ≤ ratio ≤ std × 1.05  （落在標準 ±5% 邊界）
-//     danger  : std × 1.05 < ratio ≤ std × 1.10  （超過標準 5% 但未達 10%）
-//     critical: ratio > std × 1.10              （超過標準 10% 以上）
+//     safe   : ratio < std × 0.95         （明確低於標準 5%）
+//     watch  : std × 0.95 ≤ ratio ≤ std × 1.05  （落在標準 ±5% 邊界）
+//     danger : ratio > std × 1.05         （明顯超過標準 5%）
 //   醫院分類（取最壞班別）：
-//     A · 達標 (green)   ：三班全部 safe
-//     B · 觀察 (amber)   ：至少一班 watch，且無 danger/critical
-//     C · 超標 (red)     ：至少一班 danger，且無 critical
-//     D · 爆表 (dark red)：至少一班 critical
-const COMPLIANCE_TOLERANCE = 0.05;  // ±5% 觀察邊界
-const COMPLIANCE_SEVERE = 0.10;     // +10% 爆表門檻
+//     A · 達標 (green)：三班全部 safe
+//     B · 觀察 (amber)：至少一班 watch，且無 danger
+//     C · 警戒 (red)  ：至少一班 danger
+const COMPLIANCE_TOLERANCE = 0.05;  // ±5%
 const COMPLIANCE_CLASSES = {
   A: { key: 'A', label: '達標', color: '#06A77D', bg: 'rgba(6,167,125,0.13)' },
   B: { key: 'B', label: '觀察', color: '#F4A261', bg: 'rgba(244,162,97,0.15)' },
-  C: { key: 'C', label: '超標', color: '#E63946', bg: 'rgba(230,57,70,0.13)' },
-  D: { key: 'D', label: '爆表', color: '#8B0000', bg: 'rgba(139,0,0,0.15)' },
+  C: { key: 'C', label: '警戒', color: '#E63946', bg: 'rgba(230,57,70,0.13)' },
   N: { key: 'N', label: '未報', color: '#6B7C93', bg: 'rgba(107,124,147,0.10)' },
 };
 
 // 單一班別狀態
 function shiftStatus(val, std) {
   if (val == null || std == null) return null;
-  const upper = std * (1 + COMPLIANCE_TOLERANCE);   // std × 1.05
-  const lower = std * (1 - COMPLIANCE_TOLERANCE);   // std × 0.95
-  const severe = std * (1 + COMPLIANCE_SEVERE);     // std × 1.10
-  if (val > severe) return 'critical';
+  const upper = std * (1 + COMPLIANCE_TOLERANCE);
+  const lower = std * (1 - COMPLIANCE_TOLERANCE);
   if (val > upper) return 'danger';
   if (val >= lower) return 'watch';
   return 'safe';
@@ -74,7 +68,6 @@ function classifyHospital(hosp) {
     shiftStatus(latest.night, std.night),
   ].filter((s) => s != null);
   if (statuses.length === 0) return 'N';
-  if (statuses.includes('critical')) return 'D';
   if (statuses.includes('danger')) return 'C';
   if (statuses.includes('watch')) return 'B';
   return 'A';
@@ -88,7 +81,7 @@ const state = {
   complianceFilter: 'all',
   cityFilter: 'all',
   searchQuery: '',
-  complianceMap: {},  // { hospitalId: 'A' | 'B' | 'C' | 'D' | 'N' } — 載入後計算一次快取
+  complianceMap: {},  // { hospitalId: 'A' | 'B' | 'C' | 'N' } — 載入後計算一次快取
 };
 
 // ROC yyyymm → 顯示字串
@@ -514,7 +507,7 @@ function buildComplianceMap() {
   state.data.hospitals.forEach((h) => { map[h.id] = classifyHospital(h); });
   state.complianceMap = map;
   // 各類別統計
-  const counts = { A: 0, B: 0, C: 0, D: 0, N: 0 };
+  const counts = { A: 0, B: 0, C: 0, N: 0 };
   Object.values(map).forEach((v) => { counts[v] = (counts[v] || 0) + 1; });
   // 更新篩選按鈕上的計數
   Object.entries(counts).forEach(([k, v]) => {
