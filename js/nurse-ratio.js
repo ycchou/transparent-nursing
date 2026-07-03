@@ -6,9 +6,9 @@
 //     hospitals: [{ id, name, level, history: { "11207": {day, eve, night} } }]
 //   }
 
-import { renderIcons } from './icons.js?v=20';
+import { renderIcons } from './icons.js?v=22';
 
-const DATA_URL = 'data/nurse-ratio.json?v=20';
+const DATA_URL = 'data/nurse-ratio.json?v=22';
 
 // 三班護病比・衛福部公告標準（依醫院層級）
 const STANDARDS = {
@@ -251,12 +251,11 @@ function renderDetail(hosp) {
   document.getElementById('hosp-level').textContent = hosp.level;
   document.getElementById('hosp-level').className = `nurse-level-badge nurse-level-${levelSlug(hosp.level)}`;
 
-  // 詳情：第 1 行 正式名稱；第 2 行 機構代號 · 地址（縣市已升為 badge，此處不重複）
+  // 詳情：正式名稱 / 機構代號 / 地址 三行（縣市已升為 badge，此處不重複）
   const lines = [];
   if (hosp.fullName && hosp.fullName !== hosp.name) lines.push(`正式名稱：${escapeHtml(hosp.fullName)}`);
-  const bottomBits = [`機構代號：${escapeHtml(hosp.id)}`];
-  if (hosp.address) bottomBits.push(escapeHtml(hosp.address));
-  lines.push(bottomBits.join(' · '));
+  lines.push(`機構代號：${escapeHtml(hosp.id)}`);
+  if (hosp.address) lines.push(`地址：${escapeHtml(hosp.address)}`);
   document.getElementById('hosp-code').innerHTML = lines.map((l) => `<div>${l}</div>`).join('');
 
   const cls = state.complianceMap[hosp.id] || 'N';
@@ -377,6 +376,11 @@ function renderChart(hosp) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      // 螢幕縮放時重算 X 軸 tick 上限（每 70px 一格）
+      onResize: (chart, size) => {
+        const limit = Math.max(4, Math.min(months.length, Math.floor(size.width / 70)));
+        chart.options.scales.x.ticks.maxTicksLimit = limit;
+      },
       interaction: { intersect: false, mode: 'index' },
       plugins: {
         legend: {
@@ -410,9 +414,14 @@ function renderChart(hosp) {
           ticks: {
             color: '#6B7C93',
             font: { family: "'Noto Sans TC', sans-serif", size: 10 },
-            maxRotation: 60,
-            minRotation: 45,
-            autoSkip: false,
+            maxRotation: 45,
+            minRotation: 0,
+            autoSkip: true,
+            // 依 canvas 寬度動態決定 tick 上限（每個標籤 ~70px 寬）
+            maxTicksLimit: (() => {
+              const w = canvas.clientWidth || canvas.parentElement?.clientWidth || 800;
+              return Math.max(4, Math.min(months.length, Math.floor(w / 70)));
+            })(),
           },
         },
         y: {
