@@ -6,9 +6,9 @@
 //     hospitals: [{ id, name, level, history: { "11207": {day, eve, night} } }]
 //   }
 
-import { renderIcons } from './icons.js?v=24';
+import { renderIcons } from './icons.js?v=25';
 
-const DATA_URL = 'data/nurse-ratio.json?v=24';
+const DATA_URL = 'data/nurse-ratio.json?v=25';
 
 // 三班護病比・衛福部公告標準（依醫院層級）
 const STANDARDS = {

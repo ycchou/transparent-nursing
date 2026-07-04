@@ -30,6 +30,7 @@ OUT_FILE = os.path.join(ROOT, 'data', 'nurse-ratio.json')
 COL_LEVEL = 0        # 特約類別
 COL_HOSP_CODE = 3    # 機構代號
 COL_HOSP_NAME = 4    # 機構名稱
+COL_BRANCH = 5       # 院區（同機構代號的多院區在此區分）
 COL_BEDS = 6         # 急性一般病床數
 COL_DAY_RATIO = 9    # 白班護病比
 COL_EVE_RATIO = 11   # 小夜班護病比
@@ -152,7 +153,11 @@ def parseOds(path):
 
 
 def extractHospitalRatios(rows):
-    """從 rows 抽出所有醫院資料，回傳 {code: {name, level, day, eve, night}}"""
+    """從 rows 抽出所有醫院資料，回傳 {(code, branch): {name, branch, level, day, eve, night}}
+
+    - branch = col 5「院區」欄的字串（無資料則空字串）
+    - 同 (code, branch) 出現多次時後者覆蓋（例：精神急性 sheet 若混入會被 latest 覆蓋）
+    """
     out = {}
     for r in rows:
         if len(r) < COL_NIGHT_RATIO + 1:
@@ -167,6 +172,7 @@ def extractHospitalRatios(rows):
         if not name:
             continue
 
+        branch = str(r[COL_BRANCH]).strip() if len(r) > COL_BRANCH else ''
         beds = parseInt(r[COL_BEDS])
         day = parseNumber(r[COL_DAY_RATIO])
         eve = parseNumber(r[COL_EVE_RATIO])
@@ -176,8 +182,9 @@ def extractHospitalRatios(rows):
         if beds is None and day is None and eve is None and night is None:
             continue
 
-        out[code] = {
+        out[(code, branch)] = {
             'name': name,
+            'branch': branch,
             'level': level,
             'day': day,
             'eve': eve,
@@ -239,6 +246,85 @@ def extractBranchName(fullName, commonPrefix):
     return fullName
 
 
+def _stripYuanqu(s: str) -> str:
+    """去掉尾綴「院區」以便做前綴比對"""
+    return s[:-2] if s.endswith('院區') else s
+
+
+def normalizeBranch(b: str) -> str:
+    """
+    正規化院區字串（用於跨月份比對）：
+    - 早期 ODS 用「中興」、「仁愛」等短名，後期改用「中興院區」等
+    - 統一去尾綴「院區」，這樣 key 才會一致
+    - 額外處理奇怪尾綴（例：「及其婦幼」）
+    """
+    if not b:
+        return ''
+    t = b.strip()
+    for tail in ['及其婦幼', '及其分院']:
+        if t.endswith(tail):
+            t = t[:-len(tail)]
+    if t.endswith('院區'):
+        t = t[:-2]
+    return t
+
+
+def matchAccredForVpnBranch(vpn_branch, accred_list, common_prefix):
+    """
+    給 VPN 的 branch 字串（可能是空字串），從 accred_list 找最匹配的一筆 accred 記錄。
+
+    匹配優先序：
+      0) VPN 沒 branch → 找 accred 中 branch 也為空者
+      1) 精準匹配 accred branch == vpn_branch
+      2) 前綴匹配（去 "院區" 後）：例 VPN「林森中醫院區」→ accred「林森中醫昆明院區」
+      3) fallback：accred 中有 branch 為空者當「本院/主院區」
+
+    accred_list: list of accred records（同代號的全部）
+    common_prefix: accred fullName 的最長共同前綴（如「臺北市立聯合醫院」）
+    """
+    # 先算每個 accred entry 的 branch
+    ab_pairs = []
+    for ac in accred_list:
+        name = ac.get('name') or ''
+        b = name[len(common_prefix):] if common_prefix and name.startswith(common_prefix) else name
+        ab_pairs.append((ac, b))
+
+    # 0) VPN 空 branch
+    if not vpn_branch:
+        for ac, b in ab_pairs:
+            if not b:
+                return ac
+        return None
+
+    # 1) 精準（含 normalize 後精準）
+    v_norm = normalizeBranch(vpn_branch)
+    for ac, b in ab_pairs:
+        if b == vpn_branch or normalizeBranch(b) == v_norm:
+            return ac
+
+    # 2) 前綴（去院區後）
+    v_stem = _stripYuanqu(vpn_branch)
+    if v_stem:
+        for ac, b in ab_pairs:
+            a_stem = _stripYuanqu(b)
+            if not a_stem:
+                continue
+            common = 0
+            for i in range(min(len(v_stem), len(a_stem))):
+                if v_stem[i] == a_stem[i]:
+                    common += 1
+                else:
+                    break
+            if common >= 2:
+                return ac
+
+    # 3) fallback：空 branch = 本院/主院區
+    for ac, b in ab_pairs:
+        if not b:
+            return ac
+    return None
+
+
 def writeMergedHospitalsIndex(accredIndex, accredMeta, vpnHospitalsByCode):
     """
     產生合併版醫院總表 data/hospitals-merged.json
@@ -280,7 +366,7 @@ def writeMergedHospitalsIndex(accredIndex, accredMeta, vpnHospitalsByCode):
             'address': None,
             'phone': None,
             'source': 'vpn-only',
-            'sharedCode': False,
+            'sharedCode': len(vp.get('branches', set())) > 1,
         })
 
     # 排序：層級 → 縣市 → 名稱
@@ -334,10 +420,11 @@ def main():
     # 讀評鑑名單（PDF 萃取 → hospitals.json）
     accredIndex, accredMeta = loadAccredHospitalsIndex()
 
-    # 集合所有月份 + 每個醫院
-    hospitalsByCode = {}  # code → {id, name, shortName, fullName, level, city, address, history}
+    # 集合所有月份 + 每個 (code, branch) 醫院院區
+    #   key = (code, branch)；branch 可能是空字串（單院區醫院）
+    hospitalsByKey = {}
     monthsSet = set()
-    vpnHospitalsByCode = {}  # 給 merged 表用（只含 VPN 出現過的醫院）
+    vpnHospitalsByCode = {}  # 給 merged 表用；每 code 記 { name, level, branches:set }
 
     for filename in files:
         monthKey = rocFilenameToKey(filename)
@@ -350,62 +437,89 @@ def main():
             if not rows:
                 print(f'  ⚠️  略過（無資料 sheet）: {filename}')
                 continue
-            data = extractHospitalRatios(rows)
-            for code, rec in data.items():
-                accredList = accredIndex.get(code, [])
-                vpnHospitalsByCode[code] = { 'name': rec['name'], 'level': rec['level'] }
+            data = extractHospitalRatios(rows)  # {(code, branch): rec}
+            for (code, branchRaw), rec in data.items():
+                # normalize branch 用作 key，跨月份「中興」「中興院區」視為同一院區
+                branchKey = normalizeBranch(branchRaw)
+                key = (code, branchKey)
                 monthEntry = { 'day': rec['day'], 'eve': rec['eve'], 'night': rec['night'] }
 
-                if len(accredList) > 1:
-                    # 多院區：拆成 N 筆，各自 fullName / level / 分院顯示名，但共用 history
-                    prefix = longestCommonPrefix([a.get('name') or '' for a in accredList])
-                    for idx, accred in enumerate(accredList):
-                        sub_id = f'{code}-{idx + 1}'
-                        branch = extractBranchName(accred.get('name'), prefix)
-                        display_name = f"{rec['name']}·{branch}" if branch else rec['name']
-                        if sub_id not in hospitalsByCode:
-                            hospitalsByCode[sub_id] = {
-                                'id': sub_id,
-                                'code': code,               # 保留原機構代號供辨識
-                                'name': display_name,       # VPN 簡稱 + 院區
-                                'fullName': accred.get('name'),
-                                'level': accred.get('level') or rec['level'],
-                                'city': accred.get('city'),
-                                'address': accred.get('address'),
-                                'phone': accred.get('phone'),
-                                'source': 'both',
-                                'branch': branch,
-                                'sharedCode': {
-                                    'code': code,
-                                    'branchCount': len(accredList),
-                                    'note': f'此代號涵蓋 {len(accredList)} 院區，VPN 護病比為整體回報之數字',
-                                },
-                                'history': {},
-                            }
-                        hospitalsByCode[sub_id]['history'][monthKey] = monthEntry
-                else:
-                    # 單院區（或 VPN-only）：走原本路徑
-                    accred = accredList[0] if accredList else {}
-                    if code not in hospitalsByCode:
-                        hospitalsByCode[code] = {
-                            'id': code,
-                            'code': code,
-                            'name': rec['name'],
-                            'fullName': accred.get('name'),
-                            'level': rec['level'],
-                            'city': accred.get('city'),
-                            'address': accred.get('address'),
-                            'phone': accred.get('phone'),
-                            'source': 'both' if accredList else 'vpn-only',
-                            'history': {},
-                        }
-                    hospitalsByCode[code]['name'] = rec['name']
-                    hospitalsByCode[code]['level'] = rec['level']
-                    hospitalsByCode[code]['history'][monthKey] = monthEntry
+                # 記入 vpnHospitalsByCode（給 merged 用；用 normalize 後的 branch set）
+                vc = vpnHospitalsByCode.setdefault(code, { 'name': rec['name'], 'level': rec['level'], 'branches': set() })
+                vc['name'] = rec['name']
+                vc['level'] = rec['level']
+                vc['branches'].add(branchKey)
+
+                if key not in hospitalsByKey:
+                    hospitalsByKey[key] = {
+                        'code': code,
+                        'branch': branchRaw,       # 顯示用原始 branch（可能被覆蓋為最新月的）
+                        'branchKey': branchKey,    # 正規化 key（穩定）
+                        'name': rec['name'],
+                        'level': rec['level'],
+                        'fullName': None,
+                        'city': None,
+                        'address': None,
+                        'phone': None,
+                        'source': 'vpn-only',
+                        'history': {},
+                    }
+                # 名稱、level、branch 顯示都以最新月為準
+                hospitalsByKey[key]['name'] = rec['name']
+                hospitalsByKey[key]['level'] = rec['level']
+                hospitalsByKey[key]['branch'] = branchRaw
+                hospitalsByKey[key]['history'][monthKey] = monthEntry
             monthsSet.add(monthKey)
-            print(f'  ✓ {monthKey}: {len(data)} 家醫院  ← {filename}')
+            print(f'  ✓ {monthKey}: {len(data)} 筆 (code, branch)  ← {filename}')
         except Exception as e:
             print(f'  ❌ 解析失敗: {filename} — {e}')
+
+    # ===== 後處理：依 accreditation 填 fullName / city / address / level =====
+    # 並依 code 底下有幾個 branchKey 決定 id 與 sharedCode 標記
+    codesBranches = {}
+    for (code, branchKey), _ in hospitalsByKey.items():
+        codesBranches.setdefault(code, []).append(branchKey)
+
+    for (code, branchKey), h in hospitalsByKey.items():
+        accredList = accredIndex.get(code, [])
+        if accredList:
+            prefix = longestCommonPrefix([a.get('name') or '' for a in accredList]) if len(accredList) > 1 else ''
+            # 用最新月的 branchRaw 去匹配（保留院區/院區字樣有助於精準匹配）
+            matched = matchAccredForVpnBranch(h['branch'], accredList, prefix) if len(accredList) > 1 else accredList[0]
+            if matched:
+                h['fullName'] = matched.get('name')
+                h['city'] = matched.get('city')
+                h['address'] = matched.get('address')
+                h['phone'] = matched.get('phone')
+                if matched.get('level'):
+                    h['level'] = matched['level']
+                h['source'] = 'both'
+
+        # 多院區標記
+        siblingBranches = codesBranches[code]
+        multi = len(siblingBranches) > 1 or len(accredList) > 1
+        if multi:
+            h['sharedCode'] = {
+                'code': code,
+                'branchCount': max(len(siblingBranches), len(accredList)),
+                'note': f'此機構代號涵蓋多院區（{max(len(siblingBranches), len(accredList))} 個），本頁各院區資料分別呈現',
+            }
+
+        # 顯示名：若有 branch 就補上「·branch」
+        displayBranch = h['branch']
+        if displayBranch and not h['name'].endswith(displayBranch) and '·' not in h['name']:
+            h['name'] = f"{h['name']}·{displayBranch}"
+
+    # 建立 id：單一 branch 且無 accred 拆分 → id = code；否則 id = code-branchKey
+    for (code, branchKey), h in hospitalsByKey.items():
+        siblingBranches = codesBranches[code]
+        if len(siblingBranches) == 1 and siblingBranches[0] == '':
+            h['id'] = code
+        else:
+            slug = branchKey if branchKey else 'main'
+            h['id'] = f'{code}-{slug}'
+        # branchKey 是內部欄位，不需要 output
+        h.pop('branchKey', None)
 
     # 產生醫院合併總表（評鑑為主 + VPN 補）
     print()
@@ -418,7 +532,7 @@ def main():
     # 排序 hospitals：先依 level，再依 name
     LEVEL_ORDER = {'醫學中心': 0, '區域醫院': 1, '地區醫院': 2}
     hospitals = sorted(
-        hospitalsByCode.values(),
+        hospitalsByKey.values(),
         key=lambda h: (LEVEL_ORDER.get(h['level'], 99), h['name']),
     )
 
