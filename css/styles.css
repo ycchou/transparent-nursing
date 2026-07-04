@@ -4551,6 +4551,23 @@ body.g2g-modal-open { overflow: hidden; }
   font-weight: 500;
 }
 
+/* 共用機構代號多院區的提示 */
+.nurse-shared-hint {
+  color: #b96b1f;
+  font-size: 0.78rem;
+  margin-left: 4px;
+}
+.nurse-shared-banner {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: rgba(244, 162, 97, 0.10);
+  border-left: 3px solid #F4A261;
+  border-radius: 6px;
+  color: #814d17;
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
 @media (max-width: 640px) {
   .nurse-std-row {
     grid-template-columns: 80px 1fr 1fr 1fr;

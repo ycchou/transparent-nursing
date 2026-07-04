@@ -6,9 +6,9 @@
 //     hospitals: [{ id, name, level, history: { "11207": {day, eve, night} } }]
 //   }
 
-import { renderIcons } from './icons.js?v=23';
+import { renderIcons } from './icons.js?v=24';
 
-const DATA_URL = 'data/nurse-ratio.json?v=23';
+const DATA_URL = 'data/nurse-ratio.json?v=24';
 
 // 三班護病比・衛福部公告標準（依醫院層級）
 const STANDARDS = {
@@ -258,9 +258,30 @@ function renderDetail(hosp) {
   // 詳情：正式名稱 / 機構代號 / 地址 三行（縣市已升為 badge，此處不重複）
   const lines = [];
   if (hosp.fullName && hosp.fullName !== hosp.name) lines.push(`正式名稱：${escapeHtml(hosp.fullName)}`);
-  lines.push(`機構代號：${escapeHtml(hosp.id)}`);
+  // 共用機構代號的多院區：顯示原始代號 + 提示
+  const shared = hosp.sharedCode;
+  if (shared) {
+    lines.push(`機構代號：${escapeHtml(shared.code)} <span class="nurse-shared-hint">（此代號共 ${shared.branchCount} 院區）</span>`);
+  } else {
+    lines.push(`機構代號：${escapeHtml(hosp.id)}`);
+  }
   if (hosp.address) lines.push(`地址：${escapeHtml(hosp.address)}`);
   document.getElementById('hosp-code').innerHTML = lines.map((l) => `<div>${l}</div>`).join('');
+
+  // sharedCode 說明條（顯眼提示 VPN 數據是整體回報）
+  let sharedBanner = document.getElementById('hosp-shared-banner');
+  if (shared) {
+    if (!sharedBanner) {
+      sharedBanner = document.createElement('div');
+      sharedBanner.id = 'hosp-shared-banner';
+      sharedBanner.className = 'nurse-shared-banner';
+      document.getElementById('hosp-code').after(sharedBanner);
+    }
+    sharedBanner.innerHTML = `⚠️ ${escapeHtml(shared.note)}。各院區實際護病比未拆分揭露，本頁列出的 ${shared.branchCount} 個院區數字為同一組資料。`;
+    sharedBanner.hidden = false;
+  } else if (sharedBanner) {
+    sharedBanner.hidden = true;
+  }
 
   const cls = state.complianceMap[hosp.id] || 'N';
   const compBadge = document.getElementById('hosp-compliance');

@@ -191,19 +191,52 @@ HOSPITALS_MERGED_JSON = os.path.join(ROOT, 'data', 'hospitals-merged.json')
 
 
 def loadAccredHospitalsIndex():
-    """從 data/hospitals.json (評鑑 PDF 萃取) 讀完整醫院索引：code → full record"""
+    """從 data/hospitals.json (評鑑 PDF 萃取) 讀完整醫院索引：code → [full record, ...]
+
+    同一代號有多院區時保留全部（例：臺北市聯醫 6 院區都掛 0101090517）；
+    fullName 完全相同的重複條目會去重（PDF 萃取常見瑕疵）。
+    """
     if not os.path.isfile(HOSPITALS_JSON):
         print('  ⚠️  找不到 hospitals.json，將無評鑑資訊可用')
         return {}, {}
     with open(HOSPITALS_JSON, encoding='utf-8') as f:
         hd = json.load(f)
-    accredIndex = {}  # code → 完整評鑑記錄
+    accredIndex = {}  # code → list[record]
     for h in hd.get('hospitals', []):
         code = h.get('code')
-        if code:
-            accredIndex[str(code).strip()] = h
-    print(f'  ✓ 讀到評鑑名單 {len(accredIndex)} 家')
+        if not code:
+            continue
+        code = str(code).strip()
+        existing = accredIndex.setdefault(code, [])
+        # 依 fullName 去重
+        if any(e.get('name') == h.get('name') for e in existing):
+            continue
+        existing.append(h)
+    total = sum(len(v) for v in accredIndex.values())
+    dup_codes = sum(1 for v in accredIndex.values() if len(v) > 1)
+    print(f'  ✓ 讀到評鑑名單 {total} 筆 / {len(accredIndex)} 家 (共用代號多院區: {dup_codes} 家)')
     return accredIndex, hd
+
+
+def longestCommonPrefix(strs):
+    """回傳一組字串的最長共同前綴"""
+    if not strs:
+        return ''
+    s1 = min(strs)
+    s2 = max(strs)
+    for i, c in enumerate(s1):
+        if i >= len(s2) or c != s2[i]:
+            return s1[:i]
+    return s1
+
+
+def extractBranchName(fullName, commonPrefix):
+    """給 fullName 與共用前綴，回傳院區短名（例：中興院區、和平婦幼院區）"""
+    if not fullName:
+        return None
+    if commonPrefix and fullName.startswith(commonPrefix):
+        return fullName[len(commonPrefix):] or None
+    return fullName
 
 
 def writeMergedHospitalsIndex(accredIndex, accredMeta, vpnHospitalsByCode):
@@ -215,47 +248,50 @@ def writeMergedHospitalsIndex(accredIndex, accredMeta, vpnHospitalsByCode):
     每筆記錄格式：
       { code, name, shortName, city, level, source, address?, phone?, accredResult? ... }
     """
-    merged = {}
+    records = []
 
-    # 評鑑名單優先
-    for code, ac in accredIndex.items():
-        merged[code] = {
-            'code': code,
-            'name': ac.get('name'),         # 評鑑正式全名
-            'shortName': None,               # 待 VPN 填
-            'city': ac.get('city'),
-            'level': ac.get('level'),
-            'address': ac.get('address'),
-            'phone': ac.get('phone'),
-            'source': 'accred',
-        }
-
-    # VPN 補：對應到就補 shortName，對應不到就新增條目
-    for code, vp in vpnHospitalsByCode.items():
-        if code in merged:
-            merged[code]['shortName'] = vp['name']
-            merged[code]['source'] = 'both'
-        else:
-            merged[code] = {
+    # 評鑑名單優先：同代號多院區 → 各自輸出一筆（共用 shortName）
+    for code, acList in accredIndex.items():
+        vp = vpnHospitalsByCode.get(code)
+        shortName = vp['name'] if vp else None
+        for ac in acList:
+            records.append({
                 'code': code,
-                'name': vp['name'],           # 沒評鑑資料，用 VPN 名稱當正式名稱
-                'shortName': vp['name'],
-                'city': None,                 # 評鑑沒收錄 = 沒 city 資料
-                'level': vp['level'],
-                'address': None,
-                'phone': None,
-                'source': 'vpn-only',
-            }
+                'name': ac.get('name'),        # 評鑑正式全名（含院區）
+                'shortName': shortName,        # 全部院區共用 VPN 簡稱
+                'city': ac.get('city'),
+                'level': ac.get('level'),
+                'address': ac.get('address'),
+                'phone': ac.get('phone'),
+                'source': 'both' if vp else 'accred',
+                'sharedCode': len(acList) > 1,
+            })
+
+    # VPN 有但評鑑沒收錄的
+    for code, vp in vpnHospitalsByCode.items():
+        if code in accredIndex:
+            continue
+        records.append({
+            'code': code,
+            'name': vp['name'],
+            'shortName': vp['name'],
+            'city': None,
+            'level': vp['level'],
+            'address': None,
+            'phone': None,
+            'source': 'vpn-only',
+            'sharedCode': False,
+        })
 
     # 排序：層級 → 縣市 → 名稱
     LEVEL_ORDER = {'醫學中心': 0, '區域醫院': 1, '地區醫院': 2}
     orderedList = sorted(
-        merged.values(),
+        records,
         key=lambda h: (LEVEL_ORDER.get(h['level'], 99), h['city'] or 'zz', h['name'] or ''),
     )
 
     stats = {'both': 0, 'accred': 0, 'vpn-only': 0}
-    for h in merged.values():
+    for h in records:
         stats[h['source']] = stats.get(h['source'], 0) + 1
 
     tz = timezone(timedelta(hours=8))
@@ -277,7 +313,7 @@ def writeMergedHospitalsIndex(accredIndex, accredMeta, vpnHospitalsByCode):
     print(f'    - 只 VPN 有 (vpn-only): {stats["vpn-only"]:>4}')
     print(f'    - 合計：              {len(orderedList):>4}')
 
-    return merged
+    return orderedList
 
 
 def main():
@@ -316,35 +352,56 @@ def main():
                 continue
             data = extractHospitalRatios(rows)
             for code, rec in data.items():
-                # 從評鑑名單查對照資訊
-                accred = accredIndex.get(code, {})
-                fullName = accred.get('name')   # 評鑑正式全名（若有）
-                city = accred.get('city')       # 縣市（若有）
-                address = accred.get('address') # 地址（若有）
-                phone = accred.get('phone')     # 電話（若有）
-
-                if code not in hospitalsByCode:
-                    hospitalsByCode[code] = {
-                        'id': code,
-                        'name': rec['name'],        # VPN 簡稱作為顯示用主名稱
-                        'fullName': fullName,       # 評鑑全名 (nullable)
-                        'level': rec['level'],
-                        'city': city,               # nullable
-                        'address': address,         # nullable
-                        'phone': phone,             # nullable
-                        'source': 'both' if code in accredIndex else 'vpn-only',
-                        'history': {},
-                    }
-                # 每月份都更新一次名稱（以最新月為準）
-                hospitalsByCode[code]['name'] = rec['name']
-                hospitalsByCode[code]['level'] = rec['level']
-                # VPN 出現過的醫院也記到 vpn 集合（給 merged 表）
+                accredList = accredIndex.get(code, [])
                 vpnHospitalsByCode[code] = { 'name': rec['name'], 'level': rec['level'] }
-                hospitalsByCode[code]['history'][monthKey] = {
-                    'day': rec['day'],
-                    'eve': rec['eve'],
-                    'night': rec['night'],
-                }
+                monthEntry = { 'day': rec['day'], 'eve': rec['eve'], 'night': rec['night'] }
+
+                if len(accredList) > 1:
+                    # 多院區：拆成 N 筆，各自 fullName / level / 分院顯示名，但共用 history
+                    prefix = longestCommonPrefix([a.get('name') or '' for a in accredList])
+                    for idx, accred in enumerate(accredList):
+                        sub_id = f'{code}-{idx + 1}'
+                        branch = extractBranchName(accred.get('name'), prefix)
+                        display_name = f"{rec['name']}·{branch}" if branch else rec['name']
+                        if sub_id not in hospitalsByCode:
+                            hospitalsByCode[sub_id] = {
+                                'id': sub_id,
+                                'code': code,               # 保留原機構代號供辨識
+                                'name': display_name,       # VPN 簡稱 + 院區
+                                'fullName': accred.get('name'),
+                                'level': accred.get('level') or rec['level'],
+                                'city': accred.get('city'),
+                                'address': accred.get('address'),
+                                'phone': accred.get('phone'),
+                                'source': 'both',
+                                'branch': branch,
+                                'sharedCode': {
+                                    'code': code,
+                                    'branchCount': len(accredList),
+                                    'note': f'此代號涵蓋 {len(accredList)} 院區，VPN 護病比為整體回報之數字',
+                                },
+                                'history': {},
+                            }
+                        hospitalsByCode[sub_id]['history'][monthKey] = monthEntry
+                else:
+                    # 單院區（或 VPN-only）：走原本路徑
+                    accred = accredList[0] if accredList else {}
+                    if code not in hospitalsByCode:
+                        hospitalsByCode[code] = {
+                            'id': code,
+                            'code': code,
+                            'name': rec['name'],
+                            'fullName': accred.get('name'),
+                            'level': rec['level'],
+                            'city': accred.get('city'),
+                            'address': accred.get('address'),
+                            'phone': accred.get('phone'),
+                            'source': 'both' if accredList else 'vpn-only',
+                            'history': {},
+                        }
+                    hospitalsByCode[code]['name'] = rec['name']
+                    hospitalsByCode[code]['level'] = rec['level']
+                    hospitalsByCode[code]['history'][monthKey] = monthEntry
             monthsSet.add(monthKey)
             print(f'  ✓ {monthKey}: {len(data)} 家醫院  ← {filename}')
         except Exception as e:
