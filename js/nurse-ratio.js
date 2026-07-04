@@ -6,9 +6,9 @@
 //     hospitals: [{ id, name, level, history: { "11207": {day, eve, night} } }]
 //   }
 
-import { renderIcons } from './icons.js?v=25';
+import { renderIcons } from './icons.js?v=26';
 
-const DATA_URL = 'data/nurse-ratio.json?v=25';
+const DATA_URL = 'data/nurse-ratio.json?v=26';
 
 // 三班護病比・衛福部公告標準（依醫院層級）
 const STANDARDS = {
@@ -268,20 +268,9 @@ function renderDetail(hosp) {
   if (hosp.address) lines.push(`地址：${escapeHtml(hosp.address)}`);
   document.getElementById('hosp-code').innerHTML = lines.map((l) => `<div>${l}</div>`).join('');
 
-  // sharedCode 說明條（顯眼提示 VPN 數據是整體回報）
-  let sharedBanner = document.getElementById('hosp-shared-banner');
-  if (shared) {
-    if (!sharedBanner) {
-      sharedBanner = document.createElement('div');
-      sharedBanner.id = 'hosp-shared-banner';
-      sharedBanner.className = 'nurse-shared-banner';
-      document.getElementById('hosp-code').after(sharedBanner);
-    }
-    sharedBanner.innerHTML = `⚠️ ${escapeHtml(shared.note)}。各院區實際護病比未拆分揭露，本頁列出的 ${shared.branchCount} 個院區數字為同一組資料。`;
-    sharedBanner.hidden = false;
-  } else if (sharedBanner) {
-    sharedBanner.hidden = true;
-  }
+  // 各院區已有各自 VPN 護病比獨立資料，不再顯示警語（僅 code 行保留「共 N 院區」小提示）
+  const sharedBanner = document.getElementById('hosp-shared-banner');
+  if (sharedBanner) sharedBanner.hidden = true;
 
   const cls = state.complianceMap[hosp.id] || 'N';
   const compBadge = document.getElementById('hosp-compliance');
