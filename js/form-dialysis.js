@@ -5,6 +5,7 @@ import { mountLayout } from './components.js?v=17';
 import { renderIcons, icon } from './icons.js?v=17';
 import { HOSPITALS } from './hospitals.js?v=17';
 import { markContributed } from './contribution-gate.js?v=17';
+import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=17';
 
 const DRAFT_KEY = 'dform_draft_dialysis';
 const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 避開易混字元 0/O/1/I/L
@@ -630,28 +631,15 @@ function showThanks() {
 
 const ACCRED_LEVELS = new Set(['醫學中心', '區域醫院', '地區醫院']);
 
-// 從 hospitals-merged.json 讀簡稱 map（accred 正式名稱 → VPN 簡稱）
-// 供模糊搜尋用（使用者輸入簡稱關鍵字也能命中）；載入失敗靜默略過。
-const HOSPITAL_SHORT_MAP = new Map();
-let hospitalShortMapReady = false;
-(async function loadShortNames() {
-  try {
-    const r = await fetch('data/hospitals-merged.json', { cache: 'default' });
-    if (!r.ok) return;
-    const d = await r.json();
-    (d.hospitals || []).forEach((h) => {
-      if (h.name && h.shortName && h.shortName !== h.name) {
-        HOSPITAL_SHORT_MAP.set(h.name, h.shortName);
-      }
-    });
-    hospitalShortMapReady = true;
-    // 若下拉已展開，觸發重新 render 讓簡稱立即生效
-    const input = document.getElementById('f-institutionName');
-    if (input && document.activeElement === input) {
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-  } catch {}
-})();
+// 簡稱 map（accred 正式名稱 → VPN 簡稱）由共用模組載入
+const HOSPITAL_SHORT_MAP = _SHORT_MAP;
+window.addEventListener('hospitalShortNamesReady', () => {
+  // 若下拉已展開，觸發重新 render 讓簡稱立即生效
+  const input = document.getElementById('f-institutionName');
+  if (input && document.activeElement === input) {
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+});
 
 function attachInstitutionAutocomplete() {
   const nameInput = document.getElementById('f-institutionName');

@@ -46,16 +46,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=16" />
+  <link rel="stylesheet" href="css/styles.css?v=17" />
 
     <!-- modulepreload：平行載入 ES module 鏈（首次造訪快 30-50%） -->
-  <link rel="modulepreload" href="./js/config.js?v=16" />
-  <link rel="modulepreload" href="./js/components.js?v=16" />
-  <link rel="modulepreload" href="./js/icons.js?v=16" />
-  <link rel="modulepreload" href="./js/pwa-prompt.js?v=16" />
-  <link rel="modulepreload" href="./js/data-loader.js?v=16" />
-  <link rel="modulepreload" href="./js/charts.js?v=16" />
-  <link rel="modulepreload" href="./js/official-stats.js?v=16" />
+  <link rel="modulepreload" href="./js/config.js?v=17" />
+  <link rel="modulepreload" href="./js/components.js?v=17" />
+  <link rel="modulepreload" href="./js/icons.js?v=17" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=17" />
+  <link rel="modulepreload" href="./js/data-loader.js?v=17" />
+  <link rel="modulepreload" href="./js/charts.js?v=17" />
+  <link rel="modulepreload" href="./js/official-stats.js?v=17" />
 
   <!-- JSON-LD Structured Data：官方參考數據四份資料集 -->
   <script type="application/ld+json">
@@ -696,18 +696,18 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
   <script type="module">
-    import { CATEGORIES } from './js/config.js?v=16';
-    import { mountLayout } from './js/components.js?v=16';
-    import { renderIcons } from './js/icons.js?v=16';
-    import { loadAll, startAutoRefresh } from './js/data-loader.js?v=16';
+    import { CATEGORIES } from './js/config.js?v=17';
+    import { mountLayout } from './js/components.js?v=17';
+    import { renderIcons } from './js/icons.js?v=17';
+    import { loadAll, startAutoRefresh } from './js/data-loader.js?v=17';
     import {
       chartCategoryDistribution, chartInstitutionStacked, chartHoursHistogram,
       chartOvertimePolicy, chartRecommend, chartAtmosphereByCategory,
       chartLocationDistribution, chartSalaryDistribution,
-    } from './js/charts.js?v=16';
+    } from './js/charts.js?v=17';
     import {
       renderOfficialSourceA, renderOfficialSourceB, renderOfficialSourceC, renderOfficialSourceD,
-    } from './js/official-stats.js?v=16';
+    } from './js/official-stats.js?v=17';
 
     mountLayout();
     renderIcons();

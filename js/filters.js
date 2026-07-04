@@ -1,5 +1,6 @@
 // 篩選器：縣市、機構類別、推薦指數、工時、加班費 + 機構名稱搜尋
-import { COMMON_FIELDS } from './config.js?v=16';
+import { COMMON_FIELDS } from './config.js?v=17';
+import { getShort as getHospitalShort } from './hospital-shortname.js?v=17';
 
 const INSTITUTION_TYPES = ['醫學中心', '區域醫院', '地區醫院', '診所', '其他'];
 const RECOMMEND_LABELS = { 5: '非常推薦', 4: '推薦', 3: '保留', 2: '不推薦', 1: '非常不推薦' };
@@ -116,7 +117,8 @@ export function applyFilters(rows, state) {
       if (seqQuery && /^\d+$/.test(seqQuery) && Number(seqQuery) === r._seq) {
         return true;
       }
-      const hay = `${r.institutionName || ''} ${r.unitName || ''} ${r.comment || ''} ${r.location || ''} #${r._seq || ''}`.toLowerCase();
+      const short = getHospitalShort(r.institutionName) || '';
+      const hay = `${r.institutionName || ''} ${short} ${r.unitName || ''} ${r.comment || ''} ${r.location || ''} #${r._seq || ''}`.toLowerCase();
       if (!hay.includes(q)) return false;
     }
     return true;

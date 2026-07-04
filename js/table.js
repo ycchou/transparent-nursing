@@ -1,10 +1,10 @@
 // 表格 / 卡片 渲染、排序、Modal
-import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=16';
-import { fmt, recommendPill, categoryTag } from './components.js?v=16';
-import { icon } from './icons.js?v=16';
-import { generateShareCard, showSharePreview } from './share-card.js?v=16';
-import { ensureTooltip } from './tooltip.js?v=16';
-import { pageSlice, renderPagination } from './pagination.js?v=16';
+import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=17';
+import { fmt, recommendPill, categoryTag } from './components.js?v=17';
+import { icon } from './icons.js?v=17';
+import { generateShareCard, showSharePreview } from './share-card.js?v=17';
+import { ensureTooltip } from './tooltip.js?v=17';
+import { pageSlice, renderPagination } from './pagination.js?v=17';
 
 function gateCtaHtml(shownCount, fullCount, isFilteredView) {
   const reasonText = isFilteredView ? '（篩選結果）' : '';

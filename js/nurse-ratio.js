@@ -6,9 +6,9 @@
 //     hospitals: [{ id, name, level, history: { "11207": {day, eve, night} } }]
 //   }
 
-import { renderIcons } from './icons.js?v=22';
+import { renderIcons } from './icons.js?v=23';
 
-const DATA_URL = 'data/nurse-ratio.json?v=22';
+const DATA_URL = 'data/nurse-ratio.json?v=23';
 
 // 三班護病比・衛福部公告標準（依醫院層級）
 const STANDARDS = {
@@ -162,7 +162,11 @@ function renderHospitalList() {
       const c = h.city || '(未知)';
       if (c !== state.cityFilter) return false;
     }
-    if (q && !h.name.toLowerCase().includes(q) && !h.id.includes(q)) return false;
+    if (q) {
+      const nameL = h.name.toLowerCase();
+      const fullL = (h.fullName || '').toLowerCase();
+      if (!nameL.includes(q) && !fullL.includes(q) && !h.id.includes(q)) return false;
+    }
     return true;
   });
 

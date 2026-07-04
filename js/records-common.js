@@ -1,6 +1,8 @@
 // 違規紀錄類頁面共用模組：CSV 抓取 / 解析 / cache / 通用工具
 // 給 violations.js (勞檢)、gender.js (性平)、osha.js (職安) 共用。
 
+import { getShort as getHospitalShort } from './hospital-shortname.js?v=17';
+
 // ============================================================
 // 通用工具
 // ============================================================
@@ -278,9 +280,9 @@ export function createCsvLoader(cfg) {
 //   records-table-container
 // ============================================================
 
-import { icon, renderIcons } from './icons.js?v=16';
-import { ensureTooltip } from './tooltip.js?v=16';
-import { pageSlice, renderPagination } from './pagination.js?v=16';
+import { icon, renderIcons } from './icons.js?v=17';
+import { ensureTooltip } from './tooltip.js?v=17';
+import { pageSlice, renderPagination } from './pagination.js?v=17';
 
 /**
  * @param {Object} cfg
@@ -311,7 +313,8 @@ export function initRecordsPage(cfg) {
       if (state.location !== 'all' && r.location !== state.location) return false;
       if (state.article !== 'all' && !r.articles.includes(state.article)) return false;
       if (q) {
-        const hay = `${r.institutionName} ${r.lawArticle} ${r.lawDesc} ${r.location} ${r.locationRaw || ''} ${r.docId}`.toLowerCase();
+        const short = getHospitalShort(r.institutionName) || '';
+        const hay = `${r.institutionName} ${short} ${r.lawArticle} ${r.lawDesc} ${r.location} ${r.locationRaw || ''} ${r.docId}`.toLowerCase();
         if (!hay.includes(q)) return false;
       }
       return true;
