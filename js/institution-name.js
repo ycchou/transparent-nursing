@@ -36,7 +36,10 @@ export function normalizeInstitutionName(raw) {
   // 3. 臺→台，統一異體字。
   s = s.replace(/臺/g, '台');
 
-  // 4. 去掉所有空白（含全形空白）。
+  // 4. 去各種破折號（ASCII/全形/連字號等）——「委託X辦理」常出現不一致的分隔符。
+  s = s.replace(/[－–—―−‐-]/g, '');
+
+  // 5. 去掉所有空白（含全形空白）。
   s = s.replace(/[\s　]+/g, '');
 
   return s.trim();

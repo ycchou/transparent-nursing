@@ -47,6 +47,20 @@ INSTITUTION_COL = 3   # 事業單位名稱 欄索引（三支皆為 index 3）
 JI_MAX_OWNER_LEN = 4  # 「X即Y」的負責人姓名長度上限
 CONTAIN_MIN_LEN = 6   # 「canonical ⊆ 違規名」比對時 canonical 正規化後最短長度
 PREFIX_MIN_LEN = 7    # 「違規名為 canonical 前綴」比對時違規名最短長度
+CORE_MIN_LEN = 6      # 「核心院名」比對時最短長度
+# 委託經營醫院：「○○市立○○醫院委託○○(財團法人)辦理」——評鑑名與勞動部名在
+# 「委託…辦理」子句常有差異（多/少「財團法人」、破折號不同），故改比對委託前的核心院名。
+CORE_MARKERS = ('委託', '委外')
+
+
+def core_name(nn):
+    """取『委託/委外』子句之前的核心院名（破折號已於 normalize 去除）。"""
+    idx = len(nn)
+    for mk in CORE_MARKERS:
+        j = nn.find(mk)
+        if j != -1:
+            idx = min(idx, j)
+    return nn[:idx].rstrip('一')  # 去 OCR 誤植成「一」的破折號殘留
 
 
 def normalize_name(raw):
@@ -62,7 +76,9 @@ def normalize_name(raw):
     s = re.sub(r'[（(][^（()）]*[)）]', '', s)
     # 3. 臺→台
     s = s.replace('臺', '台')
-    # 4. 去空白（含全形）
+    # 4. 去各種破折號（ASCII/全形/連字號等）——「委託X辦理」常出現不一致的分隔符
+    s = re.sub(r'[－–—―−‐\-]', '', s)
+    # 5. 去空白（含全形）
     s = re.sub(r'[\s　]+', '', s)
     return s.strip()
 
@@ -100,6 +116,7 @@ def load_merged():
     # canonical 正規化名 → code（同名多代號時，保留第一個；院區細分靠 longest-wins）
     norm_to_code = {}
     entries = []  # (norm_name, code, name)
+    core_to_codes = {}  # 委託經營醫院核心院名 → set(code)
     for h in hosps:
         code = h.get('code')
         name = h.get('name')
@@ -110,20 +127,37 @@ def load_merged():
             continue
         entries.append((nn, code, name))
         norm_to_code.setdefault(nn, code)
+        # 只為含「委託/委外」的醫院建核心名索引（其餘靠精確/包含/前綴即可）
+        if any(mk in nn for mk in CORE_MARKERS):
+            c = core_name(nn)
+            if len(c) >= CORE_MIN_LEN:
+                core_to_codes.setdefault(c, set()).add(code)
     # 依正規化名長度降冪，供 longest-wins 包含比對
     entries.sort(key=lambda e: len(e[0]), reverse=True)
-    return norm_to_code, entries
+    # 只保留能唯一對應到一家醫院的核心名，避免誤判
+    core_to_code = {c: next(iter(codes)) for c, codes in core_to_codes.items() if len(codes) == 1}
+    return norm_to_code, entries, core_to_code
 
 
-def match_name(raw, norm_to_code, entries):
+def match_name(raw, norm_to_code, entries, core_to_code):
     nn = normalize_name(raw)
     if not nn:
         return None
-    # 1. 精確
+    # 委託/委外 經營醫院：委託子句內嵌「受託醫院」名（榮總/長庚/北醫…），
+    # 若走一般包含比對會誤命中受託醫院，故這類一律只用「委託前核心院名」比對。
+    if any(mk in nn for mk in CORE_MARKERS):
+        c = core_name(nn)
+        if len(c) >= CORE_MIN_LEN:
+            if c in core_to_code:
+                return core_to_code[c]
+            if c in norm_to_code:  # 核心名本身即某醫院正式名
+                return norm_to_code[c]
+        return None
+    # 一般：1. 精確
     if nn in norm_to_code:
         return norm_to_code[nn]
     # 2. canonical ⊆ 違規正規化名（取最長的 canonical）
-    #    處理違規名夾負責人/委託註記，去雜訊後 canonical 完整內嵌其中。
+    #    處理違規名夾負責人註記，去雜訊後 canonical 完整內嵌其中。
     for cnorm, code, _name in entries:  # entries 已依長度降冪
         if len(cnorm) >= CONTAIN_MIN_LEN and cnorm in nn:
             return code
@@ -157,7 +191,7 @@ def looks_like_hospital(name):
 
 def main():
     print('讀取 hospitals-merged.json …')
-    norm_to_code, entries = load_merged()
+    norm_to_code, entries, core_to_code = load_merged()
     print(f'  canonical 醫院 {len(entries)} 筆')
 
     all_names = set()
@@ -175,7 +209,7 @@ def main():
     mapping = {}
     unmatched_hosp = []
     for name in sorted(all_names):
-        code = match_name(name, norm_to_code, entries)
+        code = match_name(name, norm_to_code, entries, core_to_code)
         if code:
             mapping[name] = code
         elif looks_like_hospital(name):
