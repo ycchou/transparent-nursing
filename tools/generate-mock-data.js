@@ -8,6 +8,23 @@ const path = require('path');
 
 const OUT_DIR = path.join(__dirname, '..', 'data', 'mock');
 
+// ============ 真實評鑑醫院名單 ============
+// 從 data/hospitals.json（衛福部醫院評鑑合格名單）讀入，讓多數測試資料掛在
+// 真實醫院名稱上，機構總覽頁（hospital.html）才能以名稱對應到眾包資料。
+const MIN_REAL_ROWS = 800;  // 至少 800 筆用真實評鑑醫院名稱
+const REAL = { '醫學中心': [], '區域醫院': [], '地區醫院': [] };
+try {
+  const hj = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'hospitals.json'), 'utf8'));
+  for (const h of (hj.hospitals || [])) {
+    if (REAL[h.level] && h.name) REAL[h.level].push({ name: h.name, city: h.city || '' });
+  }
+} catch (e) {
+  console.error('讀取 data/hospitals.json 失敗，無法產生真實醫院測試資料：', e.message);
+  process.exit(1);
+}
+// 「臺北 → 台北」對齊表單/篩選用字
+const normalizeCity = (s) => String(s || '').replace(/臺/g, '台');
+
 // ============ pools ============
 const HOSPITALS = {
   '醫學中心': [
@@ -60,11 +77,19 @@ function genTimestamp() {
 function pickInstitution(weights) {
   const r = Math.random();
   let acc = 0;
-  for (const [type, w] of Object.entries(weights)) {
+  let type = '區域醫院';
+  for (const [t, w] of Object.entries(weights)) {
     acc += w;
-    if (r < acc) return { institutionType: type, institutionName: pick(HOSPITALS[type]) };
+    if (r < acc) { type = t; break; }
   }
-  return { institutionType: '區域醫院', institutionName: pick(HOSPITALS['區域醫院']) };
+  // 醫學中心 / 區域醫院 / 地區醫院 → 抽真實評鑑醫院（名稱＋縣市）
+  if (REAL[type] && REAL[type].length) {
+    const h = pick(REAL[type]);
+    return { institutionType: type, institutionName: h.name, location: normalizeCity(h.city), isReal: true };
+  }
+  // 診所等非評鑑機構 → 用假名池，location 交給呼叫端隨機
+  const pool = HOSPITALS[type] || HOSPITALS['區域醫院'];
+  return { institutionType: type, institutionName: pick(pool), location: null, isReal: false };
 }
 
 function genWellbeing(institutionType, hours) {
@@ -157,7 +182,7 @@ function generateIcu(n) {
     return {
       timestamp: genTimestamp(),
       institutionType: inst.institutionType, institutionName: inst.institutionName,
-      unitName: pair.unitName, location: pick(LOCATIONS), jobTitle,
+      unitName: pair.unitName, location: inst.location || pick(LOCATIONS), jobTitle,
       icuType: pair.icuType,
       dayShiftRatio: pick(['1:1', '1:2', '1:2', '1:2', '1:3', '1:3', '1:4']),
       eveningShiftRatio: pick(['1:2', '1:2', '1:3', '1:3', '1:3', '1:4']),
@@ -186,7 +211,7 @@ const DIALYSIS_PAIRS = [
 ];
 function generateDialysis(n) {
   return Array.from({ length: n }, () => {
-    const inst = pickInstitution({ '醫學中心': 0.30, '區域醫院': 0.30, '地區醫院': 0.15, '診所': 0.25 });
+    const inst = pickInstitution({ '醫學中心': 0.35, '區域醫院': 0.30, '地區醫院': 0.20, '診所': 0.15 });
     const pair = pick(DIALYSIS_PAIRS);
     const jobTitle = pick(JOB_TITLES);
     const hours = pick(WEEKLY_HOURS);
@@ -196,13 +221,17 @@ function generateDialysis(n) {
     return {
       timestamp: genTimestamp(),
       institutionType: inst.institutionType, institutionName: inst.institutionName,
-      unitName: pair.unitName, location: pick(LOCATIONS), jobTitle,
+      unitName: pair.unitName, location: inst.location || pick(LOCATIONS), jobTitle,
       dialysisType: pair.dialysisType,
       hdRatio: isHD ? pick(['1:4', '1:4', '1:5', '1:5', '1:5', '1:6']) : '—',
       pdCount: pair.dialysisType === '血液透析' ? '—' : pick(['20-30', '30-40', '40-50']),
       batchShift: pick(['有', '有', '無']),
       onCallType: isHD ? pick(['假日值班', '下班後待命', '全天待命', '無']) : '—',
+      onCallRotation: isHD ? pick(['2-3 人輪值', '固定一人', '全員輪替', '無']) : '—',
+      restInterval11h: isHD ? pick(['有', '有', '無']) : '—',
       onCallPay: isHD ? pick(['都沒有', '200-250元', '250-300元', '300元以上']) : '—',
+      workDuties: pick(['上機/下機/管路照護', '上下機/衛教', '管路/給藥/衛教', '上下機/緊急處置']),
+      specialBenefits: pick(['', '', '透析津貼', '夜點費', '年節獎金']),
       weeklyHours: hours, overtimePolicy: w.overtimePolicy,
       yearsCurrent: s.yearsCurrent, yearsTotal: s.yearsTotal,
       annualSalary: s.annualSalary, monthlyBase: s.monthlyBase, annualBonus: s.annualBonus,
@@ -226,7 +255,7 @@ function generateEr(n) {
     return {
       timestamp: genTimestamp(),
       institutionType: inst.institutionType, institutionName: inst.institutionName,
-      unitName: pick(ER_UNIT_NAMES), location: pick(LOCATIONS), jobTitle,
+      unitName: pick(ER_UNIT_NAMES), location: inst.location || pick(LOCATIONS), jobTitle,
       erLevel,
       triageRatio: pick(['1:25', '1:30', '1:30', '1:35', '1:40']),
       criticalRatio: pick(['1:2', '1:2', '1:3', '1:3', '1:4']),
@@ -279,7 +308,7 @@ function generateWard(n) {
     return {
       timestamp: genTimestamp(),
       institutionType: inst.institutionType, institutionName: inst.institutionName,
-      unitName: pair.unitName, location: pick(LOCATIONS), jobTitle,
+      unitName: pair.unitName, location: inst.location || pick(LOCATIONS), jobTitle,
       wardType: pair.wardType,
       dayShiftRatio: pick(['1:6', '1:7', '1:8', '1:8', '1:9', '1:10']),
       eveningShiftRatio: pick(['1:10', '1:11', '1:12', '1:12', '1:13', '1:14']),
@@ -328,7 +357,7 @@ function generateOutpatient(n) {
     return {
       timestamp: genTimestamp(),
       institutionType: inst.institutionType, institutionName: inst.institutionName,
-      unitName: pair.unitName, location: pick(LOCATIONS), jobTitle,
+      unitName: pair.unitName, location: inst.location || pick(LOCATIONS), jobTitle,
       clinicType: pair.clinicType,
       registrationPerSession: pick(['20-40', '40-60', '60-80', '80-100', '100+']),
       staffPerClinic: pick(['1', '1', '2', '2', '3']),
@@ -372,7 +401,7 @@ function generateOr(n) {
     return {
       timestamp: genTimestamp(),
       institutionType: inst.institutionType, institutionName: inst.institutionName,
-      unitName: pair.unitName, location: pick(LOCATIONS), jobTitle,
+      unitName: pair.unitName, location: inst.location || pick(LOCATIONS), jobTitle,
       orSpecialty: pair.orSpecialty,
       orRole: isRecovery ? '恢復室' : pick(['流動護理師', '刷手護理師', '麻醉護理', '混合輪替']),
       dailyCases: isRecovery ? '—' : pick(['5-8', '8-12', '12-18', '15-25', '20-30', '30-50']),
@@ -413,12 +442,46 @@ function generateSpecial(n) {
     return {
       timestamp: genTimestamp(),
       institutionType: inst.institutionType, institutionName: inst.institutionName,
-      unitName: pair.unitName, location: pick(LOCATIONS), jobTitle,
+      unitName: pair.unitName, location: inst.location || pick(LOCATIONS), jobTitle,
       specialType: pair.specialType,
       dailyCases: pick(['5-8', '8-12', '12-18', '20-30', '30-50']),
       onCallRequired: pair.rad === '高頻率' ? pick(['有，常被 call', '有，少被 call']) : pick(['有，少被 call', '無', '無']),
       radiationExposure: pair.rad === '高頻率' ? pick(['高頻率', '中等']) : pair.rad,
       dayShiftRatio: pick(['1:1案件', '1:1台', '1:2案件', '1:2台', '1:3病人']),
+      weeklyHours: hours, overtimePolicy: w.overtimePolicy,
+      yearsCurrent: s.yearsCurrent, yearsTotal: s.yearsTotal,
+      annualSalary: s.annualSalary, monthlyBase: s.monthlyBase, annualBonus: s.annualBonus,
+      workAtmosphere: w.workAtmosphere, promotion: w.promotion,
+      recommendIndex: w.recommendIndex, comment: genComment(w.recommendIndex),
+    };
+  });
+}
+
+const PSYCH_TYPES = [
+  '精神急性病房', '精神急性病房', '精神慢性病房', '精神慢性病房',
+  '日間照護單位', '社區精神復健', '兒童青少年精神', '老年精神', '成癮戒治',
+];
+function generatePsych(n) {
+  return Array.from({ length: n }, () => {
+    const inst = pickInstitution({ '醫學中心': 0.30, '區域醫院': 0.40, '地區醫院': 0.30, '診所': 0 });
+    const psychType = pick(PSYCH_TYPES);
+    const jobTitle = pick(JOB_TITLES.filter((t) => t !== '專科護理師'));
+    const hours = pick(['40-45', '40-45', '45-50', '45-50', '50-55']);
+    const w = genWellbeing(inst.institutionType, hours);
+    const s = genSalary(inst.institutionType, jobTitle);
+    const acute = psychType.includes('急性') || psychType === '成癮戒治';
+    return {
+      timestamp: genTimestamp(),
+      institutionType: inst.institutionType, institutionName: inst.institutionName,
+      unitName: psychType, location: inst.location || pick(LOCATIONS), jobTitle,
+      psychType,
+      dayShiftRatio: pick(['1:6', '1:7', '1:8', '1:9', '1:10', '1:12']),
+      eveningShiftRatio: pick(['1:10', '1:12', '1:15', '1:18', '1:20']),
+      nightShiftRatio: pick(['1:15', '1:20', '1:25', '1:30', '1:40']),
+      hasProtectionRoom: pick(['符合新規格', '較舊但堪用', '較舊但堪用', '無']),
+      teamSupport: pick(['完整（心理/職能/社工/醫師）', '部分（缺 1-2 種）', '部分（缺 1-2 種）', '主要靠護理']),
+      restraintFreq: acute ? pick(['每日多次', '每週數次', '每週數次', '偶爾']) : pick(['偶爾', '罕見', '罕見']),
+      violenceFreq: acute ? pick(['每週', '每月', '每月', '每季']) : pick(['每季', '罕見', '罕見']),
       weeklyHours: hours, overtimePolicy: w.overtimePolicy,
       yearsCurrent: s.yearsCurrent, yearsTotal: s.yearsTotal,
       annualSalary: s.annualSalary, monthlyBase: s.monthlyBase, annualBonus: s.annualBonus,
@@ -493,60 +556,86 @@ function toCsv(rows, columns) {
 }
 
 // ============ Main ============
+// 各類別筆數合計 1000；多數走真實評鑑醫院（只有 診所 / other 用假名）
 const CFG = [
-  { slug: 'icu', n: 40, gen: generateIcu,
-    cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
-           'icuType','dayShiftRatio','eveningShiftRatio','nightShiftRatio','ventilatorCare',
-           'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
-           'annualSalary','monthlyBase','annualBonus','workAtmosphere','promotion','recommendIndex','comment'] },
-  { slug: 'dialysis', n: 36, gen: generateDialysis,
-    cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
-           'dialysisType','hdRatio','pdCount','batchShift','onCallType','onCallPay',
-           'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
-           'annualSalary','monthlyBase','annualBonus','workAtmosphere','promotion','recommendIndex','comment'] },
-  { slug: 'er', n: 42, gen: generateEr,
-    cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
-           'erLevel','triageRatio','criticalRatio','observationRatio','violenceFreq',
-           'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
-           'annualSalary','monthlyBase','annualBonus','workAtmosphere','promotion','recommendIndex','comment'] },
-  { slug: 'ward', n: 55, gen: generateWard,
+  { slug: 'ward', n: 175, gen: generateWard,
     cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
            'wardType','dayShiftRatio','eveningShiftRatio','nightShiftRatio','leaderSupport','invasiveDuties',
            'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
            'annualSalary','monthlyBase','annualBonus','workAtmosphere','promotion','recommendIndex','comment'] },
-  { slug: 'outpatient', n: 40, gen: generateOutpatient,
+  { slug: 'icu', n: 115, gen: generateIcu,
     cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
-           'clinicType','registrationPerSession','staffPerClinic','supportProcedures','hasOvertime',
+           'icuType','dayShiftRatio','eveningShiftRatio','nightShiftRatio','ventilatorCare',
            'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
            'annualSalary','monthlyBase','annualBonus','workAtmosphere','promotion','recommendIndex','comment'] },
-  { slug: 'or', n: 32, gen: generateOr,
+  { slug: 'er', n: 125, gen: generateEr,
+    cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
+           'erLevel','triageRatio','criticalRatio','observationRatio','violenceFreq',
+           'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
+           'annualSalary','monthlyBase','annualBonus','workAtmosphere','promotion','recommendIndex','comment'] },
+  { slug: 'or', n: 95, gen: generateOr,
     cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
            'orSpecialty','orRole','dailyCases','roomCount','dayShiftRatio','onCallSystem',
            'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
            'annualSalary','monthlyBase','annualBonus','workAtmosphere','promotion','recommendIndex','comment'] },
-  { slug: 'special', n: 30, gen: generateSpecial,
+  { slug: 'outpatient', n: 115, gen: generateOutpatient,
+    cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
+           'clinicType','registrationPerSession','staffPerClinic','supportProcedures','hasOvertime',
+           'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
+           'annualSalary','monthlyBase','annualBonus','workAtmosphere','promotion','recommendIndex','comment'] },
+  { slug: 'dialysis', n: 105, gen: generateDialysis,
+    cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
+           'dialysisType','hdRatio','pdCount','batchShift','onCallType','onCallRotation','restInterval11h','onCallPay','workDuties',
+           'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
+           'annualSalary','monthlyBase','annualBonus','specialBenefits','workAtmosphere','promotion','recommendIndex','comment'] },
+  { slug: 'psych', n: 95, gen: generatePsych,
+    cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
+           'psychType','dayShiftRatio','eveningShiftRatio','nightShiftRatio','hasProtectionRoom','teamSupport','restraintFreq','violenceFreq',
+           'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
+           'annualSalary','monthlyBase','annualBonus','workAtmosphere','promotion','recommendIndex','comment'] },
+  { slug: 'special', n: 85, gen: generateSpecial,
     cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
            'specialType','dailyCases','onCallRequired','radiationExposure','dayShiftRatio',
            'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
            'annualSalary','monthlyBase','annualBonus','workAtmosphere','promotion','recommendIndex','comment'] },
-  { slug: 'other', n: 30, gen: generateOther,
+  { slug: 'other', n: 90, gen: generateOther,
     cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
            'customCategory','serviceTarget','mainDuties','dayShiftRatio',
            'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
            'annualSalary','monthlyBase','annualBonus','workAtmosphere','promotion','recommendIndex','comment'] },
 ];
 
+const REAL_LEVELS = new Set(['醫學中心', '區域醫院', '地區醫院']);
+
+// 產生全部類別；若真實醫院筆數不足 MIN_REAL_ROWS 則重抽（最多 8 次）
+function generateAll() {
+  let attempt = 0;
+  while (true) {
+    attempt++;
+    const perCat = CFG.map(({ gen, n }) => gen(n));
+    const all = perCat.flat();
+    const realCount = all.filter((r) => REAL_LEVELS.has(r.institutionType)).length;
+    if (realCount >= MIN_REAL_ROWS || attempt >= 8) return { perCat, all, realCount };
+  }
+}
+
+const { perCat, all, realCount } = generateAll();
+if (realCount < MIN_REAL_ROWS) {
+  console.error(`真實醫院筆數 ${realCount} 未達 ${MIN_REAL_ROWS}，請調整權重。`);
+  process.exit(1);
+}
+
 let total = 0;
-for (const { slug, n, gen, cols } of CFG) {
-  const rows = gen(n);
+CFG.forEach(({ slug, cols }, i) => {
+  const rows = perCat[i];
   // 按 timestamp 排序 (新→舊)；最新一筆強制加時間 (讓首頁分鐘顯示)
   rows.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
   if (rows[0] && !/\d{2}:\d{2}/.test(rows[0].timestamp)) {
     rows[0].timestamp += ' ' + String(randint(7, 23)).padStart(2, '0') + ':' + String(randint(0, 59)).padStart(2, '0');
   }
-  const csv = toCsv(rows, cols);
-  fs.writeFileSync(path.join(OUT_DIR, `${slug}.csv`), csv, 'utf8');
+  fs.writeFileSync(path.join(OUT_DIR, `${slug}.csv`), toCsv(rows, cols), 'utf8');
   console.log(`✓ ${slug}.csv: ${rows.length} rows`);
   total += rows.length;
-}
-console.log(`\nTotal: ${total} rows`);
+});
+const realPct = ((100 * realCount) / total).toFixed(1);
+console.log(`\nTotal: ${total} rows（真實評鑑醫院 ${realCount} 筆 / ${realPct}%，其餘為診所/其他場域）`);
