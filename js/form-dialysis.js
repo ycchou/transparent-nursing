@@ -728,6 +728,10 @@ function attachInstitutionAutocomplete() {
     return isMobile() && isEnabled() && selectedLocation();
   }
 
+  // 從下拉選項挑選後，會補派一次 input 事件給表單驗證用；
+  // 這個旗標讓那次 input 不要重新開下拉（否則選完馬上又彈出來）。
+  let suppressInlineRender = false;
+
   function renderInline() {
     if (!isEnabled()) {
       wrap.hidden = true;
@@ -778,7 +782,10 @@ function attachInstitutionAutocomplete() {
         nameInput.value = li.dataset.name;
         wrap.hidden = true;
         wrap.innerHTML = '';
+        // 補派 input 事件給表單驗證/狀態，但不要讓它重新開下拉
+        suppressInlineRender = true;
         nameInput.dispatchEvent(new Event('input', { bubbles: true }));
+        nameInput.blur();
       });
     });
   }
@@ -909,6 +916,8 @@ function attachInstitutionAutocomplete() {
 
   // 桌機 input 即時過濾；手機由 sheet 內的 search 處理
   nameInput.addEventListener('input', () => {
+    // 剛從下拉選完的那次補派 input：略過，避免下拉又彈出來
+    if (suppressInlineRender) { suppressInlineRender = false; return; }
     if (!isMobile()) renderInline();
   });
 
