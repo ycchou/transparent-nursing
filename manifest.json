@@ -55,6 +55,11 @@
       "description": "瀏覽社群分享的職場資料"
     },
     {
+      "name": "機構總覽",
+      "url": "/hospital.html",
+      "description": "查一家醫院的護病比・眾包資料・違規紀錄"
+    },
+    {
       "name": "填寫表單",
       "url": "/participate.html",
       "description": "分享你的職場資訊"

@@ -2,6 +2,7 @@
 // 給 violations.js (勞檢)、gender.js (性平)、osha.js (職安) 共用。
 
 import { getShort as getHospitalShort } from './hospital-shortname.js?v=17';
+import { normalizeInstitutionName } from './institution-name.js?v=17';
 
 // ============================================================
 // 通用工具
@@ -284,6 +285,19 @@ import { icon, renderIcons } from './icons.js?v=17';
 import { ensureTooltip } from './tooltip.js?v=17';
 import { pageSlice, renderPagination } from './pagination.js?v=17';
 
+// 違規機構名稱 → 機構代號 對照表（離線預建，供機構名稱連到整合檔案頁）
+let _violHospitalMap = null;
+let _violHospitalMapLoading = null;
+function ensureViolHospitalMap() {
+  if (_violHospitalMap) return Promise.resolve(_violHospitalMap);
+  if (_violHospitalMapLoading) return _violHospitalMapLoading;
+  _violHospitalMapLoading = fetch('data/violations-hospital-map.json?v=26', { cache: 'default' })
+    .then((r) => (r.ok ? r.json() : { map: {} }))
+    .then((d) => { _violHospitalMap = (d && d.map) || {}; return _violHospitalMap; })
+    .catch(() => { _violHospitalMap = {}; return _violHospitalMap; });
+  return _violHospitalMapLoading;
+}
+
 /**
  * @param {Object} cfg
  * @param {{ load: Function, preload: Function }} cfg.loader - createCsvLoader() 的產物
@@ -334,7 +348,7 @@ export function initRecordsPage(cfg) {
     let maxFine = 0;
     let latest = null;
     all.forEach((r) => {
-      const cleanName = r.institutionName.replace(/\(.*?\)$/, '').trim();
+      const cleanName = normalizeInstitutionName(r.institutionName);
       if (cleanName) orgs.add(cleanName);
       if (r.fine > maxFine) maxFine = r.fine;
       if (r.penaltyDate && (!latest || r.penaltyDate > latest)) latest = r.penaltyDate;
@@ -418,6 +432,15 @@ export function initRecordsPage(cfg) {
     return `<span class="viol-loc" ${tipAttr}>${r.location}</span>`;
   }
 
+  // 機構名稱：若違規對照表命中，連到整合檔案頁（stopPropagation 避免觸發列 modal）
+  function instCell(r) {
+    const name = r.institutionName || '';
+    if (!name) return '—';
+    const code = _violHospitalMap && _violHospitalMap[name];
+    if (!code) return escapeHtml(name);
+    return `<a href="hospital.html?code=${encodeURIComponent(code)}" onclick="event.stopPropagation()" title="查看整合檔案">${escapeHtml(name)}</a>`;
+  }
+
   function renderTable() {
     const filtered = applyFilters();
     filtered.sort((a, b) => {
@@ -462,7 +485,7 @@ export function initRecordsPage(cfg) {
                 <td class="seq-col">#${r.id}</td>
                 <td><span class="viol-date">${r.penaltyDate ? formatROCDate(r.penaltyDate) : r.penaltyDateRaw || '—'}</span></td>
                 <td>${renderLocCell(r)}</td>
-                <td class="viol-inst-cell">${r.institutionName || '—'}</td>
+                <td class="viol-inst-cell">${instCell(r)}</td>
                 <td>${renderLawChips(r.articles, r.lawArticle)}</td>
                 <td class="viol-fine">${fmtFine(r.fine)}</td>
               </tr>
@@ -651,6 +674,9 @@ export function initRecordsPage(cfg) {
       renderAll();
       renderIcons();
       ensureTooltip();
+
+      // 載入違規對照表後重繪表格，讓可對應的機構名稱變成整合檔案連結
+      ensureViolHospitalMap().then(() => renderAll());
 
       const input = document.getElementById('records-search');
       if (input) {

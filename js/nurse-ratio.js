@@ -7,70 +7,20 @@
 //   }
 
 import { renderIcons } from './icons.js?v=26';
+import {
+  STANDARDS,
+  COMPLIANCE_CLASSES,
+  formatRocMonth,
+  shiftStatus,
+  classifyHospital as classifyHospitalView,
+  renderNurseChart,
+} from './nurse-ratio-view.js?v=26';
 
 const DATA_URL = 'data/nurse-ratio.json?v=26';
 
-// 三班護病比・衛福部公告標準（依醫院層級）
-const STANDARDS = {
-  '醫學中心': { day: 6, eve: 9, night: 11 },
-  '區域醫院': { day: 7, eve: 11, night: 13 },
-  '地區醫院': { day: 10, eve: 13, night: 15 },
-};
-
-// 三班顏色（跟參考圖對齊：白班藍 / 小夜粉 / 大夜橙）
-const COLORS = {
-  day:   { line: '#2E86AB', fill: 'rgba(46,134,171,0.15)' },
-  eve:   { line: '#E63946', fill: 'rgba(230,57,70,0.12)' },
-  night: { line: '#F4A261', fill: 'rgba(244,162,97,0.15)' },
-  std:   'rgba(230, 57, 70, 0.55)',
-};
-
-// 合規分類（依最新月份對照該層級標準）
-//   每一班別的判定：
-//     safe   : ratio < std × 0.95         （明確低於標準 5%）
-//     watch  : std × 0.95 ≤ ratio ≤ std × 1.05  （落在標準 ±5% 邊界）
-//     danger : ratio > std × 1.05         （明顯超過標準 5%）
-//   醫院分類（取最壞班別）：
-//     A · 達標 (green)：三班全部 safe
-//     B · 觀察 (amber)：至少一班 watch，且無 danger
-//     C · 警戒 (red)  ：至少一班 danger
-const COMPLIANCE_TOLERANCE = 0.05;  // ±5%
-const COMPLIANCE_CLASSES = {
-  A: { key: 'A', label: '達標', color: '#06A77D', bg: 'rgba(6,167,125,0.13)' },
-  B: { key: 'B', label: '觀察', color: '#F4A261', bg: 'rgba(244,162,97,0.15)' },
-  C: { key: 'C', label: '警戒', color: '#E63946', bg: 'rgba(230,57,70,0.13)' },
-  N: { key: 'N', label: '未報', color: '#6B7C93', bg: 'rgba(107,124,147,0.10)' },
-};
-
-// 單一班別狀態
-function shiftStatus(val, std) {
-  if (val == null || std == null) return null;
-  const upper = std * (1 + COMPLIANCE_TOLERANCE);
-  const lower = std * (1 - COMPLIANCE_TOLERANCE);
-  if (val > upper) return 'danger';
-  if (val >= lower) return 'watch';
-  return 'safe';
-}
-
+// 合規分類綁定本頁 state.data.months（共用邏輯在 nurse-ratio-view.js）
 function classifyHospital(hosp) {
-  const std = STANDARDS[hosp.level];
-  if (!std) return 'N';
-  // 找最新有資料的月份
-  const months = state.data ? state.data.months : [];
-  let latest = null;
-  for (let i = months.length - 1; i >= 0; i--) {
-    if (hosp.history[months[i]]) { latest = hosp.history[months[i]]; break; }
-  }
-  if (!latest) return 'N';
-  const statuses = [
-    shiftStatus(latest.day, std.day),
-    shiftStatus(latest.eve, std.eve),
-    shiftStatus(latest.night, std.night),
-  ].filter((s) => s != null);
-  if (statuses.length === 0) return 'N';
-  if (statuses.includes('danger')) return 'C';
-  if (statuses.includes('watch')) return 'B';
-  return 'A';
+  return classifyHospitalView(hosp, state.data ? state.data.months : []);
 }
 
 const state = {
@@ -83,13 +33,6 @@ const state = {
   searchQuery: '',
   complianceMap: {},  // { hospitalId: 'A' | 'B' | 'C' | 'N' } — 載入後計算一次快取
 };
-
-// ROC yyyymm → 顯示字串
-function formatRocMonth(key) {
-  const y = key.slice(0, 3);
-  const m = parseInt(key.slice(3), 10);
-  return `${y}年${m}月`;
-}
 
 // URL deep-link helpers
 function parseDeepLinkId() {
@@ -266,6 +209,10 @@ function renderDetail(hosp) {
     lines.push(`機構代號：${escapeHtml(hosp.id)}`);
   }
   if (hosp.address) lines.push(`地址：${escapeHtml(hosp.address)}`);
+  const profileCode = hosp.code || hosp.id;
+  if (profileCode) {
+    lines.push(`<a href="hospital.html?code=${encodeURIComponent(profileCode)}" style="color:var(--primary);text-decoration:underline;text-underline-offset:2px;">查看整合檔案（含眾包資料・違規紀錄）→</a>`);
+  }
   document.getElementById('hosp-code').innerHTML = lines.map((l) => `<div>${l}</div>`).join('');
 
   // 各院區已有各自 VPN 護病比獨立資料，不再顯示警語（僅 code 行保留「共 N 院區」小提示）
@@ -295,168 +242,7 @@ function renderDetail(hosp) {
   setKpi('kpi-eve', latest.eve, std.eve);
   setKpi('kpi-night', latest.night, std.night);
 
-  renderChart(hosp);
-}
-
-// ===== Chart.js 折線圖 =====
-
-function renderChart(hosp) {
-  const canvas = document.getElementById('ratio-chart');
-  if (!canvas || typeof Chart === 'undefined') return;
-
-  // 註冊 annotation plugin（重複註冊無害）
-  if (window['chartjs-plugin-annotation'] && typeof Chart.register === 'function') {
-    try { Chart.register(window['chartjs-plugin-annotation']); } catch {}
-  }
-
-  // Destroy 舊 chart
-  const existing = Chart.getChart(canvas);
-  if (existing) existing.destroy();
-
-  const months = state.data.months;
-  const labels = months.map(formatRocMonth);
-  const dayData = months.map((m) => hosp.history[m]?.day ?? null);
-  const eveData = months.map((m) => hosp.history[m]?.eve ?? null);
-  const nightData = months.map((m) => hosp.history[m]?.night ?? null);
-
-  const std = STANDARDS[hosp.level] || {};
-
-  const datasets = [
-    {
-      label: '白班護病比',
-      data: dayData,
-      borderColor: COLORS.day.line,
-      backgroundColor: COLORS.day.fill,
-      tension: 0.25,
-      borderWidth: 2,
-      pointRadius: 3,
-      pointHoverRadius: 5,
-      pointBackgroundColor: COLORS.day.line,
-      spanGaps: true,
-    },
-    {
-      label: '小夜班護病比',
-      data: eveData,
-      borderColor: COLORS.eve.line,
-      backgroundColor: COLORS.eve.fill,
-      tension: 0.25,
-      borderWidth: 2,
-      pointRadius: 3,
-      pointHoverRadius: 5,
-      pointBackgroundColor: COLORS.eve.line,
-      spanGaps: true,
-    },
-    {
-      label: '大夜班護病比',
-      data: nightData,
-      borderColor: COLORS.night.line,
-      backgroundColor: COLORS.night.fill,
-      tension: 0.25,
-      borderWidth: 2,
-      pointRadius: 3,
-      pointHoverRadius: 5,
-      pointBackgroundColor: COLORS.night.line,
-      spanGaps: true,
-    },
-  ];
-
-  // 用 chartjs-plugin-annotation 畫 3 條標準虛線，各自帶「白班標準 1:6」等左上標籤
-  const stdAnnotations = {};
-  const makeStdLine = (shiftLabel, value) => ({
-    type: 'line',
-    yMin: value, yMax: value,
-    borderColor: COLORS.std,
-    borderDash: [8, 4],
-    borderWidth: 1.5,
-    label: {
-      display: true,
-      content: `${shiftLabel}標準 1:${value}`,
-      position: 'end',           // 標籤放最右邊
-      backgroundColor: 'rgba(255,255,255,0.85)',
-      color: '#B22234',
-      font: { family: "'Noto Sans TC', sans-serif", size: 10, weight: 'bold' },
-      padding: { top: 2, bottom: 2, left: 6, right: 6 },
-      yAdjust: -10,
-      borderRadius: 4,
-    },
-  });
-  if (std.day) stdAnnotations.stdDay = makeStdLine('白班', std.day);
-  if (std.eve) stdAnnotations.stdEve = makeStdLine('小夜', std.eve);
-  if (std.night) stdAnnotations.stdNight = makeStdLine('大夜', std.night);
-
-  new Chart(canvas, {
-    type: 'line',
-    data: { labels, datasets },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      // 螢幕縮放時重算 X 軸 tick 上限（每 70px 一格）
-      onResize: (chart, size) => {
-        const limit = Math.max(4, Math.min(months.length, Math.floor(size.width / 70)));
-        chart.options.scales.x.ticks.maxTicksLimit = limit;
-      },
-      interaction: { intersect: false, mode: 'index' },
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            font: { family: "'Noto Sans TC', sans-serif", size: 12 },
-            color: '#46557A',
-            usePointStyle: true,
-            padding: 12,
-          },
-        },
-        tooltip: {
-          backgroundColor: '#1D3557',
-          titleFont: { family: "'Noto Sans TC', sans-serif" },
-          bodyFont: { family: "'Noto Sans TC', sans-serif" },
-          padding: 10,
-          cornerRadius: 8,
-          callbacks: {
-            label: (ctx) => {
-              const v = ctx.parsed.y;
-              return v == null ? null : `${ctx.dataset.label}: ${v.toFixed(1)}`;
-            },
-          },
-        },
-        annotation: { annotations: stdAnnotations },
-      },
-      scales: {
-        x: {
-          grid: { display: false },
-          border: { color: '#E5E9F0' },
-          ticks: {
-            color: '#6B7C93',
-            font: { family: "'Noto Sans TC', sans-serif", size: 10 },
-            maxRotation: 45,
-            minRotation: 0,
-            autoSkip: true,
-            // 依 canvas 寬度動態決定 tick 上限（每個標籤 ~70px 寬）
-            maxTicksLimit: (() => {
-              const w = canvas.clientWidth || canvas.parentElement?.clientWidth || 800;
-              return Math.max(4, Math.min(months.length, Math.floor(w / 70)));
-            })(),
-          },
-        },
-        y: {
-          title: {
-            display: true,
-            text: '護病比',
-            color: '#46557A',
-            font: { family: "'Noto Sans TC', sans-serif", size: 12 },
-          },
-          grid: { color: '#F1F3F7' },
-          border: { display: false },
-          beginAtZero: false,
-          suggestedMin: 4,
-          ticks: {
-            color: '#6B7C93',
-            font: { family: "'Noto Sans TC', sans-serif", size: 11 },
-          },
-        },
-      },
-    },
-  });
+  renderNurseChart(document.getElementById('ratio-chart'), hosp, state.data.months);
 }
 
 // ===== 篩選/搜尋事件 =====
