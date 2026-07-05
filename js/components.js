@@ -39,7 +39,7 @@ export function orgStripHTML(opts = {}) {
 
 const NAV_ITEMS = [
   { href: 'index.html',       label: '首頁',     match: ['index.html', ''] },
-  { href: 'platform.html',    label: '資料平台', match: ['platform.html'] },
+  { href: 'platform.html',    label: '分享平台', match: ['platform.html'] },
   { href: 'stats.html',       label: '統計摘要', match: ['stats.html'] },
   { href: 'nurse-ratio.html', label: '護病比', match: ['nurse-ratio.html'] },
   { href: 'hospital.html',    label: '機構總覽', match: ['hospital.html'] },
@@ -102,7 +102,7 @@ function footerHTML() {
           <div>
             <h4>探索</h4>
             <ul>
-              <li><a href="platform.html">資料平台</a></li>
+              <li><a href="platform.html">分享平台</a></li>
               <li><a href="stats.html">統計摘要</a></li>
               <li><a href="nurse-ratio.html">護病比</a></li>
               <li><a href="hospital.html">機構總覽</a></li>
@@ -160,7 +160,7 @@ export function mountLayout() {
   // PWA「加到主畫面」自動引導（10 秒後行動裝置彈出 banner）
   initPWAPrompt();
 
-  // 背景預載 platform 資料：使用者切到資料平台時即時顯示，無需等待 fetch
+  // 背景預載 platform 資料：使用者切到分享平台時即時顯示，無需等待 fetch
   // 動態 import 避免循環依賴與初始 parse 成本
   import('./data-loader.js?v=17')
     .then(({ preloadAll }) => preloadAll && preloadAll())

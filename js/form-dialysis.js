@@ -14,7 +14,7 @@ const DRAFT_DEBOUNCE_MS = 500;
 const SUBMIT_ENDPOINT = ''; // ← 第二階段填 Apps Script URL；空字串 = 測試模式
 
 // ===== 欄位 Schema =====
-// 已對齊資料平台 (config.js + dialysis.csv) 的欄位型別與選項
+// 已對齊分享平台 (config.js + dialysis.csv) 的欄位型別與選項
 // section 物件代表分區標題（不是欄位）；其餘為欄位
 // options 可以是字串陣列、或 { value, label } 物件陣列（送出 value、顯示 label）
 const LOCATIONS = [
@@ -543,7 +543,7 @@ async function onSubmit(e) {
 }
 
 function showThanks() {
-  // Soft Give-to-Get：成功送出 = 解鎖資料平台完整資料
+  // Soft Give-to-Get：成功送出 = 解鎖分享平台完整資料
   markContributed();
 
   const form = document.getElementById('dform');
@@ -563,7 +563,7 @@ function showThanks() {
       <div class="dform-thanks-icon">${icon('check-circle', { size: 48 })}</div>
       <h2 id="dform-thanks-title">感謝你的分享！</h2>
       <p>
-        ${SUBMIT_ENDPOINT ? '資料已送出，將在彙整後顯示於資料平台。' : '（測試模式）資料已記錄於 console，未實際送出。'}<br/>
+        ${SUBMIT_ENDPOINT ? '資料已送出，將在彙整後顯示於分享平台。' : '（測試模式）資料已記錄於 console，未實際送出。'}<br/>
         你的經驗會成為下一位護理師選擇職場時最真實的參考。
       </p>
       <p class="dform-thanks-countdown" id="thanks-countdown-text">

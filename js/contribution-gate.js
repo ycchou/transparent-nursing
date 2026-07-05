@@ -1,4 +1,4 @@
-// Soft Give-to-Get：未貢獻者預設看精簡版資料平台
+// Soft Give-to-Get：未貢獻者預設看精簡版分享平台
 // localStorage flag-based，刻意可被使用者繞過（清 storage / 無痕視窗）
 // 不違反 README「完全匿名、不收 IP/Email/Cookie」承諾 — localStorage 不離開瀏覽器
 

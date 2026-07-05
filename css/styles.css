@@ -2517,7 +2517,7 @@ select.chart-select {
 body.calc-modal-open { overflow: hidden; }
 
 /* ============================================================
-   資料平台底部 CTA 卡片（倒流到 participate.html）
+   分享平台底部 CTA 卡片（倒流到 participate.html）
    ============================================================ */
 /* 桌機：兩張卡並排（分享 + 諮詢）*/
 .platform-cta-row {
@@ -2758,7 +2758,7 @@ body.calc-modal-open { overflow: hidden; }
 }
 
 /* ============================================================
-   分頁列 (platform.html 資料平台 + violations.html 勞檢紀錄)
+   分頁列 (platform.html 分享平台 + violations.html 勞檢紀錄)
    ============================================================ */
 .pagination {
   display: flex;

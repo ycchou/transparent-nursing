@@ -81,7 +81,7 @@
       <span class="eyebrow">Participate</span>
       <h1 style="margin:4px 0 12px;">分享你的職場資訊，<br class="md-only"/>幫助下一個護理師</h1>
       <p style="color:var(--muted);font-size:1.05rem;line-height:1.75;">
-        填寫時間約 3-5 分鐘。<strong style="color:var(--ink);">送出後即直接公開於資料平台</strong>，僅作為求職與職涯參考。
+        填寫時間約 3-5 分鐘。<strong style="color:var(--ink);">送出後即直接公開於分享平台</strong>，僅作為求職與職涯參考。
         我們不收集姓名、員工編號、IP 或 email；表單完全匿名、不可追溯、<strong style="color:var(--danger);">送出後無法撤回</strong>。
       </p>
     </div>
@@ -100,10 +100,10 @@
       <div class="g2g-self-claim" id="g2g-self-claim">
         <div class="g2g-self-claim-body">
           <h3>已經分享過了嗎？</h3>
-          <p>如果你已經透過表單分享過你的職場資訊，可以在這裡標記，解鎖資料平台的完整內容。</p>
+          <p>如果你已經透過表單分享過你的職場資訊，可以在這裡標記，解鎖分享平台的完整內容。</p>
         </div>
         <button type="button" id="g2g-claim-btn" class="btn btn-primary g2g-claim-btn">
-          ✓ 我已完成分享，解鎖資料平台
+          ✓ 我已完成分享，解鎖分享平台
         </button>
       </div>
     </div>
@@ -133,7 +133,7 @@
           </div>
           <h3>直接公開</h3>
           <p style="color:var(--muted);margin:0;">
-            送出後資料會直接顯示在資料平台供瀏覽，<strong style="color:var(--ink);">沒有審核或延遲</strong>。
+            送出後資料會直接顯示在分享平台供瀏覽，<strong style="color:var(--ink);">沒有審核或延遲</strong>。
             這代表你填的每一個欄位都會被看見——填寫前請審視欄位內容，量力分享。
           </p>
         </div>
@@ -221,7 +221,7 @@
         </details>
         <details>
           <summary>資料會被拿去做什麼？</summary>
-          <p>1) 公開呈現於資料平台與統計頁；2) 作為工會倡議、學術研究的引用素材；3) 整理成年度報告。所有用途以匿名、彙整方式進行。</p>
+          <p>1) 公開呈現於分享平台與統計頁；2) 作為工會倡議、學術研究的引用素材；3) 整理成年度報告。所有用途以匿名、彙整方式進行。</p>
         </details>
         <details>
           <summary>填寫前我有什麼法律責任？</summary>
@@ -290,10 +290,10 @@
       claimWrap.innerHTML = `
         <div class="g2g-self-claim-body">
           <h3>已經分享過了嗎？</h3>
-          <p>如果你已經透過表單分享過你的職場資訊，可以在這裡標記，解鎖資料平台的完整內容。</p>
+          <p>如果你已經透過表單分享過你的職場資訊，可以在這裡標記，解鎖分享平台的完整內容。</p>
         </div>
         <button type="button" id="g2g-claim-btn" class="btn btn-primary g2g-claim-btn">
-          ✓ 我已完成分享，解鎖資料平台
+          ✓ 我已完成分享，解鎖分享平台
         </button>
       `;
       claimWrap.querySelector('#g2g-claim-btn').addEventListener('click', openConfirmModal);
@@ -405,7 +405,7 @@
       claimWrap.innerHTML = `
         <div class="g2g-self-claim-body">
           <h3>✓ 已解鎖完整資料</h3>
-          <p>感謝你的分享。<a href="platform.html">前往資料平台 →</a></p>
+          <p>感謝你的分享。<a href="platform.html">前往分享平台 →</a></p>
         </div>
       `;
     }
