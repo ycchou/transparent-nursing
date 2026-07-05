@@ -1,8 +1,8 @@
-// 單一機構整合檔案頁：輸入一家評鑑醫院 → 一次看護病比 / 資料平台眾包 / 違規紀錄
+// 單一機構整合檔案頁：輸入一家評鑑醫院 → 一次看護病比 / 分享平台眾包 / 違規紀錄
 //
 // 三源以「機構代號」為錨（只涵蓋 hospitals-merged.json 的 482 家評鑑醫院）：
 //   - 護病比：data/nurse-ratio.json，以 code 對應（多院區則各分院各一張圖）
-//   - 資料平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
+//   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
 import { renderIcons } from './icons.js?v=26';
@@ -18,6 +18,7 @@ import {
 } from './nurse-ratio-view.js?v=26';
 import { loadAll } from './data-loader.js?v=26';
 import { renderKpiStrip } from './stats-kpi.js?v=26';
+import { renderTable, showDetailModal } from './table.js?v=26';
 import {
   createCsvLoader,
   parseROCDate,
@@ -64,6 +65,8 @@ const state = {
   violRows: null,       // 違規資料（lazy，已 tag feed）
   currentCode: null,
   searchQuery: '',
+  levelFilter: 'all',
+  cityFilter: 'all',
 };
 
 // ---------- utils ----------
@@ -147,20 +150,43 @@ async function ensureViolRows() {
 }
 
 // ---------- picker ----------
+// 是否已套用任一篩選/搜尋（未套用時預設不列出全部機構）
+function hasActiveFilter() {
+  return state.searchQuery !== '' || state.levelFilter !== 'all' || state.cityFilter !== 'all';
+}
+
 function renderHospitalList() {
   const container = document.getElementById('hospital-list');
   if (!container) return;
+  const countEl = document.getElementById('hospital-count');
+
+  // 預設（未篩選）：不顯示整份名單，只給提示
+  if (!hasActiveFilter()) {
+    if (countEl) countEl.textContent = '—';
+    container.innerHTML = `<div class="nurse-picker-hint" style="padding:20px;color:var(--muted);">
+      請先選擇<strong>層級</strong>或<strong>地點</strong>，或輸入醫院名稱／簡稱／代號來搜尋。</div>`;
+    return;
+  }
+
   const q = state.searchQuery.toLowerCase();
   const filtered = state.merged.filter((h) => {
-    if (!q) return true;
-    if (h.name.toLowerCase().includes(q)) return true;
-    if (h.code.includes(q)) return true;
-    const short = h.shortName || getShort(h.name);
-    return !!(short && short.toLowerCase().includes(q));
+    if (state.levelFilter !== 'all' && h.level !== state.levelFilter) return false;
+    if (state.cityFilter !== 'all' && (h.city || '(未知)') !== state.cityFilter) return false;
+    if (q) {
+      if (h.name.toLowerCase().includes(q)) return true;
+      if (h.code.includes(q)) return true;
+      const short = h.shortName || getShort(h.name);
+      return !!(short && short.toLowerCase().includes(q));
+    }
+    return true;
   });
 
-  const countEl = document.getElementById('hospital-count');
   if (countEl) countEl.textContent = `${filtered.length.toLocaleString()} 家`;
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div class="nurse-picker-hint" style="padding:20px;color:var(--muted);">找不到符合條件的醫院。</div>`;
+    return;
+  }
 
   const grouped = { '醫學中心': [], '區域醫院': [], '地區醫院': [] };
   filtered.forEach((h) => { (grouped[h.level] || (grouped['其他'] = grouped['其他'] || [])).push(h); });
@@ -175,7 +201,7 @@ function renderHospitalList() {
           <span class="nurse-level-count">${grouped[lv].length} 家</span>
         </div>
         <div class="nurse-hospital-grid">
-          ${grouped[lv].slice(0, q ? Infinity : 400).map((h) => {
+          ${grouped[lv].map((h) => {
             const short = h.shortName || getShort(h.name);
             const tip = [h.name, h.city, `代號 ${h.code}`].filter(Boolean).join(' · ');
             return `
@@ -279,11 +305,13 @@ function renderNurseSection(code, hosp) {
   });
 }
 
-// 資料平台眾包：以機構名稱/簡稱比對
+// 分享平台眾包：以機構名稱/簡稱比對 → KPI 摘要 + 每筆可點開的表格
 function renderPlatformSection(hosp) {
-  const body = document.getElementById('pf-section-body');
+  const kpi = document.getElementById('pf-section-kpi');
+  const table = document.getElementById('pf-section-table');
   const empty = document.getElementById('pf-section-empty');
-  body.innerHTML = '<div style="padding:16px;color:var(--muted);">載入眾包資料中⋯</div>';
+  kpi.innerHTML = '';
+  table.innerHTML = '<div style="padding:16px;color:var(--muted);">載入眾包資料中⋯</div>';
   empty.hidden = true;
 
   ensurePlatformRows().then((rows) => {
@@ -296,11 +324,15 @@ function renderPlatformSection(hosp) {
       return !!(short && normalizeInstitutionName(nm) === normalizeInstitutionName(short));
     });
     if (matched.length === 0) {
-      body.innerHTML = '';
+      kpi.innerHTML = '';
+      table.innerHTML = '';
       empty.hidden = false;
       return;
     }
-    renderKpiStrip(body, matched);
+    renderKpiStrip(kpi, matched);
+    // 每筆資料的表格/卡片視圖，點列可開明細（重用分享平台的 modal）
+    table.dataset.view = window.matchMedia('(max-width: 640px)').matches ? 'card' : 'table';
+    renderTable(table, matched, { slug: 'all', onRowClick: (r) => showDetailModal(r) });
   });
 }
 
@@ -365,6 +397,45 @@ function setupSearch() {
   });
 }
 
+// 地點篩選：依機構數 desc 列出縣市（(未知) 殿後），mirror 護病比頁
+function renderCityFilter() {
+  const el = document.getElementById('city-filter');
+  if (!el) return;
+  const counts = {};
+  state.merged.forEach((h) => {
+    const c = h.city || '(未知)';
+    counts[c] = (counts[c] || 0) + 1;
+  });
+  const sorted = Object.entries(counts).sort((a, b) => {
+    if (a[0] === '(未知)') return 1;
+    if (b[0] === '(未知)') return -1;
+    return b[1] - a[1];
+  });
+  el.innerHTML = `
+    <button type="button" class="nurse-city-filter active" data-city="all">全部</button>
+    ${sorted.map(([c, n]) => `
+      <button type="button" class="nurse-city-filter" data-city="${escapeHtml(c)}">${escapeHtml(c)} <span style="opacity:.6;font-size:0.78em;">${n}</span></button>
+    `).join('')}
+  `;
+  el.querySelectorAll('.nurse-city-filter').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.cityFilter = btn.dataset.city;
+      el.querySelectorAll('.nurse-city-filter').forEach((b) => b.classList.toggle('active', b.dataset.city === state.cityFilter));
+      renderHospitalList();
+    });
+  });
+}
+
+function setupLevelFilter() {
+  document.querySelectorAll('.nurse-level-filter').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.levelFilter = btn.dataset.level;
+      document.querySelectorAll('.nurse-level-filter').forEach((b) => b.classList.toggle('active', b.dataset.level === state.levelFilter));
+      renderHospitalList();
+    });
+  });
+}
+
 // ---------- init ----------
 export async function initHospital() {
   const container = document.getElementById('hospital-list');
@@ -372,6 +443,8 @@ export async function initHospital() {
   try {
     await Promise.all([loadBaseData(), ensureShortLoaded().catch(() => {})]);
     setupSearch();
+    setupLevelFilter();
+    renderCityFilter();
     renderHospitalList();
 
     // 簡稱載完後重繪清單（顯示簡稱）
