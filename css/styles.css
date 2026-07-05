@@ -1565,6 +1565,12 @@ body.viol-modal-open { overflow: hidden; }
   #modal-share-btn { padding: 7px 10px !important; font-size: 0.78rem !important; }
   #modal-share-btn span:last-child { display: none; }
 }
+/* 手機：標頭改直向堆疊，動作鈕列移到上方靠右，標題取得整行寬度
+   （避免長按鈕把標題擠成一行一字） */
+@media (max-width: 600px) {
+  .modal-header { flex-direction: column; align-items: stretch; }
+  .modal-header > :last-child { order: -1; justify-content: flex-end; flex-wrap: wrap; }
+}
 .modal-close {
   background: var(--border-soft);
   border: none;
