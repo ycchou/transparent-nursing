@@ -42,9 +42,13 @@ const VIOL_FEEDS = [
 const parseViolRow = (r) => ({
   id: String(r[0] || '').trim(),
   location: shortenLocation(String(r[1] || '').trim()),
+  locationRaw: String(r[1] || '').trim(),
+  publishDate: parseROCDate(r[2]),
+  publishDateRaw: String(r[2] || '').trim(),
   institutionName: String(r[3] || '').trim(),
   penaltyDate: parseROCDate(r[4]),
   penaltyDateRaw: String(r[4] || '').trim(),
+  docId: String(r[5] || '').trim(),
   lawArticle: String(r[6] || '').trim(),
   lawDesc: String(r[7] || '').trim(),
   fine: parseFine(r[8]),
@@ -139,7 +143,7 @@ async function ensureViolRows() {
   const results = await Promise.all(violLoaders.map(async (f) => {
     try {
       const rows = await f.loader.load();
-      return rows.map((r) => ({ ...r, feedTag: f.tag, lawShort: f.lawShort }));
+      return rows.map((r) => ({ ...r, feedTag: f.tag, lawShort: f.lawShort, feedKey: f.key }));
     } catch (e) {
       console.warn(`[hospital] ${f.key} 違規載入失敗:`, e.message);
       return [];
@@ -254,6 +258,16 @@ function renderHeader(hosp) {
   if (hosp.address) lines.push(`地址：${escapeHtml(hosp.address)}`);
   if (hosp.phone) lines.push(`電話：${escapeHtml(hosp.phone)}`);
   document.getElementById('hosp-code').innerHTML = lines.map((l) => `<div>${l}</div>`).join('');
+
+  // 本頁自己的分享連結（hospital.html?code=…）
+  const shareBtn = document.getElementById('hosp-share-btn');
+  if (shareBtn) {
+    shareBtn.onclick = () => {
+      const u = new URL(location.href);
+      u.searchParams.set('code', hosp.code);
+      copyOrShare(u.toString(), shareBtn, '分享此機構');
+    };
+  }
 }
 
 // 護病比：每個 code 可能對應多院區 → 各自一張 KPI + 圖
@@ -373,15 +387,110 @@ function renderViolationsSection(code, hosp) {
 
     body.innerHTML = `
       <div class="records-list">
-        ${matched.map((r) => `
-          <div class="record-row" style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);align-items:baseline;flex-wrap:wrap;">
+        ${matched.map((r, i) => `
+          <div class="record-row" data-idx="${i}" role="button" tabindex="0" title="點擊看詳情"
+               style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);align-items:baseline;flex-wrap:wrap;cursor:pointer;">
             <span class="tag" style="flex:0 0 auto;">${r.feedTag}</span>
             <span style="flex:0 0 auto;color:var(--muted);font-size:0.85rem;">${r.penaltyDate ? formatROCDate(r.penaltyDate) : (r.penaltyDateRaw || '—')}</span>
             <span style="flex:1 1 260px;min-width:200px;">${escapeHtml(r.lawShort)}${escapeHtml(r.lawArticle ? '・' + r.lawArticle : '')}<br/><span style="color:var(--muted);font-size:0.86rem;">${escapeHtml(r.lawDesc)}</span></span>
             <span style="flex:0 0 auto;font-weight:600;color:var(--danger);">${r.fine ? fineToWan(r.fine) + ' 萬' : '—'}</span>
           </div>`).join('')}
       </div>`;
+
+    const open = (idx) => openViolModal(matched[idx]);
+    body.querySelectorAll('.record-row').forEach((el) => {
+      el.addEventListener('click', () => open(+el.dataset.idx));
+      el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(+el.dataset.idx); } });
+    });
   });
+}
+
+// 違規單筆明細 modal（含「複製連結」→ 連到違規紀錄頁該筆的永久連結）
+function openViolModal(row) {
+  const backdrop = document.getElementById('hosp-viol-modal') || (() => {
+    const el = document.createElement('div');
+    el.id = 'hosp-viol-modal';
+    el.className = 'modal-backdrop';
+    document.body.appendChild(el);
+    return el;
+  })();
+
+  const dateStr = row.penaltyDate ? formatROCDate(row.penaltyDate) : (row.penaltyDateRaw || '—');
+  const pubStr = row.publishDate ? formatROCDate(row.publishDate) : (row.publishDateRaw || '—');
+  const fineStr = row.fine ? row.fine.toLocaleString() : '—';
+  const locFull = row.locationRaw || row.location || '—';
+  const recordLink = `records.html?type=${encodeURIComponent(row.feedKey)}&id=${encodeURIComponent(row.id)}`;
+
+  backdrop.innerHTML = `
+    <div class="modal viol-detail-modal" role="dialog">
+      <div class="modal-header">
+        <div style="min-width:0;flex:1;">
+          <span class="viol-detail-tag">${escapeHtml(row.feedTag)}紀錄 · #${escapeHtml(row.id)}</span>
+          <h3 style="margin:8px 0 0;word-break:break-word;">${escapeHtml(row.institutionName) || '未填寫'}</h3>
+          <div style="color:var(--muted);font-size:0.88rem;margin-top:4px;">
+            ${escapeHtml(locFull)}${row.penaltyDate ? ' · ' + dateStr + ' 處分' : ''}
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:flex-start;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
+          <a href="${recordLink}" class="btn btn-secondary" style="padding:8px 14px;font-size:0.85rem;gap:6px;text-decoration:none;" title="在違規紀錄頁開啟這一筆">在違規紀錄頁開啟 →</a>
+          <button id="hosp-viol-copylink" class="btn btn-primary" style="padding:8px 14px;font-size:0.85rem;gap:6px;">複製連結</button>
+          <button class="modal-close" aria-label="關閉">${escapeHtml('✕')}</button>
+        </div>
+      </div>
+      <div class="modal-grid">
+        <div><div class="key">處分日期</div><div class="val">${dateStr}</div></div>
+        <div><div class="key">公告日期</div><div class="val">${pubStr}</div></div>
+        <div><div class="key">主管機關</div><div class="val">${escapeHtml(locFull)}</div></div>
+        <div><div class="key">處分字號</div><div class="val">${escapeHtml(row.docId) || '—'}</div></div>
+        <div><div class="key">罰鍰 (元)</div><div class="val" style="font-weight:600;color:var(--danger);">${fineStr}</div></div>
+        <div><div class="key">依據法規</div><div class="val">${escapeHtml(row.lawShort)}</div></div>
+      </div>
+      <hr class="divider" />
+      <div>
+        <div class="key" style="color:var(--muted);font-size:0.85rem;margin-bottom:6px;">違反法規條款</div>
+        <p style="margin:0;color:var(--ink-soft);line-height:1.8;">${escapeHtml(row.lawArticle) || '—'}</p>
+      </div>
+      ${row.lawDesc ? `
+        <hr class="divider" />
+        <div>
+          <div class="key" style="color:var(--muted);font-size:0.85rem;margin-bottom:6px;">法條敘述</div>
+          <p style="margin:0;color:var(--ink-soft);line-height:1.8;">${escapeHtml(row.lawDesc)}</p>
+        </div>` : ''}
+    </div>`;
+
+  backdrop.classList.add('open');
+  const close = () => {
+    backdrop.classList.remove('open');
+    document.removeEventListener('keydown', esc);
+  };
+  const esc = (e) => { if (e.key === 'Escape') close(); };
+  backdrop.querySelector('.modal-close').addEventListener('click', close);
+  backdrop.addEventListener('click', (e) => { if (e.target === backdrop) close(); });
+  document.addEventListener('keydown', esc);
+
+  const copyBtn = backdrop.querySelector('#hosp-viol-copylink');
+  copyBtn.addEventListener('click', () => {
+    const abs = new URL(recordLink, location.href).toString();
+    copyOrShare(abs, copyBtn, '複製連結');
+  });
+}
+
+// 複製連結 / Web Share（回饋「已複製」）
+function copyOrShare(link, btn, defaultLabel) {
+  const labelEl = btn.querySelector('.btn-label') || btn;
+  const flash = () => {
+    labelEl.textContent = '已複製';
+    setTimeout(() => { labelEl.textContent = defaultLabel; }, 1600);
+  };
+  if (navigator.share) {
+    navigator.share({ url: link }).catch(() => {});
+    return;
+  }
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(link).then(flash).catch(() => window.prompt('請手動複製：', link));
+  } else {
+    window.prompt('請手動複製：', link);
+  }
 }
 
 // ---------- search wiring ----------

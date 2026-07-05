@@ -109,13 +109,16 @@
 
       <div id="hospital-detail" hidden>
         <!-- 機構標頭 -->
-        <div class="nurse-hosp-header">
-          <div>
+        <div class="nurse-hosp-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+          <div style="min-width:0;">
             <h2 id="hosp-name" style="margin:0 0 8px;">—</h2>
             <span id="hosp-city" class="nurse-city-badge" hidden>—</span>
             <span id="hosp-level" class="nurse-level-badge">—</span>
             <div id="hosp-code" style="color:var(--muted);font-size:0.85rem;margin-top:8px;">—</div>
           </div>
+          <button id="hosp-share-btn" class="btn btn-secondary" style="flex:0 0 auto;padding:8px 14px;font-size:0.85rem;gap:6px;">
+            <span data-icon="share" data-size="14" style="vertical-align:middle;"></span> <span class="btn-label">分享此機構</span>
+          </button>
         </div>
 
         <!-- 護病比 -->
