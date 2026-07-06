@@ -91,6 +91,17 @@ async function loadManualCityOverlay() {
   } catch { return {}; }
 }
 
+// 地址 overlay（vpn-only 醫院沒地址，用健保署開放資料以 id/代碼補上；
+// 由 tools/fetch-hospital-addresses.py 產生 data/hospitals-address-overlay.json）
+async function loadAddressOverlay() {
+  try {
+    const r = await fetch('data/hospitals-address-overlay.json?v=1', { cache: 'no-store' });
+    if (!r.ok) return {};
+    const d = await r.json();
+    return (d && d.overlay) || {};
+  } catch { return {}; }
+}
+
 // ===== 醫院清單渲染 =====
 
 function renderHospitalList() {
@@ -424,6 +435,17 @@ export async function initNurseRatio() {
     const cityOverlay = await loadManualCityOverlay();
     if (cityOverlay && Object.keys(cityOverlay).length) {
       state.data.hospitals.forEach((h) => { if (!h.city && cityOverlay[h.id]) h.city = cityOverlay[h.id]; });
+    }
+    // 套用地址 overlay（以 id 補地址/縣市/電話，僅補原本缺的欄位）
+    const addrOverlay = await loadAddressOverlay();
+    if (addrOverlay && Object.keys(addrOverlay).length) {
+      state.data.hospitals.forEach((h) => {
+        const o = addrOverlay[h.id];
+        if (!o) return;
+        if (!(h.address || '').trim() && o.address) h.address = o.address;
+        if (!(h.city || '').trim() && o.city) h.city = o.city;
+        if (!(h.phone || '').trim() && o.phone) h.phone = o.phone;
+      });
     }
     buildComplianceMap();
     renderOverview();

@@ -31,6 +31,7 @@ import {
 const NURSE_URL = 'data/nurse-ratio.json?v=26';
 const MERGED_URL = 'data/hospitals-merged.json?v=26';
 const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=26';
+const ADDR_OVERLAY_URL = 'data/hospitals-address-overlay.json?v=1';
 
 // 三支違規 Sheet（欄位 0-8 共用：id/location/publishDate/institutionName/penaltyDate/docId/lawArticle/lawDesc/fine）
 const VIOL_FEEDS = [
@@ -81,6 +82,18 @@ function escapeHtml(s) {
 function levelSlug(lv) {
   return { '醫學中心': 'mc', '區域醫院': 'rg', '地區醫院': 'dt' }[lv] || 'other';
 }
+// 多字串的最長共同前綴（用於多院區取母院名）
+function commonPrefix(strs) {
+  if (!strs.length) return '';
+  let p = strs[0];
+  for (const s of strs) {
+    let i = 0;
+    while (i < p.length && i < s.length && p[i] === s[i]) i++;
+    p = p.slice(0, i);
+    if (!p) break;
+  }
+  return p;
+}
 function parseDeepLinkCode() {
   const raw = new URL(location.href).searchParams.get('code');
   return raw ? String(raw).trim() : null;
@@ -100,18 +113,40 @@ async function fetchJson(url) {
 }
 
 async function loadBaseData() {
-  const [merged, nrData, violMapDoc] = await Promise.all([
+  const [merged, nrData, violMapDoc, addrDoc] = await Promise.all([
     fetchJson(MERGED_URL),
     fetchJson(NURSE_URL).catch(() => null),
     fetchJson(VIOL_MAP_URL).catch(() => ({ map: {} })),
+    fetchJson(ADDR_OVERLAY_URL).catch(() => ({ overlay: {} })),
   ]);
+
+  // 地址 overlay：以代碼補 vpn-only 醫院缺的地址/縣市/電話（僅補原本缺的欄位）
+  const addrOverlay = (addrDoc && addrDoc.overlay) || {};
 
   // 去重：每個 code 保留名稱最短的 base entry（多院區時取母院）
   const byCode = new Map();
+  const namesByCode = new Map();
   (merged.hospitals || []).forEach((h) => {
     if (!h.code || !h.name) return;
+    const o = addrOverlay[h.code];
+    if (o) {
+      if (!(h.address || '').trim() && o.address) h.address = o.address;
+      if (!(h.city || '').trim() && o.city) h.city = o.city;
+      if (!(h.phone || '').trim() && o.phone) h.phone = o.phone;
+    }
+    const arr = namesByCode.get(h.code) || [];
+    arr.push(h.name);
+    namesByCode.set(h.code, arr);
     const prev = byCode.get(h.code);
     if (!prev || h.name.length < prev.name.length) byCode.set(h.code, h);
+  });
+  // 共用代號的多院區（北市聯醫/耕莘/新竹臺大）：機構標頭顯示各院區「共同前綴」＝母院名，
+  // 而非任一分院（分院明細仍在下方護病比區逐一顯示）。
+  namesByCode.forEach((names, code) => {
+    if (names.length < 2) return;
+    const base = commonPrefix(names).replace(/[·・\-\s]+$/, '').trim();
+    const entry = byCode.get(code);
+    if (entry && base.length >= 4) entry.name = base;
   });
   state.byCode = byCode;
   state.merged = [...byCode.values()];
