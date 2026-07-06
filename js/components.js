@@ -40,11 +40,14 @@ export function orgStripHTML(opts = {}) {
 const NAV_ITEMS = [
   { href: 'index.html',       label: '首頁',     match: ['index.html', ''] },
   { href: 'platform.html',    label: '分享平台', match: ['platform.html'] },
-  { href: 'stats.html',       label: '統計摘要', match: ['stats.html'] },
-  { href: 'nurse-ratio.html', label: '護病比', match: ['nurse-ratio.html'] },
-  { href: 'hospital.html',    label: '機構總覽', match: ['hospital.html'] },
-  // 3 個違規紀錄合併進 records.html，match 陣列同時涵蓋舊 URL 讓 nav highlight 保留
-  { href: 'records.html',     label: '違規紀錄', match: ['records.html', 'violations.html', 'gender.html', 'osha.html'] },
+  // 「資料查詢」下拉群組：把瀏覽資料的頁面收在一起，精簡頂層數量
+  { label: '資料查詢', children: [
+    { href: 'hospital.html',    label: '機構總覽', match: ['hospital.html'] },
+    { href: 'nurse-ratio.html', label: '護病比', match: ['nurse-ratio.html'] },
+    // 3 個違規紀錄合併進 records.html，match 陣列同時涵蓋舊 URL 讓 nav highlight 保留
+    { href: 'records.html',     label: '違規紀錄', match: ['records.html', 'violations.html', 'gender.html', 'osha.html'] },
+    { href: 'stats.html',       label: '統計摘要', match: ['stats.html'] },
+  ] },
   { href: 'participate.html', label: '填寫表單', match: ['participate.html'] },
   { href: 'about.html',       label: '關於',     match: ['about.html'] },
 ];
@@ -61,6 +64,24 @@ function currentPage() {
   return path;
 }
 
+// 單一導覽項目 → HTML（一般連結，或含子選單的下拉群組）
+function navItemHTML(it, page) {
+  if (!it.children) {
+    return `<a href="${it.href}" class="${it.match.includes(page) ? 'active' : ''}">${it.label}</a>`;
+  }
+  const groupActive = it.children.some((c) => c.match.includes(page));
+  const links = it.children
+    .map((c) => `<a href="${c.href}" class="${c.match.includes(page) ? 'active' : ''}">${c.label}</a>`)
+    .join('');
+  return `
+    <div class="nav-group${groupActive ? ' active' : ''}">
+      <button type="button" class="nav-group-trigger${groupActive ? ' active' : ''}" aria-expanded="false" aria-haspopup="true">
+        ${it.label}<span class="nav-group-caret" aria-hidden="true">▾</span>
+      </button>
+      <div class="nav-submenu">${links}</div>
+    </div>`;
+}
+
 function headerHTML() {
   const page = currentPage();
   return `
@@ -72,9 +93,7 @@ function headerHTML() {
             <span>護理職場透明化</span>
           </a>
           <nav class="site-nav" id="site-nav">
-            ${NAV_ITEMS.map((it) => `
-              <a href="${it.href}" class="${it.match.includes(page) ? 'active' : ''}">${it.label}</a>
-            `).join('')}
+            ${NAV_ITEMS.map((it) => navItemHTML(it, page)).join('')}
           </nav>
           <button class="nav-toggle" id="nav-toggle" aria-label="開啟選單">
             ${icon('menu')}
@@ -154,6 +173,25 @@ export function mountLayout() {
   const nav = document.getElementById('site-nav');
   if (toggle && nav) {
     toggle.addEventListener('click', () => nav.classList.toggle('open'));
+  }
+  // 「資料查詢」下拉：點 trigger 切換（觸控/鍵盤友善；桌機另有 CSS hover）
+  const group = document.querySelector('.nav-group');
+  if (group) {
+    const trigger = group.querySelector('.nav-group-trigger');
+    trigger?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = group.classList.toggle('open');
+      trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    document.addEventListener('click', (e) => {
+      if (!group.contains(e.target)) {
+        group.classList.remove('open');
+        trigger?.setAttribute('aria-expanded', 'false');
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') { group.classList.remove('open'); trigger?.setAttribute('aria-expanded', 'false'); }
+    });
   }
   // render any remaining icons
   renderIcons();

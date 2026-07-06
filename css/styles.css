@@ -200,6 +200,41 @@ h1[id], h2[id], h3[id] {
   border-radius: 2px;
 }
 
+/* 導覽下拉群組（資料查詢） */
+.nav-group { position: relative; display: inline-flex; align-items: center; }
+.nav-group-trigger {
+  background: none; border: none; padding: 0; cursor: pointer;
+  font: inherit; font-size: 0.95rem; font-weight: 500;
+  color: var(--ink-soft); display: inline-flex; align-items: center; gap: 4px;
+}
+.nav-group-trigger.active { color: var(--primary); }
+.nav-group-caret { font-size: 0.7em; transition: transform .2s; }
+.nav-group:hover .nav-group-caret,
+.nav-group.open .nav-group-caret { transform: rotate(180deg); }
+/* 透明橋接：補 trigger 與下拉之間的空隙，避免 hover 中斷 */
+.nav-group::after { content: ''; position: absolute; top: 100%; left: 0; right: 0; height: 16px; }
+.nav-submenu {
+  position: absolute; top: calc(100% + 12px); left: 50%;
+  transform: translateX(-50%) translateY(-6px);
+  min-width: 170px; background: var(--surface);
+  border: 1px solid var(--border-soft); border-radius: 12px;
+  box-shadow: var(--shadow-soft); padding: 8px;
+  display: flex; flex-direction: column; gap: 2px;
+  opacity: 0; visibility: hidden; transition: opacity .18s, transform .18s; z-index: 60;
+}
+.nav-group:hover .nav-submenu,
+.nav-group:focus-within .nav-submenu,
+.nav-group.open .nav-submenu {
+  opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+}
+.nav-submenu a {
+  padding: 9px 12px; border-radius: 8px; white-space: nowrap;
+  color: var(--ink-soft); font-size: 0.92rem; font-weight: 500;
+}
+.nav-submenu a:hover { background: var(--border-soft); color: var(--ink); }
+.nav-submenu a.active { color: var(--primary); background: rgba(46,134,171,0.08); }
+.nav-submenu a.active::after { display: none; }
+
 .nav-toggle {
   display: none;
   width: 40px; height: 40px;
@@ -224,6 +259,22 @@ h1[id], h2[id], h3[id] {
   .site-nav.open { display: flex; }
   .site-nav a.active::after { display: none; }
   .nav-toggle { display: grid; place-items: center; }
+  /* 手機：資料查詢群組直接展開，trigger 當小標題、子項縮排 */
+  .nav-group { display: flex; flex-direction: column; gap: 10px; width: 100%; align-items: stretch; }
+  .nav-group::after { display: none; }
+  .nav-group-trigger {
+    pointer-events: none; cursor: default;
+    color: var(--muted); font-size: 0.8rem; font-weight: 600; letter-spacing: .04em;
+    padding: 2px 0;
+  }
+  .nav-group-caret { display: none; }
+  .nav-submenu {
+    position: static; transform: none; opacity: 1; visibility: visible;
+    box-shadow: none; border: none; background: none;
+    padding: 0 0 0 12px; margin-left: 2px; gap: 12px;
+    border-left: 2px solid var(--border-soft); border-radius: 0;
+  }
+  .nav-submenu a { padding: 0; }
 }
 
 /* ---------- Buttons ---------- */
