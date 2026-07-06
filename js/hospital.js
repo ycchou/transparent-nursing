@@ -20,6 +20,11 @@ import { loadAll } from './data-loader.js?v=26';
 import { renderKpiStrip } from './stats-kpi.js?v=26';
 import { renderTable, showDetailModal } from './table.js?v=26';
 import {
+  ensureFinancialsLoaded, getFinancials, getFinancialFields,
+  formatVal as finFormatVal, signClass as finSignClass, formatRocYear as finRocYear,
+  renderFinancialTrendChart,
+} from './financials-view.js?v=26';
+import {
   createCsvLoader,
   parseROCDate,
   parseFine,
@@ -268,6 +273,7 @@ function selectHospital(code, updateUrl = false) {
   document.getElementById('hospital-placeholder').hidden = true;
   document.getElementById('hospital-detail').hidden = false;
   renderNurseSection(code, hosp);
+  renderFinancialsSection(code);
   renderPlatformSection(hosp);
   renderViolationsSection(code, hosp);
   renderIcons();
@@ -352,6 +358,36 @@ function renderNurseSection(code, hosp) {
 
   branches.forEach((b, i) => {
     renderNurseChart(document.getElementById(`nr-chart-${i}`), b, months);
+  });
+}
+
+// 財務概況（健保署）：以 code 對接 hospital-financials.json → 最新年 KPI + 趨勢圖
+function renderFinancialsSection(code) {
+  const empty = document.getElementById('fi-section-empty');
+  const kpi = document.getElementById('fi-section-kpi');
+  const chartWrap = document.getElementById('fi-section-chart');
+  const link = document.getElementById('fi-section-link');
+  kpi.innerHTML = '';
+  link.innerHTML = '';
+  chartWrap.hidden = true;
+  empty.hidden = true;
+
+  ensureFinancialsLoaded().then(() => {
+    if (state.currentCode !== code) return;
+    const h = getFinancials(code);
+    if (!h || !h.rows || !h.rows.length) { empty.hidden = false; return; }
+    const fields = getFinancialFields();
+    const latest = [...h.rows].sort((a, b) => Number(b.YEAR) - Number(a.YEAR))[0];
+    const card = (key, label) => {
+      const val = latest[`${key}Val`]; const rank = latest[`${key}Rank`];
+      return `<div class="card stat-card"><div class="stat-num kpi-num"><span class="${finSignClass(val)}">${finFormatVal(key, val, fields)}</span></div><div class="stat-label">${label}${rank ? ` · 全國第 ${rank}` : ''}</div></div>`;
+    };
+    kpi.innerHTML = `<div style="color:var(--muted);font-size:0.85rem;margin-bottom:8px;">最新年度：${finRocYear(latest.YEAR)}</div>
+      <div class="grid grid-3">${card('F3', '整體獲利/虧損')}${card('F5', '醫務利益率')}${card('F6', '醫務收入')}</div>`;
+    link.innerHTML = `<a href="financials.html?code=${encodeURIComponent(code)}" style="color:var(--primary);text-decoration:underline;font-size:0.85rem;">查看醫院財務 →</a>`;
+    chartWrap.hidden = false;
+    renderFinancialTrendChart(document.getElementById('fi-chart'), h, fields, { metrics: ['F1', 'F2', 'F3'] });
+    renderIcons();
   });
 }
 

@@ -130,6 +130,19 @@
           <div id="nr-section-body"></div>
         </div>
 
+        <!-- 財務概況（健保署） -->
+        <div class="chart-card" style="margin-top:24px;">
+          <div class="chart-card-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;"><div>
+            <h3><span data-icon="pie-chart" data-size="16" style="color:var(--primary);vertical-align:middle;"></span> 財務概況（健保署）</h3>
+          </div><div id="fi-section-link"></div></div>
+          <div id="fi-section-empty" hidden style="padding:20px;color:var(--muted);">查無此機構的財務公開資料（僅依法須公開財務之醫院有）。</div>
+          <div id="fi-section-kpi"></div>
+          <div id="fi-section-chart" hidden>
+            <div class="chart-card-header" style="margin-top:8px;"><div><h3 style="font-size:1rem;">逐年財務趨勢（醫務本業／非醫務／整體，單位：億元）</h3></div></div>
+            <div class="chart-canvas-wrap" style="height:320px;"><canvas id="fi-chart"></canvas></div>
+          </div>
+        </div>
+
         <!-- 分享平台眾包 -->
         <div class="chart-card" style="margin-top:24px;">
           <div class="chart-card-header"><div>

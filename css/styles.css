@@ -4411,6 +4411,15 @@ body.g2g-modal-open { overflow: hidden; }
 .kpi-num .status-safe   { color: #06A77D; }
 .kpi-num .status-watch  { color: #F4A261; }
 .kpi-num .status-danger { color: var(--danger); }
+
+/* 醫院財務表格 */
+.fin-table .status-safe   { color: #06A77D; font-weight: 600; }
+.fin-table .status-danger { color: var(--danger); font-weight: 600; }
+.fin-table th.fin-sort:hover { color: var(--primary); }
+.fin-table .fin-hosp-name { font-weight: 500; }
+.fin-table .fin-short { color: var(--muted); font-size: 0.82rem; margin-left: 6px; }
+.fin-table .fin-rank { color: var(--muted-light); font-size: 0.76rem; margin-left: 5px; }
+@media (max-width: 640px) { .fin-table .fin-lv-col { display: none; } }
 /* backward compat：舊 CSS class 保留 */
 .kpi-num .over-std { color: var(--danger); }
 
