@@ -381,6 +381,11 @@
         renderTabs();
         refreshTable();
 
+        // 醫院對照表載完後重繪一次，讓評鑑醫院名稱變成機構總覽連結
+        window.addEventListener('hospitalShortNamesReady', () => {
+          if (state.allData && state.allData.length) refreshTable();
+        }, { once: true });
+
         // 處理 pending deep-link：找到對應 row → 開 modal
         if (state.pendingDeepLinkId) {
           const id = state.pendingDeepLinkId;

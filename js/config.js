@@ -222,7 +222,7 @@ export const CATEGORIES = [
     short: '其他',
     color: '#64748B',
     accent: '#D1D9E2',
-    description: '居家護理、長照、學校、月子中心、捐血中心、產業、公衛等多元場域。',
+    description: '凡不屬於前述場域的護理相關職務都歸在這裡：專科護理師、社區／居家護理、長照機構、學校護理師、月子中心、捐血中心、公共衛生等；也涵蓋較少被看見的護理職涯——職業安全衛生（廠護／職護）、臨床研究（CRA 臨床監測員、SC／CRC 試驗協調／研究護理師）、藥廠與醫材廠等。',
     icon: 'briefcase-medical',
     csvUrl: 'data/mock/other.csv',
     formUrl: '',

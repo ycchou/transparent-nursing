@@ -5,6 +5,14 @@ import { icon } from './icons.js?v=17';
 import { generateShareCard, showSharePreview } from './share-card.js?v=17';
 import { ensureTooltip } from './tooltip.js?v=17';
 import { pageSlice, renderPagination } from './pagination.js?v=17';
+import { getHospitalCode } from './hospital-shortname.js?v=17';
+
+// 機構名稱若對得上評鑑醫院，包成連到機構總覽頁的連結（stopPropagation 避免觸發列 modal）
+function withHospitalLink(name, innerHtml) {
+  const code = getHospitalCode(name);
+  if (!code) return innerHtml;
+  return `<a href="hospital.html?code=${encodeURIComponent(code)}" onclick="event.stopPropagation()" title="查看機構總覽">${innerHtml}</a>`;
+}
 
 function gateCtaHtml(shownCount, fullCount, isFilteredView) {
   const reasonText = isFilteredView ? '（篩選結果）' : '';
@@ -115,7 +123,8 @@ function renderCellValue(row, key) {
   if (key === 'institutionName' || key === 'unitName') {
     if (!v) return fmt.empty(v);
     const safe = String(v).replaceAll('"', '&quot;');
-    return `<span class="cell-trunc" data-key="${key}" title="${safe}">${v}</span>`;
+    const span = `<span class="cell-trunc" data-key="${key}" title="${safe}">${v}</span>`;
+    return key === 'institutionName' ? withHospitalLink(v, span) : span;
   }
   return fmt.empty(v);
 }
@@ -236,7 +245,7 @@ export function renderTable(container, rows, opts = {}) {
             <div class="data-card-header">
               <div style="min-width:0;flex:1;">
                 <div style="font-size:0.78rem;color:var(--muted-light);font-weight:600;letter-spacing:0.04em;margin-bottom:2px;">#${r._seq != null ? r._seq : (idx + 1)}</div>
-                <div class="data-card-title">${fmt.empty(r.institutionName)}</div>
+                <div class="data-card-title">${r.institutionName ? withHospitalLink(r.institutionName, r.institutionName) : fmt.empty(r.institutionName)}</div>
                 ${r.unitName ? `<div style="font-size:0.88rem;color:var(--ink-soft);font-weight:500;margin-top:2px;">${r.unitName}</div>` : ''}
                 <div style="font-size:0.82rem;color:var(--muted);margin-top:2px;">
                   ${fmt.empty(r.institutionType)}${r.location ? ' · ' + r.location : ''}
