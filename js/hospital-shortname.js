@@ -14,6 +14,7 @@ import { normalizeInstitutionName } from './institution-name.js?v=17';
 
 const SHORT_MAP = new Map();       // 正式名稱 → 簡稱
 const CODE_MAP = new Map();        // 正規化名稱 → 機構代碼
+const CODE_TO_SHORT = new Map();   // 機構代碼 → 簡稱
 let loaded = false;
 let loadingPromise = null;
 
@@ -41,6 +42,7 @@ function startLoad() {
       (d.hospitals || []).forEach((h) => {
         if (!h.name) return;
         if (h.shortName && h.shortName !== h.name) SHORT_MAP.set(h.name, h.shortName);
+        if (h.code && h.shortName && !CODE_TO_SHORT.has(h.code)) CODE_TO_SHORT.set(h.code, h.shortName);
         if (h.code) {
           const nn = normalizeInstitutionName(h.name);
           if (nn && !CODE_MAP.has(nn)) CODE_MAP.set(nn, h.code);
@@ -76,6 +78,12 @@ export function isLoaded() {
 export function getShort(name) {
   if (!name) return null;
   return SHORT_MAP.get(name) || null;
+}
+
+// 機構代碼 → 簡稱（已去重的正式簡稱；找不到回 null）
+export function getShortByCode(code) {
+  if (!code) return null;
+  return CODE_TO_SHORT.get(code) || null;
 }
 
 // 名稱 → 機構代碼（評鑑醫院才有；找不到回 null）

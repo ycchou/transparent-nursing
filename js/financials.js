@@ -3,7 +3,7 @@
 // 資料/圖表共用 js/financials-view.js；名稱↔代碼/簡稱重用 js/hospital-shortname.js
 
 import { renderIcons, icon } from './icons.js?v=26';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=26';
+import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=26';
 import {
   ensureFinancialsLoaded, getAllFinancials, getFinancials, getFinancialFields,
   parseNum, formatVal, signClass, formatRocYear, renderFinancialTrendChart,
@@ -123,7 +123,7 @@ function filteredRows() {
     if (!r) return;
     if (state.levelFilter !== 'all' && r.HOSP_CNT_TYPNAM !== state.levelFilter) return;
     if (q) {
-      const short = getShort(h.name) || h.shortName || '';
+      const short = getShortByCode(h.code) || getShort(h.name) || h.shortName || '';
       const hay = `${h.name} ${short} ${h.code}`.toLowerCase();
       if (!hay.includes(q)) return;
     }
@@ -154,7 +154,7 @@ function renderTable() {
     ${COLUMNS.map((c) => `<th class="fin-sort" data-key="${c.key}" style="text-align:right;cursor:pointer;white-space:nowrap;">${c.label}${caret(c.key)}</th>`).join('')}
   `;
   const body = rows.map(({ h, r }) => {
-    const short = getShort(h.name) || h.shortName;
+    const short = getShortByCode(h.code) || getShort(h.name) || h.shortName;
     const cells = COLUMNS.map((c) => {
       const val = r[`${c.key}Val`];
       const rank = c.rank ? r[`${c.key}Rank`] : null;
@@ -204,7 +204,7 @@ function selectHospital(code, updateUrl = false) {
 function modalHtml(h) {
   const f = state.fields;
   const latest = latestRow(h);
-  const short = getShort(h.name) || h.shortName;
+  const short = getShortByCode(h.code) || getShort(h.name) || h.shortName;
   const card = (key, label) => {
     const val = latest ? latest[`${key}Val`] : null;
     const rank = latest ? latest[`${key}Rank`] : null;

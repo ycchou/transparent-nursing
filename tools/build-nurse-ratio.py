@@ -325,6 +325,36 @@ def matchAccredForVpnBranch(vpn_branch, accred_list, common_prefix):
     return None
 
 
+def disambiguateShortNames(records):
+    """
+    VPN 簡稱（如「馬偕兒童醫」）常被不同醫院共用（台北/新竹馬偕兒童）。
+    當同一簡稱對應到多個「不同機構代號」時，各自加上縣市以區別
+    （臺北市→臺北）；同一代號的多院區維持共用同一簡稱。
+    """
+    from collections import defaultdict
+    groups = defaultdict(list)
+    for h in records:
+        if h.get('shortName'):
+            groups[h['shortName']].append(h)
+    for sn, group in groups.items():
+        codes = list(dict.fromkeys(h['code'] for h in group))
+        if len(codes) <= 1:
+            continue
+        seen, newByCode = set(), {}
+        for code in codes:
+            city = next((h.get('city') for h in group if h['code'] == code), None)
+            tag = (city or '').rstrip('市縣')
+            cand = f'{sn}（{tag}）' if tag else sn
+            base, i = cand, 2
+            while cand in seen:
+                cand = f'{base}{i}'
+                i += 1
+            seen.add(cand)
+            newByCode[code] = cand
+        for h in group:
+            h['shortName'] = newByCode[h['code']]
+
+
 def writeMergedHospitalsIndex(accredIndex, accredMeta, vpnHospitalsByCode):
     """
     產生合併版醫院總表 data/hospitals-merged.json
@@ -368,6 +398,9 @@ def writeMergedHospitalsIndex(accredIndex, accredMeta, vpnHospitalsByCode):
             'source': 'vpn-only',
             'sharedCode': len(vp.get('branches', set())) > 1,
         })
+
+    # 同一 VPN 簡稱被「不同機構代號」共用 → 加縣市區別（同代號多院區維持共用）
+    disambiguateShortNames(records)
 
     # 排序：層級 → 縣市 → 名稱
     LEVEL_ORDER = {'醫學中心': 0, '區域醫院': 1, '地區醫院': 2}
