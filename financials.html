@@ -87,38 +87,7 @@
     </div>
   </section>
 
-  <!-- 單院明細 -->
-  <section style="padding:0 0 56px;">
-    <div class="container">
-      <div id="fin-detail-placeholder" class="card card-flat" style="text-align:center;padding:40px 24px;color:var(--muted);">
-        <div style="font-size:2rem;margin-bottom:8px;">📈</div>
-        <div>點上方任一家醫院，查看其逐年財務趨勢與各年度明細</div>
-      </div>
-
-      <div id="fin-detail" hidden>
-        <div class="nurse-hosp-header">
-          <div>
-            <h2 id="fin-detail-name" style="margin:0 0 8px;">—</h2>
-            <div id="fin-detail-meta"></div>
-          </div>
-        </div>
-
-        <div id="fin-detail-kpi" style="margin-top:16px;"></div>
-
-        <div class="chart-card" style="margin-top:20px;">
-          <div class="chart-card-header"><div><h3>逐年財務趨勢（醫務本業／非醫務／整體，單位：億元）</h3></div></div>
-          <div class="chart-canvas-wrap" style="height:380px;">
-            <canvas id="fin-chart"></canvas>
-          </div>
-        </div>
-
-        <div class="chart-card" style="margin-top:20px;">
-          <div class="chart-card-header"><div><h3>各年度明細</h3></div></div>
-          <div id="fin-year-table"></div>
-        </div>
-      </div>
-    </div>
-  </section>
+  <!-- 單院明細以彈出視窗顯示（由 js/financials.js 動態建立 #fin-detail-modal） -->
 
   <div id="app-footer"></div>
 

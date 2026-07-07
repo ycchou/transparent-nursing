@@ -191,65 +191,84 @@ function renderTable() {
   });
 }
 
-// ---------- 明細 ----------
+// ---------- 明細（彈出視窗）----------
 function selectHospital(code, updateUrl = false) {
   const h = getFinancials(code);
   if (!h) return;
   state.currentCode = code;
   if (updateUrl) setDeepLinkUrl(code);
-  renderTable();
-  renderDetail(h);
-  try { window.scrollTo({ top: document.getElementById('fin-detail').offsetTop - 60, behavior: 'smooth' }); } catch {}
+  renderTable();       // 更新列 active 樣式
+  openModal(h);
 }
 
-function renderDetail(h) {
-  const wrap = document.getElementById('fin-detail');
-  const ph = document.getElementById('fin-detail-placeholder');
-  if (ph) ph.hidden = true;
-  wrap.hidden = false;
-
+function modalHtml(h) {
+  const f = state.fields;
   const latest = latestRow(h);
   const short = getShort(h.name) || h.shortName;
-  document.getElementById('fin-detail-name').textContent = h.name;
-  document.getElementById('fin-detail-meta').innerHTML =
-    `${latest ? `<span class="nurse-level-badge nurse-level-${levelSlug(latest.HOSP_CNT_TYPNAM)}">${escapeHtml(latest.HOSP_CNT_TYPNAM)}</span>` : ''}
-     <span style="color:var(--muted);font-size:0.85rem;">代號 ${escapeHtml(h.code)}${short && short !== h.name ? ' · ' + escapeHtml(short) : ''}
-     · <a href="hospital.html?code=${encodeURIComponent(h.code)}" style="color:var(--primary);text-decoration:underline;">機構總覽 →</a></span>`;
-
-  // 最新年度 KPI
-  const kpi = document.getElementById('fin-detail-kpi');
-  if (latest) {
-    const card = (key, label) => {
-      const val = latest[`${key}Val`]; const rank = latest[`${key}Rank`];
-      const cls = signClass(val);
-      return `<div class="card stat-card">
-        <div class="stat-num kpi-num"><span class="${cls}">${formatVal(key, val, state.fields)}</span></div>
-        <div class="stat-label">${label}${rank ? ` · 全國第 ${rank}` : ''}</div></div>`;
-    };
-    kpi.innerHTML = `<div style="color:var(--muted);font-size:0.85rem;margin-bottom:8px;">最新年度：${formatRocYear(latest.YEAR)}</div>
-      <div class="grid grid-3">
-        ${card('F3', '整體獲利/虧損')}${card('F5', '醫務利益率')}${card('F6', '醫務收入')}
-      </div>`;
-  } else kpi.innerHTML = '';
-
-  // 趨勢圖（醫務本業/非醫務/整體 三條，同為億元）
-  renderFinancialTrendChart(document.getElementById('fin-chart'), h, state.fields, { metrics: ['F1', 'F2', 'F3'] });
-
-  // 各年度明細表
-  const yt = document.getElementById('fin-year-table');
-  const f = state.fields;
+  const card = (key, label) => {
+    const val = latest ? latest[`${key}Val`] : null;
+    const rank = latest ? latest[`${key}Rank`] : null;
+    return `<div class="card stat-card"><div class="stat-num kpi-num"><span class="${signClass(val)}">${formatVal(key, val, f)}</span></div><div class="stat-label">${label}${rank ? ` · 全國第 ${rank}` : ''}</div></div>`;
+  };
   const cols = ['F1', 'F2', 'F3', 'F5', 'F6', 'F7', 'F8'];
   const rowsDesc = [...(h.rows || [])].sort((a, b) => Number(b.YEAR) - Number(a.YEAR));
-  yt.innerHTML = `
-    <div class="data-table-wrap">
-      <table class="data-table fin-table">
-        <thead><tr><th>年度</th>${cols.map((c) => `<th style="text-align:right;white-space:nowrap;">${(f[c] && f[c].title) || c}</th>`).join('')}</tr></thead>
-        <tbody>
-          ${rowsDesc.map((r) => `<tr><td>${formatRocYear(r.YEAR)}</td>${cols.map((c) => `<td style="text-align:right;white-space:nowrap;"><span class="${(c === 'F1' || c === 'F3' || c === 'F5') ? signClass(r[c + 'Val']) : ''}">${formatVal(c, r[c + 'Val'], f)}</span>${r[c + 'Rank'] ? `<span class="fin-rank">#${r[c + 'Rank']}</span>` : ''}</td>`).join('')}</tr>`).join('')}
-        </tbody>
-      </table>
+  const yearTable = `
+    <div class="data-table-wrap"><table class="data-table fin-table">
+      <thead><tr><th>年度</th>${cols.map((c) => `<th style="text-align:right;white-space:nowrap;">${(f[c] && f[c].title) || c}</th>`).join('')}</tr></thead>
+      <tbody>${rowsDesc.map((r) => `<tr><td>${formatRocYear(r.YEAR)}</td>${cols.map((c) => `<td style="text-align:right;white-space:nowrap;"><span class="${(c === 'F1' || c === 'F3' || c === 'F5') ? signClass(r[c + 'Val']) : ''}">${formatVal(c, r[c + 'Val'], f)}</span>${r[c + 'Rank'] ? `<span class="fin-rank">#${r[c + 'Rank']}</span>` : ''}</td>`).join('')}</tr>`).join('')}</tbody>
+    </table></div>`;
+
+  return `
+    <div class="modal" role="dialog" style="max-width:840px;">
+      <div class="modal-header" style="flex-direction:row;align-items:flex-start;gap:12px;">
+        <div style="min-width:0;flex:1;">
+          <h3 style="margin:0 0 6px;word-break:break-word;">${escapeHtml(h.name)}</h3>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            ${latest ? `<span class="nurse-level-badge nurse-level-${levelSlug(latest.HOSP_CNT_TYPNAM)}">${escapeHtml(latest.HOSP_CNT_TYPNAM)}</span>` : ''}
+            <span style="color:var(--muted);font-size:0.85rem;">代號 ${escapeHtml(h.code)}${short && short !== h.name ? ' · ' + escapeHtml(short) : ''}
+            · <a href="hospital.html?code=${encodeURIComponent(h.code)}" style="color:var(--primary);text-decoration:underline;">機構總覽 →</a></span>
+          </div>
+        </div>
+        <button class="modal-close" aria-label="關閉" style="flex:0 0 auto;order:0;">✕</button>
+      </div>
+      ${latest ? `<div style="color:var(--muted);font-size:0.85rem;margin-bottom:8px;">最新年度：${formatRocYear(latest.YEAR)}</div>
+      <div class="grid grid-3">${card('F3', '整體獲利/虧損')}${card('F5', '醫務利益率')}${card('F6', '醫務收入')}</div>` : ''}
+      <div class="chart-card" style="margin-top:18px;">
+        <div class="chart-card-header"><div><h3 style="font-size:1rem;">逐年財務趨勢（醫務本業／非醫務／整體，單位：億元）</h3></div></div>
+        <div class="chart-canvas-wrap" style="height:320px;"><canvas id="fin-modal-chart"></canvas></div>
+      </div>
+      <div class="chart-card" style="margin-top:18px;">
+        <div class="chart-card-header"><div><h3 style="font-size:1rem;">各年度明細</h3></div></div>
+        ${yearTable}
+      </div>
     </div>`;
-  renderIcons();
+}
+
+function openModal(h) {
+  let backdrop = document.getElementById('fin-detail-modal');
+  if (!backdrop) {
+    backdrop = document.createElement('div');
+    backdrop.id = 'fin-detail-modal';
+    backdrop.className = 'modal-backdrop';
+    document.body.appendChild(backdrop);
+  }
+  backdrop.innerHTML = modalHtml(h);
+  backdrop.classList.add('open');
+  backdrop.querySelector('.modal-close').addEventListener('click', closeModal);
+  backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
+  document.addEventListener('keydown', escHandler);
+  renderFinancialTrendChart(backdrop.querySelector('#fin-modal-chart'), h, state.fields, { metrics: ['F1', 'F2', 'F3'] });
+}
+
+function escHandler(e) { if (e.key === 'Escape') closeModal(); }
+
+function closeModal() {
+  const backdrop = document.getElementById('fin-detail-modal');
+  if (backdrop) backdrop.classList.remove('open');
+  document.removeEventListener('keydown', escHandler);
+  setDeepLinkUrl(null, true);
+  state.currentCode = null;
+  renderTable();
 }
 
 // ---------- init ----------
@@ -274,6 +293,7 @@ export async function initFinancials() {
     window.addEventListener('popstate', () => {
       const c = parseDeepLinkCode();
       if (c && getFinancials(c)) selectHospital(c, false);
+      else closeModal();
     });
     renderIcons();
   } catch (e) {
