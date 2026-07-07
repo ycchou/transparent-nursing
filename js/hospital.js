@@ -208,8 +208,7 @@ function renderHospitalList() {
   if (!hasActiveFilter()) {
     if (countEl) countEl.textContent = '—';
     container.innerHTML = `<div class="nurse-picker-hint" style="padding:20px;color:var(--muted);line-height:1.7;">
-      請先選擇<strong>層級</strong>或<strong>地點</strong>，或輸入醫院名稱／簡稱／代號來搜尋。<br>
-      <span style="font-size:0.85em;">僅收錄評鑑醫院（醫學中心／區域／地區醫院）；診所、長照等未達地區醫院層級者不會顯示。</span></div>`;
+      請先選擇<strong>層級</strong>或<strong>地點</strong>，或輸入醫院名稱／簡稱／代號來搜尋。</div>`;
     return;
   }
 
