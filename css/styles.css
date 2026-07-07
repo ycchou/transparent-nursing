@@ -4427,6 +4427,28 @@ body.g2g-modal-open { overflow: hidden; }
 .fin-table .fin-short { color: var(--muted); font-size: 0.82rem; margin-left: 6px; }
 .fin-table .fin-rank { color: var(--muted-light); font-size: 0.76rem; margin-left: 5px; }
 @media (max-width: 640px) { .fin-table .fin-lv-col { display: none; } }
+
+/* 財務規模對照卡 */
+.fin-benchmark {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: 14px;
+  padding: 16px 20px;
+  box-shadow: var(--shadow-soft);
+}
+.fin-benchmark-summary {
+  cursor: pointer; list-style: none;
+  font-weight: 600; color: var(--ink-soft); font-size: 0.95rem;
+  display: flex; align-items: baseline; gap: 10px;
+}
+.fin-benchmark-summary::-webkit-details-marker { display: none; }
+.fin-benchmark-title { flex: 1; line-height: 1.6; }
+.fin-benchmark-caret { flex: 0 0 auto; color: var(--muted); transition: transform .2s; }
+.fin-benchmark[open] .fin-benchmark-caret { transform: rotate(90deg); }
+.fin-benchmark-baseline td { background: var(--surface-soft); color: var(--muted); font-style: italic; }
+.fin-benchmark-note { margin-top: 12px; font-size: 0.82rem; color: var(--muted); line-height: 1.75; }
+.fin-benchmark-note p { margin: 4px 0; }
+.fin-benchmark-note em { font-style: normal; color: var(--ink-soft); font-weight: 500; }
 /* backward compat：舊 CSS class 保留 */
 .kpi-num .over-std { color: var(--danger); }
 
