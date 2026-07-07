@@ -251,11 +251,13 @@ h1[id], h2[id], h3[id] {
     top: 64px; left: 0; right: 0;
     background: var(--surface);
     flex-direction: column;
+    align-items: stretch;   /* 手機：改左對齊全寬，與「資料查詢」群組一致 */
     padding: 16px 24px 24px;
     gap: 12px;
     border-bottom: 1px solid var(--border-soft);
     box-shadow: var(--shadow-soft);
   }
+  .site-nav > a { padding: 2px 0; }
   .site-nav.open { display: flex; }
   .site-nav a.active::after { display: none; }
   .nav-toggle { display: grid; place-items: center; }
