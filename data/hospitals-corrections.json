@@ -1,0 +1,38 @@
+{
+  "note": "手動修正來源資料（評鑑名單／VPN）的機構錯誤：改制換碼、名稱與地址誤植。由 tools/apply-hospital-corrections.py 套用到 hospitals-merged.json 與 nurse-ratio.json。欄位：fullName=評鑑正式全名(merged.name/nurse.fullName)、vpnName=VPN 短名(nurse.name)、shortName=顯示簡稱(merged.shortName)、address/city。",
+  "corrections": {
+    "0922020059": {
+      "fullName": "亞人醫療社團法人盧亞人醫院",
+      "vpnName": "盧亞人醫院",
+      "shortName": "盧亞人醫院",
+      "address": "嘉義市西區民權路406號",
+      "city": "嘉義市",
+      "phone": "05-2248347",
+      "reason": "健保署最新特約名單此碼為盧亞人醫院（民權路406號），原資料誤植為安心醫院（新民路88號、電話也是安心的）"
+    },
+    "1522021175": {
+      "fullName": "亞人社團法人盧亞人醫院",
+      "vpnName": "盧亞人醫院",
+      "shortName": "盧亞人醫院（舊制）",
+      "address": "嘉義市西區民權路406號",
+      "city": "嘉義市",
+      "reason": "盧亞人醫院改制前私立碼；簡稱加註（舊制）與現行社團法人碼區別"
+    },
+    "0922020040": {
+      "fullName": "安心醫療社團法人安心醫院",
+      "vpnName": "安心醫院",
+      "shortName": "安心醫院",
+      "address": "嘉義市西區新民路88號",
+      "city": "嘉義市",
+      "reason": "安心醫院 114/6/1 改制為醫療社團法人，此為改制後現行碼；補正式全名"
+    },
+    "1522021264": {
+      "fullName": "安心醫院",
+      "vpnName": "安心醫院",
+      "shortName": "安心醫院（舊制）",
+      "address": "嘉義市西區新民路88號",
+      "city": "嘉義市",
+      "reason": "安心醫院改制前私立碼；簡稱加註（舊制）與現行社團法人碼區別"
+    }
+  }
+}
