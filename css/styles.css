@@ -275,7 +275,12 @@ h1[id], h2[id], h3[id] {
     box-shadow: none; border: none; background: none;
     padding: 0 0 0 12px; margin-left: 2px; gap: 12px;
     border-left: 2px solid var(--border-soft); border-radius: 0;
+    transition: none;   /* 手機為靜態展開，關掉桌機下拉的滑動動畫 */
   }
+  /* 手機點子項時避免 focus-within/open 觸發桌機的位移動畫 */
+  .nav-group.open .nav-submenu,
+  .nav-group:hover .nav-submenu,
+  .nav-group:focus-within .nav-submenu { transform: none; }
   .nav-submenu a { padding: 0; }
 }
 
