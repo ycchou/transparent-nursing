@@ -64,24 +64,34 @@ def col_bounds(pg1):
     return sorted(set(round(c[0], 1) for c in cells) | set(round(c[2], 1) for c in cells))
 
 
-def rows_from_page(page, xs):
-    """以字詞 x 位置分欄（不靠框線）：舊版多頁 PDF 的續頁沒有框線，
-    預設 extract_tables 只抓得到第 1 頁；改用 word bucketing 才能抓完整。"""
-    words = page.extract_words(x_tolerance=1.5, y_tolerance=2)
-    lines = {}
-    for w in words:
-        lines.setdefault(round(w['top'] / 3.0), []).append(w)
+def _bucket_row(cluster, xs, ncol):
+    cells = [''] * ncol
+    for w in sorted(cluster, key=lambda x: x['x0']):
+        cx = (w['x0'] + w['x1']) / 2
+        ci = next((i for i in range(ncol) if xs[i] - 1 <= cx <= xs[i + 1] + 1), None)
+        if ci is None:
+            ci = 0 if cx < xs[0] else ncol - 1
+        cells[ci] = (cells[ci] + w['text']).strip()
+    return cells
+
+
+def rows_from_page(page, xs, row_gap=4.0):
+    """以字詞 x 位置分欄（不靠框線）；列的分群用「top 相鄰間距」而非固定分箱。
+    舊版 PDF 續頁無框線（預設 extract_tables 只抓得到第 1 頁），且部分月份每列
+    的標籤與數字 top 相差約 0.4px，固定分箱會把「實際人數」的數字與標籤拆成兩
+    列 → 實際值變空。改用間距分群（列距約 13px、列內 <1px）可穩定分列。"""
+    words = sorted(page.extract_words(x_tolerance=1.5, y_tolerance=2),
+                   key=lambda w: (w['top'], w['x0']))
     ncol = len(xs) - 1
-    out = []
-    for key in sorted(lines):
-        cells = [''] * ncol
-        for w in sorted(lines[key], key=lambda x: x['x0']):
-            cx = (w['x0'] + w['x1']) / 2
-            ci = next((i for i in range(ncol) if xs[i] - 1 <= cx <= xs[i + 1] + 1), None)
-            if ci is None:
-                ci = 0 if cx < xs[0] else ncol - 1
-            cells[ci] = (cells[ci] + w['text']).strip()
-        out.append(cells)
+    out, cur, last = [], [], None
+    for w in words:
+        if last is not None and (w['top'] - last) > row_gap:
+            out.append(_bucket_row(cur, xs, ncol))
+            cur = []
+        cur.append(w)
+        last = w['top']
+    if cur:
+        out.append(_bucket_row(cur, xs, ncol))
     return out
 
 
@@ -152,6 +162,37 @@ def main():
                 print(f"  ...{done}/{len(tasks)}")
     print(f"解析完成；錯誤 {len(errs)}", errs[:5] if errs else '')
 
+    # 套用人工修正（來源 PDF 異常值，例如數字誤植）
+    corr_path = os.path.join(ROOT, 'data', 'personnel-corrections.json')
+    ncorr = 0
+    if os.path.exists(corr_path):
+        with open(corr_path, encoding='utf-8') as fp:
+            corr = json.load(fp).get('corrections', {})
+        for code, mmap in corr.items():
+            for mkey, fields in mmap.items():
+                rec = store.get((code, mkey))
+                if not rec:
+                    continue
+                for which in ('actual', 'eval'):
+                    for cat, val in (fields.get(which) or {}).items():
+                        if cat in CATEGORIES:
+                            rec['rows'].setdefault(which, [None] * 13)[CATEGORIES.index(cat)] = val
+                            ncorr += 1
+                for bt, val in (fields.get('beds') or {}).items():
+                    if bt in BED_TYPES:
+                        rec['beds'][BED_TYPES.index(bt)] = val
+                        ncorr += 1
+        print(f"套用人工修正 {ncorr} 個值")
+
+    # 官方正式名稱：PDF 長名稱有時落在中列導致空白，一律以 hospitals-merged 為準
+    merged_names = {}
+    mp = os.path.join(ROOT, 'data', 'hospitals-merged.json')
+    if os.path.exists(mp):
+        with open(mp, encoding='utf-8') as fp:
+            for h in json.load(fp).get('hospitals', []):
+                if h.get('code') and h.get('name'):
+                    merged_names.setdefault(h['code'], h['name'])
+
     # 依醫院彙整
     hosp = {}
     for (code, mkey), rec in store.items():
@@ -166,8 +207,9 @@ def main():
     for code, months_map in hosp.items():
         mkeys = sorted(months_map.keys())
         last = months_map[mkeys[-1]]
+        name = merged_names.get(code) or last['name'] or code
         out = {
-            'code': code, 'name': last['name'], 'city': last['city'], 'level': last['level'],
+            'code': code, 'name': name, 'city': last['city'], 'level': last['level'],
             'categories': CATEGORIES, 'bedTypes': BED_TYPES,
             'months': mkeys,
             'beds': [months_map[m]['beds'] for m in mkeys],
@@ -176,7 +218,7 @@ def main():
         }
         with open(os.path.join(OUT_DIR, f"{code}.json"), 'w', encoding='utf-8') as fp:
             json.dump(out, fp, ensure_ascii=False, separators=(',', ':'))
-        index.append({'code': code, 'name': last['name'], 'city': last['city'], 'level': last['level'],
+        index.append({'code': code, 'name': name, 'city': last['city'], 'level': last['level'],
                       'firstMonth': mkeys[0], 'lastMonth': mkeys[-1], 'monthCount': len(mkeys)})
 
     # 全國逐月加總（僅計 3 層級齊全的月份，避免 110/04 這類缺整層級的月造成假降）

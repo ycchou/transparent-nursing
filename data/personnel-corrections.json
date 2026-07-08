@@ -1,0 +1,8 @@
+{
+  "note": "人工修正來源 PDF 的異常值（數字誤植等）。格式：code -> 月(YYYMM) -> { actual|eval: {職類:值}, beds: {病床別:值} }。由 tools/build-personnel.py 套用到解析結果。",
+  "corrections": {
+    "1302050014": {
+      "11503": { "actual": { "醫師": 851 } }
+    }
+  }
+}
