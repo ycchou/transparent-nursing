@@ -49,7 +49,7 @@ const RATIO_INTRO = `<strong>ICU 護病比設置標準與評鑑基準</strong><b
 
 const ICU_FORM_SCHEMA = [
   ...buildInstitutionSection({
-    unitNameHelp: '請含 ICU 類型，例：內科加護病房 (MICU)、外科 (SICU)、心臟內科 (CCU)、心臟外科 (CVICU)、神經 (Neuro-ICU)、新生兒 (NICU)、兒童 (PICU)、綜合 ICU',
+    unitNameHelp: '例：內科加護病房 (MICU)、外科 (SICU)、心臟內科 (CCU)、心臟外科 (CVICU)、神經 (Neuro-ICU)、新生兒 (NICU)、兒童 (PICU)、綜合 ICU',
     jobTitleHelp: '例：N0、N1、N2、N3、專科護理師',
   }),
 
