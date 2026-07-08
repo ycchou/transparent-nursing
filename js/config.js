@@ -68,8 +68,6 @@ export const CATEGORIES = [
     formUrl: 'participate-icu.html',
     formStatus: 'live',
     specificFields: [
-      { key: 'icuType', label: 'ICU 類型', type: 'enum',
-        options: ['MICU', 'SICU', 'CCU', 'CVICU', 'Neuro-ICU', 'NICU', 'PICU', '綜合ICU', '其他'] },
       { key: 'bedbathFreq', label: 'Bedbath 頻率', type: 'enum',
         options: ['QD & PRN', 'QOD & PRN', '其他'] },
       { key: 'ppCareFreq', label: 'PP care 頻率', type: 'enum',

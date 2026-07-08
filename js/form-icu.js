@@ -49,14 +49,11 @@ const RATIO_INTRO = `<strong>ICU 護病比設置標準與評鑑基準</strong><b
 
 const ICU_FORM_SCHEMA = [
   ...buildInstitutionSection({
-    unitNameHelp: '例：內科加護病房 (MICU)、心臟內科加護病房 (CCU)、兒童加護病房 (PICU)',
+    unitNameHelp: '請含 ICU 類型，例：內科加護病房 (MICU)、外科 (SICU)、心臟內科 (CCU)、心臟外科 (CVICU)、神經 (Neuro-ICU)、新生兒 (NICU)、兒童 (PICU)、綜合 ICU',
     jobTitleHelp: '例：N0、N1、N2、N3、專科護理師',
   }),
 
   { section: '加護病房資訊' },
-  { name: 'icuType', label: 'ICU 類型', type: 'radio', required: true,
-    options: ['MICU', 'SICU', 'CCU', 'CVICU', 'Neuro-ICU', 'NICU', 'PICU', '綜合ICU', '其他'],
-    help: 'MICU 內科／SICU 外科／CCU 心臟內科／CVICU 心臟外科／Neuro-ICU 神經／NICU 新生兒／PICU 兒童；找不到請選「其他」自填' },
   { name: 'bedbathFreq', label: 'Bedbath 頻率', type: 'radio',
     options: ['QD & PRN', 'QOD & PRN', '其他'],
     help: 'QD＝每日、QOD＝隔日、PRN＝需要時' },
