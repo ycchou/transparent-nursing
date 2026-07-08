@@ -83,8 +83,8 @@ const ICU_FORM_SCHEMA = [
     help: '每班津貼金額（元）；無則填「無」' },
 
   { section: '業務與工時' },
-  { name: 'dailyActualHours', label: '每日實際工時（含交接班）', type: 'radio',
-    options: ['8 小時以內', '8-9 小時', '9-10 小時', '10-11 小時', '11-12 小時', '12 小時以上'] },
+  { name: 'dailyOvertime', label: '每日平均加班時間', type: 'radio',
+    options: ['無', '1 小時內', '1-2 小時', '2-3 小時', '4 小時'] },
   ...WORKHOURS_FIELDS,
 
   { section: '教育訓練與制度' },
