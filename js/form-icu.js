@@ -62,7 +62,7 @@ const ICU_FORM_SCHEMA = [
     help: 'QD＝每日、QOD＝隔日、PRN＝需要時' },
   { name: 'ppCareFreq', label: 'PP care 頻率', type: 'radio',
     options: ['QD & PRN', 'QOD & PRN', '其他'],
-    help: 'PP care＝Prone Position 俯臥擺位；QD＝每日、QOD＝隔日、PRN＝需要時' },
+    help: 'PP care＝Perineal Care 陰部護理；QD＝每日、QOD＝隔日、PRN＝需要時' },
 
   { section: '護病比配置', intro: RATIO_INTRO },
   { name: 'dayShiftRatio', label: '白班護病比', type: 'radio', required: true,
