@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#2E86AB" />
+
+  <title>人力監控 — 護理職場透明化運動</title>
+  <meta name="description" content="整合衛福部『醫院醫事人力持續性監測結果』，以醫院為單位呈現各職類（醫師、護產、藥事…）實際人數與各類病床數量的逐月變化（民國108年7月起）。" />
+  <meta name="keywords" content="醫事人力, 護理人力, 護病比, 病床數, 醫院人力監測, 衛福部, 醫院評鑑" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <link rel="canonical" href="https://transparentnursing.example.org/personnel.html" />
+
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon-180.png" />
+  <link rel="apple-touch-icon" sizes="152x152" href="assets/apple-touch-icon-152.png" />
+  <link rel="apple-touch-icon" sizes="120x120" href="assets/apple-touch-icon-120.png" />
+  <link rel="manifest" href="manifest.json" />
+
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="護理職場透明化" />
+  <meta name="mobile-web-app-capable" content="yes" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="護理職場透明化運動" />
+  <meta property="og:title" content="人力監控 — 護理職場透明化運動" />
+  <meta property="og:description" content="衛福部醫院醫事人力持續性監測：各職類實際人數與病床數的逐月變化。" />
+  <meta property="og:image" content="https://transparentnursing.example.org/assets/og-image.svg" />
+  <meta property="og:url" content="https://transparentnursing.example.org/personnel.html" />
+  <meta property="og:locale" content="zh_TW" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="人力監控 — 護理職場透明化運動" />
+  <meta name="twitter:description" content="各職類實際人數與病床數的逐月變化（衛福部監測）。" />
+  <meta name="twitter:image" content="https://transparentnursing.example.org/assets/og-image.svg" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css?v=26" />
+
+  <link rel="modulepreload" href="./js/components.js?v=26" />
+  <link rel="modulepreload" href="./js/icons.js?v=26" />
+  <link rel="modulepreload" href="./js/personnel.js?v=26" />
+</head>
+<body>
+  <div id="app-header"></div>
+
+  <section style="padding-top:48px;padding-bottom:16px;">
+    <div class="container">
+      <span class="eyebrow">Workforce Monitor</span>
+      <h1 style="margin:4px 0 8px;">人力監控</h1>
+      <p style="color:var(--muted);max-width:820px;line-height:1.75;">
+        以醫院為單位呈現<strong style="color:var(--ink);">各職類（醫師、護產、藥事、醫檢…）實際人數</strong>與
+        <strong style="color:var(--ink);">各類病床數量</strong>的逐月變化。選一家醫院即可看它歷年的人力與床數走勢。
+      </p>
+      <p style="color:var(--muted-light);font-size:0.85rem;margin-top:10px;line-height:1.7;">
+        資料來源：<a href="https://openinfo.mohw.gov.tw/web/D01" target="_blank" rel="noopener" style="color:var(--primary);text-decoration:underline;">衛生福利部「醫院醫事人力持續性監測結果」</a>
+        （民國 108 年 7 月起逐月；「護產人力」＝護理＋助產）。
+      </p>
+    </div>
+  </section>
+
+  <!-- 醫院選擇區 -->
+  <section style="padding:0 0 24px;">
+    <div class="container">
+      <div class="nurse-picker">
+        <div class="nurse-picker-header">
+          <div class="nurse-picker-title">選擇醫院</div>
+          <div class="nurse-picker-count" id="personnel-count">—</div>
+        </div>
+        <div class="nurse-picker-controls">
+          <input id="personnel-search" type="search" placeholder="搜尋醫院名稱、簡稱或機構代號..." class="nurse-picker-search" />
+          <div class="nurse-picker-filter-row">
+            <span class="nurse-filter-label">層級：</span>
+            <div class="nurse-picker-filters">
+              <button type="button" class="nurse-level-filter active" data-level="all">全部</button>
+              <button type="button" class="nurse-level-filter" data-level="醫學中心">醫學中心</button>
+              <button type="button" class="nurse-level-filter" data-level="區域醫院">區域醫院</button>
+              <button type="button" class="nurse-level-filter" data-level="地區醫院">地區醫院</button>
+            </div>
+          </div>
+          <div class="nurse-picker-filter-row">
+            <span class="nurse-filter-label">地點：</span>
+            <div class="nurse-picker-filters" id="city-filter"></div>
+          </div>
+        </div>
+        <div id="personnel-list" class="nurse-hospital-list"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 單院明細 -->
+  <section style="padding:0 0 56px;">
+    <div class="container">
+      <div id="personnel-placeholder" class="card card-flat" style="text-align:center;padding:48px 24px;color:var(--muted);">
+        <div style="font-size:2rem;margin-bottom:8px;">📈</div>
+        <div>從上方選擇一家醫院，查看歷年人力與病床變化</div>
+      </div>
+
+      <div id="personnel-detail" hidden>
+        <div class="nurse-hosp-header" style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;">
+          <div style="min-width:0;">
+            <h2 id="pm-name" style="margin:0 0 8px;">—</h2>
+            <span id="pm-city" class="nurse-city-badge" hidden>—</span>
+            <span id="pm-level" class="nurse-level-badge">—</span>
+            <div id="pm-meta" style="color:var(--muted);font-size:0.85rem;margin-top:8px;">—</div>
+          </div>
+          <button id="pm-share-btn" class="btn btn-secondary" style="flex:0 0 auto;padding:8px 14px;font-size:0.85rem;gap:6px;">
+            <span data-icon="share" data-size="14" style="vertical-align:middle;"></span> <span class="btn-label">分享此機構</span>
+          </button>
+        </div>
+
+        <!-- 各職類實際人數 -->
+        <div class="chart-card" style="margin-top:24px;">
+          <div class="chart-card-header"><div>
+            <h3><span data-icon="users" data-size="16" style="color:var(--primary);vertical-align:middle;"></span> 各職類實際人數（逐月）</h3>
+          </div></div>
+          <p style="color:var(--muted-light);font-size:0.8rem;margin:0 4px 10px;">點圖例可切換各職類顯示；預設顯示護產、醫師等核心職類。</p>
+          <div class="chart-canvas-wrap" style="height:360px;"><canvas id="pm-staff-chart"></canvas></div>
+        </div>
+
+        <!-- 病床數量 -->
+        <div class="chart-card" style="margin-top:24px;">
+          <div class="chart-card-header"><div>
+            <h3><span data-icon="bed" data-size="16" style="color:var(--primary);vertical-align:middle;"></span> 病床數量（逐月）</h3>
+          </div></div>
+          <div class="chart-canvas-wrap" style="height:300px;"><canvas id="pm-bed-chart"></canvas></div>
+        </div>
+
+        <!-- 最新月一覽 -->
+        <div class="chart-card" style="margin-top:24px;">
+          <div class="chart-card-header"><div>
+            <h3 id="pm-latest-title"><span data-icon="list" data-size="16" style="color:var(--primary);vertical-align:middle;"></span> 最新月一覽</h3>
+          </div></div>
+          <div id="pm-latest" class="data-table-wrap"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="app-footer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" defer></script>
+  <script type="module">
+    import { mountLayout } from './js/components.js?v=26';
+    import { renderIcons } from './js/icons.js?v=26';
+    import { initPersonnel } from './js/personnel.js?v=26';
+
+    mountLayout();
+    renderIcons();
+
+    if (typeof Chart !== 'undefined') initPersonnel();
+    else window.addEventListener('load', () => initPersonnel());
+  </script>
+</body>
+</html>
