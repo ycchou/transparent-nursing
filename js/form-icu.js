@@ -10,7 +10,42 @@ import {
 } from './form-sections.js?v=18';
 
 // 各班護病比共用選項（第一線值班護理人員：照護病人數）
-const ICU_RATIO_OPTIONS = ['1:1', '1:2', '1:3', '1:4', '1:5+', '其他'];
+const ICU_RATIO_OPTIONS = [
+  '原則上 1:2，特殊情況可能 1:1',
+  '原則上 1:2',
+  '原則上 1:2，偶爾會 1:3',
+  '原則上 1:2，經常會 1:3',
+  '其他',
+];
+
+// 護病比配置引導文字：可展開查看完整法規／評鑑條文全文
+const RATIO_INTRO = `<strong>ICU 護病比設置標準與評鑑基準</strong><br><br>
+重點：加護病房<strong>每床應有 1.5 人以上</strong>（設置標準）；評鑑必要條文對區域醫院要求<strong>每床 ≧ 2.0 人</strong>；健保支付以<strong>每班 1:2</strong> 為實質上限（超標核扣）；ECMO／CRRT 等高危重症建議 <strong>1:1</strong> 專責照護。
+<details style="margin-top:12px;">
+  <summary style="cursor:pointer;color:var(--primary);font-weight:600;">📖 點此查看完整法規／評鑑條文全文</summary>
+  <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.1);">
+    <strong>1.《醫療機構設置標準》</strong><br>
+    此為醫院設立特殊病床的基本法律底線，採「總床數配置比」而非日常三班護病比。<br>
+    〔條文原文摘要〕加護病房：每床應有一點五人以上。<br><br>
+    <strong>2.《醫院評鑑基準》條號：必 1.3.4（必要條文）</strong><br>
+    列為必要條文（須完全達成，否則評鑑直接不及格），依醫院層級加嚴：<br>
+    ・申請「地區醫院」評鑑者：加護病房每床應有 1.5 人以上。<br>
+    ・申請「區域醫院」評鑑者：加護病房每床應有 2.0 人以上。<br>
+    （註：以上總量計算均以執照登記人數為準，不含書記、護佐與照服員。）<br><br>
+    <strong>3.《醫院評鑑基準》條號：重 2.3.5（重點條文）</strong><br>
+    〔條文原文〕適當的護病比。<br>
+    〔目的〕合理的護理人員照護負荷，以維護照護品質。<br>
+    〔符合項目〕應符合醫療機構設置標準。<br>
+    （註：評鑑實地查核是以「護理紀錄」來回推三班現場的實際照護負荷。）<br><br>
+    <strong>4.《全民健康保險醫療服務給付項目及支付標準》</strong><br>
+    「1:2 護病比」的實質法定出處；健保署以經濟手段實質管制特殊病房的三班現場排班。<br>
+    〔特約審查條文〕加護病房費之申報，不論申報班別（白班、小夜、大夜），每一第一線值班護理人員之實質照護人次，至多以二人為限（即 1:2）。<br>
+    〔核扣機制〕若單位常態性超標排班（例如大夜班出現 1 顧 3），健保署將依特約審查原則，直接扣除（不給付）醫院該病床之健保申報費用。<br><br>
+    <strong>5. 重症醫學相關學會之《加護病房照護指引》</strong><br>
+    「1:1 高危重症專責照護」的依據，由中華民國重症醫學會與台灣急救加護醫學會聯合公告。<br>
+    〔臨床指引建議〕為確保高危重症病人安全，凡體外膜肺氧合（ECMO／葉克膜）運作中、連續性腎臟替代治療（CRRT／連續洗腎）執行中之重症患者，建議其核心護理人力配置應採 1:1 專責照護。
+  </div>
+</details>`;
 
 const ICU_FORM_SCHEMA = [
   ...buildInstitutionSection({
@@ -20,15 +55,16 @@ const ICU_FORM_SCHEMA = [
 
   { section: '加護病房資訊' },
   { name: 'icuType', label: 'ICU 類型', type: 'radio', required: true,
-    options: ['內科', '外科', '心臟', '神經', '兒童', '混合'] },
+    options: ['MICU', 'SICU', 'CCU', 'CVICU', 'Neuro-ICU', 'NICU', 'PICU', '綜合ICU', '其他'],
+    help: 'MICU 內科／SICU 外科／CCU 心臟內科／CVICU 心臟外科／Neuro-ICU 神經／NICU 新生兒／PICU 兒童；找不到請選「其他」自填' },
+  { name: 'ppCareFreq', label: 'PP care（俯臥擺位）頻率', type: 'radio',
+    options: ['每日', '每週數次', '每月數次', '偶爾', '無'],
+    help: 'PP care＝Prone Position 俯臥擺位照護的執行頻率' },
+  { name: 'ventilatorCare', label: '呼吸器照護占比', type: 'radio', required: true,
+    options: ['全部', '多數', '少數', '無'],
+    help: '單位內使用呼吸器（Ventilator）病人所占比例' },
 
-  { section: '護病比配置',
-    intro: `<strong>ICU 護病比相關法規與評鑑基準</strong><br><br>
-<strong>1. 醫療機構設置標準（總量下限）：</strong>加護病房每床應有 <strong>1.5 人以上</strong>（以總床數配置比計，非三班現場比）。<br><br>
-<strong>2. 醫院評鑑基準 必 1.3.4（必要條文，須完全達成）：</strong>依層級加嚴——申請「地區醫院」評鑑者，ICU 每床應 <strong>≧ 1.5 人</strong>；申請「區域醫院」評鑑者，ICU 每床應 <strong>≧ 2.0 人</strong>。（總量以執照登記人數為準，不含書記、護佐、照服員）<br><br>
-<strong>3. 醫院評鑑基準 重 2.3.5（重點條文）：</strong>「適當的護病比」，應符合醫療機構設置標準；實地查核以護理紀錄回推三班現場的實際照護負荷。<br><br>
-<strong>4. 健保支付標準（「1:2」的法定出處）：</strong>加護病房費之申報，不論白班／小夜／大夜，每一第一線值班護理人員實質照護 <strong>至多 2 人（1:2）</strong>；若常態超標排班（如大夜 1 顧 3），健保署得依特約審查逕予核扣該病床之申報費用。<br><br>
-<strong>5. 重症醫學會加護病房照護指引：</strong>ECMO（葉克膜）、CRRT（連續性腎臟替代治療）運作中之重症病人，建議核心護理人力採 <strong>1:1 專責照護</strong>。` },
+  { section: '護病比配置', intro: RATIO_INTRO },
   { name: 'dayShiftRatio', label: '白班護病比', type: 'radio', required: true,
     options: ICU_RATIO_OPTIONS,
     help: '第一線值班護理人員：照護病人數（法定上限 1:2）' },
@@ -36,12 +72,25 @@ const ICU_FORM_SCHEMA = [
     options: ICU_RATIO_OPTIONS },
   { name: 'nightShiftRatio', label: '大夜護病比', type: 'radio', required: true,
     options: ICU_RATIO_OPTIONS },
-  { name: 'ventilatorCare', label: '呼吸器照護占比', type: 'radio', required: true,
-    options: ['全部', '多數', '少數', '無'],
-    help: '單位內使用呼吸器（Ventilator）病人所占比例' },
 
   { section: '業務與工時' },
+  { name: 'dailyActualHours', label: '每日實際工時（含交接班）', type: 'radio',
+    options: ['8 小時以內', '8-9 小時', '9-10 小時', '10-11 小時', '11-12 小時', '12 小時以上'] },
   ...WORKHOURS_FIELDS,
+
+  { section: '教育訓練與制度' },
+  { name: 'icuTrainingRequired', label: '是否硬性規定需 ICU Training', type: 'radio',
+    options: ['是，硬性規定', '否，非強制', '不清楚'] },
+  { name: 'icuTrainingContract', label: 'ICU Training 是否需簽約受訓', type: 'radio',
+    options: ['是，需簽約綁約', '否，不需簽約', '無 ICU Training'] },
+  { name: 'icuTrainingPeriod', label: 'ICU Training 受訓期間', type: 'radio',
+    options: ['1 個月以內', '1-3 個月', '3-6 個月', '6 個月以上', '不一定／依個人進度', '無 ICU Training'] },
+  { name: 'promotionReport', label: '晉升報告（進階報告）制度', type: 'radio',
+    options: ['自願參加、有加給', '自願參加、無加給', '強制要求、有加給', '強制要求、無加給', '無此制度'],
+    help: '晉升／進階（如 N1→N2）時的報告制度與加給情形' },
+  { name: 'advancedTherapyTraining', label: 'CVVH／IABP／ECMO 是否派員受訓', type: 'checkbox',
+    options: ['CVVH', 'IABP', 'ECMO'],
+    help: '單位有派員受訓的高階治療（可複選；皆無則不勾）' },
 
   ...SALARY_SECTION,
   ...EVALUATION_SECTION,
