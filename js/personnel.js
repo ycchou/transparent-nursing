@@ -4,23 +4,18 @@
 
 import { renderIcons, icon } from './icons.js?v=26';
 import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=26';
+import {
+  CAT_COLORS, BED_COLORS, DEFAULT_ON, mLabel, baseLineCfg,
+  renderStaffChart, renderBedChart, loadPersonnelHospital,
+} from './personnel-view.js?v=26';
 
 const INDEX_URL = 'data/personnel-index.json';
 const AGG_URL = 'data/personnel-aggregate.json';
-const hospUrl = (code) => `data/personnel/${code}.json`;
-
-// 職類配色（13）＋病床配色（4）
-const CAT_COLORS = ['#2E86AB', '#E63946', '#06A77D', '#1D3557', '#F4A261', '#9D4EDD',
-  '#14B8A6', '#FF6B9D', '#F59E0B', '#4F46E5', '#0EA5E9', '#84CC16', '#A855F7'];
-const BED_COLORS = ['#2E86AB', '#E63946', '#9D4EDD', '#F4A261'];
-// 預設只顯示「護產」，其餘職類由使用者點圖例自行開啟
-const DEFAULT_ON = new Set(['護產']);
 
 const state = {
   index: [], byCode: new Map(),
   levelFilter: 'all', cityFilter: 'all', searchQuery: '',
   currentCode: null,
-  hospCache: new Map(),
   staffChart: null, bedChart: null,
   dashStaffChart: null, dashBedChart: null,
 };
@@ -33,8 +28,6 @@ function escapeHtml(s) {
   return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 function levelSlug(lv) { return { '醫學中心': 'mc', '區域醫院': 'rg', '地區醫院': 'dt' }[lv] || 'other'; }
-// "10807" -> "108/07"
-function mLabel(m) { return `${parseInt(m.slice(0, 3), 10)}/${m.slice(3)}`; }
 
 function showToast(msg) {
   let host = document.getElementById('toast-host');
@@ -144,20 +137,13 @@ function setupSearch() {
 }
 
 // ---------- detail ----------
-async function loadHospital(code) {
-  if (state.hospCache.has(code)) return state.hospCache.get(code);
-  const data = await fetchJson(hospUrl(code));
-  state.hospCache.set(code, data);
-  return data;
-}
-
 async function selectHospital(code, updateUrl = false) {
   state.currentCode = code;
   if (updateUrl) setDeepLinkUrl(code);
   document.querySelectorAll('.nurse-hospital-chip').forEach((b) => b.classList.toggle('active', b.dataset.code === code));
 
   let h;
-  try { h = await loadHospital(code); }
+  try { h = await loadPersonnelHospital(code); }
   catch (e) { showToast('資料載入失敗：' + e.message); return; }
 
   document.getElementById('personnel-placeholder').hidden = true;
@@ -174,62 +160,33 @@ async function selectHospital(code, updateUrl = false) {
   const first = h.months[0], last = h.months[h.months.length - 1];
   document.getElementById('pm-meta').textContent = `機構代號：${code} ｜ 資料期間：${mLabel(first)}–${mLabel(last)}（${h.months.length} 個月）`;
 
-  renderStaffChart(h);
-  renderBedChart(h);
+  state.staffChart = renderStaffChart(document.getElementById('pm-staff-chart'), h, state.staffChart);
+  renderBedWithEmpty(h);
   renderLatestTable(h);
   renderIcons(detail);
   detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function baseLineCfg(labels, datasets) {
-  return {
-    type: 'line',
-    data: { labels, datasets },
-    options: {
-      responsive: true, maintainAspectRatio: false, spanGaps: false,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 }, usePointStyle: true } },
-        tooltip: { callbacks: { title: (items) => items.length ? `民國 ${items[0].label}` : '' } },
-      },
-      scales: {
-        x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12, font: { size: 10 } }, grid: { display: false } },
-        y: { beginAtZero: true, ticks: { font: { size: 10 } } },
-      },
-      elements: { line: { tension: 0.25, borderWidth: 2 }, point: { radius: 0, hitRadius: 8 } },
-    },
-  };
-}
-
-function renderStaffChart(h) {
-  const labels = h.months.map(mLabel);
-  const datasets = h.categories.map((cat, i) => ({
-    label: cat,
-    data: h.actual.map((row) => (row ? row[i] : null)),
-    borderColor: CAT_COLORS[i % CAT_COLORS.length],
-    backgroundColor: CAT_COLORS[i % CAT_COLORS.length],
-    hidden: !DEFAULT_ON.has(cat),
-  }));
-  if (state.staffChart) state.staffChart.destroy();
-  state.staffChart = new Chart(document.getElementById('pm-staff-chart'), baseLineCfg(labels, datasets));
-}
-
-function renderBedChart(h) {
-  const labels = h.months.map(mLabel);
-  const datasets = h.bedTypes.map((bt, i) => {
-    const data = h.beds.map((row) => (row ? row[i] : null));
-    return { label: bt, data, borderColor: BED_COLORS[i % BED_COLORS.length], backgroundColor: BED_COLORS[i % BED_COLORS.length],
-      _allZero: data.every((v) => v == null || v === 0) };
-  }).filter((d) => !d._allZero); // 略過整段皆 0 的床別
-  if (state.bedChart) state.bedChart.destroy();
-  const wrap = document.getElementById('pm-bed-chart').closest('.chart-card');
-  if (datasets.length === 0) {
-    if (state.bedChart) { state.bedChart.destroy(); state.bedChart = null; }
-    document.getElementById('pm-bed-chart').closest('.chart-canvas-wrap').innerHTML =
-      '<div style="padding:24px;color:var(--muted);text-align:center;">此機構無登錄病床資料。</div>';
-    return;
+// 病床圖：無登錄床數時顯示提示（不破壞 canvas，供再次選院使用）
+function renderBedWithEmpty(h) {
+  const canvas = document.getElementById('pm-bed-chart');
+  const wrap = canvas.closest('.chart-canvas-wrap');
+  state.bedChart = renderBedChart(canvas, h, state.bedChart);
+  let msg = wrap.querySelector('.pm-empty-msg');
+  if (!state.bedChart) {
+    canvas.style.display = 'none';
+    if (!msg) {
+      msg = document.createElement('div');
+      msg.className = 'pm-empty-msg';
+      msg.style.cssText = 'padding:24px;color:var(--muted);text-align:center;';
+      wrap.appendChild(msg);
+    }
+    msg.textContent = '此機構無登錄病床資料。';
+    msg.style.display = '';
+  } else {
+    canvas.style.display = '';
+    if (msg) msg.style.display = 'none';
   }
-  state.bedChart = new Chart(document.getElementById('pm-bed-chart'), baseLineCfg(labels, datasets));
 }
 
 function renderLatestTable(h) {

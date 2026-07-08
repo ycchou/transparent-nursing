@@ -36,11 +36,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=26" />
+  <link rel="stylesheet" href="css/styles.css?v=27" />
 
-  <link rel="modulepreload" href="./js/components.js?v=26" />
-  <link rel="modulepreload" href="./js/icons.js?v=26" />
-  <link rel="modulepreload" href="./js/personnel.js?v=26" />
+  <link rel="modulepreload" href="./js/components.js?v=27" />
+  <link rel="modulepreload" href="./js/icons.js?v=27" />
+  <link rel="modulepreload" href="./js/personnel.js?v=27" />
 </head>
 <body>
   <div id="app-header"></div>
@@ -136,7 +136,7 @@
           <div class="chart-card-header"><div>
             <h3><span data-icon="users" data-size="16" style="color:var(--primary);vertical-align:middle;"></span> 各職類實際人數（逐月）</h3>
           </div></div>
-          <p style="color:var(--muted-light);font-size:0.8rem;margin:0 4px 10px;">點圖例可切換各職類顯示；預設顯示護產、醫師等核心職類。</p>
+          <p style="color:var(--muted-light);font-size:0.8rem;margin:0 4px 10px;">預設顯示護產；點圖例可加看其他職類。未填報之月份線段中斷、不補值。</p>
           <div class="chart-canvas-wrap" style="height:360px;"><canvas id="pm-staff-chart"></canvas></div>
         </div>
 
@@ -163,9 +163,9 @@
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" defer></script>
   <script type="module">
-    import { mountLayout } from './js/components.js?v=26';
-    import { renderIcons } from './js/icons.js?v=26';
-    import { initPersonnel } from './js/personnel.js?v=26';
+    import { mountLayout } from './js/components.js?v=27';
+    import { renderIcons } from './js/icons.js?v=27';
+    import { initPersonnel } from './js/personnel.js?v=27';
 
     mountLayout();
     renderIcons();

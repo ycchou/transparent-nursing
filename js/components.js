@@ -40,9 +40,9 @@ export function orgStripHTML(opts = {}) {
 const NAV_ITEMS = [
   { href: 'index.html',       label: '首頁',     match: ['index.html', ''] },
   { href: 'platform.html',    label: '分享平台', match: ['platform.html'] },
+  { href: 'hospital.html',    label: '機構總覽', match: ['hospital.html'] },
   // 「資料查詢」下拉群組：把瀏覽資料的頁面收在一起，精簡頂層數量
   { label: '資料查詢', children: [
-    { href: 'hospital.html',    label: '機構總覽', match: ['hospital.html'] },
     { href: 'nurse-ratio.html', label: '護病比', match: ['nurse-ratio.html'] },
     { href: 'financials.html',  label: '醫院財務', match: ['financials.html'] },
     { href: 'personnel.html',   label: '人力監控', match: ['personnel.html'] },

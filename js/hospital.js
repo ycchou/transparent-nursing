@@ -25,6 +25,10 @@ import {
   renderFinancialTrendChart,
 } from './financials-view.js?v=26';
 import {
+  loadPersonnelHospital, ensurePersonnelIndex,
+  renderStaffChart as renderPmStaffChart, renderBedChart as renderPmBedChart,
+} from './personnel-view.js?v=26';
+import {
   createCsvLoader,
   parseROCDate,
   parseFine,
@@ -77,6 +81,9 @@ const state = {
   searchQuery: '',
   levelFilter: 'all',
   cityFilter: 'all',
+  pmIndex: null,        // 人力監控有資料的 code 集合（lazy）
+  pmStaffChart: null,
+  pmBedChart: null,
 };
 
 // ---------- utils ----------
@@ -273,6 +280,7 @@ function selectHospital(code, updateUrl = false) {
   document.getElementById('hospital-detail').hidden = false;
   renderNurseSection(code, hosp);
   renderFinancialsSection(code);
+  renderPersonnelSection(code);
   renderPlatformSection(hosp);
   renderViolationsSection(code, hosp);
   renderIcons();
@@ -388,6 +396,47 @@ function renderFinancialsSection(code) {
     renderFinancialTrendChart(document.getElementById('fi-chart'), h, fields, { metrics: ['F1', 'F2', 'F3'] });
     renderIcons();
   });
+}
+
+// 人力監控：以機構代號載入 data/personnel/{code}.json → 職類/病床折線圖（無最新月一覽）
+function renderPersonnelSection(code) {
+  const empty = document.getElementById('pm-section-empty');
+  const body = document.getElementById('pm-section-body');
+  const link = document.getElementById('pm-section-link');
+  link.innerHTML = '';
+  body.hidden = true;
+  empty.hidden = true;
+
+  ensurePersonnelIndex().then((idx) => {
+    if (state.currentCode !== code) return;
+    if (!idx.has(code)) { empty.hidden = false; return; }
+    return loadPersonnelHospital(code).then((h) => {
+      if (state.currentCode !== code) return;
+      body.hidden = false;
+      link.innerHTML = `<a href="personnel.html?code=${encodeURIComponent(code)}" style="color:var(--primary);text-decoration:underline;font-size:0.85rem;">查看人力監控 →</a>`;
+      state.pmStaffChart = renderPmStaffChart(document.getElementById('pm-sec-staff-chart'), h, state.pmStaffChart);
+      // 病床圖：無登錄床數時顯示提示（不破壞 canvas）
+      const bedCanvas = document.getElementById('pm-sec-bed-chart');
+      const bedWrap = bedCanvas.closest('.chart-canvas-wrap');
+      state.pmBedChart = renderPmBedChart(bedCanvas, h, state.pmBedChart);
+      let msg = bedWrap.querySelector('.pm-empty-msg');
+      if (!state.pmBedChart) {
+        bedCanvas.style.display = 'none';
+        if (!msg) {
+          msg = document.createElement('div');
+          msg.className = 'pm-empty-msg';
+          msg.style.cssText = 'padding:24px;color:var(--muted);text-align:center;';
+          bedWrap.appendChild(msg);
+        }
+        msg.textContent = '此機構無登錄病床資料。';
+        msg.style.display = '';
+      } else {
+        bedCanvas.style.display = '';
+        if (msg) msg.style.display = 'none';
+      }
+      renderIcons();
+    });
+  }).catch(() => { if (state.currentCode === code) empty.hidden = false; });
 }
 
 // 分享平台眾包：以機構名稱/簡稱比對 → KPI 摘要 + 每筆可點開的表格
