@@ -55,6 +55,36 @@ def level_of(fname):
     return None
 
 
+def col_bounds(pg1):
+    """由第 1 頁的表格框線取 24 欄的 x 邊界（共 25 個）。"""
+    tbls = pg1.find_tables()
+    if not tbls:
+        return None
+    cells = tbls[0].cells
+    return sorted(set(round(c[0], 1) for c in cells) | set(round(c[2], 1) for c in cells))
+
+
+def rows_from_page(page, xs):
+    """以字詞 x 位置分欄（不靠框線）：舊版多頁 PDF 的續頁沒有框線，
+    預設 extract_tables 只抓得到第 1 頁；改用 word bucketing 才能抓完整。"""
+    words = page.extract_words(x_tolerance=1.5, y_tolerance=2)
+    lines = {}
+    for w in words:
+        lines.setdefault(round(w['top'] / 3.0), []).append(w)
+    ncol = len(xs) - 1
+    out = []
+    for key in sorted(lines):
+        cells = [''] * ncol
+        for w in sorted(lines[key], key=lambda x: x['x0']):
+            cx = (w['x0'] + w['x1']) / 2
+            ci = next((i for i in range(ncol) if xs[i] - 1 <= cx <= xs[i + 1] + 1), None)
+            if ci is None:
+                ci = 0 if cx < xs[0] else ncol - 1
+            cells[ci] = (cells[ci] + w['text']).strip()
+        out.append(cells)
+    return out
+
+
 def parse_one(task):
     """worker：解析單一 PDF，回傳該檔所有醫院-月記錄。"""
     path, level, mkey = task
@@ -62,24 +92,26 @@ def parse_one(task):
     cur = None
     try:
         with pdfplumber.open(path) as pdf:
+            xs = col_bounds(pdf.pages[0])
             for page in pdf.pages:
-                for tbl in (page.extract_tables() or []):
-                    for row in tbl:
-                        if not row or len(row) < 24:
-                            continue
-                        code = clean(row[1])
-                        rtype = clean(row[10])
-                        if re.fullmatch(r'\d{10}', code):
-                            cur = code
-                            rec = out.setdefault(code, {'code': code, 'mkey': mkey, 'level': level,
-                                                         'name': clean(row[2]), 'branch': clean(row[3]),
-                                                         'city': clean(row[4]),
-                                                         'beds': [to_int(row[6 + i]) for i in range(4)],
-                                                         'rows': {}})
-                            if rtype in ROW_TYPES:
-                                rec['rows'][ROW_TYPES[rtype]] = [to_int(row[11 + i]) for i in range(13)]
-                        elif code == '' and rtype in ROW_TYPES and cur and cur in out:
-                            out[cur]['rows'][ROW_TYPES[rtype]] = [to_int(row[11 + i]) for i in range(13)]
+                rows = rows_from_page(page, xs) if xs else \
+                    [r for t in (page.extract_tables() or []) for r in t]
+                for row in rows:
+                    if not row or len(row) < 24:
+                        continue
+                    code = clean(row[1])
+                    rtype = clean(row[10])
+                    if re.fullmatch(r'\d{10}', code):
+                        cur = code
+                        rec = out.setdefault(code, {'code': code, 'mkey': mkey, 'level': level,
+                                                     'name': clean(row[2]), 'branch': clean(row[3]),
+                                                     'city': clean(row[4]),
+                                                     'beds': [to_int(row[6 + i]) for i in range(4)],
+                                                     'rows': {}})
+                        if rtype in ROW_TYPES:
+                            rec['rows'][ROW_TYPES[rtype]] = [to_int(row[11 + i]) for i in range(13)]
+                    elif code == '' and rtype in ROW_TYPES and cur and cur in out:
+                        out[cur]['rows'][ROW_TYPES[rtype]] = [to_int(row[11 + i]) for i in range(13)]
     except Exception as e:
         return ('ERR', f"{os.path.basename(path)}: {e}")
     return ('OK', list(out.values()))
@@ -146,6 +178,31 @@ def main():
             json.dump(out, fp, ensure_ascii=False, separators=(',', ':'))
         index.append({'code': code, 'name': last['name'], 'city': last['city'], 'level': last['level'],
                       'firstMonth': mkeys[0], 'lastMonth': mkeys[-1], 'monthCount': len(mkeys)})
+
+    # 全國逐月加總（僅計 3 層級齊全的月份，避免 110/04 這類缺整層級的月造成假降）
+    m_levels, m_actual, m_beds, m_count = {}, {}, {}, {}
+    for (code, mkey), rec in store.items():
+        m_levels.setdefault(mkey, set()).add(rec['level'])
+        m_count[mkey] = m_count.get(mkey, 0) + 1
+        a = rec['rows'].get('actual')
+        if a:
+            ma = m_actual.setdefault(mkey, [0] * 13)
+            for i, v in enumerate(a):
+                if v is not None:
+                    ma[i] += v
+        for i, v in enumerate(rec.get('beds') or []):
+            if v is not None:
+                m_beds.setdefault(mkey, [0] * 4)[i] += v
+    complete = sorted(m for m in m_levels if {'醫學中心', '區域醫院', '地區醫院'} <= m_levels[m])
+    with open(os.path.join(ROOT, 'data', 'personnel-aggregate.json'), 'w', encoding='utf-8') as fp:
+        json.dump({
+            'categories': CATEGORIES, 'bedTypes': BED_TYPES,
+            'months': complete,
+            'totalActual': [m_actual.get(m, [0] * 13) for m in complete],
+            'totalBeds': [m_beds.get(m, [0] * 4) for m in complete],
+            'hospitalCount': [m_count[m] for m in complete],
+        }, fp, ensure_ascii=False, separators=(',', ':'))
+    print(f"全國加總月份：{len(complete)}（排除缺整層級月 {sorted(set(m_levels) - set(complete))}）")
 
     index.sort(key=lambda x: (x['city'], x['level'], x['name']))
     from datetime import datetime, timezone, timedelta

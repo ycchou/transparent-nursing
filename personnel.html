@@ -60,6 +60,24 @@
     </div>
   </section>
 
+  <!-- 全國儀錶板 -->
+  <section style="padding:0 0 8px;">
+    <div class="container">
+      <div class="chart-card">
+        <div class="chart-card-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;"><div>
+          <h3><span data-icon="bar-chart-3" data-size="16" style="color:var(--primary);vertical-align:middle;"></span> 全國人力儀錶板（所有監測醫院加總）</h3>
+        </div><div id="pm-dash-caption" style="color:var(--muted-light);font-size:0.82rem;">—</div></div>
+
+        <h4 style="margin:14px 4px 4px;font-size:0.98rem;">各職類實際人數（逐月・全國加總）</h4>
+        <p style="color:var(--muted-light);font-size:0.8rem;margin:0 4px 8px;">預設顯示「護產人力」；點圖例可加看其他職類。</p>
+        <div class="chart-canvas-wrap" style="height:320px;"><canvas id="pm-dash-staff"></canvas></div>
+
+        <h4 style="margin:22px 4px 4px;font-size:0.98rem;">急性一般病床數（逐月・全國加總）</h4>
+        <div class="chart-canvas-wrap" style="height:260px;"><canvas id="pm-dash-bed"></canvas></div>
+      </div>
+    </div>
+  </section>
+
   <!-- 醫院選擇區 -->
   <section style="padding:0 0 24px;">
     <div class="container">
@@ -130,7 +148,7 @@
         <!-- 最新月一覽 -->
         <div class="chart-card" style="margin-top:24px;">
           <div class="chart-card-header"><div>
-            <h3 id="pm-latest-title"><span data-icon="list" data-size="16" style="color:var(--primary);vertical-align:middle;"></span> 最新月一覽</h3>
+            <h3 id="pm-latest-title"><span data-icon="layout" data-size="16" style="color:var(--primary);vertical-align:middle;"></span> 最新月一覽</h3>
           </div></div>
           <div id="pm-latest" class="data-table-wrap"></div>
         </div>

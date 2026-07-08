@@ -6,14 +6,15 @@ import { renderIcons, icon } from './icons.js?v=26';
 import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=26';
 
 const INDEX_URL = 'data/personnel-index.json';
+const AGG_URL = 'data/personnel-aggregate.json';
 const hospUrl = (code) => `data/personnel/${code}.json`;
 
 // 職類配色（13）＋病床配色（4）
 const CAT_COLORS = ['#2E86AB', '#E63946', '#06A77D', '#1D3557', '#F4A261', '#9D4EDD',
   '#14B8A6', '#FF6B9D', '#F59E0B', '#4F46E5', '#0EA5E9', '#84CC16', '#A855F7'];
 const BED_COLORS = ['#2E86AB', '#E63946', '#9D4EDD', '#F4A261'];
-// 預設顯示的核心職類（其餘可點圖例開啟）
-const DEFAULT_ON = new Set(['護產', '醫師', '藥事', '醫事檢驗', '醫事放射']);
+// 預設只顯示「護產」，其餘職類由使用者點圖例自行開啟
+const DEFAULT_ON = new Set(['護產']);
 
 const state = {
   index: [], byCode: new Map(),
@@ -21,6 +22,7 @@ const state = {
   currentCode: null,
   hospCache: new Map(),
   staffChart: null, bedChart: null,
+  dashStaffChart: null, dashBedChart: null,
 };
 
 // ---------- utils ----------
@@ -235,7 +237,7 @@ function renderLatestTable(h) {
   const m = h.months[li];
   const actual = h.actual[li] || [], evl = h.eval[li] || [], beds = h.beds[li] || [];
   document.getElementById('pm-latest-title').innerHTML =
-    `<span data-icon="list" data-size="16" style="color:var(--primary);vertical-align:middle;"></span> 最新月一覽（民國 ${mLabel(m)}）`;
+    `<span data-icon="layout" data-size="16" style="color:var(--primary);vertical-align:middle;"></span> 最新月一覽（民國 ${mLabel(m)}）`;
   const fmt = (v) => (v == null ? '—' : v.toLocaleString());
   const staffRows = h.categories.map((c, i) => {
     const a = actual[i], e = evl[i];
@@ -251,6 +253,36 @@ function renderLatestTable(h) {
         ${bedRows}
       </tbody>
     </table>`;
+}
+
+// ---------- 全國儀錶板 ----------
+function renderDashboard(agg) {
+  if (!agg || !agg.months || !agg.months.length) return;
+  const labels = agg.months.map(mLabel);
+  const cap = document.getElementById('pm-dash-caption');
+  if (cap) {
+    const last = agg.months[agg.months.length - 1];
+    const n = agg.hospitalCount[agg.hospitalCount.length - 1];
+    cap.textContent = `涵蓋約 ${n} 家醫院 ｜ 資料期間 ${mLabel(agg.months[0])}–${mLabel(last)}`;
+  }
+  // 各職類實際人數（全國加總）— 預設只顯示護產
+  const staffDs = agg.categories.map((cat, i) => ({
+    label: cat,
+    data: agg.totalActual.map((row) => (row ? row[i] : null)),
+    borderColor: CAT_COLORS[i % CAT_COLORS.length],
+    backgroundColor: CAT_COLORS[i % CAT_COLORS.length],
+    hidden: !DEFAULT_ON.has(cat),
+  }));
+  if (state.dashStaffChart) state.dashStaffChart.destroy();
+  state.dashStaffChart = new Chart(document.getElementById('pm-dash-staff'), baseLineCfg(labels, staffDs));
+
+  // 急性一般病床（全國加總）— 單線
+  const bedDs = [{
+    label: '急性一般病床', data: agg.totalBeds.map((row) => (row ? row[0] : null)),
+    borderColor: BED_COLORS[0], backgroundColor: BED_COLORS[0], fill: false,
+  }];
+  if (state.dashBedChart) state.dashBedChart.destroy();
+  state.dashBedChart = new Chart(document.getElementById('pm-dash-bed'), baseLineCfg(labels, bedDs));
 }
 
 // ---------- deep link / share ----------
@@ -283,9 +315,15 @@ export async function initPersonnel() {
   const container = document.getElementById('personnel-list');
   if (container) container.innerHTML = '<div style="padding:24px;color:var(--muted);">載入中⋯</div>';
   try {
-    const [idx] = await Promise.all([fetchJson(INDEX_URL), ensureShortLoaded().catch(() => {})]);
+    const [idx, agg] = await Promise.all([
+      fetchJson(INDEX_URL),
+      fetchJson(AGG_URL).catch(() => null),
+      ensureShortLoaded().catch(() => {}),
+    ]);
     state.index = idx.hospitals || [];
     state.index.forEach((h) => state.byCode.set(h.code, h));
+
+    if (agg) { renderDashboard(agg); renderIcons(document.getElementById('pm-dash-staff')?.closest('.chart-card')); }
 
     setupSearch();
     setupLevelFilter();
