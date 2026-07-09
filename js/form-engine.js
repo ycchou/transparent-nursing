@@ -5,7 +5,7 @@
 import { mountLayout } from './components.js?v=17';
 import { renderIcons, icon } from './icons.js?v=17';
 import { HOSPITALS } from './hospitals.js?v=17';
-import { HOSPITALS_EXTRA } from './hospitals-extra.js?v=17';
+import { HOSPITALS_EXTRA } from './hospitals-extra.js?v=18';
 import { markContributed } from './contribution-gate.js?v=17';
 import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=17';
 
