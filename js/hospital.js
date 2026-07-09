@@ -116,7 +116,8 @@ function setDeepLinkUrl(code, replace = false) {
 
 // ---------- data loading ----------
 async function fetchJson(url) {
-  const r = await fetch(url, { cache: 'no-store' });
+  // 靜態 JSON 皆帶 ?v= 版本號破快取，故可交給瀏覽器快取（改版換 URL 才重抓），回訪更快。
+  const r = await fetch(url, { cache: 'default' });
   if (!r.ok) throw new Error(`HTTP ${r.status} (${url})`);
   return r.json();
 }

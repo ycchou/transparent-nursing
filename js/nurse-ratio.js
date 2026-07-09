@@ -68,13 +68,13 @@ async function loadData() {
   const cached = readCache();
   if (cached) {
     // 立即用 cache，背景刷新
-    fetch(DATA_URL, { cache: 'no-store' })
+    fetch(DATA_URL, { cache: 'default' })
       .then((r) => r.ok ? r.json() : null)
       .then((fresh) => { if (fresh) writeCache(fresh); })
       .catch(() => {});
     return cached;
   }
-  const res = await fetch(DATA_URL, { cache: 'no-store' });
+  const res = await fetch(DATA_URL, { cache: 'default' });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const data = await res.json();
   writeCache(data);
@@ -85,7 +85,7 @@ async function loadData() {
 // 使用者可在 data/hospitals-manual-city.json 手動補上 { 機構代號: 縣市 } 對照）。
 async function loadManualCityOverlay() {
   try {
-    const r = await fetch('data/hospitals-manual-city.json?v=1', { cache: 'no-store' });
+    const r = await fetch('data/hospitals-manual-city.json?v=1', { cache: 'default' });
     if (!r.ok) return {};
     return await r.json();
   } catch { return {}; }
@@ -95,7 +95,7 @@ async function loadManualCityOverlay() {
 // 由 tools/fetch-hospital-addresses.py 產生 data/hospitals-address-overlay.json）
 async function loadAddressOverlay() {
   try {
-    const r = await fetch('data/hospitals-address-overlay.json?v=1', { cache: 'no-store' });
+    const r = await fetch('data/hospitals-address-overlay.json?v=1', { cache: 'default' });
     if (!r.ok) return {};
     const d = await r.json();
     return (d && d.overlay) || {};
