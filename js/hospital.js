@@ -5,9 +5,9 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { renderIcons } from './icons.js?v=26';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=26';
-import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=26';
+import { renderIcons } from './icons.js?v=27';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=27';
+import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=27';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -15,19 +15,19 @@ import {
   shiftStatus,
   classifyHospital,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=26';
-import { loadAll } from './data-loader.js?v=26';
-import { renderKpiStrip } from './stats-kpi.js?v=26';
-import { renderTable, showDetailModal } from './table.js?v=26';
+} from './nurse-ratio-view.js?v=27';
+import { loadAll } from './data-loader.js?v=27';
+import { renderKpiStrip } from './stats-kpi.js?v=27';
+import { renderTable, showDetailModal } from './table.js?v=27';
 import {
   ensureFinancialsLoaded, getFinancials, getFinancialFields,
   formatVal as finFormatVal, signClass as finSignClass, formatRocYear as finRocYear,
   renderFinancialTrendChart,
-} from './financials-view.js?v=26';
+} from './financials-view.js?v=27';
 import {
   loadPersonnelHospital, ensurePersonnelIndex,
   renderStaffChart as renderPmStaffChart, renderBedChart as renderPmBedChart,
-} from './personnel-view.js?v=26';
+} from './personnel-view.js?v=27';
 import {
   createCsvLoader,
   parseROCDate,
@@ -35,11 +35,11 @@ import {
   shortenLocation,
   fineToWan,
   formatROCDate,
-} from './records-common.js?v=26';
+} from './records-common.js?v=27';
 
-const NURSE_URL = 'data/nurse-ratio.json?v=26';
-const MERGED_URL = 'data/hospitals-merged.json?v=26';
-const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=26';
+const NURSE_URL = 'data/nurse-ratio.json?v=27';
+const MERGED_URL = 'data/hospitals-merged.json?v=27';
+const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=27';
 const ADDR_OVERLAY_URL = 'data/hospitals-address-overlay.json?v=1';
 
 // 三支違規 Sheet（欄位 0-8 共用：id/location/publishDate/institutionName/penaltyDate/docId/lawArticle/lawDesc/fine）
@@ -81,9 +81,6 @@ const state = {
   searchQuery: '',
   levelFilter: 'all',
   cityFilter: 'all',
-  pmIndex: null,        // 人力監控有資料的 code 集合（lazy）
-  pmStaffChart: null,
-  pmBedChart: null,
 };
 
 // ---------- utils ----------
@@ -318,7 +315,32 @@ function renderHeader(hosp) {
   }
 }
 
-// 護病比：每個 code 可能對應多院區 → 各自一張 KPI + 圖
+// 共用院區頁簽：多院區時以 .tabs 頁簽切換，內容區惰性重繪（重用 css .tabs/.tab）。
+// tabs: [{ label, data }]；renderPanel(data, panelEl) 每次切換都重畫（圖表用新 canvas）。
+function renderBranchTabs(host, tabs, renderPanel) {
+  host.innerHTML = '';
+  const bar = document.createElement('div');
+  bar.className = 'tabs';
+  bar.style.cssText = 'margin-bottom:14px;';
+  const panel = document.createElement('div');
+  const activate = (i) => {
+    bar.querySelectorAll('.tab').forEach((b, j) => b.classList.toggle('active', j === i));
+    renderPanel(tabs[i].data, panel);
+  };
+  tabs.forEach((t, i) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'tab' + (i === 0 ? ' active' : '');
+    btn.textContent = t.label;
+    btn.addEventListener('click', () => activate(i));
+    bar.appendChild(btn);
+  });
+  host.appendChild(bar);
+  host.appendChild(panel);
+  if (tabs.length) renderPanel(tabs[0].data, panel);
+}
+
+// 護病比：每個 code 可能對應多院區 → 單院區直接呈現，多院區用院區頁簽切換。
 function renderNurseSection(code, hosp) {
   const wrap = document.getElementById('nr-section-body');
   const empty = document.getElementById('nr-section-empty');
@@ -331,41 +353,47 @@ function renderNurseSection(code, hosp) {
   empty.hidden = true;
   const months = state.nrData.months;
 
-  wrap.innerHTML = branches.map((b, i) => {
+  const renderOne = (b, panel) => {
     const latestMonth = [...months].reverse().find((m) => b.history[m]);
     const latest = latestMonth ? b.history[latestMonth] : {};
     const std = STANDARDS[b.level] || {};
     const cls = classifyHospital(b, months);
     const meta = COMPLIANCE_CLASSES[cls];
-    const branchTitle = b.branch ? `<span class="nurse-level-badge nurse-level-${levelSlug(b.level)}" style="margin-right:8px;">${escapeHtml(b.branch)}</span>` : '';
+    const lvBadge = `<span class="nurse-level-badge nurse-level-${levelSlug(b.level)}">${escapeHtml(b.level)}</span>`;
     const kpi = (val, sname, s) => {
       if (val == null) return `<div class="card stat-card"><div class="stat-num kpi-num">—</div><div class="stat-label">${sname}</div></div>`;
       const st = shiftStatus(val, s);
       return `<div class="card stat-card"><div class="stat-num kpi-num"><span class="${st ? 'status-' + st : ''}">${val.toFixed(1)}</span></div><div class="stat-label">${sname}</div></div>`;
     };
-    return `
-      <div style="margin-top:${i ? 28 : 8}px;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-          ${branchTitle}
-          <span class="nurse-compliance-badge nurse-compliance-${cls}">${meta.label}</span>
-          <span style="color:var(--muted);font-size:0.82rem;">${latestMonth ? formatRocMonth(latestMonth) : ''}</span>
-        </div>
-        <div class="grid grid-3">
-          ${kpi(latest.day, '白班護病比', std.day)}
-          ${kpi(latest.eve, '小夜班護病比', std.eve)}
-          ${kpi(latest.night, '大夜班護病比', std.night)}
-        </div>
-        <div class="chart-card" style="margin-top:16px;">
-          <div class="chart-canvas-wrap" style="height:360px;">
-            <canvas id="nr-chart-${i}"></canvas>
-          </div>
+    panel.innerHTML = `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+        ${lvBadge}
+        <span class="nurse-compliance-badge nurse-compliance-${cls}">${meta.label}</span>
+        <span style="color:var(--muted);font-size:0.82rem;">${latestMonth ? formatRocMonth(latestMonth) : ''}</span>
+      </div>
+      <div class="grid grid-3">
+        ${kpi(latest.day, '白班護病比', std.day)}
+        ${kpi(latest.eve, '小夜班護病比', std.eve)}
+        ${kpi(latest.night, '大夜班護病比', std.night)}
+      </div>
+      <div class="chart-card" style="margin-top:16px;">
+        <div class="chart-canvas-wrap" style="height:360px;">
+          <canvas class="nr-branch-canvas"></canvas>
         </div>
       </div>`;
-  }).join('');
+    renderNurseChart(panel.querySelector('.nr-branch-canvas'), b, months);
+    renderIcons();
+  };
 
-  branches.forEach((b, i) => {
-    renderNurseChart(document.getElementById(`nr-chart-${i}`), b, months);
-  });
+  if (branches.length === 1) {
+    wrap.innerHTML = '';
+    const panel = document.createElement('div');
+    panel.style.marginTop = '8px';
+    wrap.appendChild(panel);
+    renderOne(branches[0], panel);
+  } else {
+    renderBranchTabs(wrap, branches.map((b) => ({ label: b.branch || '本院', data: b })), renderOne);
+  }
 }
 
 // 財務概況（健保署）：以 code 對接 hospital-financials.json → 最新年 KPI + 趨勢圖
@@ -398,7 +426,28 @@ function renderFinancialsSection(code) {
   });
 }
 
-// 人力監控：以機構代號載入 data/personnel/{code}.json → 職類/病床折線圖（無最新月一覽）
+// 一個院區的人力監控面板（職類 + 病床折線圖），寫入 panel。
+function renderPersonnelPanel(h, panel) {
+  panel.innerHTML = `
+    <p style="color:var(--muted-light);font-size:0.8rem;margin:0 4px 10px;">各職類實際人數（逐月）；預設顯示護產，點圖例可加看其他職類。未填報之月份線段中斷、不補值。</p>
+    <div class="chart-canvas-wrap" style="height:300px;"><canvas class="pm-staff-canvas"></canvas></div>
+    <h4 style="margin:20px 4px 4px;font-size:0.95rem;">病床數量（逐月）</h4>
+    <div class="chart-canvas-wrap" style="height:260px;"><canvas class="pm-bed-canvas"></canvas></div>`;
+  renderPmStaffChart(panel.querySelector('.pm-staff-canvas'), h, null);
+  // 病床圖：無登錄床數時以提示取代（renderPmBedChart 回傳 null）
+  const bedCanvas = panel.querySelector('.pm-bed-canvas');
+  const bedChart = renderPmBedChart(bedCanvas, h, null);
+  if (!bedChart) {
+    bedCanvas.style.display = 'none';
+    const msg = document.createElement('div');
+    msg.style.cssText = 'padding:24px;color:var(--muted);text-align:center;';
+    msg.textContent = '此機構無登錄病床資料。';
+    bedCanvas.parentElement.appendChild(msg);
+  }
+  renderIcons();
+}
+
+// 人力監控：以機構代號查院區清單 → 單院區直接呈現，多院區用院區頁簽切換。
 function renderPersonnelSection(code) {
   const empty = document.getElementById('pm-section-empty');
   const body = document.getElementById('pm-section-body');
@@ -409,33 +458,27 @@ function renderPersonnelSection(code) {
 
   ensurePersonnelIndex().then((idx) => {
     if (state.currentCode !== code) return;
-    if (!idx.has(code)) { empty.hidden = false; return; }
-    return loadPersonnelHospital(code).then((h) => {
-      if (state.currentCode !== code) return;
-      body.hidden = false;
-      link.innerHTML = `<a href="personnel.html?code=${encodeURIComponent(code)}" style="color:var(--primary);text-decoration:underline;font-size:0.85rem;">查看人力監控 →</a>`;
-      state.pmStaffChart = renderPmStaffChart(document.getElementById('pm-sec-staff-chart'), h, state.pmStaffChart);
-      // 病床圖：無登錄床數時顯示提示（不破壞 canvas）
-      const bedCanvas = document.getElementById('pm-sec-bed-chart');
-      const bedWrap = bedCanvas.closest('.chart-canvas-wrap');
-      state.pmBedChart = renderPmBedChart(bedCanvas, h, state.pmBedChart);
-      let msg = bedWrap.querySelector('.pm-empty-msg');
-      if (!state.pmBedChart) {
-        bedCanvas.style.display = 'none';
-        if (!msg) {
-          msg = document.createElement('div');
-          msg.className = 'pm-empty-msg';
-          msg.style.cssText = 'padding:24px;color:var(--muted);text-align:center;';
-          bedWrap.appendChild(msg);
-        }
-        msg.textContent = '此機構無登錄病床資料。';
-        msg.style.display = '';
-      } else {
-        bedCanvas.style.display = '';
-        if (msg) msg.style.display = 'none';
-      }
-      renderIcons();
-    });
+    const campuses = idx.byCode.get(code) || [];
+    if (campuses.length === 0) { empty.hidden = false; return; }
+    body.hidden = false;
+    link.innerHTML = `<a href="personnel.html?id=${encodeURIComponent(campuses[0].id)}" style="color:var(--primary);text-decoration:underline;font-size:0.85rem;">查看人力監控 →</a>`;
+
+    const loadPanel = (campus, panel) => {
+      panel.innerHTML = '<div style="padding:16px;color:var(--muted);">載入中⋯</div>';
+      loadPersonnelHospital(campus.id).then((h) => {
+        if (state.currentCode !== code) return;
+        renderPersonnelPanel(h, panel);
+      }).catch(() => { panel.innerHTML = '<div style="padding:16px;color:var(--danger);">人力資料載入失敗。</div>'; });
+    };
+
+    if (campuses.length === 1) {
+      body.innerHTML = '';
+      const panel = document.createElement('div');
+      body.appendChild(panel);
+      loadPanel(campuses[0], panel);
+    } else {
+      renderBranchTabs(body, campuses.map((c) => ({ label: c.branch || '本院', data: c })), loadPanel);
+    }
   }).catch(() => { if (state.currentCode === code) empty.hidden = false; });
 }
 

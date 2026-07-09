@@ -2,20 +2,20 @@
 // 資料：data/personnel-index.json（picker 清單）＋ data/personnel/{code}.json（單院時間序列）
 // 來源：衛福部「醫院醫事人力持續性監測結果」。
 
-import { renderIcons, icon } from './icons.js?v=26';
-import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=26';
+import { renderIcons, icon } from './icons.js?v=27';
+import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=27';
 import {
   CAT_COLORS, BED_COLORS, DEFAULT_ON, mLabel, baseLineCfg,
   renderStaffChart, renderBedChart, loadPersonnelHospital,
-} from './personnel-view.js?v=26';
+} from './personnel-view.js?v=27';
 
 const INDEX_URL = 'data/personnel-index.json';
 const AGG_URL = 'data/personnel-aggregate.json';
 
 const state = {
-  index: [], byCode: new Map(),
+  index: [], byId: new Map(),
   levelFilter: 'all', cityFilter: 'all', searchQuery: '',
-  currentCode: null,
+  currentId: null,
   staffChart: null, bedChart: null,
   dashStaffChart: null, dashBedChart: null,
 };
@@ -61,6 +61,7 @@ function renderHospitalList() {
     if (q) {
       if ((h.name || '').toLowerCase().includes(q)) return true;
       if (h.code.includes(q)) return true;
+      if (h.branch && h.branch.toLowerCase().includes(q)) return true;
       const short = getShortByCode(h.code) || getShort(h.name);
       return !!(short && short.toLowerCase().includes(q));
     }
@@ -86,16 +87,18 @@ function renderHospitalList() {
         </div>
         <div class="nurse-hospital-grid">
           ${grouped[lv].map((h) => {
-            const short = getShortByCode(h.code) || getShort(h.name) || h.name;
+            const baseShort = getShortByCode(h.code) || getShort(h.name) || h.name;
+            // 多院區：簡稱後綴院區，讓同代號各院區可辨（如「北市聯醫·仁愛院區」）
+            const label = h.branch ? `${baseShort}·${h.branch}` : baseShort;
             const tip = [h.name, h.city, `代號 ${h.code}`].filter(Boolean).join(' · ');
-            return `<button type="button" class="nurse-hospital-chip ${h.code === state.currentCode ? 'active' : ''}" data-code="${h.code}" title="${escapeHtml(tip)}">
-                <span class="nurse-hospital-chip-name">${escapeHtml(short)}</span></button>`;
+            return `<button type="button" class="nurse-hospital-chip ${h.id === state.currentId ? 'active' : ''}" data-id="${escapeHtml(h.id)}" title="${escapeHtml(tip)}">
+                <span class="nurse-hospital-chip-name">${escapeHtml(label)}</span></button>`;
           }).join('')}
         </div>
       </div>`).join('');
 
   container.querySelectorAll('.nurse-hospital-chip').forEach((btn) => {
-    btn.addEventListener('click', () => selectHospital(btn.dataset.code, true));
+    btn.addEventListener('click', () => selectHospital(btn.dataset.id, true));
   });
 }
 
@@ -137,28 +140,29 @@ function setupSearch() {
 }
 
 // ---------- detail ----------
-async function selectHospital(code, updateUrl = false) {
-  state.currentCode = code;
-  if (updateUrl) setDeepLinkUrl(code);
-  document.querySelectorAll('.nurse-hospital-chip').forEach((b) => b.classList.toggle('active', b.dataset.code === code));
+async function selectHospital(id, updateUrl = false) {
+  state.currentId = id;
+  if (updateUrl) setDeepLinkUrl(id);
+  document.querySelectorAll('.nurse-hospital-chip').forEach((b) => b.classList.toggle('active', b.dataset.id === id));
 
   let h;
-  try { h = await loadPersonnelHospital(code); }
+  try { h = await loadPersonnelHospital(id); }
   catch (e) { showToast('資料載入失敗：' + e.message); return; }
 
   document.getElementById('personnel-placeholder').hidden = true;
   const detail = document.getElementById('personnel-detail');
   detail.hidden = false;
 
-  const short = getShortByCode(code) || getShort(h.name);
-  document.getElementById('pm-name').textContent = h.name || short || code;
+  const short = getShortByCode(h.code) || getShort(h.name);
+  document.getElementById('pm-name').textContent = h.name || short || id;
   const cityBadge = document.getElementById('pm-city');
   if (h.city) { cityBadge.hidden = false; cityBadge.textContent = h.city; } else cityBadge.hidden = true;
   const lvBadge = document.getElementById('pm-level');
   lvBadge.textContent = h.level || '—';
   lvBadge.className = `nurse-level-badge nurse-level-${levelSlug(h.level)}`;
   const first = h.months[0], last = h.months[h.months.length - 1];
-  document.getElementById('pm-meta').textContent = `機構代號：${code} ｜ 資料期間：${mLabel(first)}–${mLabel(last)}（${h.months.length} 個月）`;
+  const branchNote = h.branch ? ` ｜ 院區：${h.branch}` : '';
+  document.getElementById('pm-meta').textContent = `機構代號：${h.code}${branchNote} ｜ 資料期間：${mLabel(first)}–${mLabel(last)}（${h.months.length} 個月）`;
 
   state.staffChart = renderStaffChart(document.getElementById('pm-staff-chart'), h, state.staffChart);
   renderBedWithEmpty(h);
@@ -243,21 +247,32 @@ function renderDashboard(agg) {
 }
 
 // ---------- deep link / share ----------
-function parseDeepLinkCode() {
-  const p = new URLSearchParams(location.search).get('code');
-  return p && /^\d{10}$/.test(p) ? p : null;
+// 以 ?id= 為主（可為 code 或 code-院區）；相容舊 ?code=（單院區→id=code；
+// 多院區代號→該代號第一個院區）。
+function resolveDeepLinkId() {
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id');
+  if (id && /^\d{10}(-.+)?$/.test(id) && state.byId.has(id)) return id;
+  const code = params.get('code');
+  if (code && /^\d{10}$/.test(code)) {
+    if (state.byId.has(code)) return code;
+    const branch = state.index.find((h) => h.code === code);
+    if (branch) return branch.id;
+  }
+  return null;
 }
-function setDeepLinkUrl(code, replace = false) {
+function setDeepLinkUrl(id, replace = false) {
   const url = new URL(location.href);
-  if (code) url.searchParams.set('code', code); else url.searchParams.delete('code');
+  url.searchParams.delete('code');
+  if (id) url.searchParams.set('id', id); else url.searchParams.delete('id');
   history[replace ? 'replaceState' : 'pushState']({}, '', url);
 }
 function setupShare() {
   const btn = document.getElementById('pm-share-btn');
   if (!btn) return;
   btn.addEventListener('click', async () => {
-    if (!state.currentCode) return;
-    const url = new URL(location.href); url.searchParams.set('code', state.currentCode);
+    if (!state.currentId) return;
+    const url = new URL(location.href); url.searchParams.delete('code'); url.searchParams.set('id', state.currentId);
     const link = url.toString();
     const name = document.getElementById('pm-name').textContent;
     try {
@@ -278,7 +293,7 @@ export async function initPersonnel() {
       ensureShortLoaded().catch(() => {}),
     ]);
     state.index = idx.hospitals || [];
-    state.index.forEach((h) => state.byCode.set(h.code, h));
+    state.index.forEach((h) => state.byId.set(h.id, h));
 
     if (agg) { renderDashboard(agg); renderIcons(document.getElementById('pm-dash-staff')?.closest('.chart-card')); }
 
@@ -289,12 +304,12 @@ export async function initPersonnel() {
     setupShare();
     window.addEventListener('hospitalShortNamesReady', () => renderHospitalList(), { once: true });
 
-    const code = parseDeepLinkCode();
-    if (code && state.byCode.has(code)) selectHospital(code, false);
-    else if (code) setDeepLinkUrl(null, true);
+    const id = resolveDeepLinkId();
+    if (id) selectHospital(id, false);
+    else if (location.search.includes('code=') || location.search.includes('id=')) setDeepLinkUrl(null, true);
     window.addEventListener('popstate', () => {
-      const c = parseDeepLinkCode();
-      if (c && state.byCode.has(c)) selectHospital(c, false);
+      const rid = resolveDeepLinkId();
+      if (rid) selectHospital(rid, false);
     });
     renderIcons();
   } catch (e) {

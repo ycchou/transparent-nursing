@@ -2,15 +2,20 @@
 """
 解析衛福部「醫院醫事人力持續性監測結果」PDF → 結構化資料檔（多核平行）。
 
-來源：桌面資料夾 醫院醫事人力持續性監測/{ROC月}/*.pdf（每月 3 檔：醫學中心／區域醫院／地區醫院）
+來源：data/醫院醫事人力持續性監測/{ROC月}/*.pdf（每月 3 檔：醫學中心／區域醫院／地區醫院）
 輸出：
   data/personnel-index.json           picker 用清單（categories / bedTypes / hospitals）
-  data/personnel/{code}.json          每家醫院逐月時間序列
+  data/personnel/{id}.json            每家醫院（或院區）逐月時間序列
+
+多院區處理：同一機構代號可能逐院區各一列（如北市聯醫 0101090517 有仁愛/中興/…），
+以 (code, normalizeBranch(branch)) 為鍵拆分，比照 build-nurse-ratio.py。單院區 id=code，
+多院區 id=code-院區（與護病比一致）。
 
 僅解析文字型 PDF（108/07～115/05，83 個月）；108/03～06 為掃描影像、已排除。
 用法：python tools/build-personnel.py
 """
 import os, re, sys, json, glob
+from collections import defaultdict
 from multiprocessing import Pool, cpu_count
 import pdfplumber
 
@@ -18,7 +23,7 @@ if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SRC = r"C:\Users\Chou Yu-Cheng\Desktop\醫院醫事人力持續性監測"
+SRC = os.path.join(ROOT, 'data', '醫院醫事人力持續性監測')
 OUT_INDEX = os.path.join(ROOT, 'data', 'personnel-index.json')
 OUT_DIR = os.path.join(ROOT, 'data', 'personnel')
 
@@ -53,6 +58,88 @@ def level_of(fname):
         if lv in fname:
             return lv
     return None
+
+
+def normalize_branch(b):
+    """正規化院區字串（跨月份/檔案比對用）：去尾綴「院區」及奇怪尾綴，使早期短名與
+    後期「◯◯院區」收斂為同鍵。比照 build-nurse-ratio.py 的 normalizeBranch。"""
+    if not b:
+        return ''
+    t = str(b).strip()
+    for tail in ('及其婦幼', '及其分院'):
+        if t.endswith(tail):
+            t = t[:-len(tail)]
+    if t.endswith('院區'):
+        t = t[:-2]
+    return t
+
+
+def load_nurse_multi():
+    """讀 nurse-ratio.json，取「真正多院區」的權威院區清單（僅這些 code 才拆院區）。
+    回傳 {code: {branchKey: {'branch': 顯示院區, 'levels': set()}}}。
+
+    監測 PDF 的「院區」欄位品質差（同一單院醫院逐月寫成『本院』/空白/『本院及其◯院區』
+    /解析碎片），若照單全收會誤拆數十家單院醫院。改以護病比已認定的多院區為準，
+    並把監測的院區字串貼合(snap)到護病比的院區身分，達成與護病比一致。"""
+    nr = {}
+    p = os.path.join(ROOT, 'data', 'nurse-ratio.json')
+    if not os.path.exists(p):
+        return nr
+    from collections import defaultdict as _dd
+    by_code = _dd(list)
+    with open(p, encoding='utf-8') as fp:
+        for h in json.load(fp).get('hospitals', []):
+            if h.get('code'):
+                by_code[h['code']].append(h)
+    for code, hs in by_code.items():
+        if len(hs) < 2:
+            continue  # 單院區不拆
+        branches = {}
+        for h in hs:
+            hid = h.get('id') or code
+            slug = hid.split('-', 1)[1] if '-' in hid else normalize_branch(h.get('branch'))
+            b = branches.setdefault(slug, {'branch': h.get('branch') or slug, 'levels': set()})
+            if h.get('level'):
+                b['levels'].add(h['level'])
+        nr[code] = branches
+    return nr
+
+
+def snap_branch(raw_branch, level, nr_branches):
+    """把監測 PDF 的院區字串貼合到護病比的院區 slug。
+    優先序：正規化精準 → 前綴(共同前 ≥2 字) → 同層級唯一者 → 該層級任一/正規化值。"""
+    nb = normalize_branch(raw_branch)
+    if nb in nr_branches:
+        return nb
+    for slug in nr_branches:
+        common = 0
+        for i in range(min(len(nb), len(slug))):
+            if nb[i] == slug[i]:
+                common += 1
+            else:
+                break
+        if common >= 2:
+            return slug
+    same = [slug for slug, meta in nr_branches.items() if level in meta['levels']]
+    if len(same) == 1:
+        return same[0]
+    if same:
+        return same[0]
+    return nb or 'main'
+
+
+def merged_mother_name(code, months_map, merged_names):
+    """多院區的母院名：PDF row[2] 偶因欄位錯位變成『醫院』等碎片，故取群組內
+    最常見的乾淨名稱（長度≥5 且非碎片），退而求其次用 merged 官方名。"""
+    from collections import Counter
+    names = Counter()
+    for rec in months_map.values():
+        nm = (rec.get('name') or '').strip()
+        if len(nm) >= 5 and nm not in ('醫院', '院'):
+            names[nm] += 1
+    if names:
+        return names.most_common(1)[0][0]
+    return merged_names.get(code) or code
 
 
 def col_bounds(pg1):
@@ -96,10 +183,11 @@ def rows_from_page(page, xs, row_gap=4.0):
 
 
 def parse_one(task):
-    """worker：解析單一 PDF，回傳該檔所有醫院-月記錄。"""
+    """worker：解析單一 PDF，回傳該檔所有醫院(院區)-月記錄。
+    以 (code, branchKey) 為鍵，使同代號多院區（如北市聯醫）各自成列、互不覆蓋。"""
     path, level, mkey = task
-    out = {}   # code -> rec
-    cur = None
+    out = {}   # (code, branchKey) -> rec
+    cur = None  # 目前的 (code, branchKey)
     try:
         with pdfplumber.open(path) as pdf:
             xs = col_bounds(pdf.pages[0])
@@ -112,12 +200,14 @@ def parse_one(task):
                     code = clean(row[1])
                     rtype = clean(row[10])
                     if re.fullmatch(r'\d{10}', code):
-                        cur = code
-                        rec = out.setdefault(code, {'code': code, 'mkey': mkey, 'level': level,
-                                                     'name': clean(row[2]), 'branch': clean(row[3]),
-                                                     'city': clean(row[4]),
-                                                     'beds': [to_int(row[6 + i]) for i in range(4)],
-                                                     'rows': {}})
+                        branch = clean(row[3])
+                        key = (code, normalize_branch(branch))
+                        cur = key
+                        rec = out.setdefault(key, {'code': code, 'mkey': mkey, 'level': level,
+                                                    'name': clean(row[2]), 'branch': branch,
+                                                    'city': clean(row[4]),
+                                                    'beds': [to_int(row[6 + i]) for i in range(4)],
+                                                    'rows': {}})
                         if rtype in ROW_TYPES:
                             rec['rows'][ROW_TYPES[rtype]] = [to_int(row[11 + i]) for i in range(13)]
                     elif code == '' and rtype in ROW_TYPES and cur and cur in out:
@@ -146,7 +236,7 @@ def main():
     months, tasks = build_tasks()
     print(f"月份：{len(months)}（{months[0]} ~ {months[-1]}）；PDF 任務：{len(tasks)}")
 
-    store = {}   # (code, mkey) -> rec
+    store = {}   # (code, branchKey, mkey) -> rec
     errs = []
     nproc = min(8, cpu_count())
     done = 0
@@ -157,12 +247,13 @@ def main():
                 errs.append(payload)
             else:
                 for rec in payload:
-                    store[(rec['code'], rec['mkey'])] = rec
+                    store[(rec['code'], normalize_branch(rec['branch']), rec['mkey'])] = rec
             if done % 30 == 0:
                 print(f"  ...{done}/{len(tasks)}")
     print(f"解析完成；錯誤 {len(errs)}", errs[:5] if errs else '')
 
-    # 套用人工修正（來源 PDF 異常值，例如數字誤植）
+    # 套用人工修正（來源 PDF 異常值，例如數字誤植）。修正表以 code 為鍵，
+    # 套用到該 code 同月份的所有院區記錄（現有修正皆單院區，key branchKey='')。
     corr_path = os.path.join(ROOT, 'data', 'personnel-corrections.json')
     ncorr = 0
     if os.path.exists(corr_path):
@@ -170,18 +261,17 @@ def main():
             corr = json.load(fp).get('corrections', {})
         for code, mmap in corr.items():
             for mkey, fields in mmap.items():
-                rec = store.get((code, mkey))
-                if not rec:
-                    continue
-                for which in ('actual', 'eval'):
-                    for cat, val in (fields.get(which) or {}).items():
-                        if cat in CATEGORIES:
-                            rec['rows'].setdefault(which, [None] * 13)[CATEGORIES.index(cat)] = val
+                recs = [r for (c, _b, mk), r in store.items() if c == code and mk == mkey]
+                for rec in recs:
+                    for which in ('actual', 'eval'):
+                        for cat, val in (fields.get(which) or {}).items():
+                            if cat in CATEGORIES:
+                                rec['rows'].setdefault(which, [None] * 13)[CATEGORIES.index(cat)] = val
+                                ncorr += 1
+                    for bt, val in (fields.get('beds') or {}).items():
+                        if bt in BED_TYPES:
+                            rec['beds'][BED_TYPES.index(bt)] = val
                             ncorr += 1
-                for bt, val in (fields.get('beds') or {}).items():
-                    if bt in BED_TYPES:
-                        rec['beds'][BED_TYPES.index(bt)] = val
-                        ncorr += 1
         print(f"套用人工修正 {ncorr} 個值")
 
     # 官方正式名稱：PDF 長名稱有時落在中列導致空白，一律以 hospitals-merged 為準
@@ -193,39 +283,77 @@ def main():
                 if h.get('code') and h.get('name'):
                     merged_names.setdefault(h['code'], h['name'])
 
-    # 依醫院彙整
+    # 只有護病比認定的「真正多院區」才拆院區；其餘 code 一律收合成單筆（id=code），
+    # 避免監測 PDF 逐月變動的院區欄位把單院醫院誤拆成數筆。
+    nr_multi = load_nurse_multi()
+    print(f"多院區 code（沿用護病比）：{sorted(nr_multi.keys())}")
+
+    def final_branch_key(code, raw_branch, level):
+        """回傳該筆記錄最終的院區 slug；非多院區 code 一律 ''（收合）。"""
+        if code in nr_multi:
+            return snap_branch(raw_branch, level, nr_multi[code])
+        return ''
+
+    # 依 (code, finalBranchKey) 彙整逐月序列
     hosp = {}
-    for (code, mkey), rec in store.items():
-        h = hosp.setdefault(code, {})
-        h[mkey] = rec
+    for (code, _rawKey, mkey), rec in store.items():
+        fk = final_branch_key(code, rec['branch'], rec['level'])
+        hosp.setdefault((code, fk), {})[mkey] = rec
+
+    branches_by_code = defaultdict(set)
+    for (code, fk) in hosp:
+        branches_by_code[code].add(fk)
 
     os.makedirs(OUT_DIR, exist_ok=True)
     for old in glob.glob(os.path.join(OUT_DIR, '*.json')):
         os.remove(old)
 
     index = []
-    for code, months_map in hosp.items():
+    for (code, fk), months_map in hosp.items():
         mkeys = sorted(months_map.keys())
         last = months_map[mkeys[-1]]
-        name = merged_names.get(code) or last['name'] or code
+        siblings = branches_by_code[code]
+        multi = code in nr_multi and len(siblings) > 1
+        if not multi:
+            hid = code
+            name = merged_names.get(code) or last['name'] or code
+            branch_disp = ''
+        else:
+            hid = f"{code}-{fk}"
+            # 顯示院區用護病比的院區名（一致），母院名取穩定來源
+            branch_disp = nr_multi[code].get(fk, {}).get('branch') or last['branch'] or fk
+            mother = merged_mother_name(code, months_map, merged_names)
+            name = f"{mother}·{branch_disp}"
         out = {
-            'code': code, 'name': name, 'city': last['city'], 'level': last['level'],
+            'code': code, 'id': hid, 'branch': branch_disp,
+            'name': name, 'city': last['city'], 'level': last['level'],
             'categories': CATEGORIES, 'bedTypes': BED_TYPES,
             'months': mkeys,
             'beds': [months_map[m]['beds'] for m in mkeys],
             'actual': [months_map[m]['rows'].get('actual') for m in mkeys],
             'eval': [months_map[m]['rows'].get('eval') for m in mkeys],
         }
-        with open(os.path.join(OUT_DIR, f"{code}.json"), 'w', encoding='utf-8') as fp:
+        if multi:
+            out['sharedCode'] = {
+                'code': code, 'branchCount': len(siblings),
+                'note': f'此機構代號涵蓋多院區（{len(siblings)} 個），各院區資料分別呈現',
+            }
+        with open(os.path.join(OUT_DIR, f"{hid}.json"), 'w', encoding='utf-8') as fp:
             json.dump(out, fp, ensure_ascii=False, separators=(',', ':'))
-        index.append({'code': code, 'name': name, 'city': last['city'], 'level': last['level'],
-                      'firstMonth': mkeys[0], 'lastMonth': mkeys[-1], 'monthCount': len(mkeys)})
+        entry = {'code': code, 'id': hid, 'branch': branch_disp, 'name': name,
+                 'city': last['city'], 'level': last['level'],
+                 'firstMonth': mkeys[0], 'lastMonth': mkeys[-1], 'monthCount': len(mkeys)}
+        if multi:
+            entry['sharedCode'] = True
+        index.append(entry)
 
-    # 全國逐月加總（僅計 3 層級齊全的月份，避免 110/04 這類缺整層級的月造成假降）
-    m_levels, m_actual, m_beds, m_count = {}, {}, {}, {}
-    for (code, mkey), rec in store.items():
+    # 全國逐月加總（僅計 3 層級齊全的月份，避免 110/04 這類缺整層級的月造成假降）。
+    # 以院區為單位加總（含先前被覆蓋掉的院區，修正低估）；hospitalCount 計 distinct code。
+    m_levels, m_actual, m_beds = {}, {}, {}
+    m_codes = defaultdict(set)
+    for (code, branchKey, mkey), rec in store.items():
         m_levels.setdefault(mkey, set()).add(rec['level'])
-        m_count[mkey] = m_count.get(mkey, 0) + 1
+        m_codes[mkey].add(code)
         a = rec['rows'].get('actual')
         if a:
             ma = m_actual.setdefault(mkey, [0] * 13)
@@ -235,6 +363,7 @@ def main():
         for i, v in enumerate(rec.get('beds') or []):
             if v is not None:
                 m_beds.setdefault(mkey, [0] * 4)[i] += v
+    m_count = {mkey: len(codes) for mkey, codes in m_codes.items()}
     complete = sorted(m for m in m_levels if {'醫學中心', '區域醫院', '地區醫院'} <= m_levels[m])
     with open(os.path.join(ROOT, 'data', 'personnel-aggregate.json'), 'w', encoding='utf-8') as fp:
         json.dump({

@@ -24,7 +24,8 @@ export function baseLineCfg(labels, datasets) {
       },
       scales: {
         x: { ticks: { maxRotation: 0, autoSkip: true, maxTicksLimit: 12, font: { size: 10 } }, grid: { display: false } },
-        y: { beginAtZero: true, ticks: { font: { size: 10 } } },
+        // Y 軸不從 0 起：護產等基數大的職類，自動貼合目前可見資料集範圍，讓月變化清楚可辨。
+        y: { ticks: { font: { size: 10 } } },
       },
       elements: { line: { tension: 0.25, borderWidth: 2 }, point: { radius: 0, hitRadius: 8 } },
     },
@@ -61,24 +62,31 @@ export function renderBedChart(canvas, h, prevChart) {
   return new Chart(canvas, baseLineCfg(labels, datasets));
 }
 
-// 單院資料載入（附快取）
+// 單院（或院區）資料載入（附快取）。id 可為機構代號，或多院區的 code-院區。
 const cache = new Map();
-export async function loadPersonnelHospital(code) {
-  if (cache.has(code)) return cache.get(code);
-  const r = await fetch(`data/personnel/${code}.json`);
-  if (!r.ok) throw new Error(`HTTP ${r.status} personnel/${code}`);
+export async function loadPersonnelHospital(id) {
+  if (cache.has(id)) return cache.get(id);
+  const r = await fetch(`data/personnel/${id}.json?v=27`);
+  if (!r.ok) throw new Error(`HTTP ${r.status} personnel/${id}`);
   const d = await r.json();
-  cache.set(code, d);
+  cache.set(id, d);
   return d;
 }
 
-// 全站人力監控索引（判斷某機構是否有監測資料）
+// 全站人力監控索引：判斷某機構是否有監測資料、以及該代號有哪些院區。
+// 回傳 { codes:Set<code>, byCode:Map<code,[entry…]> }（entry 含 id/branch/name/level）。
 let indexCache = null;
 export async function ensurePersonnelIndex() {
   if (indexCache) return indexCache;
-  const r = await fetch('data/personnel-index.json');
+  const r = await fetch('data/personnel-index.json?v=27');
   if (!r.ok) throw new Error(`HTTP ${r.status} personnel-index`);
   const doc = await r.json();
-  indexCache = new Set((doc.hospitals || []).map((h) => h.code));
+  const byCode = new Map();
+  (doc.hospitals || []).forEach((h) => {
+    const arr = byCode.get(h.code) || [];
+    arr.push(h);
+    byCode.set(h.code, arr);
+  });
+  indexCache = { codes: new Set(byCode.keys()), byCode };
   return indexCache;
 }

@@ -6,7 +6,7 @@
 //     hospitals: [{ id, name, level, history: { "11207": {day, eve, night} } }]
 //   }
 
-import { renderIcons } from './icons.js?v=26';
+import { renderIcons } from './icons.js?v=27';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -14,9 +14,9 @@ import {
   shiftStatus,
   classifyHospital as classifyHospitalView,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=26';
+} from './nurse-ratio-view.js?v=27';
 
-const DATA_URL = 'data/nurse-ratio.json?v=26';
+const DATA_URL = 'data/nurse-ratio.json?v=27';
 
 // 合規分類綁定本頁 state.data.months（共用邏輯在 nurse-ratio-view.js）
 function classifyHospital(hosp) {
