@@ -5,6 +5,7 @@
 import { mountLayout } from './components.js?v=17';
 import { renderIcons, icon } from './icons.js?v=17';
 import { HOSPITALS } from './hospitals.js?v=17';
+import { HOSPITALS_EXTRA } from './hospitals-extra.js?v=17';
 import { markContributed } from './contribution-gate.js?v=17';
 import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=17';
 
@@ -542,6 +543,8 @@ const ACCRED_LEVELS = new Set(['醫學中心', '區域醫院', '地區醫院']);
 
 // 簡稱 map（accred 正式名稱 → VPN 簡稱）由共用模組載入
 const HOSPITAL_SHORT_MAP = _SHORT_MAP;
+// 評鑑名單（自動產生）＋ 手動補充清單（漏收院區），合併供機構名稱自動建議使用
+const HOSPITALS_ALL = HOSPITALS.concat(HOSPITALS_EXTRA);
 window.addEventListener('hospitalShortNamesReady', () => {
   // 若下拉已展開，觸發重新 render 讓簡稱立即生效
   const input = document.getElementById('f-institutionName');
@@ -614,7 +617,7 @@ function attachInstitutionAutocomplete() {
   // 共用 filter（桌機 inline 與手機 sheet 共用）
   function getMatches(level, loc, q) {
     const cap = (loc || q) ? Infinity : 15;
-    const primary = HOSPITALS
+    const primary = HOSPITALS_ALL
       .filter((h) => {
         if (h.level !== level) return false;
         if (loc && normalizeCity(h.city) !== loc) return false;
@@ -624,7 +627,7 @@ function attachInstitutionAutocomplete() {
       .slice(0, cap);
     let crossLevel = [];
     if (q && loc) {
-      crossLevel = HOSPITALS.filter((h) =>
+      crossLevel = HOSPITALS_ALL.filter((h) =>
         h.level !== level && normalizeCity(h.city) === loc && matchesQuery(h, q));
     }
     return { primary, crossLevel };
