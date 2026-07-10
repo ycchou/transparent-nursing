@@ -29,6 +29,54 @@ REF_RE = re.compile(r'((?:\.{0,2}/)?[\w./@-]+\.(?:js|json|css))\?v=[\w]+')
 HASH_LEN = 10
 
 
+MP_RE = re.compile(r'[ \t]*<link rel="modulepreload" href="\./js/[^"]+"\s*/>\r?\n')
+IMPORT_FROM_RE = re.compile(r"from\s+'\./([\w-]+\.js)")            # js 內靜態 import（排除動態 import()）
+HTML_SRC_RE = re.compile(r'<script[^>]*type="module"[^>]*src="\./js/([\w-]+\.js)')
+HTML_BLOCK_RE = re.compile(r'<script[^>]*type="module"[^>]*>(.*?)</script>', re.S)
+HTML_IMPORT_RE = re.compile(r"from\s+'\./js/([\w-]+\.js)")
+
+
+def _js_static_deps(name, sources):
+    text = sources.get(os.path.join(ROOT, 'js', name))
+    if text is None:
+        p = os.path.join(ROOT, 'js', name)
+        text = open(p, encoding='utf-8', newline='').read() if os.path.exists(p) else ''
+    return set(IMPORT_FROM_RE.findall(text))
+
+
+def _closure(entries, sources):
+    seen, stack = set(), list(entries)
+    while stack:
+        n = stack.pop()
+        if n in seen:
+            continue
+        seen.add(n)
+        stack += [d for d in _js_static_deps(n, sources) if d not in seen]
+    return seen
+
+
+def regen_modulepreloads(sources):
+    """每頁重算「完整靜態 import 圖」並改寫 <link rel=modulepreload>，讓整包模組平行下載、
+    消除 ES module 逐層探索的請求瀑布。動態 import() 的懶載模組不列入（維持懶載）。"""
+    for html in [p for p in sources if p.endswith('.html')]:
+        text = sources[html]
+        m0 = MP_RE.search(text)
+        if not m0:
+            continue  # 無現成 modulepreload 區塊 → 不亂插
+        entries = set(HTML_SRC_RE.findall(text))
+        for block in HTML_BLOCK_RE.findall(text):
+            entries |= set(HTML_IMPORT_RE.findall(block))
+        if not entries:
+            continue
+        indent = re.match(r'[ \t]*', m0.group(0)).group(0)
+        nl = '\r\n' if '\r\n' in m0.group(0) else '\n'
+        mods = sorted(_closure(entries, sources))
+        blk = ''.join(f'{indent}<link rel="modulepreload" href="./js/{n}?v=0" />{nl}' for n in mods)
+        first = m0.start()
+        wo = MP_RE.sub('', text)           # first 之前無 modulepreload，故位置不位移
+        sources[html] = wo[:first] + blk + wo[first:]
+
+
 def resolve_target(ref, src_abs):
     """把參照路徑解析成實體檔案絕對路徑；解析不到（含 ${} 動態路徑）回 None。"""
     if '${' in ref or '{' in ref:
@@ -70,6 +118,9 @@ def main():
             with open(path, 'rb') as f:
                 data_hash_cache[path] = hashlib.sha1(f.read()).hexdigest()[:HASH_LEN]
         return data_hash_cache[path]
+
+    # 先重算各頁完整 modulepreload（寫 ?v=0），下方 ?v= 蓋雜湊時一併填入 code_token
+    regen_modulepreloads(sources)
 
     unresolved = set()
 
