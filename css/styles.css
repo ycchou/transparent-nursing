@@ -183,7 +183,8 @@ h1[id], h2[id], h3[id] {
 .site-nav a {
   color: var(--ink-soft);
   font-size: 0.95rem;
-  font-weight: 500;
+  /* 600（而非 500）：微軟正黑只有 400/700，500 會退回 400 顯得太細；600 進位到 700 才有字重 */
+  font-weight: 600;
   position: relative;
 }
 
@@ -4674,4 +4675,16 @@ body.g2g-modal-open { overflow: hidden; }
   .nurse-picker-controls { flex-direction: column; align-items: stretch; }
   .nurse-hospital-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
   .nurse-hospital-list { max-height: 320px; }
+}
+
+/* 數字顯示改用無襯線系統字：serif fallback 到 Georgia 的舊式襯線數字不好看，
+   統一讓所有 KPI/統計/金額/排名等「數字」用系統 sans（此規則置於最後，覆蓋原 serif 設定）。 */
+.stat-card .stat-num,
+.stat-card .kpi-num,
+.off-money-avg,
+.salary-stats .ss-value,
+.manifesto-item .num,
+.kpi-strip-num,
+.calc-rank-num {
+  font-family: var(--font-sans);
 }
