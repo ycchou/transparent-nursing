@@ -1,5 +1,5 @@
 // PWA「加到主畫面」引導 — 自動 banner（行動裝置首次造訪）+ 主動觸發 modal
-// import { initPWAPrompt, showInstallGuide } from './pwa-prompt.js?v=16';
+// import { initPWAPrompt, showInstallGuide } from './pwa-prompt.js?v=71961ba1c4';
 
 const DISMISS_KEY = '__nursing_pwa_dismissed';
 const INSTALLED_KEY = '__nursing_pwa_installed';

@@ -6,7 +6,7 @@
 //     hospitals: [{ id, name, level, history: { "11207": {day, eve, night} } }]
 //   }
 
-import { renderIcons } from './icons.js?v=27';
+import { renderIcons } from './icons.js?v=71961ba1c4';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -14,9 +14,9 @@ import {
   shiftStatus,
   classifyHospital as classifyHospitalView,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=27';
+} from './nurse-ratio-view.js?v=71961ba1c4';
 
-const DATA_URL = 'data/nurse-ratio.json?v=27';
+const DATA_URL = 'data/nurse-ratio.json?v=1dbde60d94';
 
 // 合規分類綁定本頁 state.data.months（共用邏輯在 nurse-ratio-view.js）
 function classifyHospital(hosp) {
@@ -85,7 +85,7 @@ async function loadData() {
 // 使用者可在 data/hospitals-manual-city.json 手動補上 { 機構代號: 縣市 } 對照）。
 async function loadManualCityOverlay() {
   try {
-    const r = await fetch('data/hospitals-manual-city.json?v=1', { cache: 'default' });
+    const r = await fetch('data/hospitals-manual-city.json?v=dd65ec4ace', { cache: 'default' });
     if (!r.ok) return {};
     return await r.json();
   } catch { return {}; }
@@ -95,7 +95,7 @@ async function loadManualCityOverlay() {
 // 由 tools/fetch-hospital-addresses.py 產生 data/hospitals-address-overlay.json）
 async function loadAddressOverlay() {
   try {
-    const r = await fetch('data/hospitals-address-overlay.json?v=1', { cache: 'default' });
+    const r = await fetch('data/hospitals-address-overlay.json?v=4f090ac4c9', { cache: 'default' });
     if (!r.ok) return {};
     const d = await r.json();
     return (d && d.overlay) || {};

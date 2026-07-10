@@ -5,9 +5,9 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { renderIcons } from './icons.js?v=27';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=27';
-import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=27';
+import { renderIcons } from './icons.js?v=71961ba1c4';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=71961ba1c4';
+import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=71961ba1c4';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -15,19 +15,19 @@ import {
   shiftStatus,
   classifyHospital,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=27';
-import { loadAll } from './data-loader.js?v=27';
-import { renderKpiStrip } from './stats-kpi.js?v=27';
-import { renderTable, showDetailModal } from './table.js?v=27';
+} from './nurse-ratio-view.js?v=71961ba1c4';
+import { loadAll } from './data-loader.js?v=71961ba1c4';
+import { renderKpiStrip } from './stats-kpi.js?v=71961ba1c4';
+import { renderTable, showDetailModal } from './table.js?v=71961ba1c4';
 import {
   ensureFinancialsLoaded, getFinancials, getFinancialFields,
   formatVal as finFormatVal, signClass as finSignClass, formatRocYear as finRocYear,
   renderFinancialTrendChart,
-} from './financials-view.js?v=27';
+} from './financials-view.js?v=71961ba1c4';
 import {
   loadPersonnelHospital, ensurePersonnelIndex,
   renderStaffChart as renderPmStaffChart, renderBedChart as renderPmBedChart,
-} from './personnel-view.js?v=27';
+} from './personnel-view.js?v=71961ba1c4';
 import {
   createCsvLoader,
   parseROCDate,
@@ -35,12 +35,12 @@ import {
   shortenLocation,
   fineToWan,
   formatROCDate,
-} from './records-common.js?v=27';
+} from './records-common.js?v=71961ba1c4';
 
-const NURSE_URL = 'data/nurse-ratio.json?v=27';
-const MERGED_URL = 'data/hospitals-merged.json?v=27';
-const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=27';
-const ADDR_OVERLAY_URL = 'data/hospitals-address-overlay.json?v=1';
+const NURSE_URL = 'data/nurse-ratio.json?v=1dbde60d94';
+const MERGED_URL = 'data/hospitals-merged.json?v=c017631e69';
+const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=f3d4b868a4';
+const ADDR_OVERLAY_URL = 'data/hospitals-address-overlay.json?v=4f090ac4c9';
 
 // 三支違規 Sheet（欄位 0-8 共用：id/location/publishDate/institutionName/penaltyDate/docId/lawArticle/lawDesc/fine）
 const VIOL_FEEDS = [

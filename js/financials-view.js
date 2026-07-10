@@ -10,7 +10,7 @@
 //     rows:[{ YEAR, HOSP_CNT_TYPNAM, F1Val,F1Rank, F2Val,F2Rank, F3Val,F3Rank,
 //             F5Val, F6Val, F7Val, F8Val }] }] }
 
-const DATA_URL = 'data/hospital-financials.json?v=1';
+const DATA_URL = 'data/hospital-financials.json?v=6f127aeaff';
 
 let _doc = null;
 let _byCode = null;

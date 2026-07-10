@@ -1,11 +1,11 @@
 // 表格 / 卡片 渲染、排序、Modal
-import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=17';
-import { fmt, recommendPill, categoryTag } from './components.js?v=17';
-import { icon } from './icons.js?v=17';
-import { generateShareCard, showSharePreview } from './share-card.js?v=17';
-import { ensureTooltip } from './tooltip.js?v=17';
-import { pageSlice, renderPagination } from './pagination.js?v=17';
-import { getHospitalCode } from './hospital-shortname.js?v=17';
+import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=71961ba1c4';
+import { fmt, recommendPill, categoryTag } from './components.js?v=71961ba1c4';
+import { icon } from './icons.js?v=71961ba1c4';
+import { generateShareCard, showSharePreview } from './share-card.js?v=71961ba1c4';
+import { ensureTooltip } from './tooltip.js?v=71961ba1c4';
+import { pageSlice, renderPagination } from './pagination.js?v=71961ba1c4';
+import { getHospitalCode } from './hospital-shortname.js?v=71961ba1c4';
 
 // 機構名稱若對得上評鑑醫院，包成連到機構總覽頁的連結（stopPropagation 避免觸發列 modal）
 function withHospitalLink(name, innerHtml) {
