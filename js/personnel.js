@@ -2,12 +2,13 @@
 // 資料：data/personnel-index.json（picker 清單）＋ data/personnel/{code}.json（單院時間序列）
 // 來源：衛福部「醫院醫事人力持續性監測結果」。
 
-import { renderIcons, icon } from './icons.js?v=3cb29e39e7';
-import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=3cb29e39e7';
+import { renderIcons, icon } from './icons.js?v=ae4610f284';
+import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=ae4610f284';
 import {
   CAT_COLORS, BED_COLORS, DEFAULT_ON, mLabel, baseLineCfg,
   renderStaffChart, renderBedChart, loadPersonnelHospital,
-} from './personnel-view.js?v=3cb29e39e7';
+} from './personnel-view.js?v=ae4610f284';
+import { showToast } from './toast.js?v=ae4610f284';
 
 const INDEX_URL = 'data/personnel-index.json';
 const AGG_URL = 'data/personnel-aggregate.json';
@@ -28,14 +29,6 @@ function escapeHtml(s) {
   return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 function levelSlug(lv) { return { '醫學中心': 'mc', '區域醫院': 'rg', '地區醫院': 'dt' }[lv] || 'other'; }
-
-function showToast(msg) {
-  let host = document.getElementById('toast-host');
-  if (!host) { host = document.createElement('div'); host.id = 'toast-host'; host.className = 'toast-host'; document.body.appendChild(host); }
-  const el = document.createElement('div'); el.className = 'toast toast-info'; el.textContent = msg;
-  host.appendChild(el); requestAnimationFrame(() => el.classList.add('show'));
-  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 250); }, 2600);
-}
 
 // ---------- picker ----------
 function hasActiveFilter() {
