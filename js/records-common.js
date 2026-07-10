@@ -144,6 +144,10 @@ const DEFAULT_TTL_MS = 30 * 24 * 60 * 60 * 1000;  // 30 天
 const DEFAULT_STALE_MS = 6 * 60 * 60 * 1000;      // 6 小時
 const DEFAULT_FETCH_TIMEOUT_MS = 15000;
 
+// localStorage 快取的 record 結構版本。改動 parseRow 產出的欄位（如新增 articles）時 +1，
+// 讓舊格式快取自動失效、重新抓取，避免新程式讀到缺欄位的舊快取而崩潰（如 r.articles.forEach）。
+const CACHE_SCHEMA_VERSION = 2;
+
 /**
  * @param {Object} cfg
  * @param {string} cfg.csvUrl - Google Sheets 發布 CSV 網址
@@ -199,6 +203,8 @@ export function createCsvLoader(cfg) {
       if (!raw) return null;
       const obj = JSON.parse(raw);
       if (!obj || !obj.ts || !Array.isArray(obj.data)) return null;
+      // 結構版本不符（舊格式快取）→ 視為無效，強制重新抓取，避免讀到缺欄位的資料
+      if (obj.v !== CACHE_SCHEMA_VERSION) return null;
       const age = Date.now() - obj.ts;
       const valid = age <= ttlMs;
       const veryFresh = age <= staleMs;
@@ -217,7 +223,7 @@ export function createCsvLoader(cfg) {
 
   function writeLocal(rows) {
     try {
-      localStorage.setItem(storageKey, JSON.stringify({ ts: Date.now(), data: rows }));
+      localStorage.setItem(storageKey, JSON.stringify({ v: CACHE_SCHEMA_VERSION, ts: Date.now(), data: rows }));
     } catch {}
   }
 
@@ -325,7 +331,7 @@ export function initRecordsPage(cfg) {
     const q = state.q.toLowerCase();
     return state.rows.filter((r) => {
       if (state.location !== 'all' && r.location !== state.location) return false;
-      if (state.article !== 'all' && !r.articles.includes(state.article)) return false;
+      if (state.article !== 'all' && !(r.articles || []).includes(state.article)) return false;
       if (q) {
         const short = getHospitalShort(r.institutionName) || '';
         const hay = `${r.institutionName} ${short} ${r.lawArticle} ${r.lawDesc} ${r.location} ${r.locationRaw || ''} ${r.docId}`.toLowerCase();
@@ -398,7 +404,7 @@ export function initRecordsPage(cfg) {
 
   function renderLawFilter() {
     const counts = {};
-    state.rows.forEach((r) => r.articles.forEach((a) => { counts[a] = (counts[a] || 0) + 1; }));
+    state.rows.forEach((r) => (r.articles || []).forEach((a) => { counts[a] = (counts[a] || 0) + 1; }));
     const top = Object.entries(counts).sort((a, b) => b[1] - a[1]);
     const items = [
       { slug: 'all', name: '全部', tip: null, n: state.rows.length },
