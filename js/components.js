@@ -1,7 +1,7 @@
 // 共用 header / footer 注入 + 工具函式
-import { SITE, CATEGORIES } from './config.js?v=3cb29e39e7';
-import { icon, renderIcons } from './icons.js?v=3cb29e39e7';
-import { initPWAPrompt, showInstallGuide } from './pwa-prompt.js?v=3cb29e39e7';
+import { SITE, CATEGORIES } from './config.js?v=ae4610f284';
+import { icon, renderIcons } from './icons.js?v=ae4610f284';
+import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=ae4610f284';
 
 // 主辦/協作工會 — 共用資料（footer / hero strip / about 都引用）
 export const ORGS = {
@@ -149,7 +149,7 @@ function footerHTML() {
               <li><a href="about.html">運動緣起</a></li>
               <li><a href="participate.html">填寫表單</a></li>
               <li><a href="terms.html">服務條款</a></li>
-              <li><a href="#" onclick="event.preventDefault();window.__nursingShowInstallGuide&&window.__nursingShowInstallGuide();">加到主畫面 (App 化)</a></li>
+              ${isAppInstalled() ? '' : `<li><a href="#" onclick="event.preventDefault();window.__nursingShowInstallGuide&&window.__nursingShowInstallGuide();">加到主畫面 (App 化)</a></li>`}
             </ul>
           </div>
         </div>
@@ -203,18 +203,18 @@ export function mountLayout() {
 
   // 背景預載 platform 資料：使用者切到分享平台時即時顯示，無需等待 fetch
   // 動態 import 避免循環依賴與初始 parse 成本
-  import('./data-loader.js?v=3cb29e39e7')
+  import('./data-loader.js?v=ae4610f284')
     .then(({ preloadAll }) => preloadAll && preloadAll())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
 
   // 背景預載勞檢/性平/職安紀錄資料：同樣讓使用者切過去時即時顯示
-  import('./violations.js?v=3cb29e39e7')
+  import('./violations.js?v=ae4610f284')
     .then(({ preloadViolations }) => preloadViolations && preloadViolations())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./gender.js?v=3cb29e39e7')
+  import('./gender.js?v=ae4610f284')
     .then(({ preloadGender }) => preloadGender && preloadGender())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./osha.js?v=3cb29e39e7')
+  import('./osha.js?v=ae4610f284')
     .then(({ preloadOsha }) => preloadOsha && preloadOsha())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
 }

@@ -1725,6 +1725,20 @@ body.viol-modal-open { overflow: hidden; }
   flex-shrink: 0;
 }
 .pwa-prompt-link:hover { background: var(--accent-soft); }
+.pwa-prompt-install {
+  background: var(--primary);
+  border: 1px solid var(--primary);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.pwa-prompt-install:hover { filter: brightness(1.05); }
 .pwa-prompt-close {
   width: 28px;
   height: 28px;
@@ -1745,6 +1759,7 @@ body.viol-modal-open { overflow: hidden; }
   .pwa-prompt-title { font-size: 0.88rem; }
   .pwa-prompt-text { font-size: 0.75rem; }
   .pwa-prompt-link { font-size: 0.78rem; padding: 5px 10px; }
+  .pwa-prompt-install { font-size: 0.78rem; padding: 6px 12px; }
 }
 
 /* Install Guide modal — current platform highlight */

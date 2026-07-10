@@ -46,16 +46,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=374e549509" />
+  <link rel="stylesheet" href="css/styles.css?v=0a084f5837" />
 
     <!-- modulepreload：平行載入 ES module 鏈（首次造訪快 30-50%） -->
-  <link rel="modulepreload" href="./js/charts.js?v=3cb29e39e7" />
-  <link rel="modulepreload" href="./js/components.js?v=3cb29e39e7" />
-  <link rel="modulepreload" href="./js/config.js?v=3cb29e39e7" />
-  <link rel="modulepreload" href="./js/data-loader.js?v=3cb29e39e7" />
-  <link rel="modulepreload" href="./js/icons.js?v=3cb29e39e7" />
-  <link rel="modulepreload" href="./js/official-stats.js?v=3cb29e39e7" />
-  <link rel="modulepreload" href="./js/pwa-prompt.js?v=3cb29e39e7" />
+  <link rel="modulepreload" href="./js/charts.js?v=ae4610f284" />
+  <link rel="modulepreload" href="./js/components.js?v=ae4610f284" />
+  <link rel="modulepreload" href="./js/config.js?v=ae4610f284" />
+  <link rel="modulepreload" href="./js/data-loader.js?v=ae4610f284" />
+  <link rel="modulepreload" href="./js/icons.js?v=ae4610f284" />
+  <link rel="modulepreload" href="./js/official-stats.js?v=ae4610f284" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=ae4610f284" />
+  <link rel="modulepreload" href="./js/toast.js?v=ae4610f284" />
 
   <!-- JSON-LD Structured Data：官方參考數據四份資料集 -->
   <script type="application/ld+json">
@@ -696,18 +697,18 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
   <script type="module">
-    import { CATEGORIES } from './js/config.js?v=3cb29e39e7';
-    import { mountLayout } from './js/components.js?v=3cb29e39e7';
-    import { renderIcons } from './js/icons.js?v=3cb29e39e7';
-    import { loadAll, startAutoRefresh } from './js/data-loader.js?v=3cb29e39e7';
+    import { CATEGORIES } from './js/config.js?v=ae4610f284';
+    import { mountLayout } from './js/components.js?v=ae4610f284';
+    import { renderIcons } from './js/icons.js?v=ae4610f284';
+    import { loadAll, startAutoRefresh } from './js/data-loader.js?v=ae4610f284';
     import {
       chartCategoryDistribution, chartInstitutionStacked, chartHoursHistogram,
       chartOvertimePolicy, chartRecommend, chartAtmosphereByCategory,
       chartLocationDistribution, chartSalaryDistribution,
-    } from './js/charts.js?v=3cb29e39e7';
+    } from './js/charts.js?v=ae4610f284';
     import {
       renderOfficialSourceA, renderOfficialSourceB, renderOfficialSourceC, renderOfficialSourceD,
-    } from './js/official-stats.js?v=3cb29e39e7';
+    } from './js/official-stats.js?v=ae4610f284';
 
     mountLayout();
     renderIcons();

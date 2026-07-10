@@ -2,10 +2,12 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=3cb29e39e7';
-import { renderIcons, icon } from './icons.js?v=3cb29e39e7';
-import { markContributed } from './contribution-gate.js?v=3cb29e39e7';
-import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=3cb29e39e7';
+import { mountLayout } from './components.js?v=ae4610f284';
+import { renderIcons, icon } from './icons.js?v=ae4610f284';
+import { markContributed } from './contribution-gate.js?v=ae4610f284';
+import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=ae4610f284';
+import { showToast } from './toast.js?v=ae4610f284';
+import { notePwaIntent } from './pwa-prompt.js?v=ae4610f284';
 
 const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 避開易混字元 0/O/1/I/L
 let currentCaptcha = '';
@@ -30,26 +32,6 @@ function optionId(name, value, idx) {
 function debounce(fn, ms) {
   let t;
   return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
-}
-
-// 顯示 toast（沿用 platform.html 的同款做法）
-function showToast(msg, kind = 'info') {
-  let host = document.getElementById('toast-host');
-  if (!host) {
-    host = document.createElement('div');
-    host.id = 'toast-host';
-    host.className = 'toast-host';
-    document.body.appendChild(host);
-  }
-  const el = document.createElement('div');
-  el.className = `toast toast-${kind}`;
-  el.textContent = msg;
-  host.appendChild(el);
-  requestAnimationFrame(() => el.classList.add('show'));
-  setTimeout(() => {
-    el.classList.remove('show');
-    setTimeout(() => el.remove(), 250);
-  }, 3000);
 }
 
 // ===== 渲染 =====
@@ -453,6 +435,9 @@ async function onSubmit(e) {
 function showThanks() {
   // Soft Give-to-Get：成功送出 = 解鎖分享平台完整資料
   markContributed();
+
+  // 高意圖時刻：剛分享完 → 記下意圖，送出後自動跳首頁時由 initPWAPrompt 讀取顯示安裝提示
+  notePwaIntent('form_submit');
 
   const form = document.getElementById('dform');
   const banner = document.getElementById('dform-draft-banner-host');
