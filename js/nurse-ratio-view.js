@@ -120,7 +120,7 @@ export function renderNurseChart(canvas, hosp, months) {
       position: 'end',
       backgroundColor: 'rgba(255,255,255,0.85)',
       color: '#B22234',
-      font: { family: "-apple-system,'PingFang TC','Microsoft JhengHei', sans-serif", size: 10, weight: 'bold' },
+      font: { family: "'Noto Sans TC', sans-serif", size: 10, weight: 'bold' },
       padding: { top: 2, bottom: 2, left: 6, right: 6 },
       yAdjust: -10,
       borderRadius: 4,
@@ -150,7 +150,7 @@ export function renderNurseChart(canvas, hosp, months) {
         legend: {
           position: 'bottom',
           labels: {
-            font: { family: "-apple-system,'PingFang TC','Microsoft JhengHei', sans-serif", size: 12 },
+            font: { family: "'Noto Sans TC', sans-serif", size: 12 },
             color: '#46557A',
             usePointStyle: true,
             padding: 12,
@@ -158,8 +158,8 @@ export function renderNurseChart(canvas, hosp, months) {
         },
         tooltip: {
           backgroundColor: '#1D3557',
-          titleFont: { family: "-apple-system,'PingFang TC','Microsoft JhengHei', sans-serif" },
-          bodyFont: { family: "-apple-system,'PingFang TC','Microsoft JhengHei', sans-serif" },
+          titleFont: { family: "'Noto Sans TC', sans-serif" },
+          bodyFont: { family: "'Noto Sans TC', sans-serif" },
           padding: 10,
           cornerRadius: 8,
           callbacks: {
@@ -177,7 +177,7 @@ export function renderNurseChart(canvas, hosp, months) {
           border: { color: '#E5E9F0' },
           ticks: {
             color: '#6B7C93',
-            font: { family: "-apple-system,'PingFang TC','Microsoft JhengHei', sans-serif", size: 10 },
+            font: { family: "'Noto Sans TC', sans-serif", size: 10 },
             maxRotation: 45,
             minRotation: 0,
             autoSkip: true,
@@ -189,7 +189,7 @@ export function renderNurseChart(canvas, hosp, months) {
             display: true,
             text: '護病比',
             color: '#46557A',
-            font: { family: "-apple-system,'PingFang TC','Microsoft JhengHei', sans-serif", size: 12 },
+            font: { family: "'Noto Sans TC', sans-serif", size: 12 },
           },
           grid: { color: '#F1F3F7' },
           border: { display: false },
@@ -197,7 +197,7 @@ export function renderNurseChart(canvas, hosp, months) {
           suggestedMin: 4,
           ticks: {
             color: '#6B7C93',
-            font: { family: "-apple-system,'PingFang TC','Microsoft JhengHei', sans-serif", size: 11 },
+            font: { family: "'Noto Sans TC', sans-serif", size: 11 },
           },
         },
       },

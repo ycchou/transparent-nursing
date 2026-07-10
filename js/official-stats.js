@@ -272,7 +272,7 @@ export const NET_GROWTH = {
 
 // ============== Chart 渲染函式 ==============
 
-const FONT_FAMILY = "-apple-system,'PingFang TC','Microsoft JhengHei', 'Inter', sans-serif";
+const FONT_FAMILY = "'Noto Sans TC', 'Inter', sans-serif";
 const COLOR_MC = '#1D3557';    // 醫學中心（深藍）
 const COLOR_RG = '#2E86AB';    // 區域醫院
 const COLOR_DT = '#5BA8C6';    // 地區醫院

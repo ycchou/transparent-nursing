@@ -44,9 +44,9 @@
   --shadow-card-hover: 0 10px 30px rgba(29, 53, 87, 0.12);
   --shadow-soft: 0 2px 8px rgba(29, 53, 87, 0.04);
 
-  /* 字型：全用系統字，零網路字型下載（CJK 走 PingFang TC / 微軟正黑；西文走系統 UI 字） */
-  --font-serif: Georgia, 'Times New Roman', 'PingFang TC', 'Microsoft JhengHei', 'Noto Serif TC', serif;
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', 'Noto Sans TC', 'Helvetica Neue', Arial, sans-serif;
+  /* 字型 */
+  --font-serif: 'Lora', 'Noto Serif TC', Georgia, serif;
+  --font-sans: 'Noto Sans TC', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
   /* 動畫 */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -183,8 +183,7 @@ h1[id], h2[id], h3[id] {
 .site-nav a {
   color: var(--ink-soft);
   font-size: 0.95rem;
-  /* 600（而非 500）：微軟正黑只有 400/700，500 會退回 400 顯得太細；600 進位到 700 才有字重 */
-  font-weight: 600;
+  font-weight: 500;
   position: relative;
 }
 
@@ -4675,16 +4674,4 @@ body.g2g-modal-open { overflow: hidden; }
   .nurse-picker-controls { flex-direction: column; align-items: stretch; }
   .nurse-hospital-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
   .nurse-hospital-list { max-height: 320px; }
-}
-
-/* 數字顯示改用無襯線系統字：serif fallback 到 Georgia 的舊式襯線數字不好看，
-   統一讓所有 KPI/統計/金額/排名等「數字」用系統 sans（此規則置於最後，覆蓋原 serif 設定）。 */
-.stat-card .stat-num,
-.stat-card .kpi-num,
-.off-money-avg,
-.salary-stats .ss-value,
-.manifesto-item .num,
-.kpi-strip-num,
-.calc-rank-num {
-  font-family: var(--font-sans);
 }

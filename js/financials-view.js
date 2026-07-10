@@ -148,11 +148,11 @@ export function renderFinancialTrendChart(canvas, hospital, fields, opts = {}) {
       plugins: {
         legend: {
           position: 'bottom',
-          labels: { font: { family: "-apple-system,'PingFang TC','Microsoft JhengHei', sans-serif", size: 12 }, color: '#46557A', usePointStyle: true, padding: 12 },
+          labels: { font: { family: "'Noto Sans TC', sans-serif", size: 12 }, color: '#46557A', usePointStyle: true, padding: 12 },
         },
         tooltip: {
           backgroundColor: '#1D3557', padding: 10, cornerRadius: 8,
-          titleFont: { family: "-apple-system,'PingFang TC','Microsoft JhengHei', sans-serif" }, bodyFont: { family: "-apple-system,'PingFang TC','Microsoft JhengHei', sans-serif" },
+          titleFont: { family: "'Noto Sans TC', sans-serif" }, bodyFont: { family: "'Noto Sans TC', sans-serif" },
           callbacks: {
             label: (ctx) => {
               const v = ctx.parsed.y;
@@ -167,11 +167,11 @@ export function renderFinancialTrendChart(canvas, hospital, fields, opts = {}) {
         } },
       },
       scales: {
-        x: { grid: { display: false }, border: { color: '#E5E9F0' }, ticks: { color: '#6B7C93', font: { family: "-apple-system,'PingFang TC','Microsoft JhengHei', sans-serif", size: 11 } } },
+        x: { grid: { display: false }, border: { color: '#E5E9F0' }, ticks: { color: '#6B7C93', font: { family: "'Noto Sans TC', sans-serif", size: 11 } } },
         y: {
-          title: { display: true, text: unit === '百分比' ? '百分比 (%)' : (unit ? `金額（${unit}）` : ''), color: '#46557A', font: { family: "-apple-system,'PingFang TC','Microsoft JhengHei', sans-serif", size: 12 } },
+          title: { display: true, text: unit === '百分比' ? '百分比 (%)' : (unit ? `金額（${unit}）` : ''), color: '#46557A', font: { family: "'Noto Sans TC', sans-serif", size: 12 } },
           grid: { color: '#F1F3F7' }, border: { display: false },
-          ticks: { color: '#6B7C93', font: { family: "-apple-system,'PingFang TC','Microsoft JhengHei', sans-serif", size: 11 } },
+          ticks: { color: '#6B7C93', font: { family: "'Noto Sans TC', sans-serif", size: 11 } },
         },
       },
     },

@@ -1,5 +1,5 @@
 // 一鍵產生單筆資料分享圖片（1080 × 1350，IG 4:5 直式）
-import { getCategory } from './config.js?v=b9c376e5bf';
+import { getCategory } from './config.js?v=3cb29e39e7';
 
 const KEY_LABELS = {
   // ICU
@@ -101,7 +101,7 @@ function buildShareCardHTML(row) {
       background:linear-gradient(180deg, #F1FAEE 0%, #FFFFFF 60%, #F1FAEE 100%);
       padding:56px 60px 64px;
       box-sizing:border-box;
-      font-family:-apple-system,'PingFang TC','Microsoft JhengHei', 'Microsoft JhengHei', sans-serif;
+      font-family:'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
       color:#1D3557;
       position:relative;
       overflow:hidden;
