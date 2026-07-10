@@ -2,12 +2,10 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=71961ba1c4';
-import { renderIcons, icon } from './icons.js?v=71961ba1c4';
-import { HOSPITALS } from './hospitals.js?v=71961ba1c4';
-import { HOSPITALS_EXTRA } from './hospitals-extra.js?v=71961ba1c4';
-import { markContributed } from './contribution-gate.js?v=71961ba1c4';
-import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=71961ba1c4';
+import { mountLayout } from './components.js?v=e156ee6260';
+import { renderIcons, icon } from './icons.js?v=e156ee6260';
+import { markContributed } from './contribution-gate.js?v=e156ee6260';
+import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=e156ee6260';
 
 const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 避開易混字元 0/O/1/I/L
 let currentCaptcha = '';
@@ -543,15 +541,21 @@ const ACCRED_LEVELS = new Set(['醫學中心', '區域醫院', '地區醫院']);
 
 // 簡稱 map（accred 正式名稱 → VPN 簡稱）由共用模組載入
 const HOSPITAL_SHORT_MAP = _SHORT_MAP;
-// 評鑑名單（自動產生）＋ 手動補充清單（漏收院區），合併供機構名稱自動建議使用
-const HOSPITALS_ALL = HOSPITALS.concat(HOSPITALS_EXTRA);
-window.addEventListener('hospitalShortNamesReady', () => {
-  // 若下拉已展開，觸發重新 render 讓簡稱立即生效
+// 機構名稱自動建議清單：由單一權威主檔 data/hospitals-master.json 載入
+// （取代舊的 hospitals.js / hospitals-extra.js 兩個 JS 模組）。含評鑑名單 + vpn-only 補充。
+let HOSPITALS_ALL = [];
+function reRenderPickerIfOpen() {
+  // 若下拉已展開，觸發重新 render 讓新資料/簡稱立即生效
   const input = document.getElementById('f-institutionName');
   if (input && document.activeElement === input) {
     input.dispatchEvent(new Event('input', { bubbles: true }));
   }
-});
+}
+fetch('data/hospitals-master.json?v=4fa5c785d4')
+  .then((r) => (r.ok ? r.json() : null))
+  .then((d) => { if (d && Array.isArray(d.hospitals)) { HOSPITALS_ALL = d.hospitals; reRenderPickerIfOpen(); } })
+  .catch((e) => console.warn('[form] 機構主檔載入失敗:', e.message));
+window.addEventListener('hospitalShortNamesReady', reRenderPickerIfOpen);
 
 function attachInstitutionAutocomplete() {
   const nameInput = document.getElementById('f-institutionName');
