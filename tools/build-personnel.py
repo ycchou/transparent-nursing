@@ -254,7 +254,7 @@ def main():
 
     # 套用人工修正（來源 PDF 異常值，例如數字誤植）。修正表以 code 為鍵，
     # 套用到該 code 同月份的所有院區記錄（現有修正皆單院區，key branchKey='')。
-    corr_path = os.path.join(ROOT, 'data', 'personnel-corrections.json')
+    corr_path = os.path.join(ROOT, 'data', 'manual', 'personnel-corrections.json')
     ncorr = 0
     if os.path.exists(corr_path):
         with open(corr_path, encoding='utf-8') as fp:

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-套用 data/hospitals-corrections.json 的人工修正到：
+套用 data/manual/hospitals-corrections.json 的人工修正到：
   - data/hospitals-merged.json   （name=fullName、shortName、address、city）
   - data/nurse-ratio.json        （name=vpnName、fullName、address、city）
   - data/hospitals-address-overlay.json （若該碼有 overlay，同步 address/city）
@@ -19,7 +19,7 @@ if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CORR_FILE = os.path.join(ROOT, 'data', 'hospitals-corrections.json')
+CORR_FILE = os.path.join(ROOT, 'data', 'manual', 'hospitals-corrections.json')
 MERGED = os.path.join(ROOT, 'data', 'hospitals-merged.json')
 NURSE = os.path.join(ROOT, 'data', 'nurse-ratio.json')
 OVERLAY = os.path.join(ROOT, 'data', 'hospitals-address-overlay.json')

@@ -31,7 +31,7 @@ if hasattr(sys.stdout, 'reconfigure'):
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MERGED_FILE = os.path.join(ROOT, 'data', 'hospitals-merged.json')
-OVERRIDES_FILE = os.path.join(ROOT, 'data', 'violations-hospital-overrides.json')
+OVERRIDES_FILE = os.path.join(ROOT, 'data', 'manual', 'violations-hospital-overrides.json')
 OUT_MAP = os.path.join(ROOT, 'data', 'violations-hospital-map.json')
 OUT_UNMATCHED = os.path.join(ROOT, 'data', 'violations-hospital-map.unmatched.txt')
 
@@ -239,7 +239,7 @@ def main():
 
     with open(OUT_UNMATCHED, 'w', encoding='utf-8') as f:
         f.write(f'# 疑似醫院但未命中的違規機構名稱（{len(unmatched_hosp)} 筆）\n')
-        f.write('# 若確為評鑑醫院，可在 data/violations-hospital-overrides.json 補上 {"名稱": "代號"}。\n\n')
+        f.write('# 若確為評鑑醫院，可在 data/manual/violations-hospital-overrides.json 補上 {"名稱": "代號"}。\n\n')
         for n in unmatched_hosp:
             f.write(n + '\n')
 
