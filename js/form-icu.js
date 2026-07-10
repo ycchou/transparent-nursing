@@ -69,7 +69,7 @@ const ICU_FORM_SCHEMA = [
   { name: 'nightShiftRatio', label: '大夜護病比', type: 'radio', required: true,
     options: ICU_RATIO_OPTIONS },
 
-  { section: '值班班別與津貼',
+  { section: '輪班別與津貼',
     intro: `「包班」指固定承包該班別、不輪回白班者；「非包班」為一般三班輪值。<br>下方津貼欄若無此制度或不適用，請填「無」。` },
   { name: 'shiftSystem', label: '班別', type: 'radio', required: true,
     options: ['三班制', '兩班制', '其他'] },
@@ -81,6 +81,8 @@ const ICU_FORM_SCHEMA = [
     help: '每班津貼金額（元）；無則填「無」' },
   { name: 'nightAllowancePack', label: '大夜班津貼/班（包班）', type: 'text', required: true,
     help: '每班津貼金額（元）；無則填「無」' },
+  { name: 'hasOnCall', label: '是否有 on call 班', type: 'radio', required: true,
+    options: ['是', '否'] },
 
   { section: '業務與工時' },
   { name: 'dailyOvertime', label: '每日平均加班時間', type: 'radio',
