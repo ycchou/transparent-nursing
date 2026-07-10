@@ -54,20 +54,23 @@
 | `VPN登錄之各月份三班護病比/*.ods` | build-nurse-ratio.py |
 | `醫院醫事人力持續性監測/**/*.pdf` | build-personnel.py |
 
-## 重建順序（依相依）
+## 重建
+
+一鍵重建（依相依順序跑所有工具，最後破快取＋驗證）：
 
 ```bash
-python tools/extract-hospitals.py          # 評鑑 PDF → hospitals.json
-python tools/fetch-hospital-addresses.py   # 健保署 → address-overlay
-python tools/build-nurse-ratio.py          # → nurse-ratio.json, hospitals-merged.json
-python tools/apply-hospital-corrections.py # 套用 manual/hospitals-corrections
-python tools/build-personnel.py            # 監測 PDF → personnel/*
-python tools/build-hospitals-master.py     # → hospitals-master.json（表單用）
-python tools/build-violations-map.py       # 違規 CSV → map
-node   tools/fetch-financials-list.js && python tools/fetch-hospital-financials.py
-python tools/split-hospital-data.py        # 拆 per-code 小檔（機構總覽用）
-python tools/stamp-assets.py               # 最後：自動蓋 ?v= 內容雜湊（破快取）
+python tools/build-all.py           # 只跑離線步驟（從 repo 內原始檔重建）
+python tools/build-all.py --fetch   # 連健保署等連網步驟一起（完整重建）
+python tools/build-all.py --list    # 只列出計畫、不執行
 ```
 
-> 破快取：改完程式或資料後跑 `python tools/stamp-assets.py`，會自動把所有 `?v=` 更新為
-> 內容雜湊；**不要再手動改版本號**。CI 可用 `--check` 驗證是否已 stamp。
+各步驟對應的工具與順序見 `tools/build-all.py` 的 `STEPS`；單獨重建某項也可直接跑該工具
+（見上表「產生工具」欄）。
+
+### 破快取（版本號）
+改完程式或資料後跑 `python tools/stamp-assets.py`，自動把所有 `?v=` 更新為內容雜湊，
+**不要再手動改版本號**。CI 可用 `python tools/stamp-assets.py --check` 驗證是否已 stamp。
+
+### 資料驗證
+`python tools/validate-data.py` 檢查主要 JSON 輸出的結構（必填欄位、per-code 拆檔數量
+是否與來源相符等）；非 0 退出＝有問題，適合放進 CI／部署前。
