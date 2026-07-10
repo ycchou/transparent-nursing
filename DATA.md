@@ -24,7 +24,9 @@
 | `hospitals-merged.json` | `build-nurse-ratio.py` | hospitals.json＋VPN ODS | ✅ hospital / hospital-shortname |
 | `hospitals-master.json` | `build-hospitals-master.py` | hospitals.json＋nurse-ratio＋overlay＋健保署 | ✅ 表單機構建議 |
 | `hospitals-address-overlay.json` | `fetch-hospital-addresses.py` | 健保署特約機構開放資料 | ✅ nurse-ratio / hospital |
-| `nurse-ratio.json` | `build-nurse-ratio.py` | VPN 三班護病比 ODS＋hospitals.json | ✅ nurse-ratio / hospital |
+| `nurse-ratio.json` | `build-nurse-ratio.py` | VPN 三班護病比 ODS＋hospitals.json | ✅ nurse-ratio（獨立頁） |
+| `nurse-ratio/by-code/{code}.json` | `split-hospital-data.py` | nurse-ratio.json 拆 per-code | ✅ hospital（機構總覽惰性載） |
+| `financials/{code}.json` | `split-hospital-data.py` | hospital-financials.json 拆 per-code | ✅ hospital（機構總覽惰性載） |
 | `personnel-index.json`、`personnel-aggregate.json`、`personnel/{id}.json` | `build-personnel.py` | 醫事人力監測 PDF | ✅ personnel / hospital |
 | `hospital-financials-list.json` | `fetch-financials-list.js` | 健保署 | —（餵下一支） |
 | `hospital-financials.json` | `fetch-hospital-financials.py` | 健保署財務公開 API | ✅ financials / hospital |
@@ -63,6 +65,7 @@ python tools/build-personnel.py            # 監測 PDF → personnel/*
 python tools/build-hospitals-master.py     # → hospitals-master.json（表單用）
 python tools/build-violations-map.py       # 違規 CSV → map
 node   tools/fetch-financials-list.js && python tools/fetch-hospital-financials.py
+python tools/split-hospital-data.py        # 拆 per-code 小檔（機構總覽用）
 python tools/stamp-assets.py               # 最後：自動蓋 ?v= 內容雜湊（破快取）
 ```
 

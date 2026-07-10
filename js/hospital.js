@@ -5,9 +5,9 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { renderIcons } from './icons.js?v=e156ee6260';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=e156ee6260';
-import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=e156ee6260';
+import { renderIcons } from './icons.js?v=b522f773bd';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=b522f773bd';
+import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=b522f773bd';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -15,19 +15,19 @@ import {
   shiftStatus,
   classifyHospital,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=e156ee6260';
-import { loadAll } from './data-loader.js?v=e156ee6260';
-import { renderKpiStrip } from './stats-kpi.js?v=e156ee6260';
-import { renderTable, showDetailModal } from './table.js?v=e156ee6260';
+} from './nurse-ratio-view.js?v=b522f773bd';
+import { loadAll } from './data-loader.js?v=b522f773bd';
+import { renderKpiStrip } from './stats-kpi.js?v=b522f773bd';
+import { renderTable, showDetailModal } from './table.js?v=b522f773bd';
 import {
-  ensureFinancialsLoaded, getFinancials, getFinancialFields,
+  loadFinancialsHospital, getFinancialFields,
   formatVal as finFormatVal, signClass as finSignClass, formatRocYear as finRocYear,
   renderFinancialTrendChart,
-} from './financials-view.js?v=e156ee6260';
+} from './financials-view.js?v=b522f773bd';
 import {
   loadPersonnelHospital, ensurePersonnelIndex,
   renderStaffChart as renderPmStaffChart, renderBedChart as renderPmBedChart,
-} from './personnel-view.js?v=e156ee6260';
+} from './personnel-view.js?v=b522f773bd';
 import {
   createCsvLoader,
   parseROCDate,
@@ -35,9 +35,8 @@ import {
   shortenLocation,
   fineToWan,
   formatROCDate,
-} from './records-common.js?v=e156ee6260';
+} from './records-common.js?v=b522f773bd';
 
-const NURSE_URL = 'data/nurse-ratio.json?v=1dbde60d94';
 const MERGED_URL = 'data/hospitals-merged.json?v=c017631e69';
 const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=f3d4b868a4';
 const ADDR_OVERLAY_URL = 'data/hospitals-address-overlay.json?v=4f090ac4c9';
@@ -72,8 +71,6 @@ const violLoaders = VIOL_FEEDS.map((f) => ({
 const state = {
   merged: [],          // 去重後的評鑑醫院（每個 code 一筆）
   byCode: new Map(),    // code → merged entry
-  nrData: null,         // nurse-ratio.json
-  nrByCode: new Map(),  // code → [nurse hospital branch, ...]
   violMap: {},          // 違規名稱 → code
   platformRows: null,   // 眾包資料（lazy）
   violRows: null,       // 違規資料（lazy，已 tag feed）
@@ -123,9 +120,9 @@ async function fetchJson(url) {
 }
 
 async function loadBaseData() {
-  const [merged, nrData, violMapDoc, addrDoc] = await Promise.all([
+  // 護病比不再整包載入：改在 renderNurseSection 依 code 惰性載入小檔（見下）。
+  const [merged, violMapDoc, addrDoc] = await Promise.all([
     fetchJson(MERGED_URL),
-    fetchJson(NURSE_URL).catch(() => null),
     fetchJson(VIOL_MAP_URL).catch(() => ({ map: {} })),
     fetchJson(ADDR_OVERLAY_URL).catch(() => ({ overlay: {} })),
   ]);
@@ -160,16 +157,22 @@ async function loadBaseData() {
   });
   state.byCode = byCode;
   state.merged = [...byCode.values()];
-
-  if (nrData) {
-    state.nrData = nrData;
-    (nrData.hospitals || []).forEach((h) => {
-      const arr = state.nrByCode.get(h.code) || [];
-      arr.push(h);
-      state.nrByCode.set(h.code, arr);
-    });
-  }
   state.violMap = (violMapDoc && violMapDoc.map) || {};
+}
+
+// 護病比單院小檔（機構總覽用）：data/nurse-ratio/by-code/{code}.json → { months, hospitals }
+const _nrCodeCache = new Map();
+async function loadNurseByCode(code) {
+  if (_nrCodeCache.has(code)) return _nrCodeCache.get(code);
+  try {
+    const r = await fetch(`data/nurse-ratio/by-code/${code}.json?v=1dbde60d94`, { cache: 'default' });
+    const d = r.ok ? await r.json() : null;
+    _nrCodeCache.set(code, d);
+    return d;
+  } catch {
+    _nrCodeCache.set(code, null);
+    return null;
+  }
 }
 
 async function ensurePlatformRows() {
@@ -341,18 +344,23 @@ function renderBranchTabs(host, tabs, renderPanel) {
   if (tabs.length) renderPanel(tabs[0].data, panel);
 }
 
-// 護病比：每個 code 可能對應多院區 → 單院區直接呈現，多院區用院區頁簽切換。
+// 護病比：依 code 惰性載入單院小檔（data/nurse-ratio/by-code/{code}.json）；
+// 每個 code 可能對應多院區 → 單院區直接呈現，多院區用院區頁簽切換。
 function renderNurseSection(code, hosp) {
   const wrap = document.getElementById('nr-section-body');
   const empty = document.getElementById('nr-section-empty');
-  const branches = state.nrByCode.get(code) || [];
-  if (!state.nrData || branches.length === 0) {
-    wrap.innerHTML = '';
-    empty.hidden = false;
-    return;
-  }
+  wrap.innerHTML = '<div style="padding:16px;color:var(--muted);">載入護病比資料中⋯</div>';
   empty.hidden = true;
-  const months = state.nrData.months;
+
+  loadNurseByCode(code).then((data) => {
+    if (state.currentCode !== code) return;
+    const branches = (data && data.hospitals) || [];
+    if (branches.length === 0) {
+      wrap.innerHTML = '';
+      empty.hidden = false;
+      return;
+    }
+    const months = data.months;
 
   const renderOne = (b, panel) => {
     const latestMonth = [...months].reverse().find((m) => b.history[m]);
@@ -386,18 +394,21 @@ function renderNurseSection(code, hosp) {
     renderIcons();
   };
 
-  if (branches.length === 1) {
-    wrap.innerHTML = '';
-    const panel = document.createElement('div');
-    panel.style.marginTop = '8px';
-    wrap.appendChild(panel);
-    renderOne(branches[0], panel);
-  } else {
-    renderBranchTabs(wrap, branches.map((b) => ({ label: b.branch || '本院', data: b })), renderOne);
-  }
+    if (branches.length === 1) {
+      wrap.innerHTML = '';
+      const panel = document.createElement('div');
+      panel.style.marginTop = '8px';
+      wrap.appendChild(panel);
+      renderOne(branches[0], panel);
+    } else {
+      renderBranchTabs(wrap, branches.map((b) => ({ label: b.branch || '本院', data: b })), renderOne);
+    }
+  }).catch(() => {
+    if (state.currentCode === code) { wrap.innerHTML = ''; empty.hidden = false; }
+  });
 }
 
-// 財務概況（健保署）：以 code 對接 hospital-financials.json → 最新年 KPI + 趨勢圖
+// 財務概況（健保署）：依 code 惰性載入單院小檔 data/financials/{code}.json → 最新年 KPI + 趨勢圖
 function renderFinancialsSection(code) {
   const empty = document.getElementById('fi-section-empty');
   const kpi = document.getElementById('fi-section-kpi');
@@ -408,11 +419,10 @@ function renderFinancialsSection(code) {
   chartWrap.hidden = true;
   empty.hidden = true;
 
-  ensureFinancialsLoaded().then(() => {
+  loadFinancialsHospital(code).then((h) => {
     if (state.currentCode !== code) return;
-    const h = getFinancials(code);
     if (!h || !h.rows || !h.rows.length) { empty.hidden = false; return; }
-    const fields = getFinancialFields();
+    const fields = h.fields || getFinancialFields();
     const latest = [...h.rows].sort((a, b) => Number(b.YEAR) - Number(a.YEAR))[0];
     const card = (key, label) => {
       const val = latest[`${key}Val`]; const rank = latest[`${key}Rank`];

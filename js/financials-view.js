@@ -46,6 +46,22 @@ export function getFinancialFields() {
   return (_doc && _doc.fields) || {};
 }
 
+// 單院財務（機構總覽用）：只載入 data/financials/{code}.json（含 fields+rows），
+// 不必整包下載 hospital-financials.json。回傳 { fields, rows, … } 或 null。
+const _codeCache = new Map();
+export async function loadFinancialsHospital(code) {
+  if (_codeCache.has(code)) return _codeCache.get(code);
+  try {
+    const r = await fetch(`data/financials/${code}.json?v=6f127aeaff`, { cache: 'default' });
+    const d = r.ok ? await r.json() : null;
+    _codeCache.set(code, d);
+    return d;
+  } catch {
+    _codeCache.set(code, null);
+    return null;
+  }
+}
+
 // "7.08" / "-0.31%" / "1,234" → number（無法解析回 null）
 export function parseNum(v) {
   if (v == null || v === '') return null;

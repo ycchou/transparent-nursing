@@ -88,13 +88,22 @@ def main():
     for src in list(sources):
         sources[src] = stamp(sources[src], src)
 
-    # 動態 personnel per-院區檔：無法逐檔雜湊，用 personnel-index 的雜湊當代理（同批重建）
-    idx = os.path.join(ROOT, 'data', 'personnel-index.json')
-    if os.path.exists(idx):
-        pv = data_hash(idx)
+    # 動態路徑（模板字串 ${...}）無法逐檔雜湊，改用「同批重建的代理檔」雜湊當版本：
+    #   personnel/${id}       → personnel-index.json
+    #   nurse-ratio/by-code   → nurse-ratio.json
+    #   financials/${code}    → hospital-financials.json
+    DYNAMIC_PROXY = [
+        (r"(data/personnel/\$\{[^}]+\}\.json)\?v=[\w]+", 'personnel-index.json'),
+        (r"(data/nurse-ratio/by-code/\$\{[^}]+\}\.json)\?v=[\w]+", 'nurse-ratio.json'),
+        (r"(data/financials/\$\{[^}]+\}\.json)\?v=[\w]+", 'hospital-financials.json'),
+    ]
+    for pat, proxy in DYNAMIC_PROXY:
+        pf = os.path.join(ROOT, 'data', proxy)
+        if not os.path.exists(pf):
+            continue
+        pv = data_hash(pf)
         for src in list(sources):
-            sources[src] = re.sub(r"(data/personnel/\$\{[^}]+\}\.json)\?v=[\w]+",
-                                  rf"\1?v={pv}", sources[src])
+            sources[src] = re.sub(pat, rf"\1?v={pv}", sources[src])
 
     # 比對磁碟、決定要不要寫
     dirty = []
