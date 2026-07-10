@@ -43,19 +43,16 @@
   <meta name="twitter:description" content="6 大圖表呈現護理職場真實樣貌。" />
   <meta name="twitter:image" content="https://transparentnursing.example.org/assets/og-image.svg" />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=2408122eb3" />
+  <link rel="stylesheet" href="css/styles.css?v=98f3733e7d" />
 
     <!-- modulepreload：平行載入 ES module 鏈（首次造訪快 30-50%） -->
-  <link rel="modulepreload" href="./js/charts.js?v=b522f773bd" />
-  <link rel="modulepreload" href="./js/components.js?v=b522f773bd" />
-  <link rel="modulepreload" href="./js/config.js?v=b522f773bd" />
-  <link rel="modulepreload" href="./js/data-loader.js?v=b522f773bd" />
-  <link rel="modulepreload" href="./js/icons.js?v=b522f773bd" />
-  <link rel="modulepreload" href="./js/official-stats.js?v=b522f773bd" />
-  <link rel="modulepreload" href="./js/pwa-prompt.js?v=b522f773bd" />
+  <link rel="modulepreload" href="./js/charts.js?v=b9c376e5bf" />
+  <link rel="modulepreload" href="./js/components.js?v=b9c376e5bf" />
+  <link rel="modulepreload" href="./js/config.js?v=b9c376e5bf" />
+  <link rel="modulepreload" href="./js/data-loader.js?v=b9c376e5bf" />
+  <link rel="modulepreload" href="./js/icons.js?v=b9c376e5bf" />
+  <link rel="modulepreload" href="./js/official-stats.js?v=b9c376e5bf" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=b9c376e5bf" />
 
   <!-- JSON-LD Structured Data：官方參考數據四份資料集 -->
   <script type="application/ld+json">
@@ -696,18 +693,18 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
   <script type="module">
-    import { CATEGORIES } from './js/config.js?v=b522f773bd';
-    import { mountLayout } from './js/components.js?v=b522f773bd';
-    import { renderIcons } from './js/icons.js?v=b522f773bd';
-    import { loadAll, startAutoRefresh } from './js/data-loader.js?v=b522f773bd';
+    import { CATEGORIES } from './js/config.js?v=b9c376e5bf';
+    import { mountLayout } from './js/components.js?v=b9c376e5bf';
+    import { renderIcons } from './js/icons.js?v=b9c376e5bf';
+    import { loadAll, startAutoRefresh } from './js/data-loader.js?v=b9c376e5bf';
     import {
       chartCategoryDistribution, chartInstitutionStacked, chartHoursHistogram,
       chartOvertimePolicy, chartRecommend, chartAtmosphereByCategory,
       chartLocationDistribution, chartSalaryDistribution,
-    } from './js/charts.js?v=b522f773bd';
+    } from './js/charts.js?v=b9c376e5bf';
     import {
       renderOfficialSourceA, renderOfficialSourceB, renderOfficialSourceC, renderOfficialSourceD,
-    } from './js/official-stats.js?v=b522f773bd';
+    } from './js/official-stats.js?v=b9c376e5bf';
 
     mountLayout();
     renderIcons();

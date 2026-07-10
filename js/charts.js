@@ -1,7 +1,7 @@
 // Chart.js 視覺化封裝
-import { CATEGORIES } from './config.js?v=b522f773bd';
+import { CATEGORIES } from './config.js?v=b9c376e5bf';
 
-const FONT_FAMILY = "'Noto Sans TC', 'Inter', sans-serif";
+const FONT_FAMILY = "-apple-system,'PingFang TC','Microsoft JhengHei', 'Inter', sans-serif";
 const PALETTE = ['#2E86AB', '#06A77D', '#E63946', '#F4A261', '#9D4EDD', '#A8DADC', '#1D3557', '#46557A'];
 
 const baseOpts = {
@@ -295,7 +295,7 @@ export function chartSalaryDistribution(canvas, rows, statsEl) {
         ctx.setLineDash([]);
         // Label 在上方；太近時 Q1/Q3 上推 14px 避免疊到中位數
         ctx.fillStyle = color;
-        ctx.font = `${label === '中位數' ? '700' : '600'} 11px "Noto Sans TC", sans-serif`;
+        ctx.font = `${label === '中位數' ? '700' : '600'} 11px -apple-system,'PingFang TC','Microsoft JhengHei', sans-serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'bottom';
         const labelY = lifted ? chartArea.top - 16 : chartArea.top - 2;

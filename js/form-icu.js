@@ -1,13 +1,13 @@
 // 加護病房（ICU）自建表單：只定義 ICU 專屬區塊，其餘（機構基本資料 /
 // 業務與工時共用欄 / 薪資與年資 / 整體評價）沿用 form-sections.js 的共用正本。
 
-import { initDepartmentForm } from './form-engine.js?v=b522f773bd';
+import { initDepartmentForm } from './form-engine.js?v=b9c376e5bf';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
   SALARY_SECTION,
   EVALUATION_SECTION,
-} from './form-sections.js?v=b522f773bd';
+} from './form-sections.js?v=b9c376e5bf';
 
 // 各班護病比共用選項（第一線值班護理人員：照護病人數）
 const ICU_RATIO_OPTIONS = [

@@ -5,9 +5,9 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { renderIcons } from './icons.js?v=b522f773bd';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=b522f773bd';
-import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=b522f773bd';
+import { renderIcons } from './icons.js?v=b9c376e5bf';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=b9c376e5bf';
+import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=b9c376e5bf';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -15,19 +15,19 @@ import {
   shiftStatus,
   classifyHospital,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=b522f773bd';
-import { loadAll } from './data-loader.js?v=b522f773bd';
-import { renderKpiStrip } from './stats-kpi.js?v=b522f773bd';
-import { renderTable, showDetailModal } from './table.js?v=b522f773bd';
+} from './nurse-ratio-view.js?v=b9c376e5bf';
+import { loadAll } from './data-loader.js?v=b9c376e5bf';
+import { renderKpiStrip } from './stats-kpi.js?v=b9c376e5bf';
+import { renderTable, showDetailModal } from './table.js?v=b9c376e5bf';
 import {
   loadFinancialsHospital, getFinancialFields,
   formatVal as finFormatVal, signClass as finSignClass, formatRocYear as finRocYear,
   renderFinancialTrendChart,
-} from './financials-view.js?v=b522f773bd';
+} from './financials-view.js?v=b9c376e5bf';
 import {
   loadPersonnelHospital, ensurePersonnelIndex,
   renderStaffChart as renderPmStaffChart, renderBedChart as renderPmBedChart,
-} from './personnel-view.js?v=b522f773bd';
+} from './personnel-view.js?v=b9c376e5bf';
 import {
   createCsvLoader,
   parseROCDate,
@@ -35,7 +35,7 @@ import {
   shortenLocation,
   fineToWan,
   formatROCDate,
-} from './records-common.js?v=b522f773bd';
+} from './records-common.js?v=b9c376e5bf';
 
 const MERGED_URL = 'data/hospitals-merged.json?v=c017631e69';
 const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=f3d4b868a4';
