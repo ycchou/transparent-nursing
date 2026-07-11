@@ -1,63 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 部署後請把 transparentnursing.example.org 換成你的實際網域 -->
+<!-- 網域為佔位/暫時網域。換網域時見 SEO.md：一行 sed 全站替換 ycchou.github.io/transparent-nursing -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://transparentnursing.example.org/</loc>
+    <loc>https://ycchou.github.io/transparent-nursing/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://transparentnursing.example.org/platform.html</loc>
+    <loc>https://ycchou.github.io/transparent-nursing/platform.html</loc>
     <changefreq>hourly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://transparentnursing.example.org/stats.html</loc>
+    <loc>https://ycchou.github.io/transparent-nursing/stats.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://transparentnursing.example.org/nurse-ratio.html</loc>
+    <loc>https://ycchou.github.io/transparent-nursing/nurse-ratio.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://transparentnursing.example.org/hospital.html</loc>
+    <loc>https://ycchou.github.io/transparent-nursing/hospital.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://transparentnursing.example.org/financials.html</loc>
+    <loc>https://ycchou.github.io/transparent-nursing/financials.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://transparentnursing.example.org/records.html?type=labor</loc>
+    <loc>https://ycchou.github.io/transparent-nursing/personnel.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://ycchou.github.io/transparent-nursing/records.html?type=labor</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://transparentnursing.example.org/records.html?type=gender</loc>
+    <loc>https://ycchou.github.io/transparent-nursing/records.html?type=gender</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://transparentnursing.example.org/records.html?type=osha</loc>
+    <loc>https://ycchou.github.io/transparent-nursing/records.html?type=osha</loc>
     <changefreq>daily</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://transparentnursing.example.org/participate.html</loc>
+    <loc>https://ycchou.github.io/transparent-nursing/participate.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://transparentnursing.example.org/about.html</loc>
+    <loc>https://ycchou.github.io/transparent-nursing/participate-icu.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ycchou.github.io/transparent-nursing/participate-dialysis.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://ycchou.github.io/transparent-nursing/about.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://transparentnursing.example.org/terms.html</loc>
+    <loc>https://ycchou.github.io/transparent-nursing/terms.html</loc>
     <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>

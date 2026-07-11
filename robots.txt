@@ -11,4 +11,4 @@ Disallow: /data/mock/
 Disallow: /tools/
 
 # Sitemap
-Sitemap: https://transparentnursing.example.org/sitemap.xml
+Sitemap: https://ycchou.github.io/transparent-nursing/sitemap.xml
