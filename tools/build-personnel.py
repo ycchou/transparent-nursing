@@ -182,8 +182,22 @@ def rows_from_page(page, xs, row_gap=4.0):
     return out
 
 
+def norm_code(raw):
+    """PDF 有時掉了機構代碼開頭的 0（如 '145030020' 實為 '0145030020'）。
+    抽出數字後，9 碼補一個前導 0 成 10 碼；回傳 10 碼字串或 None。
+    這是跨院汙染的根因修正：舊版用 re.fullmatch(r'\\d{10}') 會漏掉掉 0 的 9 碼代碼，
+    導致 cur 不換手、下一家的『實際人數』覆蓋到上一家。"""
+    d = re.sub(r'\D', '', raw or '')
+    if len(d) == 9:
+        d = '0' + d
+    return d if len(d) == 10 else None
+
+
 def parse_one(task):
     """worker：解析單一 PDF，回傳該檔所有醫院(院區)-月記錄。
+    以『有醫院名稱(row[2]) + 可解析代碼(row[1])』的列作為新醫院區塊起點；其後無名稱的
+    續列（實際人數/設置標準）歸屬同一家。關鍵防護：同一家若已有某型值(actual/eval/setup)，
+    不再覆蓋 —— 第二筆同型值代表『下一家醫院的表頭未被辨識』，覆蓋即跨院汙染，故拒絕。
     以 (code, branchKey) 為鍵，使同代號多院區（如北市聯醫）各自成列、互不覆蓋。"""
     path, level, mkey = task
     out = {}   # (code, branchKey) -> rec
@@ -197,21 +211,25 @@ def parse_one(task):
                 for row in rows:
                     if not row or len(row) < 24:
                         continue
-                    code = clean(row[1])
+                    name = clean(row[2])
+                    code = norm_code(clean(row[1]))
                     rtype = clean(row[10])
-                    if re.fullmatch(r'\d{10}', code):
+                    if code:                                  # 有可解析代碼 → 新醫院區塊起點
+                        # 註：以代碼(非名稱)為換手訊號；某些月份表頭名稱格會空白，
+                        # 若額外要求 name 會漏掉該院當月（官方名之後由 merged_names 補回）。
                         branch = clean(row[3])
                         key = (code, normalize_branch(branch))
                         cur = key
                         rec = out.setdefault(key, {'code': code, 'mkey': mkey, 'level': level,
-                                                    'name': clean(row[2]), 'branch': branch,
+                                                    'name': name, 'branch': branch,
                                                     'city': clean(row[4]),
                                                     'beds': [to_int(row[6 + i]) for i in range(4)],
                                                     'rows': {}})
-                        if rtype in ROW_TYPES:
+                        if rtype in ROW_TYPES and ROW_TYPES[rtype] not in rec['rows']:
                             rec['rows'][ROW_TYPES[rtype]] = [to_int(row[11 + i]) for i in range(13)]
-                    elif code == '' and rtype in ROW_TYPES and cur and cur in out:
-                        out[cur]['rows'][ROW_TYPES[rtype]] = [to_int(row[11 + i]) for i in range(13)]
+                    elif cur and cur in out and rtype in ROW_TYPES:
+                        if ROW_TYPES[rtype] not in out[cur]['rows']:   # 不覆蓋 → 防跨院汙染
+                            out[cur]['rows'][ROW_TYPES[rtype]] = [to_int(row[11 + i]) for i in range(13)]
     except Exception as e:
         return ('ERR', f"{os.path.basename(path)}: {e}")
     return ('OK', list(out.values()))

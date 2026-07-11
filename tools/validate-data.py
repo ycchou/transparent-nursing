@@ -70,6 +70,24 @@ def validate():
               'personnel-index：categories 應為 13 職類')
         check(all(h.get('id') and h.get('code') for h in pi.get('hospitals', [])),
               'personnel-index：有筆缺 id/code')
+        # 抽查每家 per-code 檔的結構：月份遞增不重複、actual/eval 每列為 None 或長度 13
+        bad_struct = []
+        for h in pi.get('hospitals', []):
+            p = os.path.join(ROOT, 'data', 'personnel', f"{h['id']}.json")
+            if not os.path.exists(p):
+                continue
+            try:
+                d = json.load(open(p, encoding='utf-8'))
+            except Exception:
+                bad_struct.append(f"{h['id']}(壞JSON)"); continue
+            months = d.get('months', [])
+            if months != sorted(months) or len(months) != len(set(months)):
+                bad_struct.append(f"{h['id']}(月份未遞增或重複)")
+            for key in ('actual', 'eval'):
+                seq = d.get(key, [])
+                if len(seq) != len(months) or any(r is not None and len(r) != 13 for r in seq):
+                    bad_struct.append(f"{h['id']}({key} 列數/欄數不符)"); break
+        check(not bad_struct, f'personnel/*.json：{len(bad_struct)} 家結構異常 {bad_struct[:5]}')
 
     # 5) 財務
     fi = load('data/hospital-financials.json')
