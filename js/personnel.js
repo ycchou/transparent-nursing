@@ -2,13 +2,13 @@
 // 資料：data/personnel-index.json（picker 清單）＋ data/personnel/{code}.json（單院時間序列）
 // 來源：衛福部「醫院醫事人力持續性監測結果」。
 
-import { renderIcons, icon } from './icons.js?v=b18fe7a50a';
-import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=b18fe7a50a';
+import { renderIcons, icon } from './icons.js?v=c1fc9f9fa9';
+import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=c1fc9f9fa9';
 import {
   CAT_COLORS, BED_COLORS, DEFAULT_ON, mLabel, baseLineCfg,
   renderStaffChart, renderBedChart, loadPersonnelHospital,
-} from './personnel-view.js?v=b18fe7a50a';
-import { showToast } from './toast.js?v=b18fe7a50a';
+} from './personnel-view.js?v=c1fc9f9fa9';
+import { showToast } from './toast.js?v=c1fc9f9fa9';
 
 const INDEX_URL = 'data/personnel-index.json';
 const AGG_URL = 'data/personnel-aggregate.json';
@@ -154,8 +154,13 @@ async function selectHospital(id, updateUrl = false) {
   lvBadge.textContent = h.level || '—';
   lvBadge.className = `nurse-level-badge nurse-level-${levelSlug(h.level)}`;
   const first = h.months[0], last = h.months[h.months.length - 1];
-  const branchNote = h.branch ? ` ｜ 院區：${h.branch}` : '';
-  document.getElementById('pm-meta').textContent = `機構代號：${h.code}${branchNote} ｜ 資料期間：${mLabel(first)}–${mLabel(last)}（${h.months.length} 個月）`;
+  const branchNote = h.branch ? ` ｜ 院區：${escapeHtml(h.branch)}` : '';
+  const profileCode = h.code || h.id;
+  const profileLink = profileCode
+    ? `<div style="margin-top:4px;"><a href="hospital.html?code=${encodeURIComponent(profileCode)}" style="color:var(--primary);text-decoration:underline;text-underline-offset:2px;">查看機構總覽 →</a></div>`
+    : '';
+  document.getElementById('pm-meta').innerHTML =
+    `機構代號：${escapeHtml(h.code)}${branchNote} ｜ 資料期間：${mLabel(first)}–${mLabel(last)}（${h.months.length} 個月）${profileLink}`;
 
   state.staffChart = renderStaffChart(document.getElementById('pm-staff-chart'), h, state.staffChart);
   renderBedWithEmpty(h);

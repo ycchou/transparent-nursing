@@ -6,7 +6,7 @@
 //     hospitals: [{ id, name, level, history: { "11207": {day, eve, night} } }]
 //   }
 
-import { renderIcons } from './icons.js?v=b18fe7a50a';
+import { renderIcons } from './icons.js?v=c1fc9f9fa9';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -14,7 +14,7 @@ import {
   shiftStatus,
   classifyHospital as classifyHospitalView,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=b18fe7a50a';
+} from './nurse-ratio-view.js?v=c1fc9f9fa9';
 
 const DATA_URL = 'data/nurse-ratio.json?v=1dbde60d94';
 
@@ -222,7 +222,7 @@ function renderDetail(hosp) {
   if (hosp.address) lines.push(`地址：${escapeHtml(hosp.address)}`);
   const profileCode = hosp.code || hosp.id;
   if (profileCode) {
-    lines.push(`<a href="hospital.html?code=${encodeURIComponent(profileCode)}" style="color:var(--primary);text-decoration:underline;text-underline-offset:2px;">查看整合檔案（含眾包資料・違規紀錄）→</a>`);
+    lines.push(`<a href="hospital.html?code=${encodeURIComponent(profileCode)}" style="color:var(--primary);text-decoration:underline;text-underline-offset:2px;">查看機構總覽 →</a>`);
   }
   document.getElementById('hosp-code').innerHTML = lines.map((l) => `<div>${l}</div>`).join('');
 

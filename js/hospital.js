@@ -5,9 +5,9 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { renderIcons } from './icons.js?v=b18fe7a50a';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=b18fe7a50a';
-import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=b18fe7a50a';
+import { renderIcons } from './icons.js?v=c1fc9f9fa9';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=c1fc9f9fa9';
+import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=c1fc9f9fa9';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -15,20 +15,21 @@ import {
   shiftStatus,
   classifyHospital,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=b18fe7a50a';
-import { loadAll } from './data-loader.js?v=b18fe7a50a';
-import { renderKpiStrip } from './stats-kpi.js?v=b18fe7a50a';
-import { renderTable, showDetailModal } from './table.js?v=b18fe7a50a';
-import { notePwaIntent } from './pwa-prompt.js?v=b18fe7a50a';
+} from './nurse-ratio-view.js?v=c1fc9f9fa9';
+import { loadAll } from './data-loader.js?v=c1fc9f9fa9';
+import { renderKpiStrip } from './stats-kpi.js?v=c1fc9f9fa9';
+import { renderTable, showDetailModal } from './table.js?v=c1fc9f9fa9';
+import { hasContributed } from './contribution-gate.js?v=c1fc9f9fa9';
+import { notePwaIntent } from './pwa-prompt.js?v=c1fc9f9fa9';
 import {
   loadFinancialsHospital, getFinancialFields,
   formatVal as finFormatVal, signClass as finSignClass, formatRocYear as finRocYear,
   renderFinancialTrendChart,
-} from './financials-view.js?v=b18fe7a50a';
+} from './financials-view.js?v=c1fc9f9fa9';
 import {
   loadPersonnelHospital, ensurePersonnelIndex,
   renderStaffChart as renderPmStaffChart, renderBedChart as renderPmBedChart,
-} from './personnel-view.js?v=b18fe7a50a';
+} from './personnel-view.js?v=c1fc9f9fa9';
 import {
   createCsvLoader,
   parseROCDate,
@@ -36,7 +37,7 @@ import {
   shortenLocation,
   fineToWan,
   formatROCDate,
-} from './records-common.js?v=b18fe7a50a';
+} from './records-common.js?v=c1fc9f9fa9';
 
 const MERGED_URL = 'data/hospitals-merged.json?v=c017631e69';
 const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=f3d4b868a4';
@@ -533,7 +534,11 @@ function renderPlatformSection(hosp) {
     renderKpiStrip(kpi, matched);
     // 每筆資料的表格/卡片視圖，點列可開明細（重用分享平台的 modal）
     table.dataset.view = window.matchMedia('(max-width: 640px)').matches ? 'card' : 'table';
-    renderTable(table, matched, { slug: 'all', onRowClick: (r) => showDetailModal(r) });
+    // Soft Give-to-Get：未貢獻者鎖住排序、只顯示前 5 筆；填表分享後解鎖完整資料
+    const gate = hasContributed()
+      ? { gated: false, limit: Infinity, isFilteredView: false }
+      : { gated: true, limit: 5, isFilteredView: false };
+    renderTable(table, matched, { slug: 'all', onRowClick: (r) => showDetailModal(r), gate });
   });
 }
 
