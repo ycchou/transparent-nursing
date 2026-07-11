@@ -202,6 +202,11 @@ def parse_one(task):
     path, level, mkey = task
     out = {}   # (code, branchKey) -> rec
     cur = None  # 目前的 (code, branchKey)
+    # 多院區長院區名（如「和平婦幼院區」）會被 PDF 拆到 code 列前後幾個無 code 的碎片列上，
+    # code 列本身的院區欄可能只剩片段甚至空白。若不接回，normalize 後變空字串 → snap_branch
+    # 會誤貼到別的院區、覆蓋其資料。以下用兩個狀態把碎片接回同一院區：
+    pend_branch = ''    # code 列「之前」累積的院區前綴（例：'和平婦幼院'）
+    after_code = False  # 已見 code 列、尚未見資料列 → 之後的碎片是「後綴」（例：'區'）
     try:
         with pdfplumber.open(path) as pdf:
             xs = col_bounds(pdf.pages[0])
@@ -214,10 +219,13 @@ def parse_one(task):
                     name = clean(row[2])
                     code = norm_code(clean(row[1]))
                     rtype = clean(row[10])
+                    branch_cell = clean(row[3])
                     if code:                                  # 有可解析代碼 → 新醫院區塊起點
                         # 註：以代碼(非名稱)為換手訊號；某些月份表頭名稱格會空白，
                         # 若額外要求 name 會漏掉該院當月（官方名之後由 merged_names 補回）。
-                        branch = clean(row[3])
+                        branch = pend_branch + branch_cell     # 接上前綴碎片
+                        pend_branch = ''
+                        after_code = True
                         key = (code, normalize_branch(branch))
                         cur = key
                         rec = out.setdefault(key, {'code': code, 'mkey': mkey, 'level': level,
@@ -228,8 +236,18 @@ def parse_one(task):
                         if rtype in ROW_TYPES and ROW_TYPES[rtype] not in rec['rows']:
                             rec['rows'][ROW_TYPES[rtype]] = [to_int(row[11 + i]) for i in range(13)]
                     elif cur and cur in out and rtype in ROW_TYPES:
+                        after_code = False
+                        pend_branch = ''
                         if ROW_TYPES[rtype] not in out[cur]['rows']:   # 不覆蓋 → 防跨院汙染
                             out[cur]['rows'][ROW_TYPES[rtype]] = [to_int(row[11 + i]) for i in range(13)]
+                    elif branch_cell:
+                        # 無 code、非資料列，卻帶院區字串 → 多院區長名被 PDF 拆出的碎片。
+                        if after_code and cur and cur in out:
+                            out[cur]['branch'] += branch_cell   # 後綴('區')接回目前院區
+                        else:
+                            pend_branch += branch_cell          # 前綴('和平婦幼院')留給下一個 code 列
+                    else:
+                        pend_branch = ''
     except Exception as e:
         return ('ERR', f"{os.path.basename(path)}: {e}")
     return ('OK', list(out.values()))
