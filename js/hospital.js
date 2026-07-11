@@ -5,9 +5,9 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { renderIcons } from './icons.js?v=f609aa5aa4';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=f609aa5aa4';
-import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=f609aa5aa4';
+import { renderIcons } from './icons.js?v=346e0eb88e';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=346e0eb88e';
+import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=346e0eb88e';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -15,20 +15,20 @@ import {
   shiftStatus,
   classifyHospital,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=f609aa5aa4';
-import { loadAll } from './data-loader.js?v=f609aa5aa4';
-import { renderKpiStrip } from './stats-kpi.js?v=f609aa5aa4';
-import { renderTable, showDetailModal } from './table.js?v=f609aa5aa4';
-import { notePwaIntent } from './pwa-prompt.js?v=f609aa5aa4';
+} from './nurse-ratio-view.js?v=346e0eb88e';
+import { loadAll } from './data-loader.js?v=346e0eb88e';
+import { renderKpiStrip } from './stats-kpi.js?v=346e0eb88e';
+import { renderTable, showDetailModal } from './table.js?v=346e0eb88e';
+import { notePwaIntent } from './pwa-prompt.js?v=346e0eb88e';
 import {
   loadFinancialsHospital, getFinancialFields,
   formatVal as finFormatVal, signClass as finSignClass, formatRocYear as finRocYear,
   renderFinancialTrendChart,
-} from './financials-view.js?v=f609aa5aa4';
+} from './financials-view.js?v=346e0eb88e';
 import {
   loadPersonnelHospital, ensurePersonnelIndex,
   renderStaffChart as renderPmStaffChart, renderBedChart as renderPmBedChart,
-} from './personnel-view.js?v=f609aa5aa4';
+} from './personnel-view.js?v=346e0eb88e';
 import {
   createCsvLoader,
   parseROCDate,
@@ -36,7 +36,7 @@ import {
   shortenLocation,
   fineToWan,
   formatROCDate,
-} from './records-common.js?v=f609aa5aa4';
+} from './records-common.js?v=346e0eb88e';
 
 const MERGED_URL = 'data/hospitals-merged.json?v=c017631e69';
 const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=f3d4b868a4';

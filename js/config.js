@@ -175,8 +175,10 @@ export const CATEGORIES = [
     specificFields: [
       { key: 'dialysisType', label: '透析類別', type: 'enum',
         options: ['血液透析', '腹膜透析', '兩者皆有'] },
-      { key: 'hdRatio', label: 'HD 床護比', type: 'string' },
-      { key: 'pdCount', label: 'PD 人數比', type: 'string' },
+      { key: 'hdRatio', label: 'HD 常態護病比', type: 'string' },
+      { key: 'hdPeakRatio', label: 'HD 最忙時', type: 'string' },
+      { key: 'pdCount', label: 'PD 常態護病比', type: 'string' },
+      { key: 'pdPeakRatio', label: 'PD 最忙時', type: 'string' },
       { key: 'batchShift', label: '批班制度', type: 'enum', options: ['有', '無'] },
       { key: 'onCallType', label: '值班型態', type: 'string' },
       { key: 'onCallRotation', label: '值班輪值方式', type: 'string' },
