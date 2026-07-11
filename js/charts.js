@@ -1,5 +1,5 @@
 // Chart.js 視覺化封裝
-import { CATEGORIES } from './config.js?v=346e0eb88e';
+import { CATEGORIES } from './config.js?v=d9feff7d21';
 
 const FONT_FAMILY = "'Noto Sans TC', 'Inter', sans-serif";
 const PALETTE = ['#2E86AB', '#06A77D', '#E63946', '#F4A261', '#9D4EDD', '#A8DADC', '#1D3557', '#46557A'];

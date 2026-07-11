@@ -1,7 +1,7 @@
 // 共用 header / footer 注入 + 工具函式
-import { SITE, CATEGORIES } from './config.js?v=346e0eb88e';
-import { icon, renderIcons } from './icons.js?v=346e0eb88e';
-import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=346e0eb88e';
+import { SITE, CATEGORIES } from './config.js?v=d9feff7d21';
+import { icon, renderIcons } from './icons.js?v=d9feff7d21';
+import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=d9feff7d21';
 
 // 主辦/協作工會 — 共用資料（footer / hero strip / about 都引用）
 export const ORGS = {
@@ -54,6 +54,25 @@ const NAV_ITEMS = [
   { href: 'about.html',       label: '關於',     match: ['about.html'] },
 ];
 
+// 軟鎖：鎖定期只顯示公開頁的選單/頁尾連結（總開關與白名單在 js/gate.js）
+function gatePageOf(href) {
+  return (href || '').split('#')[0].split('?')[0].split('/').pop() || 'index.html';
+}
+function gateAllowed(href) {
+  if (typeof window === 'undefined' || !window.__SITE_LOCKED__) return true;
+  return (window.__GATE_PUBLIC__ || []).indexOf(gatePageOf(href)) !== -1;
+}
+function visibleNav() {
+  if (typeof window === 'undefined' || !window.__SITE_LOCKED__) return NAV_ITEMS;
+  return NAV_ITEMS.map((it) => {
+    if (it.children) {
+      const kids = it.children.filter((c) => gateAllowed(c.href));
+      return kids.length ? { ...it, children: kids } : null;
+    }
+    return gateAllowed(it.href) ? it : null;
+  }).filter(Boolean);
+}
+
 // Logo 標誌：白色心型 + 紅色 ECG 線（以 apple-touch-icon 為基準 1.5× 等比放大，
 // 顯示尺寸 26px 在 32px 色塊內 → 心型佔 32px 方塊約 62% 寬度）
 const HEART_PULSE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" style="display:block;">
@@ -95,7 +114,7 @@ function headerHTML() {
             <span>護理職場透明化</span>
           </a>
           <nav class="site-nav" id="site-nav">
-            ${NAV_ITEMS.map((it) => navItemHTML(it, page)).join('')}
+            ${visibleNav().map((it) => navItemHTML(it, page)).join('')}
           </nav>
           <button class="nav-toggle" id="nav-toggle" aria-label="開啟選單">
             ${icon('menu')}
@@ -120,28 +139,28 @@ function footerHTML() {
               ${SITE.tagline}<br/>讓護理職場的真實情境，被看見、被討論、被改變。
             </p>
           </div>
+          ${(() => {
+            const explore = [
+              { href: 'platform.html', label: '分享平台' },
+              { href: 'stats.html', label: '統計摘要' },
+              { href: 'nurse-ratio.html', label: '護病比' },
+              { href: 'hospital.html', label: '機構總覽' },
+              { href: 'personnel.html', label: '人力監控' },
+              { href: 'records.html?type=labor', label: '勞檢紀錄' },
+              { href: 'records.html?type=gender', label: '性平紀錄' },
+              { href: 'records.html?type=osha', label: '職安紀錄' },
+              { href: 'participate.html', label: '填寫表單' },
+            ].filter((l) => gateAllowed(l.href));
+            const cats = gateAllowed('platform.html')
+              ? CATEGORIES.map((c) => `<li><a href="platform.html#${c.slug}">${c.name}</a></li>`).join('')
+              : '';
+            return `
           <div>
             <h4>探索</h4>
-            <ul>
-              <li><a href="platform.html">分享平台</a></li>
-              <li><a href="stats.html">統計摘要</a></li>
-              <li><a href="nurse-ratio.html">護病比</a></li>
-              <li><a href="hospital.html">機構總覽</a></li>
-              <li><a href="personnel.html">人力監控</a></li>
-              <li><a href="records.html?type=labor">勞檢紀錄</a></li>
-              <li><a href="records.html?type=gender">性平紀錄</a></li>
-              <li><a href="records.html?type=osha">職安紀錄</a></li>
-              <li><a href="participate.html">填寫表單</a></li>
-            </ul>
+            <ul>${explore.map((l) => `<li><a href="${l.href}">${l.label}</a></li>`).join('')}</ul>
           </div>
-          <div>
-            <h4>類別</h4>
-            <ul>
-              ${CATEGORIES.map((c) =>
-                `<li><a href="platform.html#${c.slug}">${c.name}</a></li>`
-              ).join('')}
-            </ul>
-          </div>
+          ${cats ? `<div>\n            <h4>類別</h4>\n            <ul>${cats}</ul>\n          </div>` : ''}`;
+          })()}
           <div>
             <h4>聯絡</h4>
             <ul>
@@ -203,18 +222,18 @@ export function mountLayout() {
 
   // 背景預載 platform 資料：使用者切到分享平台時即時顯示，無需等待 fetch
   // 動態 import 避免循環依賴與初始 parse 成本
-  import('./data-loader.js?v=346e0eb88e')
+  import('./data-loader.js?v=d9feff7d21')
     .then(({ preloadAll }) => preloadAll && preloadAll())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
 
   // 背景預載勞檢/性平/職安紀錄資料：同樣讓使用者切過去時即時顯示
-  import('./violations.js?v=346e0eb88e')
+  import('./violations.js?v=d9feff7d21')
     .then(({ preloadViolations }) => preloadViolations && preloadViolations())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./gender.js?v=346e0eb88e')
+  import('./gender.js?v=d9feff7d21')
     .then(({ preloadGender }) => preloadGender && preloadGender())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./osha.js?v=346e0eb88e')
+  import('./osha.js?v=d9feff7d21')
     .then(({ preloadOsha }) => preloadOsha && preloadOsha())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
 }

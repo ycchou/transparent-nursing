@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#2E86AB" />
+  <!-- 軟鎖總開關（js/gate.js）：鎖定期非公開頁導向 coming-soon -->
+  <script src="./js/gate.js?v=d9feff7d21"></script>
 
   <!-- SEO -->
   <title>填寫表單 — 護理職場透明化運動</title>
@@ -49,12 +51,12 @@
   <link rel="stylesheet" href="css/styles.css?v=0a084f5837" />
 
     <!-- modulepreload：平行載入 ES module 鏈（首次造訪快 30-50%） -->
-  <link rel="modulepreload" href="./js/components.js?v=346e0eb88e" />
-  <link rel="modulepreload" href="./js/config.js?v=346e0eb88e" />
-  <link rel="modulepreload" href="./js/contribution-gate.js?v=346e0eb88e" />
-  <link rel="modulepreload" href="./js/icons.js?v=346e0eb88e" />
-  <link rel="modulepreload" href="./js/pwa-prompt.js?v=346e0eb88e" />
-  <link rel="modulepreload" href="./js/toast.js?v=346e0eb88e" />
+  <link rel="modulepreload" href="./js/components.js?v=d9feff7d21" />
+  <link rel="modulepreload" href="./js/config.js?v=d9feff7d21" />
+  <link rel="modulepreload" href="./js/contribution-gate.js?v=d9feff7d21" />
+  <link rel="modulepreload" href="./js/icons.js?v=d9feff7d21" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=d9feff7d21" />
+  <link rel="modulepreload" href="./js/toast.js?v=d9feff7d21" />
 
   <!-- 強制清除舊版 cache -->
   <script>
@@ -245,10 +247,10 @@
   <div id="app-footer"></div>
 
   <script type="module">
-    import { CATEGORIES } from './js/config.js?v=346e0eb88e';
-    import { mountLayout } from './js/components.js?v=346e0eb88e';
-    import { icon, renderIcons } from './js/icons.js?v=346e0eb88e';
-    import { hasContributed, markContributed } from './js/contribution-gate.js?v=346e0eb88e';
+    import { CATEGORIES } from './js/config.js?v=d9feff7d21';
+    import { mountLayout } from './js/components.js?v=d9feff7d21';
+    import { icon, renderIcons } from './js/icons.js?v=d9feff7d21';
+    import { hasContributed, markContributed } from './js/contribution-gate.js?v=d9feff7d21';
 
     mountLayout();
 
