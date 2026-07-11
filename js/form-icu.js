@@ -1,24 +1,18 @@
 // 加護病房（ICU）自建表單：只定義 ICU 專屬區塊，其餘（機構基本資料 /
 // 業務與工時共用欄 / 薪資與年資 / 整體評價）沿用 form-sections.js 的共用正本。
 
-import { initDepartmentForm } from './form-engine.js?v=e15fb4d31d';
+import { initDepartmentForm } from './form-engine.js?v=196247a243';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
   SALARY_SECTION,
   EVALUATION_SECTION,
-} from './form-sections.js?v=e15fb4d31d';
+} from './form-sections.js?v=196247a243';
 
-// 各班護病比共用選項（第一線值班護理人員：照護病人數）
-const ICU_RATIO_OPTIONS = [
-  '原則上 1:2',
-  '原則上 1:2，偶爾會 1:3',
-  '原則上 1:2，經常會 1:3',
-  '原則上 1:3',
-  '原則上 1:3，偶爾會 1:4',
-  '原則上 1:3，經常會 1:4',
-  '其他',
-];
+// 護病比刻度：把「常態」與「最忙時」拆成兩個純數字維度，直觀且可統計。
+// （第一線值班護理人員：照顧病人床數，例：1:2 ＝ 1 名護理師顧 2 床）
+const ICU_RATIO_BASE = ['1:1', '1:2', '1:3', '1:4', '1:5 以上', '其他'];
+const ICU_RATIO_PEAK = ['同常態（不會更差）', '1:2', '1:3', '1:4', '1:5 以上', '其他'];
 
 // 護病比配置引導文字：可展開查看完整法規／評鑑條文全文
 const RATIO_INTRO = `<strong>ICU 護病比設置標準與評鑑基準</strong><br><br>
@@ -60,12 +54,18 @@ const ICU_FORM_SCHEMA = [
     help: 'PP care＝Perineal Care 陰部護理；QD＝每日、QOD＝隔日、PRN＝需要時' },
 
   { section: '護病比配置', intro: RATIO_INTRO },
-  { name: 'dayShiftRatio', label: '白班護病比', type: 'radio', required: true,
-    options: ICU_RATIO_OPTIONS },
-  { name: 'eveningShiftRatio', label: '小夜護病比', type: 'radio', required: true,
-    options: ICU_RATIO_OPTIONS },
-  { name: 'nightShiftRatio', label: '大夜護病比', type: 'radio', required: true,
-    options: ICU_RATIO_OPTIONS },
+  { name: 'dayShiftRatio', label: '白班・常態護病比', type: 'radio', required: true,
+    options: ICU_RATIO_BASE, help: '平常 1 名護理師照顧幾床（例：1:2 ＝ 1 名顧 2 床）' },
+  { name: 'dayPeakRatio', label: '白班・最忙時', type: 'radio', required: true,
+    options: ICU_RATIO_PEAK, help: '尖峰／忙的時候最多會到幾床' },
+  { name: 'eveningShiftRatio', label: '小夜・常態護病比', type: 'radio', required: true,
+    options: ICU_RATIO_BASE },
+  { name: 'eveningPeakRatio', label: '小夜・最忙時', type: 'radio', required: true,
+    options: ICU_RATIO_PEAK },
+  { name: 'nightShiftRatio', label: '大夜・常態護病比', type: 'radio', required: true,
+    options: ICU_RATIO_BASE },
+  { name: 'nightPeakRatio', label: '大夜・最忙時', type: 'radio', required: true,
+    options: ICU_RATIO_PEAK },
 
   { section: '輪班別與津貼',
     intro: `「包班」指固定承包該班別、不輪回白班者；「非包班」為一般三班輪值。<br>下方津貼欄若無此制度或不適用，請填「無」。` },
