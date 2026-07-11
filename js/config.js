@@ -91,7 +91,7 @@ export const CATEGORIES = [
       { key: 'icuTrainingContract', label: 'ICU Training 簽約', type: 'enum',
         options: ['是', '否', '無 ICU Training'] },
       { key: 'icuTrainingPeriod', label: 'ICU Training 期間', type: 'string' },
-      { key: 'promotionReport', label: '晉升報告制度', type: 'string' },
+      { key: 'promotionReport', label: '進階制度', type: 'string' },
       { key: 'advancedTherapyTraining', label: 'CVVH/IABP/ECMO 受訓', type: 'multi' },
       { key: 'specialBenefits', label: '特殊福利', type: 'text' },
     ],

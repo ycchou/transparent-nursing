@@ -1,18 +1,18 @@
 // 加護病房（ICU）自建表單：只定義 ICU 專屬區塊，其餘（機構基本資料 /
 // 業務與工時共用欄 / 薪資與年資 / 整體評價）沿用 form-sections.js 的共用正本。
 
-import { initDepartmentForm } from './form-engine.js?v=196247a243';
+import { initDepartmentForm } from './form-engine.js?v=f609aa5aa4';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
   SALARY_SECTION,
   EVALUATION_SECTION,
-} from './form-sections.js?v=196247a243';
+} from './form-sections.js?v=f609aa5aa4';
 
 // 護病比刻度：把「常態」與「最忙時」拆成兩個純數字維度，直觀且可統計。
 // （第一線值班護理人員：照顧病人床數，例：1:2 ＝ 1 名護理師顧 2 床）
 const ICU_RATIO_BASE = ['1:1', '1:2', '1:3', '1:4', '1:5 以上', '其他'];
-const ICU_RATIO_PEAK = ['同常態（不會更差）', '1:2', '1:3', '1:4', '1:5 以上', '其他'];
+const ICU_RATIO_PEAK = ['1:1', '1:2', '1:3', '1:4', '1:5 以上', '其他'];
 
 // 護病比配置引導文字：可展開查看完整法規／評鑑條文全文
 const RATIO_INTRO = `<strong>ICU 護病比設置標準與評鑑基準</strong><br><br>
@@ -94,7 +94,7 @@ const ICU_FORM_SCHEMA = [
     options: ['是', '否', '無 ICU Training'] },
   { name: 'icuTrainingPeriod', label: 'ICU Training 受訓期間', type: 'radio',
     options: ['1 個月以內', '1-3 個月', '3-6 個月', '6 個月以上', '不一定／依個人進度', '無 ICU Training'] },
-  { name: 'promotionReport', label: '晉升報告（進階報告）制度', type: 'radio',
+  { name: 'promotionReport', label: '進階制度', type: 'radio',
     options: ['自願參加、有加給', '自願參加、無加給', '強制要求、有加給', '強制要求、無加給', '無此制度'],
     help: '晉升／進階（如 N1→N2）時的報告制度與加給情形' },
   { name: 'advancedTherapyTraining', label: 'CVVH／IABP／ECMO 是否派員受訓', type: 'checkbox',
