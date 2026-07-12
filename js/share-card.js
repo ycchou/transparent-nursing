@@ -1,5 +1,5 @@
 // 一鍵產生單筆資料分享圖片（1080 × 1350，IG 4:5 直式）
-import { getCategory } from './config.js?v=c1fc9f9fa9';
+import { getCategory } from './config.js?v=0fdcc10059';
 
 const KEY_LABELS = {
   // ICU
@@ -40,9 +40,12 @@ const KEY_LABELS = {
   onCallRequired: 'On-call 制度',
   radiationExposure: '輻射暴露',
   // Other
-  customCategory: '單位類別',
-  serviceTarget: '服務對象',
-  mainDuties: '主要業務',
+  workplaceType: '職場類型',
+  practiceRegistration: '需執業登記',
+  otherCerts: '其他證書資格',
+  scheduleSystem: '排班制度',
+  fieldWork: '需外出值勤',
+  violenceRisk: '暴力風險',
   // Common
   weeklyHours: '每週工時',
   overtimePolicy: '加班費合規',
@@ -58,7 +61,7 @@ const SHARE_FIELDS = {
   outpatient: ['clinicType',  'registrationPerSession', 'staffPerClinic','weeklyHours', 'overtimePolicy'],
   or:         ['orSpecialty', 'orRole',        'dailyCases',      'weeklyHours', 'overtimePolicy'],
   special:    ['specialType', 'dailyCases',    'onCallRequired',  'weeklyHours', 'overtimePolicy'],
-  other:      ['customCategory','serviceTarget','dayShiftRatio',  'weeklyHours', 'overtimePolicy'],
+  other:      ['workplaceType','scheduleSystem','violenceRisk',   'weeklyHours', 'overtimePolicy'],
 };
 
 const REC_LABEL = { 5: '非常推薦', 4: '推薦', 3: '保留', 2: '不推薦', 1: '非常不推薦' };

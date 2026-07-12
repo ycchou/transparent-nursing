@@ -516,6 +516,49 @@ const OTHER_PROFILES = [
   { unitName: '某飯店醫護室', customCategory: '職業護理', serviceTarget: '旅客與員工', mainDuties: '急救/輕傷處置', shiftRatio: '1:500 客房', titles: ['N2'] },
 ];
 const OTHER_PREFIXES = ['信安', '康健', '愛心', '安心', '長青', '幸福', '聖德', '銀光', '太陽花', '永康', '美樂蒂', '貝兒', '欣欣', '璞玉', '天恩', '康寧'];
+// customCategory → 對外顯示的職場類型（config.js 'other' 的 workplaceType 選項）
+const WORKPLACE_TYPE_MAP = {
+  '居家護理': '居家護理',
+  '月子中心': '月子中心',
+  '學校單位': '學校護理師',
+  '長期照護': '長照機構／護理之家',
+  '產業護理': '職護／廠護',
+  '職業護理': '職護／廠護',
+  '公共衛生': '公共衛生／衛生所',
+};
+// 各 customCategory 的欄位傾向（貼近真實：職護/公衛多見紅休、居家需外出、月子輪班等）
+function genOtherAttrs(cat) {
+  const isIndustrial = cat === '產業護理' || cat === '職業護理';
+  const isDayShiftJob = isIndustrial || cat === '公共衛生' || cat === '學校單位';
+  const isHomeCare = cat === '居家護理';
+  const scheduleSystem = isDayShiftJob
+    ? '見紅休（週休二日＋國定假日）'
+    : isHomeCare
+      ? pick(['見紅休（週休二日＋國定假日）', '排班制（輪班）'])
+      : '排班制（輪班）';
+  const seesRedDays = scheduleSystem.startsWith('見紅休');
+  const shiftPattern = seesRedDays
+    ? '純白班'
+    : pick(['純白班', '需輪小夜', '需輪三班']);
+  const practiceRegistration = isIndustrial
+    ? pick(['需要', '需要', '不需要'])
+    : cat === '學校單位' ? pick(['需要', '不需要']) : '需要';
+  const otherCerts = isIndustrial ? '廠護／職業衛生護理'
+    : isHomeCare ? pick(['個案管理師', '長照相關證照', '無'])
+    : cat === '長期照護' ? pick(['個案管理師', '長照相關證照', '無', '無'])
+    : cat === '月子中心' ? pick(['IBCLC 國際泌乳顧問', '無', '無'])
+    : cat === '公共衛生' ? pick(['BLS／ACLS 等急救', '無'])
+    : '無';
+  const certRequired = otherCerts === '無' ? '不適用'
+    : isIndustrial ? pick(['是，必備', '否，加分用']) : '否，加分用';
+  const fieldWork = isHomeCare || cat === '公共衛生' ? '是'
+    : isIndustrial ? pick(['是', '否', '否']) : '否';
+  const violenceRisk = pick(['低', '低', '低', '中', '無']);
+  const dailyOvertime = pick(['無', '無', '1 小時內', '1-2 小時']);
+  const specialBenefits = pick(['', '', '進修補助', '員工旅遊補助', '彈性工時', '年節獎金']);
+  return { scheduleSystem, shiftPattern, practiceRegistration, otherCerts,
+    certRequired, fieldWork, violenceRisk, dailyOvertime, specialBenefits };
+}
 function generateOther(n) {
   return Array.from({ length: n }, () => {
     const p = pick(OTHER_PROFILES);
@@ -530,16 +573,24 @@ function generateOther(n) {
     const hours = pick(['35-40', '40-45', '40-45', '45-50']);
     const w = genWellbeing(institutionType, hours);
     const s = genSalary(institutionType, jobTitle);
+    const a = genOtherAttrs(p.customCategory);
     return {
       timestamp: genTimestamp(),
       institutionType, institutionName,
       unitName: p.unitName, location: pick(LOCATIONS), jobTitle,
-      customCategory: p.customCategory,
-      serviceTarget: p.serviceTarget, mainDuties: p.mainDuties,
-      dayShiftRatio: p.shiftRatio,
+      workplaceType: WORKPLACE_TYPE_MAP[p.customCategory] || '其他',
+      practiceRegistration: a.practiceRegistration,
+      otherCerts: a.otherCerts,
+      certRequired: a.certRequired,
+      scheduleSystem: a.scheduleSystem,
+      shiftPattern: a.shiftPattern,
+      fieldWork: a.fieldWork,
+      violenceRisk: a.violenceRisk,
+      dailyOvertime: a.dailyOvertime,
       weeklyHours: hours, overtimePolicy: w.overtimePolicy,
       yearsCurrent: s.yearsCurrent, yearsTotal: s.yearsTotal,
       annualSalary: s.annualSalary, monthlyBase: s.monthlyBase, annualBonus: s.annualBonus,
+      specialBenefits: a.specialBenefits,
       workAtmosphere: w.workAtmosphere, promotion: w.promotion,
       recommendIndex: w.recommendIndex, comment: genComment(w.recommendIndex),
     };
@@ -605,9 +656,10 @@ const CFG = [
            'annualSalary','monthlyBase','annualBonus','workAtmosphere','promotion','recommendIndex','comment'] },
   { slug: 'other', n: 90, gen: generateOther,
     cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
-           'customCategory','serviceTarget','mainDuties','dayShiftRatio',
+           'workplaceType','practiceRegistration','otherCerts','certRequired','scheduleSystem','shiftPattern',
+           'fieldWork','violenceRisk','dailyOvertime',
            'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
-           'annualSalary','monthlyBase','annualBonus','workAtmosphere','promotion','recommendIndex','comment'] },
+           'annualSalary','monthlyBase','annualBonus','specialBenefits','workAtmosphere','promotion','recommendIndex','comment'] },
 ];
 
 const REAL_LEVELS = new Set(['醫學中心', '區域醫院', '地區醫院']);

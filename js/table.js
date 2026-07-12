@@ -1,11 +1,11 @@
 // 表格 / 卡片 渲染、排序、Modal
-import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=c1fc9f9fa9';
-import { fmt, recommendPill, categoryTag } from './components.js?v=c1fc9f9fa9';
-import { icon } from './icons.js?v=c1fc9f9fa9';
-import { generateShareCard, showSharePreview } from './share-card.js?v=c1fc9f9fa9';
-import { ensureTooltip } from './tooltip.js?v=c1fc9f9fa9';
-import { pageSlice, renderPagination } from './pagination.js?v=c1fc9f9fa9';
-import { getHospitalCode } from './hospital-shortname.js?v=c1fc9f9fa9';
+import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=0fdcc10059';
+import { fmt, recommendPill, categoryTag } from './components.js?v=0fdcc10059';
+import { icon } from './icons.js?v=0fdcc10059';
+import { generateShareCard, showSharePreview } from './share-card.js?v=0fdcc10059';
+import { ensureTooltip } from './tooltip.js?v=0fdcc10059';
+import { pageSlice, renderPagination } from './pagination.js?v=0fdcc10059';
+import { getHospitalCode } from './hospital-shortname.js?v=0fdcc10059';
 
 // 機構名稱若對得上評鑑醫院，包成連到機構總覽頁的連結（stopPropagation 避免觸發列 modal）
 function withHospitalLink(name, innerHtml) {
@@ -39,7 +39,7 @@ const DEFAULT_TABLE_COLUMNS = {
   outpatient: ['location', 'institutionType', 'institutionName', 'unitName', 'registrationPerSession', 'weeklyHours', 'recommendIndex'],
   or:         ['location', 'institutionType', 'institutionName', 'unitName', 'orSpecialty', 'weeklyHours', 'recommendIndex'],
   special:    ['location', 'institutionType', 'institutionName', 'unitName', 'specialType', 'weeklyHours', 'recommendIndex'],
-  other:      ['location', 'institutionType', 'institutionName', 'unitName', 'customCategory', 'weeklyHours', 'recommendIndex'],
+  other:      ['location', 'institutionType', 'institutionName', 'unitName', 'workplaceType', 'weeklyHours', 'recommendIndex'],
 };
 
 const KEY_LABELS = {
@@ -97,9 +97,15 @@ const KEY_LABELS = {
   onCallRequired: 'On-call 制度',
   radiationExposure: '輻射暴露',
   // Other (其他)
-  customCategory: '單位類別',
-  serviceTarget: '服務對象',
-  mainDuties: '主要業務',
+  workplaceType: '職場類型',
+  practiceRegistration: '需執業登記',
+  otherCerts: '其他證書資格',
+  certRequired: '資格是否必備',
+  scheduleSystem: '排班制度',
+  shiftPattern: '輪班型態',
+  fieldWork: '需外出值勤',
+  violenceRisk: '暴力風險',
+  dailyOvertime: '每日平均加班',
   // common extras
   timestamp: '填寫時間',
   yearsCurrent: '現職年資',
