@@ -5,9 +5,9 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { renderIcons } from './icons.js?v=01e7db4caf';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=01e7db4caf';
-import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=01e7db4caf';
+import { renderIcons } from './icons.js?v=8f9cf82f88';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=8f9cf82f88';
+import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=8f9cf82f88';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -15,21 +15,21 @@ import {
   shiftStatus,
   classifyHospital,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=01e7db4caf';
-import { loadAll } from './data-loader.js?v=01e7db4caf';
-import { renderKpiStrip } from './stats-kpi.js?v=01e7db4caf';
-import { renderTable, showDetailModal } from './table.js?v=01e7db4caf';
-import { hasContributed } from './contribution-gate.js?v=01e7db4caf';
-import { notePwaIntent } from './pwa-prompt.js?v=01e7db4caf';
+} from './nurse-ratio-view.js?v=8f9cf82f88';
+import { loadAll } from './data-loader.js?v=8f9cf82f88';
+import { renderKpiStrip } from './stats-kpi.js?v=8f9cf82f88';
+import { renderTable, showDetailModal } from './table.js?v=8f9cf82f88';
+import { hasContributed } from './contribution-gate.js?v=8f9cf82f88';
+import { notePwaIntent } from './pwa-prompt.js?v=8f9cf82f88';
 import {
   loadFinancialsHospital, getFinancialFields,
   formatVal as finFormatVal, signClass as finSignClass, formatRocYear as finRocYear,
   renderFinancialTrendChart,
-} from './financials-view.js?v=01e7db4caf';
+} from './financials-view.js?v=8f9cf82f88';
 import {
   loadPersonnelHospital, ensurePersonnelIndex,
   renderStaffChart as renderPmStaffChart, renderBedChart as renderPmBedChart,
-} from './personnel-view.js?v=01e7db4caf';
+} from './personnel-view.js?v=8f9cf82f88';
 import {
   createCsvLoader,
   parseROCDate,
@@ -37,7 +37,7 @@ import {
   shortenLocation,
   fineToWan,
   formatROCDate,
-} from './records-common.js?v=01e7db4caf';
+} from './records-common.js?v=8f9cf82f88';
 
 const MERGED_URL = 'data/hospitals-merged.json?v=c017631e69';
 const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=f3d4b868a4';

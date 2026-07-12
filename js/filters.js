@@ -1,6 +1,6 @@
 // 篩選器：縣市、機構類別、推薦指數、工時、加班費 + 機構名稱搜尋
-import { COMMON_FIELDS } from './config.js?v=01e7db4caf';
-import { getShort as getHospitalShort } from './hospital-shortname.js?v=01e7db4caf';
+import { COMMON_FIELDS } from './config.js?v=8f9cf82f88';
+import { getShort as getHospitalShort } from './hospital-shortname.js?v=8f9cf82f88';
 
 const INSTITUTION_TYPES = ['醫學中心', '區域醫院', '地區醫院', '診所', '其他'];
 const RECOMMEND_LABELS = { 5: '非常推薦', 4: '推薦', 3: '保留', 2: '不推薦', 1: '非常不推薦' };

@@ -166,8 +166,6 @@ export const CATEGORIES = [
         options: ['有，完整 1 小時', '有，但常被中斷／縮短', '無'] },
       { key: 'clinicOvertimeWeekly', label: '門診逾時週平均', type: 'enum',
         options: ['幾乎不', '每週 1-2 次', '每週 3-4 次', '幾乎每診都逾時'] },
-      { key: 'overtimeReport', label: '加班申報', type: 'enum',
-        options: ['可覈實申報', '部分可申報', '不能申報（做功德）', '無加班'] },
       { key: 'patientComplaints', label: '被申訴頻率', type: 'enum',
         options: ['經常', '偶爾', '罕見', '幾乎沒有'] },
       { key: 'violenceRisk', label: '暴力風險', type: 'enum', options: ['高', '中', '低', '無'] },

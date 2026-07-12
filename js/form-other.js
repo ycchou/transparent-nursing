@@ -3,13 +3,13 @@
 // 只定義本類別專屬區塊，其餘（機構基本資料 / 業務與工時共用欄 / 薪資與年資 / 整體評價）
 // 沿用 form-sections.js 的共用正本；引擎邏輯在 form-engine.js。
 
-import { initDepartmentForm } from './form-engine.js?v=01e7db4caf';
+import { initDepartmentForm } from './form-engine.js?v=8f9cf82f88';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
   SALARY_SECTION,
   EVALUATION_SECTION,
-} from './form-sections.js?v=01e7db4caf';
+} from './form-sections.js?v=8f9cf82f88';
 
 // 職場類型：多元護理職涯的常見場域（選最接近者，可於短評補充）
 const WORKPLACE_TYPES = [
