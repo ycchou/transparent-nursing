@@ -259,7 +259,7 @@ export const CATEGORIES = [
       { key: 'scheduleSystem', label: '排班制度', type: 'enum',
         options: ['見紅休（週休二日＋國定假日）', '排班制（輪班）', '其他'] },
       { key: 'shiftPattern', label: '輪班型態', type: 'enum',
-        options: ['純白班', '需輪小夜', '需輪三班', '無需輪班', '其他'] },
+        options: ['純白班', '需輪小夜', '需輪三班', '其他'] },
       { key: 'fieldWork', label: '需外出值勤', type: 'enum', options: ['是', '否'] },
       { key: 'violenceRisk', label: '暴力風險', type: 'enum', options: ['高', '中', '低', '無'] },
       { key: 'dailyOvertime', label: '每日平均加班', type: 'enum',

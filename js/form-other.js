@@ -3,13 +3,13 @@
 // 只定義本類別專屬區塊，其餘（機構基本資料 / 業務與工時共用欄 / 薪資與年資 / 整體評價）
 // 沿用 form-sections.js 的共用正本；引擎邏輯在 form-engine.js。
 
-import { initDepartmentForm } from './form-engine.js?v=0fdcc10059';
+import { initDepartmentForm } from './form-engine.js?v=1957ae4d1f';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
   SALARY_SECTION,
   EVALUATION_SECTION,
-} from './form-sections.js?v=0fdcc10059';
+} from './form-sections.js?v=1957ae4d1f';
 
 // 職場類型：多元護理職涯的常見場域（選最接近者，可於短評補充）
 const WORKPLACE_TYPES = [
@@ -46,7 +46,7 @@ const OTHER_FORM_SCHEMA = [
     options: ['見紅休（週休二日＋國定假日）', '排班制（輪班）', '其他'],
     help: '見紅休＝比照行事曆紅字放假，多為純白班職務' },
   { name: 'shiftPattern', label: '輪班型態', type: 'radio',
-    options: ['純白班', '需輪小夜', '需輪三班', '無需輪班', '其他'] },
+    options: ['純白班', '需輪小夜', '需輪三班', '其他'] },
 
   { section: '業務與工時' },
   { name: 'fieldWork', label: '是否需外出值勤', type: 'radio', required: true,
