@@ -1,7 +1,7 @@
 // 共用 header / footer 注入 + 工具函式
-import { SITE, CATEGORIES } from './config.js?v=8f9cf82f88';
-import { icon, renderIcons } from './icons.js?v=8f9cf82f88';
-import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=8f9cf82f88';
+import { SITE, CATEGORIES } from './config.js?v=84f6322831';
+import { icon, renderIcons } from './icons.js?v=84f6322831';
+import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=84f6322831';
 
 // 主辦/協作工會 — 共用資料（footer / hero strip / about 都引用）
 export const ORGS = {
@@ -222,18 +222,18 @@ export function mountLayout() {
 
   // 背景預載 platform 資料：使用者切到分享平台時即時顯示，無需等待 fetch
   // 動態 import 避免循環依賴與初始 parse 成本
-  import('./data-loader.js?v=8f9cf82f88')
+  import('./data-loader.js?v=84f6322831')
     .then(({ preloadAll }) => preloadAll && preloadAll())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
 
   // 背景預載勞檢/性平/職安紀錄資料：同樣讓使用者切過去時即時顯示
-  import('./violations.js?v=8f9cf82f88')
+  import('./violations.js?v=84f6322831')
     .then(({ preloadViolations }) => preloadViolations && preloadViolations())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./gender.js?v=8f9cf82f88')
+  import('./gender.js?v=84f6322831')
     .then(({ preloadGender }) => preloadGender && preloadGender())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./osha.js?v=8f9cf82f88')
+  import('./osha.js?v=84f6322831')
     .then(({ preloadOsha }) => preloadOsha && preloadOsha())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
 }

@@ -1,11 +1,11 @@
 // 表格 / 卡片 渲染、排序、Modal
-import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=8f9cf82f88';
-import { fmt, recommendPill, categoryTag } from './components.js?v=8f9cf82f88';
-import { icon } from './icons.js?v=8f9cf82f88';
-import { generateShareCard, showSharePreview } from './share-card.js?v=8f9cf82f88';
-import { ensureTooltip } from './tooltip.js?v=8f9cf82f88';
-import { pageSlice, renderPagination } from './pagination.js?v=8f9cf82f88';
-import { getHospitalCode } from './hospital-shortname.js?v=8f9cf82f88';
+import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=84f6322831';
+import { fmt, recommendPill, categoryTag } from './components.js?v=84f6322831';
+import { icon } from './icons.js?v=84f6322831';
+import { generateShareCard, showSharePreview } from './share-card.js?v=84f6322831';
+import { ensureTooltip } from './tooltip.js?v=84f6322831';
+import { pageSlice, renderPagination } from './pagination.js?v=84f6322831';
+import { getHospitalCode } from './hospital-shortname.js?v=84f6322831';
 
 // 機構名稱若對得上評鑑醫院，包成連到機構總覽頁的連結（stopPropagation 避免觸發列 modal）
 function withHospitalLink(name, innerHtml) {
@@ -85,7 +85,7 @@ const KEY_LABELS = {
   clinicsPerNurse: '一次顧幾診',
   weeklyPatients: '就診人數週平均',
   shiftType: '班別',
-  pShift: 'P 班（午/夜診）',
+  pShift: 'P 班（PRN）',
   lunchBreak: '休息一小時',
   clinicOvertimeWeekly: '門診逾時週平均',
   patientComplaints: '被申訴頻率',

@@ -1,13 +1,13 @@
 // 門診自建表單：只定義門診專屬區塊，其餘（機構基本資料 / 業務與工時共用欄 /
 // 薪資與年資 / 整體評價）沿用 form-sections.js 的共用正本；引擎邏輯在 form-engine.js。
 
-import { initDepartmentForm } from './form-engine.js?v=8f9cf82f88';
+import { initDepartmentForm } from './form-engine.js?v=84f6322831';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
   SALARY_SECTION,
   EVALUATION_SECTION,
-} from './form-sections.js?v=8f9cf82f88';
+} from './form-sections.js?v=84f6322831';
 
 // 選擇門診工作的原因（可複選）
 const CLINIC_REASONS = [
@@ -22,8 +22,8 @@ const OUTPATIENT_FORM_SCHEMA = [
   }),
 
   { section: '門診資訊' },
-  { name: 'clinicType', label: '門診類型', type: 'radio', required: true,
-    options: ['內科系', '外科系', '專科', '聯合門診', '健檢中心', '其他'] },
+  { name: 'clinicType', label: '門診類型', type: 'text', required: true,
+    help: '自由填寫，例：內科門診、心臟內科、皮膚科、聯合門診、健檢中心' },
   { name: 'clinicReason', label: '選擇門診工作的原因', type: 'checkbox',
     options: CLINIC_REASONS, help: '可複選' },
   { name: 'clinicsPerNurse', label: '一次顧幾個門診', type: 'radio', required: true,
@@ -36,9 +36,9 @@ const OUTPATIENT_FORM_SCHEMA = [
   { section: '班別與工時' },
   { name: 'shiftType', label: '班別', type: 'radio', required: true,
     options: ['純早診（日班）', '早診＋午診', '含夜診', '輪班制', '其他'] },
-  { name: 'pShift', label: 'P 班（午診／夜診）', type: 'radio',
-    options: ['需固定上', '需輪值', '偶爾支援', '不需要'],
-    help: 'P 班＝午診／夜診時段' },
+  { name: 'pShift', label: 'P 班（PRN／需要時才上班）', type: 'radio',
+    options: ['是（PRN，需要時才上班）', '否（固定班表）', '部分 PRN'],
+    help: 'P 班＝PRN，有需要時才來上班、不需要時放假' },
   { name: 'lunchBreak', label: '是否有休息一個小時', type: 'radio', required: true,
     options: ['有，完整 1 小時', '有，但常被中斷／縮短', '無'],
     help: '中午（或診間空檔）是否有完整休息時間' },

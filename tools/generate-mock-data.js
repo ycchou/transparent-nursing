@@ -360,7 +360,6 @@ function generateOutpatient(n) {
     const w = genWellbeing(inst.institutionType, hours);
     const s = genSalary(inst.institutionType, jobTitle);
     const shiftType = pick(['純早診（日班）', '純早診（日班）', '早診＋午診', '含夜診', '輪班制']);
-    const hasEvening = shiftType === '含夜診' || shiftType === '輪班制';
     return {
       timestamp: genTimestamp(),
       institutionType: inst.institutionType, institutionName: inst.institutionName,
@@ -369,7 +368,7 @@ function generateOutpatient(n) {
       clinicsPerNurse: pick(['1 診', '1 診', '2 診', '2 診', '3 診', '4 診以上']),
       weeklyPatients: pick(['300 以下', '300-600', '600-900', '600-900', '900-1200', '1200 以上']),
       shiftType,
-      pShift: hasEvening ? pick(['需固定上', '需輪值', '偶爾支援']) : pick(['偶爾支援', '不需要', '不需要']),
+      pShift: pick(['否（固定班表）', '否（固定班表）', '否（固定班表）', '部分 PRN', '是（PRN，需要時才上班）']),
       lunchBreak: pick(['有，完整 1 小時', '有，但常被中斷／縮短', '有，但常被中斷／縮短', '無']),
       clinicOvertimeWeekly: pick(['幾乎不', '每週 1-2 次', '每週 1-2 次', '每週 3-4 次', '幾乎每診都逾時']),
       patientComplaints: pick(['幾乎沒有', '罕見', '罕見', '偶爾', '經常']),
