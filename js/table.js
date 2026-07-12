@@ -1,11 +1,11 @@
 // 表格 / 卡片 渲染、排序、Modal
-import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=1957ae4d1f';
-import { fmt, recommendPill, categoryTag } from './components.js?v=1957ae4d1f';
-import { icon } from './icons.js?v=1957ae4d1f';
-import { generateShareCard, showSharePreview } from './share-card.js?v=1957ae4d1f';
-import { ensureTooltip } from './tooltip.js?v=1957ae4d1f';
-import { pageSlice, renderPagination } from './pagination.js?v=1957ae4d1f';
-import { getHospitalCode } from './hospital-shortname.js?v=1957ae4d1f';
+import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=01e7db4caf';
+import { fmt, recommendPill, categoryTag } from './components.js?v=01e7db4caf';
+import { icon } from './icons.js?v=01e7db4caf';
+import { generateShareCard, showSharePreview } from './share-card.js?v=01e7db4caf';
+import { ensureTooltip } from './tooltip.js?v=01e7db4caf';
+import { pageSlice, renderPagination } from './pagination.js?v=01e7db4caf';
+import { getHospitalCode } from './hospital-shortname.js?v=01e7db4caf';
 
 // 機構名稱若對得上評鑑醫院，包成連到機構總覽頁的連結（stopPropagation 避免觸發列 modal）
 function withHospitalLink(name, innerHtml) {
@@ -36,7 +36,7 @@ const DEFAULT_TABLE_COLUMNS = {
   dialysis:   ['location', 'institutionType', 'institutionName', 'unitName', 'hdRatio', 'weeklyHours', 'recommendIndex'],
   er:         ['location', 'institutionType', 'institutionName', 'unitName', 'criticalRatio', 'weeklyHours', 'recommendIndex'],
   ward:       ['location', 'institutionType', 'institutionName', 'unitName', 'dayShiftRatio', 'weeklyHours', 'recommendIndex'],
-  outpatient: ['location', 'institutionType', 'institutionName', 'unitName', 'registrationPerSession', 'weeklyHours', 'recommendIndex'],
+  outpatient: ['location', 'institutionType', 'institutionName', 'unitName', 'clinicsPerNurse', 'weeklyHours', 'recommendIndex'],
   or:         ['location', 'institutionType', 'institutionName', 'unitName', 'orSpecialty', 'weeklyHours', 'recommendIndex'],
   special:    ['location', 'institutionType', 'institutionName', 'unitName', 'specialType', 'weeklyHours', 'recommendIndex'],
   other:      ['location', 'institutionType', 'institutionName', 'unitName', 'workplaceType', 'weeklyHours', 'recommendIndex'],
@@ -80,12 +80,18 @@ const KEY_LABELS = {
   wardType: '病房類型',
   leaderSupport: 'Leader 協助',
   invasiveDuties: '侵入性處置',
-  // OPD
+  // OPD (門診)
   clinicType: '門診類型',
-  registrationPerSession: '每診掛號',
-  staffPerClinic: '每診人力',
-  supportProcedures: '協助處置',
-  hasOvertime: '加班頻率',
+  clinicsPerNurse: '一次顧幾診',
+  weeklyPatients: '就診人數週平均',
+  shiftType: '班別',
+  pShift: 'P 班（午/夜診）',
+  lunchBreak: '休息一小時',
+  clinicOvertimeWeekly: '門診逾時週平均',
+  overtimeReport: '加班申報',
+  patientComplaints: '被申訴頻率',
+  salaryGrowth: '薪資依年資增加',
+  clinicReason: '選擇門診原因',
   // OR (手術房)
   orSpecialty: '主要科別',
   orRole: '工作角色',

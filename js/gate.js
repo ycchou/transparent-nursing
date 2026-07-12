@@ -8,7 +8,8 @@ var GATE_LOCKED = false;
 // 鎖定期「仍公開」的頁面白名單（表單＋基本頁）。以檔名比對，其餘全鎖。
 var GATE_PUBLIC = [
   '', 'index.html', 'coming-soon.html',
-  'participate.html', 'participate-icu.html', 'participate-dialysis.html', 'participate-other.html',
+  'participate.html', 'participate-icu.html', 'participate-dialysis.html',
+  'participate-other.html', 'participate-outpatient.html',
   'about.html', 'terms.html',
   // 軟鎖定期間也提前開放的資料頁：護病比、人力監控、財務、違規紀錄（含 3 個舊 URL）
   'nurse-ratio.html', 'personnel.html', 'financials.html',

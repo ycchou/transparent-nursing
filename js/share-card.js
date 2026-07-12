@@ -1,5 +1,5 @@
 // 一鍵產生單筆資料分享圖片（1080 × 1350，IG 4:5 直式）
-import { getCategory } from './config.js?v=1957ae4d1f';
+import { getCategory } from './config.js?v=01e7db4caf';
 
 const KEY_LABELS = {
   // ICU
@@ -25,10 +25,13 @@ const KEY_LABELS = {
   wardType: '病房類型',
   leaderSupport: 'Leader 協助',
   invasiveDuties: '侵入性處置',
-  // OPD
+  // OPD (門診)
   clinicType: '門診類型',
-  registrationPerSession: '每診掛號',
-  staffPerClinic: '每診人力',
+  clinicsPerNurse: '一次顧幾診',
+  weeklyPatients: '就診人數週平均',
+  shiftType: '班別',
+  lunchBreak: '休息一小時',
+  patientComplaints: '被申訴頻率',
   // OR
   orSpecialty: '主要科別',
   orRole: '工作角色',
@@ -58,7 +61,7 @@ const SHARE_FIELDS = {
   dialysis:   ['dialysisType','hdRatio',       'batchShift',      'weeklyHours', 'overtimePolicy'],
   er:         ['erLevel',     'criticalRatio', 'violenceFreq',    'weeklyHours', 'overtimePolicy'],
   ward:       ['wardType',    'dayShiftRatio', 'nightShiftRatio', 'leaderSupport','weeklyHours'],
-  outpatient: ['clinicType',  'registrationPerSession', 'staffPerClinic','weeklyHours', 'overtimePolicy'],
+  outpatient: ['clinicType',  'clinicsPerNurse', 'weeklyPatients','shiftType', 'weeklyHours'],
   or:         ['orSpecialty', 'orRole',        'dailyCases',      'weeklyHours', 'overtimePolicy'],
   special:    ['specialType', 'dailyCases',    'onCallRequired',  'weeklyHours', 'overtimePolicy'],
   other:      ['workplaceType','scheduleSystem','violenceRisk',   'weeklyHours', 'overtimePolicy'],

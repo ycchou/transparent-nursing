@@ -359,18 +359,28 @@ function generateOutpatient(n) {
     const hours = pick(['40-45', '40-45', '40-45', '45-50', '50-55']);
     const w = genWellbeing(inst.institutionType, hours);
     const s = genSalary(inst.institutionType, jobTitle);
+    const shiftType = pick(['純早診（日班）', '純早診（日班）', '早診＋午診', '含夜診', '輪班制']);
+    const hasEvening = shiftType === '含夜診' || shiftType === '輪班制';
     return {
       timestamp: genTimestamp(),
       institutionType: inst.institutionType, institutionName: inst.institutionName,
       unitName: pair.unitName, location: inst.location || pick(LOCATIONS), jobTitle,
       clinicType: pair.clinicType,
-      registrationPerSession: pick(['20-40', '40-60', '60-80', '80-100', '100+']),
-      staffPerClinic: pick(['1', '1', '2', '2', '3']),
-      supportProcedures: pick(['衛教', 'IV/打針', '衛教/抽血', '心電圖/檢查', 'IV/心電圖', '換藥/拆線', '抽血/超音波協助', '簡易處置']),
-      hasOvertime: pick(['每日', '偶爾', '罕見', '無']),
+      clinicsPerNurse: pick(['1 診', '1 診', '2 診', '2 診', '3 診', '4 診以上']),
+      weeklyPatients: pick(['300 以下', '300-600', '600-900', '600-900', '900-1200', '1200 以上']),
+      shiftType,
+      pShift: hasEvening ? pick(['需固定上', '需輪值', '偶爾支援']) : pick(['偶爾支援', '不需要', '不需要']),
+      lunchBreak: pick(['有，完整 1 小時', '有，但常被中斷／縮短', '有，但常被中斷／縮短', '無']),
+      clinicOvertimeWeekly: pick(['幾乎不', '每週 1-2 次', '每週 1-2 次', '每週 3-4 次', '幾乎每診都逾時']),
+      overtimeReport: pick(['可覈實申報', '部分可申報', '不能申報（做功德）', '無加班']),
+      patientComplaints: pick(['幾乎沒有', '罕見', '罕見', '偶爾', '經常']),
+      violenceRisk: pick(['無', '低', '低', '中']),
+      salaryGrowth: pick(['有明確調薪制度', '有但幅度小', '有但幅度小', '幾乎不調', '不清楚']),
+      clinicReason: pick(['工時規律／少夜班', '工時規律／少夜班', '家庭因素', '身體因素', '興趣／專長', '離職前緩衝']),
       weeklyHours: hours, overtimePolicy: w.overtimePolicy,
       yearsCurrent: s.yearsCurrent, yearsTotal: s.yearsTotal,
       annualSalary: s.annualSalary, monthlyBase: s.monthlyBase, annualBonus: s.annualBonus,
+      specialBenefits: pick(['', '', '進修補助', '年節獎金', '員工旅遊補助']),
       workAtmosphere: w.workAtmosphere, promotion: w.promotion,
       recommendIndex: w.recommendIndex, comment: genComment(w.recommendIndex),
     };
@@ -636,9 +646,10 @@ const CFG = [
            'annualSalary','monthlyBase','annualBonus','workAtmosphere','promotion','recommendIndex','comment'] },
   { slug: 'outpatient', n: 115, gen: generateOutpatient,
     cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
-           'clinicType','registrationPerSession','staffPerClinic','supportProcedures','hasOvertime',
+           'clinicType','clinicsPerNurse','weeklyPatients','shiftType','pShift','lunchBreak','clinicOvertimeWeekly',
+           'overtimeReport','patientComplaints','violenceRisk','salaryGrowth','clinicReason',
            'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
-           'annualSalary','monthlyBase','annualBonus','workAtmosphere','promotion','recommendIndex','comment'] },
+           'annualSalary','monthlyBase','annualBonus','specialBenefits','workAtmosphere','promotion','recommendIndex','comment'] },
   { slug: 'dialysis', n: 105, gen: generateDialysis,
     cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
            'dialysisType','hdRatio','hdPeakRatio','pdCount','pdPeakRatio','batchShift','onCallType','onCallRotation','restInterval11h','onCallPay','workDuties',
