@@ -5,9 +5,9 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { renderIcons } from './icons.js?v=2157fab129';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=2157fab129';
-import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=2157fab129';
+import { renderIcons } from './icons.js?v=28ce4a4ed6';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=28ce4a4ed6';
+import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=28ce4a4ed6';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -15,22 +15,22 @@ import {
   shiftStatus,
   classifyHospital,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=2157fab129';
-import { loadAll } from './data-loader.js?v=2157fab129';
-import { renderKpiStrip } from './stats-kpi.js?v=2157fab129';
-import { renderTable, showDetailModal } from './table.js?v=2157fab129';
-import { hasContributed } from './contribution-gate.js?v=2157fab129';
-import { notePwaIntent } from './pwa-prompt.js?v=2157fab129';
+} from './nurse-ratio-view.js?v=28ce4a4ed6';
+import { loadAll } from './data-loader.js?v=28ce4a4ed6';
+import { renderKpiStrip } from './stats-kpi.js?v=28ce4a4ed6';
+import { renderTable, showDetailModal } from './table.js?v=28ce4a4ed6';
+import { hasContributed } from './contribution-gate.js?v=28ce4a4ed6';
+import { notePwaIntent } from './pwa-prompt.js?v=28ce4a4ed6';
 import {
   loadFinancialsHospital, getFinancialFields,
   formatVal as finFormatVal, signClass as finSignClass, formatRocYear as finRocYear,
   renderFinancialTrendChart,
-} from './financials-view.js?v=2157fab129';
-import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=2157fab129';
+} from './financials-view.js?v=28ce4a4ed6';
+import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=28ce4a4ed6';
 import {
   loadPersonnelHospital, ensurePersonnelIndex,
   renderStaffChart as renderPmStaffChart, renderBedChart as renderPmBedChart,
-} from './personnel-view.js?v=2157fab129';
+} from './personnel-view.js?v=28ce4a4ed6';
 import {
   createCsvLoader,
   parseROCDate,
@@ -38,7 +38,7 @@ import {
   shortenLocation,
   fineToWan,
   formatROCDate,
-} from './records-common.js?v=2157fab129';
+} from './records-common.js?v=28ce4a4ed6';
 
 const MERGED_URL = 'data/hospitals-merged.json?v=c017631e69';
 const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=f3d4b868a4';
@@ -434,35 +434,57 @@ function renderFinancialsSection(code) {
   chartWrap.hidden = true;
   empty.hidden = true;
 
-  loadFinancialsHospital(code).then((h) => {
-    if (state.currentCode !== code) return;
-    if (!h || !h.rows || !h.rows.length) {
-      // 醫療費用合併申報之子院：無獨立財報，導向母院
-      const fm = feeMergedParent(code);
-      empty.innerHTML = fm
-        ? `本院醫療費用併入 <strong>${fm.parentName}</strong> 合併申報，健保署未單獨公開本院財務。財務資料請見 <a href="hospital.html?code=${encodeURIComponent(fm.parent)}" style="color:var(--primary);text-decoration:underline;">${fm.parentName} 機構總覽 →</a>`
-        : '查無此機構的財務公開資料（僅依法須公開財務之醫院有）。';
-      empty.hidden = false;
-      return;
-    }
-    const fields = h.fields || getFinancialFields();
-    const latest = [...h.rows].sort((a, b) => Number(b.YEAR) - Number(a.YEAR))[0];
+  // 直接把某份財報資料（可能是本院或母院）渲染到財務區塊；noteHtml 為合併提示、detailCode 為深連結代號
+  const renderFinData = (dataHosp, noteHtml, detailCode) => {
+    const fields = dataHosp.fields || getFinancialFields();
+    const latest = [...dataHosp.rows].sort((a, b) => Number(b.YEAR) - Number(a.YEAR))[0];
     const card = (key, label) => {
       const val = latest[`${key}Val`]; const rank = latest[`${key}Rank`];
       return `<div class="card stat-card"><div class="stat-num kpi-num"><span class="${finSignClass(val)}">${finFormatVal(key, val, fields)}</span></div><div class="stat-label">${label}${rank ? ` · 全國第 ${rank}` : ''}</div></div>`;
     };
-    // 財報合併提報：兩碼共用同一份合併財報，數字為合計
-    const rm = reportMergedInfo(code);
-    const mergeNote = rm ? `<div class="fin-merge-note">${rm.main
-      ? `本院財報與 <strong>${rm.partnerName}</strong> 合併提報，下列數字為兩院合計。`
-      : `下列數字為與 <strong>${rm.partnerName}</strong> 合併提報之<strong>合計數</strong>，非本院單獨財報。`}
-      <a href="hospital.html?code=${encodeURIComponent(rm.partner)}" style="color:var(--primary);text-decoration:underline;">查看 ${rm.partnerName} →</a></div>` : '';
-    kpi.innerHTML = `${mergeNote}<div style="color:var(--muted);font-size:0.85rem;margin-bottom:8px;">最新年度：${finRocYear(latest.YEAR)}</div>
+    const note = noteHtml ? `<div class="fin-merge-note">${noteHtml}</div>` : '';
+    kpi.innerHTML = `${note}<div style="color:var(--muted);font-size:0.85rem;margin-bottom:8px;">最新年度：${finRocYear(latest.YEAR)}</div>
       <div class="grid grid-3">${card('F3', '整體獲利/虧損')}${card('F5', '醫務利益率')}${card('F6', '醫務收入')}</div>`;
-    link.innerHTML = `<a href="financials.html?code=${encodeURIComponent(code)}" style="color:var(--primary);text-decoration:underline;font-size:0.85rem;">查看醫院財務 →</a>`;
+    link.innerHTML = `<a href="financials.html?code=${encodeURIComponent(detailCode)}" style="color:var(--primary);text-decoration:underline;font-size:0.85rem;">查看醫院財務 →</a>`;
     chartWrap.hidden = false;
-    renderFinancialTrendChart(document.getElementById('fi-chart'), h, fields, { metrics: ['F1', 'F2', 'F3'] });
+    renderFinancialTrendChart(document.getElementById('fi-chart'), dataHosp, fields, { metrics: ['F1', 'F2', 'F3'] });
     renderIcons();
+  };
+
+  loadFinancialsHospital(code).then((h) => {
+    if (state.currentCode !== code) return;
+
+    // 有本院財報（含財報合併提報之兩碼）：直接顯示，合併提報者加提示
+    if (h && h.rows && h.rows.length) {
+      const rm = reportMergedInfo(code);
+      const rmLink = rm ? ` <a href="hospital.html?code=${encodeURIComponent(rm.partner)}" style="color:var(--primary);text-decoration:underline;">查看 ${rm.partnerName} →</a>` : '';
+      const note = rm
+        ? (rm.main
+          ? `本院財報與 <strong>${rm.partnerName}</strong> 合併提報，下列數字為兩院合計。${rmLink}`
+          : `下列數字為與 <strong>${rm.partnerName}</strong> 合併提報之<strong>合計數</strong>，非本院單獨財報。${rmLink}`)
+        : '';
+      renderFinData(h, note, code);
+      return;
+    }
+
+    // 無本院財報但屬醫療費用合併申報之子院：改載母院財報直接顯示，並提示為合併數據
+    const fm = feeMergedParent(code);
+    if (fm) {
+      loadFinancialsHospital(fm.parent).then((ph) => {
+        if (state.currentCode !== code) return;
+        if (ph && ph.rows && ph.rows.length) {
+          renderFinData(ph, `本院醫療費用併入 <strong>${fm.parentName}</strong> 合併申報，以下為 <strong>${fm.parentName}</strong> 之合併財報數據。 <a href="hospital.html?code=${encodeURIComponent(fm.parent)}" style="color:var(--primary);text-decoration:underline;">查看 ${fm.parentName} →</a>`, fm.parent);
+        } else {
+          empty.innerHTML = `本院醫療費用併入 <strong>${fm.parentName}</strong> 合併申報，健保署未單獨公開本院財務。`;
+          empty.hidden = false;
+        }
+      });
+      return;
+    }
+
+    // 其餘：確無財報
+    empty.innerHTML = '查無此機構的財務公開資料（僅依法須公開財務之醫院有）。';
+    empty.hidden = false;
   });
 }
 
