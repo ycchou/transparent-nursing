@@ -1,13 +1,13 @@
 // 洗腎室自建表單：只定義洗腎室專屬區塊，其餘（機構基本資料 / 業務與工時共用欄 /
 // 薪資與年資 / 整體評價）沿用 form-sections.js 的共用正本；引擎邏輯在 form-engine.js。
 
-import { initDepartmentForm } from './form-engine.js?v=75634a51d3';
+import { initDepartmentForm } from './form-engine.js?v=17c370612b';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
   SALARY_SECTION,
   EVALUATION_SECTION,
-} from './form-sections.js?v=75634a51d3';
+} from './form-sections.js?v=17c370612b';
 
 // 護病比刻度：常態 / 最忙時 各自的乾淨比例選擇（比照 ICU；非該類選「不適用」）
 // HD＝血液透析，床護比（1 名護理師顧幾床，評鑑基準 1:4）；

@@ -4443,6 +4443,18 @@ body.g2g-modal-open { overflow: hidden; }
 .fin-table .fin-rank { color: var(--muted-light); font-size: 0.76rem; margin-left: 5px; }
 @media (max-width: 640px) { .fin-table .fin-lv-col { display: none; } }
 
+/* 合併申報／合併提報標註 */
+.fin-merge-tag {
+  display: inline-block; margin-left: 6px; padding: 1px 6px;
+  font-size: 0.68rem; font-weight: 600; line-height: 1.5;
+  color: #B45309; background: #FEF3C7; border-radius: 4px; white-space: nowrap;
+}
+.fin-merge-note {
+  margin-bottom: 12px; padding: 8px 12px;
+  font-size: 0.82rem; line-height: 1.6; color: var(--ink-soft);
+  background: #FEF3C7; border-left: 3px solid #F59E0B; border-radius: 6px;
+}
+
 /* 財務規模對照卡 */
 .fin-benchmark {
   background: var(--surface);

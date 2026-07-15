@@ -2,12 +2,13 @@
 //
 // 資料/圖表共用 js/financials-view.js；名稱↔代碼/簡稱重用 js/hospital-shortname.js
 
-import { renderIcons, icon } from './icons.js?v=75634a51d3';
-import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=75634a51d3';
+import { renderIcons, icon } from './icons.js?v=17c370612b';
+import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=17c370612b';
 import {
   ensureFinancialsLoaded, getAllFinancials, getFinancials, getFinancialFields,
   parseNum, formatVal, signClass, formatRocYear, renderFinancialTrendChart,
-} from './financials-view.js?v=75634a51d3';
+} from './financials-view.js?v=17c370612b';
+import { reportMergedInfo } from './hospital-merges.js?v=17c370612b';
 
 const LEVEL_ORDER = ['醫學中心', '區域醫院', '地區醫院', '精神科醫院', '診所', '其他'];
 
@@ -162,9 +163,11 @@ function renderTable() {
       const rankHtml = rank ? `<span class="fin-rank">#${rank}</span>` : '';
       return `<td style="text-align:right;white-space:nowrap;"><span class="${cls}">${formatVal(c.key, val, state.fields)}</span>${rankHtml}</td>`;
     }).join('');
+    const mergeTag = reportMergedInfo(h.code)
+      ? '<span class="fin-merge-tag" title="與關聯院所合併提報，數字為兩院合計">合併提報</span>' : '';
     return `
       <tr class="fin-row ${h.code === state.currentCode ? 'active' : ''}" data-code="${h.code}" style="cursor:pointer;">
-        <td><span class="fin-hosp-name" title="${escapeHtml(h.name)}">${escapeHtml(short || h.name)}</span></td>
+        <td><span class="fin-hosp-name" title="${escapeHtml(h.name)}">${escapeHtml(short || h.name)}</span>${mergeTag}</td>
         <td class="fin-lv-col"><span class="nurse-level-badge nurse-level-${levelSlug(r.HOSP_CNT_TYPNAM)}">${escapeHtml(r.HOSP_CNT_TYPNAM)}</span></td>
         ${cells}
       </tr>`;
@@ -231,6 +234,13 @@ function modalHtml(h) {
         </div>
         <button class="modal-close" aria-label="關閉" style="flex:0 0 auto;order:0;">${icon('x', { size: 16 })}</button>
       </div>
+      ${(() => {
+        const rm = reportMergedInfo(h.code);
+        if (!rm) return '';
+        return `<div class="fin-merge-note">${rm.main
+          ? `本院財報與 <strong>${rm.partnerName}</strong> 合併提報，下列數字為兩院合計。`
+          : `下列數字為與 <strong>${rm.partnerName}</strong> 合併提報之<strong>合計數</strong>，非本院單獨財報。`}</div>`;
+      })()}
       ${latest ? `<div style="color:var(--muted);font-size:0.85rem;margin-bottom:8px;">最新年度：${formatRocYear(latest.YEAR)}</div>
       <div class="grid grid-3">${card('F3', '整體獲利/虧損')}${card('F5', '醫務利益率')}${card('F6', '醫務收入')}</div>` : ''}
       <div class="chart-card" style="margin-top:18px;">
