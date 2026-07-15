@@ -6,7 +6,7 @@
 //     hospitals: [{ id, name, level, history: { "11207": {day, eve, night} } }]
 //   }
 
-import { renderIcons } from './icons.js?v=84f6322831';
+import { renderIcons } from './icons.js?v=75634a51d3';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -14,7 +14,7 @@ import {
   shiftStatus,
   classifyHospital as classifyHospitalView,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=84f6322831';
+} from './nurse-ratio-view.js?v=75634a51d3';
 
 const DATA_URL = 'data/nurse-ratio.json?v=1dbde60d94';
 
