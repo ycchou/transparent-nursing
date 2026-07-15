@@ -5,9 +5,9 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { renderIcons } from './icons.js?v=17c370612b';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=17c370612b';
-import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=17c370612b';
+import { renderIcons } from './icons.js?v=2157fab129';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=2157fab129';
+import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=2157fab129';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -15,22 +15,22 @@ import {
   shiftStatus,
   classifyHospital,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=17c370612b';
-import { loadAll } from './data-loader.js?v=17c370612b';
-import { renderKpiStrip } from './stats-kpi.js?v=17c370612b';
-import { renderTable, showDetailModal } from './table.js?v=17c370612b';
-import { hasContributed } from './contribution-gate.js?v=17c370612b';
-import { notePwaIntent } from './pwa-prompt.js?v=17c370612b';
+} from './nurse-ratio-view.js?v=2157fab129';
+import { loadAll } from './data-loader.js?v=2157fab129';
+import { renderKpiStrip } from './stats-kpi.js?v=2157fab129';
+import { renderTable, showDetailModal } from './table.js?v=2157fab129';
+import { hasContributed } from './contribution-gate.js?v=2157fab129';
+import { notePwaIntent } from './pwa-prompt.js?v=2157fab129';
 import {
   loadFinancialsHospital, getFinancialFields,
   formatVal as finFormatVal, signClass as finSignClass, formatRocYear as finRocYear,
   renderFinancialTrendChart,
-} from './financials-view.js?v=17c370612b';
-import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=17c370612b';
+} from './financials-view.js?v=2157fab129';
+import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=2157fab129';
 import {
   loadPersonnelHospital, ensurePersonnelIndex,
   renderStaffChart as renderPmStaffChart, renderBedChart as renderPmBedChart,
-} from './personnel-view.js?v=17c370612b';
+} from './personnel-view.js?v=2157fab129';
 import {
   createCsvLoader,
   parseROCDate,
@@ -38,7 +38,7 @@ import {
   shortenLocation,
   fineToWan,
   formatROCDate,
-} from './records-common.js?v=17c370612b';
+} from './records-common.js?v=2157fab129';
 
 const MERGED_URL = 'data/hospitals-merged.json?v=c017631e69';
 const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=f3d4b868a4';
@@ -440,7 +440,7 @@ function renderFinancialsSection(code) {
       // 醫療費用合併申報之子院：無獨立財報，導向母院
       const fm = feeMergedParent(code);
       empty.innerHTML = fm
-        ? `本院醫療費用、醫師數與病床數併入 <strong>${fm.parentName}</strong> 合併申報，健保署未單獨公開本院財務。財務資料請見 <a href="hospital.html?code=${encodeURIComponent(fm.parent)}" style="color:var(--primary);text-decoration:underline;">${fm.parentName} 機構總覽 →</a>`
+        ? `本院醫療費用併入 <strong>${fm.parentName}</strong> 合併申報，健保署未單獨公開本院財務。財務資料請見 <a href="hospital.html?code=${encodeURIComponent(fm.parent)}" style="color:var(--primary);text-decoration:underline;">${fm.parentName} 機構總覽 →</a>`
         : '查無此機構的財務公開資料（僅依法須公開財務之醫院有）。';
       empty.hidden = false;
       return;
