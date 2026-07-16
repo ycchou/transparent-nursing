@@ -3,34 +3,35 @@
 // 只定義本類別專屬區塊，其餘（機構基本資料 / 業務與工時共用欄 / 薪資與年資 / 整體評價）
 // 沿用 form-sections.js 的共用正本；引擎邏輯在 form-engine.js。
 
-import { initDepartmentForm } from './form-engine.js?v=fbf38edc70';
+import { initDepartmentForm } from './form-engine.js?v=d5f792af4d';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
   SALARY_SECTION,
   EVALUATION_SECTION,
-} from './form-sections.js?v=fbf38edc70';
+} from './form-sections.js?v=d5f792af4d';
 
 // 職場類型：多元護理職涯的常見場域（選最接近者，可於短評補充）
+// 專科護理師（NP）等院內進階護理職務未被前 8 類收錄，於此類分享。
 const WORKPLACE_TYPES = [
-  '職護／廠護', '居家護理', '長照機構／護理之家', '學校護理師',
+  '專科護理師', '職護／廠護', '居家護理', '長照機構／護理之家', '學校護理師',
   '月子中心', '診所／醫美', '藥廠／醫材（MSL/CRA/CRC）', '公共衛生／衛生所', '其他',
 ];
 
 // 護理師以外的其他證書／資格（可複選；此工作實際持有或要求者）
 const OTHER_CERTS = [
-  '廠護／職業衛生護理', '個案管理師', 'IBCLC 國際泌乳顧問',
+  '專科護理師證書', '廠護／職業衛生護理', '個案管理師', 'IBCLC 國際泌乳顧問',
   '長照相關證照', 'BLS／ACLS 等急救', '無', '其他',
 ];
 
 const OTHER_FORM_SCHEMA = [
   ...buildInstitutionSection({
-    unitNameHelp: '例：某科技廠醫護室、居家護理所、月子中心、學校保健室、衛生所',
-    jobTitleHelp: '例：廠護／職護、個案管理師、學校護理師、公衛護士、N1–N4',
+    unitNameHelp: '例：某醫院外科部（專科護理師）、某科技廠醫護室、居家護理所、月子中心、學校保健室、衛生所',
+    jobTitleHelp: '例：專科護理師（NP）、廠護／職護、個案管理師、學校護理師、公衛護士、N1–N4',
   }),
 
   { section: '職場屬性',
-    intro: '本表單適用於加護病房、病房、急診等傳統臨床場域<strong>以外</strong>的多元護理職涯。請依實際情況填寫。' },
+    intro: '本表單收錄前面 8 類專門場域以外、較少被看見的多元護理職涯——包含<strong>專科護理師</strong>、居家／社區、長照、學校、月子中心、職護／廠護、臨床研究（CRA／CRC）、藥廠醫材與公衛等。請依實際情況填寫。' },
   { name: 'workplaceType', label: '職場類型', type: 'radio', required: true,
     options: WORKPLACE_TYPES, help: '選最接近的類型，細節可於下方短評補充' },
   { name: 'practiceRegistration', label: '是否需執業登記', type: 'radio', required: true,

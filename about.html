@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#2E86AB" />
   <!-- 軟鎖總開關（js/gate.js）：鎖定期非公開頁導向 coming-soon -->
-  <script src="./js/gate.js?v=fbf38edc70"></script>
+  <script src="./js/gate.js?v=d5f792af4d"></script>
 
   <!-- SEO -->
   <title>關於 — 護理職場透明化運動</title>
@@ -51,12 +51,11 @@
   <link rel="stylesheet" href="css/styles.css?v=be672b896d" />
 
     <!-- modulepreload：平行載入 ES module 鏈（首次造訪快 30-50%） -->
-  <link rel="modulepreload" href="./js/comments.js?v=fbf38edc70" />
-  <link rel="modulepreload" href="./js/components.js?v=fbf38edc70" />
-  <link rel="modulepreload" href="./js/config.js?v=fbf38edc70" />
-  <link rel="modulepreload" href="./js/icons.js?v=fbf38edc70" />
-  <link rel="modulepreload" href="./js/pwa-prompt.js?v=fbf38edc70" />
-  <link rel="modulepreload" href="./js/toast.js?v=fbf38edc70" />
+  <link rel="modulepreload" href="./js/components.js?v=d5f792af4d" />
+  <link rel="modulepreload" href="./js/config.js?v=d5f792af4d" />
+  <link rel="modulepreload" href="./js/icons.js?v=d5f792af4d" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=d5f792af4d" />
+  <link rel="modulepreload" href="./js/toast.js?v=d5f792af4d" />
 
   <!-- 強制清除舊版 cache -->
   <script>
@@ -258,23 +257,24 @@
     </div>
   </section>
 
-  <!-- 討論與留言（Disqus） -->
+  <!-- 討論與留言（Disqus）：暫時關閉。日後啟用 → 取消下方註解，並在 <script> 內加回
+       import { mountComments } from './js/comments.js'; 與 mountComments(...) 呼叫；
+       元件 js/comments.js 與 config.disqusShortname 保留備用。
   <section style="padding:24px 0 48px;">
     <div class="container">
       <h2 style="margin:0 0 12px;">討論與留言</h2>
       <div id="disqus_thread"></div>
     </div>
   </section>
+  -->
 
   <div id="app-footer"></div>
 
   <script type="module">
-    import { CATEGORIES } from './js/config.js?v=fbf38edc70';
-    import { mountLayout, ORGS } from './js/components.js?v=fbf38edc70';
-    import { icon, renderIcons } from './js/icons.js?v=fbf38edc70';
-    import { mountComments } from './js/comments.js?v=fbf38edc70';
+    import { CATEGORIES } from './js/config.js?v=d5f792af4d';
+    import { mountLayout, ORGS } from './js/components.js?v=d5f792af4d';
+    import { icon, renderIcons } from './js/icons.js?v=d5f792af4d';
     mountLayout();
-    mountComments(document.getElementById('disqus_thread'), { title: document.title });
 
     // 主辦與協作單位卡片
     const orgGrid = document.getElementById('about-org-cards');

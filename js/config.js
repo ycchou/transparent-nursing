@@ -266,7 +266,7 @@ export const CATEGORIES = [
     formStatus: 'live',
     specificFields: [
       { key: 'workplaceType', label: '職場類型', type: 'enum',
-        options: ['職護／廠護', '居家護理', '長照機構／護理之家', '學校護理師', '月子中心', '診所／醫美', '藥廠／醫材（MSL/CRA/CRC）', '公共衛生／衛生所', '其他'] },
+        options: ['專科護理師', '職護／廠護', '居家護理', '長照機構／護理之家', '學校護理師', '月子中心', '診所／醫美', '藥廠／醫材（MSL/CRA/CRC）', '公共衛生／衛生所', '其他'] },
       { key: 'practiceRegistration', label: '需執業登記', type: 'enum',
         options: ['需要', '不需要', '不清楚'] },
       { key: 'otherCerts', label: '其他證書資格', type: 'multi' },

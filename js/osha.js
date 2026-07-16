@@ -10,7 +10,7 @@ import {
   createCsvLoader,
   initRecordsPage,
   getCachedCount,
-} from './records-common.js?v=fbf38edc70';
+} from './records-common.js?v=d5f792af4d';
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9_GMqmZfaampaPKcnetc5UqhvKueTvDYBO71LhKbTY9E1sdlie-wHM0krYmEkQFSurFRh-bdevS1_/pub?gid=1130584206&single=true&output=csv';
 const STORAGE_KEY = 'nursing_osha_v1';

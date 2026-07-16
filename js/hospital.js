@@ -5,9 +5,9 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { renderIcons } from './icons.js?v=fbf38edc70';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=fbf38edc70';
-import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=fbf38edc70';
+import { renderIcons } from './icons.js?v=d5f792af4d';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=d5f792af4d';
+import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=d5f792af4d';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -15,22 +15,22 @@ import {
   shiftStatus,
   classifyHospital,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=fbf38edc70';
-import { loadAll } from './data-loader.js?v=fbf38edc70';
-import { renderKpiStrip } from './stats-kpi.js?v=fbf38edc70';
-import { renderTable, showDetailModal } from './table.js?v=fbf38edc70';
-import { hasContributed } from './contribution-gate.js?v=fbf38edc70';
-import { notePwaIntent } from './pwa-prompt.js?v=fbf38edc70';
+} from './nurse-ratio-view.js?v=d5f792af4d';
+import { loadAll } from './data-loader.js?v=d5f792af4d';
+import { renderKpiStrip } from './stats-kpi.js?v=d5f792af4d';
+import { renderTable, showDetailModal } from './table.js?v=d5f792af4d';
+import { hasContributed } from './contribution-gate.js?v=d5f792af4d';
+import { notePwaIntent } from './pwa-prompt.js?v=d5f792af4d';
 import {
   loadFinancialsHospital, getFinancialFields,
   formatVal as finFormatVal, signClass as finSignClass, formatRocYear as finRocYear,
   renderFinancialTrendChart,
-} from './financials-view.js?v=fbf38edc70';
-import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=fbf38edc70';
+} from './financials-view.js?v=d5f792af4d';
+import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=d5f792af4d';
 import {
   loadPersonnelHospital, ensurePersonnelIndex,
   renderStaffChart as renderPmStaffChart, renderBedChart as renderPmBedChart,
-} from './personnel-view.js?v=fbf38edc70';
+} from './personnel-view.js?v=d5f792af4d';
 import {
   createCsvLoader,
   parseROCDate,
@@ -38,7 +38,7 @@ import {
   shortenLocation,
   fineToWan,
   formatROCDate,
-} from './records-common.js?v=fbf38edc70';
+} from './records-common.js?v=d5f792af4d';
 
 const MERGED_URL = 'data/hospitals-merged.json?v=c017631e69';
 const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=f3d4b868a4';
@@ -454,20 +454,31 @@ function renderNurseSection(code, hosp) {
 }
 
 // 財務概況（健保署）：依 code 惰性載入單院小檔 data/financials/{code}.json → 最新年 KPI + 趨勢圖
+// 財務逐年明細表欄位（同財務頁彈窗，含營運欄位）
+const FI_YEAR_COLS = ['F1', 'F2', 'F3', 'F5', 'F6', 'F7', 'F8',
+  'DOCTOR', 'BED', 'OPD_CNT', 'IPD_CNT', 'IPD_DAY', 'PT_ALL', 'OPD_PT', 'IPD_PT'];
+
 function renderFinancialsSection(code) {
   const empty = document.getElementById('fi-section-empty');
   const kpi = document.getElementById('fi-section-kpi');
   const chartWrap = document.getElementById('fi-section-chart');
+  const opsWrap = document.getElementById('fi-section-ops-chart');
+  const tableWrap = document.getElementById('fi-section-yeartable');
+  const tableMount = document.getElementById('fi-section-table');
   const link = document.getElementById('fi-section-link');
   kpi.innerHTML = '';
   link.innerHTML = '';
   chartWrap.hidden = true;
+  opsWrap.hidden = true;
+  tableWrap.hidden = true;
+  tableMount.innerHTML = '';
   empty.hidden = true;
 
   // 直接把某份財報資料（可能是本院或母院）渲染到財務區塊；noteHtml 為合併提示、detailCode 為深連結代號
   const renderFinData = (dataHosp, noteHtml, detailCode) => {
     const fields = dataHosp.fields || getFinancialFields();
-    const latest = [...dataHosp.rows].sort((a, b) => Number(b.YEAR) - Number(a.YEAR))[0];
+    const rowsDesc = [...dataHosp.rows].sort((a, b) => Number(b.YEAR) - Number(a.YEAR));
+    const latest = rowsDesc[0];
     const card = (key, label) => {
       const val = latest[`${key}Val`]; const rank = latest[`${key}Rank`];
       return `<div class="card stat-card"><div class="stat-num kpi-num"><span class="${finSignClass(val)}">${finFormatVal(key, val, fields)}</span></div><div class="stat-label">${label}${rank ? ` · 全國第 ${rank}` : ''}</div></div>`;
@@ -476,9 +487,21 @@ function renderFinancialsSection(code) {
     kpi.innerHTML = `${note}<div style="color:var(--muted);font-size:0.85rem;margin-bottom:8px;">最新年度：${finRocYear(latest.YEAR)}</div>
       <div class="grid grid-3">${card('F3', '整體獲利/虧損')}${card('F5', '醫務利益率')}${card('F6', '醫務收入')}</div>
       <div class="grid grid-3" style="margin-top:12px;">${card('DOCTOR', '醫師數')}${card('BED', '病床數')}${card('F8', '全日平均護病比')}</div>`;
-    link.innerHTML = `<a href="financials.html?code=${encodeURIComponent(detailCode)}" style="color:var(--primary);text-decoration:underline;font-size:0.85rem;">查看醫院財務 →</a>`;
+    link.innerHTML = `<a href="financials.html?code=${encodeURIComponent(detailCode)}" style="color:var(--primary);text-decoration:underline;font-size:0.85rem;">在財務頁開啟 →</a>`;
+
     chartWrap.hidden = false;
     renderFinancialTrendChart(document.getElementById('fi-chart'), dataHosp, fields, { metrics: ['F1', 'F2', 'F3'] });
+    opsWrap.hidden = false;
+    renderFinancialTrendChart(document.getElementById('fi-ops-chart'), dataHosp, fields, { metrics: ['OPD_CNT', 'IPD_CNT'] });
+
+    // 各年度明細表（同財務頁彈窗）
+    const signKeys = new Set(['F1', 'F3', 'F5']);
+    tableMount.innerHTML = `
+      <div class="data-table-wrap"><table class="data-table fin-table">
+        <thead><tr><th>年度</th>${FI_YEAR_COLS.map((c) => `<th style="text-align:right;white-space:nowrap;">${(fields[c] && fields[c].title) || c}</th>`).join('')}</tr></thead>
+        <tbody>${rowsDesc.map((r) => `<tr><td>${finRocYear(r.YEAR)}</td>${FI_YEAR_COLS.map((c) => `<td style="text-align:right;white-space:nowrap;"><span class="${signKeys.has(c) ? finSignClass(r[c + 'Val']) : ''}">${finFormatVal(c, r[c + 'Val'], fields)}</span>${r[c + 'Rank'] ? `<span class="fin-rank">#${r[c + 'Rank']}</span>` : ''}</td>`).join('')}</tr>`).join('')}</tbody>
+      </table></div>`;
+    tableWrap.hidden = false;
     renderIcons();
   };
 
