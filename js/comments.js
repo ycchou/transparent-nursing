@@ -4,7 +4,7 @@
 // 需先到 disqus.com 建站取得 shortname，填入 js/config.js 的 SITE.disqusShortname。
 // shortname 未設時只顯示「設定中」提示、不載入任何外部腳本。
 
-import { SITE } from './config.js?v=53d5d8c1e5';
+import { SITE } from './config.js?v=fbf38edc70';
 
 let _scriptInjected = false;
 

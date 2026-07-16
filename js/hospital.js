@@ -5,9 +5,9 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { renderIcons } from './icons.js?v=53d5d8c1e5';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=53d5d8c1e5';
-import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=53d5d8c1e5';
+import { renderIcons } from './icons.js?v=fbf38edc70';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=fbf38edc70';
+import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=fbf38edc70';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -15,22 +15,22 @@ import {
   shiftStatus,
   classifyHospital,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=53d5d8c1e5';
-import { loadAll } from './data-loader.js?v=53d5d8c1e5';
-import { renderKpiStrip } from './stats-kpi.js?v=53d5d8c1e5';
-import { renderTable, showDetailModal } from './table.js?v=53d5d8c1e5';
-import { hasContributed } from './contribution-gate.js?v=53d5d8c1e5';
-import { notePwaIntent } from './pwa-prompt.js?v=53d5d8c1e5';
+} from './nurse-ratio-view.js?v=fbf38edc70';
+import { loadAll } from './data-loader.js?v=fbf38edc70';
+import { renderKpiStrip } from './stats-kpi.js?v=fbf38edc70';
+import { renderTable, showDetailModal } from './table.js?v=fbf38edc70';
+import { hasContributed } from './contribution-gate.js?v=fbf38edc70';
+import { notePwaIntent } from './pwa-prompt.js?v=fbf38edc70';
 import {
   loadFinancialsHospital, getFinancialFields,
   formatVal as finFormatVal, signClass as finSignClass, formatRocYear as finRocYear,
   renderFinancialTrendChart,
-} from './financials-view.js?v=53d5d8c1e5';
-import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=53d5d8c1e5';
+} from './financials-view.js?v=fbf38edc70';
+import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=fbf38edc70';
 import {
   loadPersonnelHospital, ensurePersonnelIndex,
   renderStaffChart as renderPmStaffChart, renderBedChart as renderPmBedChart,
-} from './personnel-view.js?v=53d5d8c1e5';
+} from './personnel-view.js?v=fbf38edc70';
 import {
   createCsvLoader,
   parseROCDate,
@@ -38,7 +38,7 @@ import {
   shortenLocation,
   fineToWan,
   formatROCDate,
-} from './records-common.js?v=53d5d8c1e5';
+} from './records-common.js?v=fbf38edc70';
 
 const MERGED_URL = 'data/hospitals-merged.json?v=c017631e69';
 const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=f3d4b868a4';
@@ -284,6 +284,35 @@ function bumpHospitalViewIntent(code) {
   } catch { /* localStorage 不可用時忽略 */ }
 }
 
+// ---------- 子頁簽（避免整頁長捲，各整合區塊分頁切換）----------
+function activateHospTab(key) {
+  const bar = document.getElementById('hosp-tabs');
+  if (!bar) return;
+  bar.querySelectorAll('.tab').forEach((b) => {
+    const on = b.dataset.tab === key;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+  document.querySelectorAll('.hosp-tab-panel').forEach((p) => {
+    const on = p.dataset.panel === key;
+    p.hidden = !on;
+    // 面板由隱藏轉顯示時重算圖表尺寸（Chart.js 於 display:none 建立會是 0 寬）
+    if (on && typeof Chart !== 'undefined') {
+      p.querySelectorAll('canvas').forEach((cv) => { const ch = Chart.getChart(cv); if (ch) ch.resize(); });
+    }
+  });
+}
+
+function setupHospitalTabs() {
+  const bar = document.getElementById('hosp-tabs');
+  if (!bar || bar.dataset.wired) return;
+  bar.dataset.wired = '1';
+  bar.addEventListener('click', (e) => {
+    const btn = e.target.closest('.tab');
+    if (btn && btn.dataset.tab) activateHospTab(btn.dataset.tab);
+  });
+}
+
 function selectHospital(code, updateUrl = false) {
   const hosp = state.byCode.get(code);
   if (!hosp) return;
@@ -299,6 +328,7 @@ function selectHospital(code, updateUrl = false) {
   renderPersonnelSection(code);
   renderPlatformSection(hosp);
   renderViolationsSection(code, hosp);
+  activateHospTab('nr');   // 每次選院回到第一個頁簽
   renderIcons();
   try { window.scrollTo({ top: document.getElementById('hospital-detail').offsetTop - 60, behavior: 'smooth' }); } catch {}
 }
@@ -783,6 +813,7 @@ export async function initHospital() {
     await Promise.all([loadBaseData(), ensureShortLoaded().catch(() => {})]);
     setupSearch();
     setupLevelFilter();
+    setupHospitalTabs();
     renderCityFilter();
     renderHospitalList();
 
