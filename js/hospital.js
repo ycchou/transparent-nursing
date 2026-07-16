@@ -5,9 +5,9 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { renderIcons } from './icons.js?v=28ce4a4ed6';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=28ce4a4ed6';
-import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=28ce4a4ed6';
+import { renderIcons } from './icons.js?v=d15f6d7c04';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=d15f6d7c04';
+import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=d15f6d7c04';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -15,22 +15,22 @@ import {
   shiftStatus,
   classifyHospital,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=28ce4a4ed6';
-import { loadAll } from './data-loader.js?v=28ce4a4ed6';
-import { renderKpiStrip } from './stats-kpi.js?v=28ce4a4ed6';
-import { renderTable, showDetailModal } from './table.js?v=28ce4a4ed6';
-import { hasContributed } from './contribution-gate.js?v=28ce4a4ed6';
-import { notePwaIntent } from './pwa-prompt.js?v=28ce4a4ed6';
+} from './nurse-ratio-view.js?v=d15f6d7c04';
+import { loadAll } from './data-loader.js?v=d15f6d7c04';
+import { renderKpiStrip } from './stats-kpi.js?v=d15f6d7c04';
+import { renderTable, showDetailModal } from './table.js?v=d15f6d7c04';
+import { hasContributed } from './contribution-gate.js?v=d15f6d7c04';
+import { notePwaIntent } from './pwa-prompt.js?v=d15f6d7c04';
 import {
   loadFinancialsHospital, getFinancialFields,
   formatVal as finFormatVal, signClass as finSignClass, formatRocYear as finRocYear,
   renderFinancialTrendChart,
-} from './financials-view.js?v=28ce4a4ed6';
-import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=28ce4a4ed6';
+} from './financials-view.js?v=d15f6d7c04';
+import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=d15f6d7c04';
 import {
   loadPersonnelHospital, ensurePersonnelIndex,
   renderStaffChart as renderPmStaffChart, renderBedChart as renderPmBedChart,
-} from './personnel-view.js?v=28ce4a4ed6';
+} from './personnel-view.js?v=d15f6d7c04';
 import {
   createCsvLoader,
   parseROCDate,
@@ -38,7 +38,7 @@ import {
   shortenLocation,
   fineToWan,
   formatROCDate,
-} from './records-common.js?v=28ce4a4ed6';
+} from './records-common.js?v=d15f6d7c04';
 
 const MERGED_URL = 'data/hospitals-merged.json?v=c017631e69';
 const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=f3d4b868a4';
@@ -444,7 +444,8 @@ function renderFinancialsSection(code) {
     };
     const note = noteHtml ? `<div class="fin-merge-note">${noteHtml}</div>` : '';
     kpi.innerHTML = `${note}<div style="color:var(--muted);font-size:0.85rem;margin-bottom:8px;">最新年度：${finRocYear(latest.YEAR)}</div>
-      <div class="grid grid-3">${card('F3', '整體獲利/虧損')}${card('F5', '醫務利益率')}${card('F6', '醫務收入')}</div>`;
+      <div class="grid grid-3">${card('F3', '整體獲利/虧損')}${card('F5', '醫務利益率')}${card('F6', '醫務收入')}</div>
+      <div class="grid grid-3" style="margin-top:12px;">${card('DOCTOR', '醫師數')}${card('BED', '病床數')}${card('F8', '全日平均護病比')}</div>`;
     link.innerHTML = `<a href="financials.html?code=${encodeURIComponent(detailCode)}" style="color:var(--primary);text-decoration:underline;font-size:0.85rem;">查看醫院財務 →</a>`;
     chartWrap.hidden = false;
     renderFinancialTrendChart(document.getElementById('fi-chart'), dataHosp, fields, { metrics: ['F1', 'F2', 'F3'] });

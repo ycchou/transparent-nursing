@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#2E86AB" />
   <!-- 軟鎖總開關（js/gate.js）：鎖定期非公開頁導向 coming-soon -->
-  <script src="./js/gate.js?v=28ce4a4ed6"></script>
+  <script src="./js/gate.js?v=d15f6d7c04"></script>
 
   <title>醫院財務 — 護理職場透明化運動</title>
   <meta name="description" content="整合健保署『醫院財務資訊公開』，以醫院為單位呈現整體獲利/虧損、醫務利益率、醫務收入與全日平均護病比等財務指標，含全國排名與逐年趨勢（民國104–113）。" />
@@ -40,16 +40,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css?v=be672b896d" />
 
-  <link rel="modulepreload" href="./js/components.js?v=28ce4a4ed6" />
-  <link rel="modulepreload" href="./js/config.js?v=28ce4a4ed6" />
-  <link rel="modulepreload" href="./js/financials-view.js?v=28ce4a4ed6" />
-  <link rel="modulepreload" href="./js/financials.js?v=28ce4a4ed6" />
-  <link rel="modulepreload" href="./js/hospital-merges.js?v=28ce4a4ed6" />
-  <link rel="modulepreload" href="./js/hospital-shortname.js?v=28ce4a4ed6" />
-  <link rel="modulepreload" href="./js/icons.js?v=28ce4a4ed6" />
-  <link rel="modulepreload" href="./js/institution-name.js?v=28ce4a4ed6" />
-  <link rel="modulepreload" href="./js/pwa-prompt.js?v=28ce4a4ed6" />
-  <link rel="modulepreload" href="./js/toast.js?v=28ce4a4ed6" />
+  <link rel="modulepreload" href="./js/components.js?v=d15f6d7c04" />
+  <link rel="modulepreload" href="./js/config.js?v=d15f6d7c04" />
+  <link rel="modulepreload" href="./js/financials-view.js?v=d15f6d7c04" />
+  <link rel="modulepreload" href="./js/financials.js?v=d15f6d7c04" />
+  <link rel="modulepreload" href="./js/hospital-merges.js?v=d15f6d7c04" />
+  <link rel="modulepreload" href="./js/hospital-shortname.js?v=d15f6d7c04" />
+  <link rel="modulepreload" href="./js/icons.js?v=d15f6d7c04" />
+  <link rel="modulepreload" href="./js/institution-name.js?v=d15f6d7c04" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=d15f6d7c04" />
+  <link rel="modulepreload" href="./js/toast.js?v=d15f6d7c04" />
 
   <!-- JSON-LD Structured Data：Dataset（醫院財務資訊） -->
   <script type="application/ld+json">
@@ -57,10 +57,10 @@
     "@context": "https://schema.org",
     "@type": "Dataset",
     "@id": "https://ycchou.github.io/transparent-nursing/financials.html#dataset",
-    "name": "全國醫院財務指標（整體獲利・醫務利益率・全日平均護病比）",
-    "description": "整合衛生福利部・健保署「醫院財務資訊公開」，以醫院為單位呈現整體獲利/虧損、醫務利益率、醫務收入與全日平均護病比，含全國排名與逐年趨勢（民國 104–113 年）。",
+    "name": "全國醫院財務與營運指標（整體獲利・醫務利益率・護病比・醫師數・病床數・門住診量）",
+    "description": "整合衛生福利部・健保署「醫院財務資訊公開」年度報表，以醫院為單位呈現整體獲利/虧損、醫務利益率、醫務收入、全日平均護病比，以及醫師數、病床數、門診/住診件數與住院天數等營運規模指標，支援層級與分區篩選，含全國排名與逐年趨勢（民國 104–113 年）。",
     "url": "https://ycchou.github.io/transparent-nursing/financials.html",
-    "keywords": ["醫院財務", "醫務利益率", "整體獲利", "醫務收入", "護病比", "健保署"],
+    "keywords": ["醫院財務", "醫務利益率", "整體獲利", "醫務收入", "護病比", "醫師數", "病床數", "門診量", "住院天數", "健保署"],
     "creator": { "@type": "GovernmentOrganization", "name": "衛生福利部中央健康保險署", "url": "https://www.nhi.gov.tw/" },
     "publisher": { "@type": "Organization", "name": "護理職場透明化運動", "url": "https://ycchou.github.io/transparent-nursing/" },
     "isAccessibleForFree": true,
@@ -77,11 +77,12 @@
       <h1 style="margin:4px 0 8px;">醫院財務</h1>
       <p style="color:var(--muted);max-width:820px;line-height:1.75;">
         以醫院為單位呈現<strong style="color:var(--ink);">整體獲利/虧損、醫務利益率、醫務收入</strong>與
-        <strong style="color:var(--ink);">全日平均護病比</strong>，含全國排名與逐年趨勢。點任一列可看該院多年變化。
+        <strong style="color:var(--ink);">全日平均護病比</strong>，並可切換<strong style="color:var(--ink);">營運規模</strong>檢視
+        <strong style="color:var(--ink);">醫師數、病床數、門診/住診量、住院天數</strong>；支援層級與分區篩選，含全國排名與逐年趨勢。點任一列可看該院多年變化。
       </p>
       <p style="color:var(--muted-light);font-size:0.85rem;margin-top:10px;line-height:1.7;">
-        資料來源：<a href="https://med.nhi.gov.tw/rgfe0000/RGFE0030S01.aspx" target="_blank" rel="noopener" style="color:var(--primary);text-decoration:underline;">衛生福利部・健保署「醫院財務資訊公開」</a>
-        （民國 104–113 年，金額單位：億元；僅涵蓋依法須公開財務之醫院）
+        資料來源：<a href="https://med.nhi.gov.tw/rgfe0000/RGFE0030S01.aspx" target="_blank" rel="noopener" style="color:var(--primary);text-decoration:underline;">衛生福利部・健保署「醫院財務資訊公開」</a>年度報表
+        （醫療服務申報情形，民國 104–113 年，金額單位：億元；僅涵蓋依法須公開財務之醫院）
       </p>
     </div>
   </section>
@@ -150,8 +151,16 @@
             <input id="fin-search" type="search" placeholder="搜尋醫院名稱、簡稱或代號..." class="nurse-picker-search" style="flex:1;min-width:220px;" />
           </div>
           <div class="nurse-picker-filter-row">
+            <span class="nurse-filter-label">指標：</span>
+            <div class="nurse-picker-filters" id="fin-view-tabs"></div>
+          </div>
+          <div class="nurse-picker-filter-row">
             <span class="nurse-filter-label">層級：</span>
             <div class="nurse-picker-filters" id="fin-level-filter"></div>
+          </div>
+          <div class="nurse-picker-filter-row">
+            <span class="nurse-filter-label">分區：</span>
+            <div class="nurse-picker-filters" id="fin-region-filter"></div>
           </div>
         </div>
         <div id="fin-table" class="fin-table-mount"></div>
@@ -167,9 +176,9 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js" defer></script>
   <script type="module">
-    import { mountLayout } from './js/components.js?v=28ce4a4ed6';
-    import { renderIcons } from './js/icons.js?v=28ce4a4ed6';
-    import { initFinancials } from './js/financials.js?v=28ce4a4ed6';
+    import { mountLayout } from './js/components.js?v=d15f6d7c04';
+    import { renderIcons } from './js/icons.js?v=d15f6d7c04';
+    import { initFinancials } from './js/financials.js?v=d15f6d7c04';
 
     mountLayout();
     renderIcons();

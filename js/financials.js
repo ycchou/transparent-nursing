@@ -2,33 +2,49 @@
 //
 // 資料/圖表共用 js/financials-view.js；名稱↔代碼/簡稱重用 js/hospital-shortname.js
 
-import { renderIcons, icon } from './icons.js?v=28ce4a4ed6';
-import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=28ce4a4ed6';
+import { renderIcons, icon } from './icons.js?v=d15f6d7c04';
+import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=d15f6d7c04';
 import {
   ensureFinancialsLoaded, getAllFinancials, getFinancials, getFinancialFields,
   parseNum, formatVal, signClass, formatRocYear, renderFinancialTrendChart,
-} from './financials-view.js?v=28ce4a4ed6';
-import { reportMergedInfo } from './hospital-merges.js?v=28ce4a4ed6';
+} from './financials-view.js?v=d15f6d7c04';
+import { reportMergedInfo } from './hospital-merges.js?v=d15f6d7c04';
 
-const LEVEL_ORDER = ['醫學中心', '區域醫院', '地區醫院', '精神科醫院', '診所', '其他'];
+const LEVEL_ORDER = ['醫學中心', '區域醫院', '地區醫院', '精神科醫院', '精神科教學醫院', '診所', '其他'];
+const REGION_ORDER = ['臺北', '北區', '中區', '南區', '高屏', '東區'];
 
-// 比較表欄位（key = 資料欄, sort = 排序用數值來源）
-const COLUMNS = [
-  { key: 'F3', label: '整體獲利/虧損', rank: true },
-  { key: 'F5', label: '醫務利益率' },
-  { key: 'F6', label: '醫務收入' },
-  { key: 'F8', label: '全日平均護病比' },
-];
+// 兩組比較表欄位：財務 / 營運規模（rank=顯示排名，sign=正負上色）
+const COLUMN_SETS = {
+  finance: [
+    { key: 'F3', label: '整體獲利/虧損', rank: true, sign: true },
+    { key: 'F5', label: '醫務利益率', rank: true, sign: true },
+    { key: 'F6', label: '醫務收入', rank: true },
+    { key: 'F8', label: '全日平均護病比' },
+  ],
+  ops: [
+    { key: 'DOCTOR', label: '醫師數', rank: true },
+    { key: 'BED', label: '病床數', rank: true },
+    { key: 'OPD_CNT', label: '門診件數', rank: true },
+    { key: 'IPD_DAY', label: '住院天數', rank: true },
+  ],
+};
+const VIEW_LABELS = { finance: '財務', ops: '營運規模' };
 
 const state = {
   fields: {},
   year: null,
+  view: 'finance',
   levelFilter: 'all',
+  regionFilter: 'all',
   searchQuery: '',
   sortKey: 'F3',
   sortDir: 'desc',
   currentCode: null,
 };
+
+function currentColumns() {
+  return COLUMN_SETS[state.view] || COLUMN_SETS.finance;
+}
 
 function escapeHtml(s) {
   return String(s == null ? '' : s)
@@ -36,6 +52,12 @@ function escapeHtml(s) {
 }
 function levelSlug(lv) {
   return { '醫學中心': 'mc', '區域醫院': 'rg', '地區醫院': 'dt' }[lv] || 'other';
+}
+function orderBy(order) {
+  return (a, b) => {
+    const ia = order.indexOf(a), ib = order.indexOf(b);
+    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+  };
 }
 function rowForYear(h, year) {
   return (h.rows || []).find((r) => r.YEAR === year) || null;
@@ -69,10 +91,15 @@ function allLevels(year) {
     const r = rowForYear(h, year);
     if (r && r.HOSP_CNT_TYPNAM) s.add(r.HOSP_CNT_TYPNAM);
   });
-  return [...s].sort((a, b) => {
-    const ia = LEVEL_ORDER.indexOf(a), ib = LEVEL_ORDER.indexOf(b);
-    return (ia < 0 ? 99 : ia) - (ib < 0 ? 99 : ib);
+  return [...s].sort(orderBy(LEVEL_ORDER));
+}
+function allRegions(year) {
+  const s = new Set();
+  getAllFinancials().forEach((h) => {
+    const r = rowForYear(h, year);
+    if (r && r.REGION) s.add(r.REGION);
   });
+  return [...s].sort(orderBy(REGION_ORDER));
 }
 
 function renderYearSelect() {
@@ -83,6 +110,7 @@ function renderYearSelect() {
   el.addEventListener('change', () => {
     state.year = el.value;
     renderLevelFilter();
+    renderRegionFilter();
     renderTable();
   });
 }
@@ -100,6 +128,47 @@ function renderLevelFilter() {
     btn.addEventListener('click', () => {
       state.levelFilter = btn.dataset.level;
       el.querySelectorAll('.nurse-level-filter').forEach((b) => b.classList.toggle('active', b.dataset.level === state.levelFilter));
+      renderTable();
+    });
+  });
+}
+
+function renderRegionFilter() {
+  const el = document.getElementById('fin-region-filter');
+  if (!el) return;
+  const regions = allRegions(state.year);
+  if (!regions.includes(state.regionFilter)) state.regionFilter = 'all';
+  el.innerHTML = `
+    <button type="button" class="nurse-level-filter ${state.regionFilter === 'all' ? 'active' : ''}" data-region="all">全部</button>
+    ${regions.map((rg) => `<button type="button" class="nurse-level-filter ${state.regionFilter === rg ? 'active' : ''}" data-region="${escapeHtml(rg)}">${escapeHtml(rg)}</button>`).join('')}
+  `;
+  el.querySelectorAll('.nurse-level-filter').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      state.regionFilter = btn.dataset.region;
+      el.querySelectorAll('.nurse-level-filter').forEach((b) => b.classList.toggle('active', b.dataset.region === state.regionFilter));
+      renderTable();
+    });
+  });
+}
+
+// 指標視圖切換：財務 / 營運規模
+function renderViewTabs() {
+  const el = document.getElementById('fin-view-tabs');
+  if (!el) return;
+  el.innerHTML = Object.keys(COLUMN_SETS).map((v) =>
+    `<button type="button" class="nurse-level-filter ${state.view === v ? 'active' : ''}" data-view="${v}">${VIEW_LABELS[v]}</button>`
+  ).join('');
+  el.querySelectorAll('.nurse-level-filter').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (state.view === btn.dataset.view) return;
+      state.view = btn.dataset.view;
+      // 切換視圖時，若目前排序欄不在新視圖，改回新視圖第一欄
+      const cols = currentColumns();
+      if (!cols.some((c) => c.key === state.sortKey)) {
+        state.sortKey = cols[0].key;
+        state.sortDir = 'desc';
+      }
+      el.querySelectorAll('.nurse-level-filter').forEach((b) => b.classList.toggle('active', b.dataset.view === state.view));
       renderTable();
     });
   });
@@ -123,6 +192,7 @@ function filteredRows() {
     const r = rowForYear(h, state.year);
     if (!r) return;
     if (state.levelFilter !== 'all' && r.HOSP_CNT_TYPNAM !== state.levelFilter) return;
+    if (state.regionFilter !== 'all' && r.REGION !== state.regionFilter) return;
     if (q) {
       const short = getShortByCode(h.code) || getShort(h.name) || h.shortName || '';
       const hay = `${h.name} ${short} ${h.code}`.toLowerCase();
@@ -149,17 +219,18 @@ function renderTable() {
   const countEl = document.getElementById('fin-count');
   if (countEl) countEl.textContent = `${rows.length.toLocaleString()} 家`;
 
+  const columns = currentColumns();
   const caret = (k) => state.sortKey === k ? (state.sortDir === 'asc' ? ' ▲' : ' ▼') : '';
   const head = `
     <th>醫院</th><th class="fin-lv-col">層級</th>
-    ${COLUMNS.map((c) => `<th class="fin-sort" data-key="${c.key}" style="text-align:right;cursor:pointer;white-space:nowrap;">${c.label}${caret(c.key)}</th>`).join('')}
+    ${columns.map((c) => `<th class="fin-sort" data-key="${c.key}" style="text-align:right;cursor:pointer;white-space:nowrap;">${c.label}${caret(c.key)}</th>`).join('')}
   `;
   const body = rows.map(({ h, r }) => {
     const short = getShortByCode(h.code) || getShort(h.name) || h.shortName;
-    const cells = COLUMNS.map((c) => {
+    const cells = columns.map((c) => {
       const val = r[`${c.key}Val`];
       const rank = c.rank ? r[`${c.key}Rank`] : null;
-      const cls = (c.key === 'F3' || c.key === 'F1' || c.key === 'F5') ? signClass(val) : '';
+      const cls = c.sign ? signClass(val) : '';
       const rankHtml = rank ? `<span class="fin-rank">#${rank}</span>` : '';
       return `<td style="text-align:right;white-space:nowrap;"><span class="${cls}">${formatVal(c.key, val, state.fields)}</span>${rankHtml}</td>`;
     }).join('');
@@ -177,7 +248,7 @@ function renderTable() {
     <div class="data-table-wrap">
       <table class="data-table fin-table">
         <thead><tr>${head}</tr></thead>
-        <tbody>${rows.length ? body : `<tr><td colspan="${COLUMNS.length + 2}" style="padding:40px;text-align:center;color:var(--muted);">查無符合條件的醫院</td></tr>`}</tbody>
+        <tbody>${rows.length ? body : `<tr><td colspan="${columns.length + 2}" style="padding:40px;text-align:center;color:var(--muted);">查無符合條件的醫院</td></tr>`}</tbody>
       </table>
     </div>`;
 
@@ -213,7 +284,8 @@ function modalHtml(h) {
     const rank = latest ? latest[`${key}Rank`] : null;
     return `<div class="card stat-card"><div class="stat-num kpi-num"><span class="${signClass(val)}">${formatVal(key, val, f)}</span></div><div class="stat-label">${label}${rank ? ` · 全國第 ${rank}` : ''}</div></div>`;
   };
-  const cols = ['F1', 'F2', 'F3', 'F5', 'F6', 'F7', 'F8'];
+  const cols = ['F1', 'F2', 'F3', 'F5', 'F6', 'F7', 'F8',
+    'DOCTOR', 'BED', 'OPD_CNT', 'IPD_CNT', 'IPD_DAY', 'PT_ALL', 'OPD_PT', 'IPD_PT'];
   const rowsDesc = [...(h.rows || [])].sort((a, b) => Number(b.YEAR) - Number(a.YEAR));
   const yearTable = `
     <div class="data-table-wrap"><table class="data-table fin-table">
@@ -228,6 +300,7 @@ function modalHtml(h) {
           <h3 style="margin:0 0 6px;word-break:break-word;">${escapeHtml(h.name)}</h3>
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             ${latest ? `<span class="nurse-level-badge nurse-level-${levelSlug(latest.HOSP_CNT_TYPNAM)}">${escapeHtml(latest.HOSP_CNT_TYPNAM)}</span>` : ''}
+            ${latest && latest.REGION ? `<span class="nurse-level-badge nurse-level-other">${escapeHtml(latest.REGION)}</span>` : ''}
             <span style="color:var(--muted);font-size:0.85rem;">代號 ${escapeHtml(h.code)}${short && short !== h.name ? ' · ' + escapeHtml(short) : ''}
             · <a href="hospital.html?code=${encodeURIComponent(h.code)}" style="color:var(--primary);text-decoration:underline;">機構總覽 →</a></span>
           </div>
@@ -242,10 +315,15 @@ function modalHtml(h) {
           : `下列數字為與 <strong>${rm.partnerName}</strong> 合併提報之<strong>合計數</strong>，非本院單獨財報。`}</div>`;
       })()}
       ${latest ? `<div style="color:var(--muted);font-size:0.85rem;margin-bottom:8px;">最新年度：${formatRocYear(latest.YEAR)}</div>
-      <div class="grid grid-3">${card('F3', '整體獲利/虧損')}${card('F5', '醫務利益率')}${card('F6', '醫務收入')}</div>` : ''}
+      <div class="grid grid-3">${card('F3', '整體獲利/虧損')}${card('F5', '醫務利益率')}${card('F6', '醫務收入')}</div>
+      <div class="grid grid-3" style="margin-top:12px;">${card('DOCTOR', '醫師數')}${card('BED', '病床數')}${card('F8', '全日平均護病比')}</div>` : ''}
       <div class="chart-card" style="margin-top:18px;">
         <div class="chart-card-header"><div><h3 style="font-size:1rem;">逐年財務趨勢（醫務本業／非醫務／整體，單位：億元）</h3></div></div>
         <div class="chart-canvas-wrap" style="height:320px;"><canvas id="fin-modal-chart"></canvas></div>
+      </div>
+      <div class="chart-card" style="margin-top:18px;">
+        <div class="chart-card-header"><div><h3 style="font-size:1rem;">逐年營運規模趨勢（門診／住診件數，單位：萬件）</h3></div></div>
+        <div class="chart-canvas-wrap" style="height:300px;"><canvas id="fin-modal-ops-chart"></canvas></div>
       </div>
       <div class="chart-card" style="margin-top:18px;">
         <div class="chart-card-header"><div><h3 style="font-size:1rem;">各年度明細</h3></div></div>
@@ -268,6 +346,7 @@ function openModal(h) {
   backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
   document.addEventListener('keydown', escHandler);
   renderFinancialTrendChart(backdrop.querySelector('#fin-modal-chart'), h, state.fields, { metrics: ['F1', 'F2', 'F3'] });
+  renderFinancialTrendChart(backdrop.querySelector('#fin-modal-ops-chart'), h, state.fields, { metrics: ['OPD_CNT', 'IPD_CNT'] });
 }
 
 function escHandler(e) { if (e.key === 'Escape') closeModal(); }
@@ -292,7 +371,9 @@ export async function initFinancials() {
     state.year = years[0] || null;
 
     renderYearSelect();
+    renderViewTabs();
     renderLevelFilter();
+    renderRegionFilter();
     setupSearch();
     renderTable();
     window.addEventListener('hospitalShortNamesReady', () => renderTable(), { once: true });

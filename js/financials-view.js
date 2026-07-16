@@ -10,7 +10,7 @@
 //     rows:[{ YEAR, HOSP_CNT_TYPNAM, F1Val,F1Rank, F2Val,F2Rank, F3Val,F3Rank,
 //             F5Val, F6Val, F7Val, F8Val }] }] }
 
-const DATA_URL = 'data/hospital-financials.json?v=8cd470a59b';
+const DATA_URL = 'data/hospital-financials.json?v=00ef43bb8c';
 
 let _doc = null;
 let _byCode = null;
@@ -52,7 +52,7 @@ const _codeCache = new Map();
 export async function loadFinancialsHospital(code) {
   if (_codeCache.has(code)) return _codeCache.get(code);
   try {
-    const r = await fetch(`data/financials/${code}.json?v=8cd470a59b`, { cache: 'default' });
+    const r = await fetch(`data/financials/${code}.json?v=00ef43bb8c`, { cache: 'default' });
     const d = r.ok ? await r.json() : null;
     _codeCache.set(code, d);
     return d;
@@ -77,7 +77,12 @@ export function formatVal(fieldKey, val, fields) {
   const n = parseNum(val);
   if (n == null) return String(val);
   if (unit === '億元') return `${n.toFixed(2)} 億`;
-  if (unit === '人') return n.toFixed(1);
+  if (unit === '人') return n.toFixed(1);                  // F8 護病比（每護理師病人數）
+  if (unit === '人數') return `${Math.round(n).toLocaleString()} 人`; // 醫師數
+  if (unit === '床') return `${Math.round(n).toLocaleString()} 床`;   // 病床數
+  if (unit === '億點') return `${n.toFixed(2)} 億點`;      // 醫療點數
+  if (unit === '萬件') return `${n.toFixed(1)} 萬件`;      // 門診/住診件數
+  if (unit === '萬日') return `${n.toFixed(1)} 萬日`;      // 住院天數
   return String(val);
 }
 
@@ -102,6 +107,14 @@ const SERIES_COLORS = {
   F6: '#F4A261', // 醫務收入
   F7: '#6B7C93', // 醫務成本
   F8: '#14B8A6', // 護病比
+  DOCTOR: '#2E86AB',  // 醫師數
+  BED: '#F4A261',     // 病床數
+  OPD_CNT: '#06A77D', // 門診件數
+  IPD_CNT: '#9D4EDD', // 住診件數
+  IPD_DAY: '#E63946', // 住院天數
+  PT_ALL: '#6B7C93',  // 門住合計點數
+  OPD_PT: '#14B8A6',  // 門診點數
+  IPD_PT: '#E76F51',  // 住診點數
 };
 
 /**
@@ -138,6 +151,10 @@ export function renderFinancialTrendChart(canvas, hospital, fields, opts = {}) {
   }));
 
   const unit = (fields[metrics[0]] && fields[metrics[0]].unit) || '';
+  // tooltip 數值後綴 / y 軸標題（依單位）
+  const unitSuffix = { '百分比': '%', '億元': ' 億', '人數': ' 人', '床': ' 床', '億點': ' 億點', '萬件': ' 萬件', '萬日': ' 萬日', '人': '' }[unit] || '';
+  const axisTitle = unit === '百分比' ? '百分比 (%)'
+    : (unit === '億元' ? '金額（億元）' : (unit ? unit : ''));
   new Chart(canvas, {
     type: 'line',
     data: { labels, datasets },
@@ -157,8 +174,7 @@ export function renderFinancialTrendChart(canvas, hospital, fields, opts = {}) {
             label: (ctx) => {
               const v = ctx.parsed.y;
               if (v == null) return null;
-              const u = unit === '百分比' ? '%' : (unit === '億元' ? ' 億' : '');
-              return `${ctx.dataset.label}: ${v}${u}`;
+              return `${ctx.dataset.label}: ${v}${unitSuffix}`;
             },
           },
         },
@@ -169,7 +185,7 @@ export function renderFinancialTrendChart(canvas, hospital, fields, opts = {}) {
       scales: {
         x: { grid: { display: false }, border: { color: '#E5E9F0' }, ticks: { color: '#6B7C93', font: { family: "'Noto Sans TC', sans-serif", size: 11 } } },
         y: {
-          title: { display: true, text: unit === '百分比' ? '百分比 (%)' : (unit ? `金額（${unit}）` : ''), color: '#46557A', font: { family: "'Noto Sans TC', sans-serif", size: 12 } },
+          title: { display: true, text: axisTitle, color: '#46557A', font: { family: "'Noto Sans TC', sans-serif", size: 12 } },
           grid: { color: '#F1F3F7' }, border: { display: false },
           ticks: { color: '#6B7C93', font: { family: "'Noto Sans TC', sans-serif", size: 11 } },
         },

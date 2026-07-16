@@ -23,8 +23,8 @@ if hasattr(sys.stdout, 'reconfigure'):
 # (kind, cmd, 說明)。kind: 'local' | 'net' | 'final'
 STEPS = [
     ('net',   ['python', 'tools/fetch-hospital-addresses.py'],   '健保署 → 地址 overlay'),
-    ('net',   ['node',   'tools/fetch-financials-list.js'],      '健保署 → 財報清單'),
-    ('net',   ['python', 'tools/fetch-hospital-financials.py'],  '健保署 → 財報'),
+    ('net',   ['node',   'tools/fetch-financials-list.js'],      '健保署 → 財報清單（供簡稱對照）'),
+    ('local', ['python', 'tools/build-financials.py'],           'ODS 年度報表 → 財報（醫療服務申報情形）'),
     ('local', ['python', 'tools/extract-hospitals.py'],          '評鑑 PDF → hospitals.json'),
     ('local', ['python', 'tools/build-nurse-ratio.py'],          'VPN ODS → 護病比＋merged'),
     ('local', ['python', 'tools/apply-hospital-corrections.py'], '套用 manual 修正'),
