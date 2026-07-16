@@ -2,13 +2,13 @@
 //
 // 資料/圖表共用 js/financials-view.js；名稱↔代碼/簡稱重用 js/hospital-shortname.js
 
-import { renderIcons, icon } from './icons.js?v=d15f6d7c04';
-import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=d15f6d7c04';
+import { renderIcons, icon } from './icons.js?v=53d5d8c1e5';
+import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=53d5d8c1e5';
 import {
   ensureFinancialsLoaded, getAllFinancials, getFinancials, getFinancialFields,
   parseNum, formatVal, signClass, formatRocYear, renderFinancialTrendChart,
-} from './financials-view.js?v=d15f6d7c04';
-import { reportMergedInfo } from './hospital-merges.js?v=d15f6d7c04';
+} from './financials-view.js?v=53d5d8c1e5';
+import { reportMergedInfo } from './hospital-merges.js?v=53d5d8c1e5';
 
 const LEVEL_ORDER = ['醫學中心', '區域醫院', '地區醫院', '精神科醫院', '精神科教學醫院', '診所', '其他'];
 const REGION_ORDER = ['臺北', '北區', '中區', '南區', '高屏', '東區'];

@@ -1,11 +1,11 @@
 // 表格 / 卡片 渲染、排序、Modal
-import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=d15f6d7c04';
-import { fmt, recommendPill, categoryTag } from './components.js?v=d15f6d7c04';
-import { icon } from './icons.js?v=d15f6d7c04';
-import { generateShareCard, showSharePreview } from './share-card.js?v=d15f6d7c04';
-import { ensureTooltip } from './tooltip.js?v=d15f6d7c04';
-import { pageSlice, renderPagination } from './pagination.js?v=d15f6d7c04';
-import { getHospitalCode } from './hospital-shortname.js?v=d15f6d7c04';
+import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=53d5d8c1e5';
+import { fmt, recommendPill, categoryTag } from './components.js?v=53d5d8c1e5';
+import { icon } from './icons.js?v=53d5d8c1e5';
+import { generateShareCard, showSharePreview } from './share-card.js?v=53d5d8c1e5';
+import { ensureTooltip } from './tooltip.js?v=53d5d8c1e5';
+import { pageSlice, renderPagination } from './pagination.js?v=53d5d8c1e5';
+import { getHospitalCode } from './hospital-shortname.js?v=53d5d8c1e5';
 
 // 機構名稱若對得上評鑑醫院，包成連到機構總覽頁的連結（stopPropagation 避免觸發列 modal）
 function withHospitalLink(name, innerHtml) {

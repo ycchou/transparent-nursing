@@ -6,6 +6,9 @@ export const SITE = {
   tagline: '讓真實的職場資訊，被下一個護理師看見',
   contactEmail: 'transparentnursing@example.org',
   lastUpdated: '自動依資料動態計算',
+  // Disqus 留言：到 disqus.com 建站取得 shortname 後填入（留空＝顯示「設定中」提示、不載入）。
+  // 別忘了到 Disqus 後台 Settings → Advanced → Trusted Domains 加入 ycchou.github.io。
+  disqusShortname: '',
 };
 
 // 共用欄位（所有類別都會出現）
