@@ -2,13 +2,13 @@
 // 資料：data/personnel-index.json（picker 清單）＋ data/personnel/{code}.json（單院時間序列）
 // 來源：衛福部「醫院醫事人力持續性監測結果」。
 
-import { renderIcons, icon } from './icons.js?v=d5f792af4d';
-import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=d5f792af4d';
+import { renderIcons, icon } from './icons.js?v=afdc52b469';
+import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=afdc52b469';
 import {
   CAT_COLORS, BED_COLORS, DEFAULT_ON, mLabel, baseLineCfg,
-  renderStaffChart, renderBedChart, loadPersonnelHospital,
-} from './personnel-view.js?v=d5f792af4d';
-import { showToast } from './toast.js?v=d5f792af4d';
+  renderStaffChart, renderBedChart, loadPersonnelHospital, latestMonthTable,
+} from './personnel-view.js?v=afdc52b469';
+import { showToast } from './toast.js?v=afdc52b469';
 
 const INDEX_URL = 'data/personnel-index.json';
 const AGG_URL = 'data/personnel-aggregate.json';
@@ -192,26 +192,10 @@ function renderBedWithEmpty(h) {
 }
 
 function renderLatestTable(h) {
-  const li = h.months.length - 1;
-  const m = h.months[li];
-  const actual = h.actual[li] || [], evl = h.eval[li] || [], beds = h.beds[li] || [];
+  const { monthLabel, tableHtml } = latestMonthTable(h);
   document.getElementById('pm-latest-title').innerHTML =
-    `<span data-icon="layout" data-size="16" style="color:var(--primary);vertical-align:middle;"></span> 最新月一覽（民國 ${mLabel(m)}）`;
-  const fmt = (v) => (v == null ? '—' : v.toLocaleString());
-  const staffRows = h.categories.map((c, i) => {
-    const a = actual[i], e = evl[i];
-    const meet = (a != null && e != null) ? (a >= e ? '<span class="status-safe">達標</span>' : '<span class="status-danger">未達</span>') : '';
-    return `<tr><td>${escapeHtml(c)}</td><td style="text-align:right;">${fmt(a)}</td><td style="text-align:right;">${fmt(e)}</td><td style="text-align:center;">${meet}</td></tr>`;
-  }).join('');
-  const bedRows = h.bedTypes.map((b, i) => `<tr><td>${escapeHtml(b)}</td><td style="text-align:right;" colspan="3">${fmt(beds[i])} 床</td></tr>`).join('');
-  document.getElementById('pm-latest').innerHTML = `
-    <table class="data-table">
-      <thead><tr><th>職類</th><th style="text-align:right;">實際人數</th><th style="text-align:right;">評鑑基準</th><th style="text-align:center;">達標</th></tr></thead>
-      <tbody>${staffRows}
-        <tr><td colspan="4" style="background:var(--surface-soft);font-weight:600;">病床數</td></tr>
-        ${bedRows}
-      </tbody>
-    </table>`;
+    `<span data-icon="layout" data-size="16" style="color:var(--primary);vertical-align:middle;"></span> 最新月一覽（民國 ${monthLabel}）`;
+  document.getElementById('pm-latest').innerHTML = tableHtml;
 }
 
 // ---------- 全國儀錶板 ----------

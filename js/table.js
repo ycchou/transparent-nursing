@@ -1,11 +1,18 @@
 // 表格 / 卡片 渲染、排序、Modal
-import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=d5f792af4d';
-import { fmt, recommendPill, categoryTag } from './components.js?v=d5f792af4d';
-import { icon } from './icons.js?v=d5f792af4d';
-import { generateShareCard, showSharePreview } from './share-card.js?v=d5f792af4d';
-import { ensureTooltip } from './tooltip.js?v=d5f792af4d';
-import { pageSlice, renderPagination } from './pagination.js?v=d5f792af4d';
-import { getHospitalCode } from './hospital-shortname.js?v=d5f792af4d';
+import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=afdc52b469';
+import { fmt, recommendPill, categoryTag } from './components.js?v=afdc52b469';
+import { icon } from './icons.js?v=afdc52b469';
+import { generateShareCard, showSharePreview } from './share-card.js?v=afdc52b469';
+import { ensureTooltip } from './tooltip.js?v=afdc52b469';
+import { pageSlice, renderPagination } from './pagination.js?v=afdc52b469';
+import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=afdc52b469';
+
+// 顯示用機構名稱：對得上評鑑醫院時改用 VPN 簡稱，否則沿用原填寫名稱。
+function displayInstitutionName(name) {
+  if (!name) return name;
+  const short = getShort(name) || getShortByCode(getHospitalCode(name));
+  return short || name;
+}
 
 // 機構名稱若對得上評鑑醫院，包成連到機構總覽頁的連結（stopPropagation 避免觸發列 modal）
 function withHospitalLink(name, innerHtml) {
@@ -134,7 +141,9 @@ function renderCellValue(row, key) {
   if (key === 'institutionName' || key === 'unitName') {
     if (!v) return fmt.empty(v);
     const safe = String(v).replaceAll('"', '&quot;');
-    const span = `<span class="cell-trunc" data-key="${key}" title="${safe}">${v}</span>`;
+    // 機構名稱顯示簡稱（hover 仍看得到完整原名）；單位名稱維持原樣
+    const disp = key === 'institutionName' ? displayInstitutionName(v) : v;
+    const span = `<span class="cell-trunc" data-key="${key}" title="${safe}">${disp}</span>`;
     return key === 'institutionName' ? withHospitalLink(v, span) : span;
   }
   return fmt.empty(v);
@@ -256,7 +265,7 @@ export function renderTable(container, rows, opts = {}) {
             <div class="data-card-header">
               <div style="min-width:0;flex:1;">
                 <div style="font-size:0.78rem;color:var(--muted-light);font-weight:600;letter-spacing:0.04em;margin-bottom:2px;">#${r._seq != null ? r._seq : (idx + 1)}</div>
-                <div class="data-card-title">${r.institutionName ? withHospitalLink(r.institutionName, r.institutionName) : fmt.empty(r.institutionName)}</div>
+                <div class="data-card-title" title="${(r.institutionName || '').replaceAll('"','&quot;')}">${r.institutionName ? withHospitalLink(r.institutionName, displayInstitutionName(r.institutionName)) : fmt.empty(r.institutionName)}</div>
                 ${r.unitName ? `<div style="font-size:0.88rem;color:var(--ink-soft);font-weight:500;margin-top:2px;">${r.unitName}</div>` : ''}
                 <div style="font-size:0.82rem;color:var(--muted);margin-top:2px;">
                   ${fmt.empty(r.institutionType)}${r.location ? ' · ' + r.location : ''}

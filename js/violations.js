@@ -9,7 +9,7 @@ import {
   createCsvLoader,
   initRecordsPage,
   getCachedCount,
-} from './records-common.js?v=d5f792af4d';
+} from './records-common.js?v=afdc52b469';
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSRqnLPDCLdMztF2BjdA_W6jgZNahmxLmlOEz5C5Cg67WrMcy8O05Gb3jbizDrjr03O0tu-WQ2Qv9dN/pub?gid=190468784&single=true&output=csv';
 const STORAGE_KEY = 'nursing_viol_v2';

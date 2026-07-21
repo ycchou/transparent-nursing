@@ -11,6 +11,35 @@ export const DEFAULT_ON = new Set(['護產']);
 // "10807" -> "108/07"
 export function mLabel(m) { return `${parseInt(m.slice(0, 3), 10)}/${m.slice(3)}`; }
 
+function escapeHtml(s) {
+  return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// 最新月一覽表格：各職類實際人數 vs 評鑑基準（達標與否）＋病床數。
+// 供人力監控頁與機構總覽頁共用。回傳 { monthLabel, tableHtml }，無資料時 monthLabel 為 null。
+export function latestMonthTable(h) {
+  if (!h || !h.months || !h.months.length) return { monthLabel: null, tableHtml: '' };
+  const li = h.months.length - 1;
+  const m = h.months[li];
+  const actual = h.actual[li] || [], evl = h.eval[li] || [], beds = h.beds[li] || [];
+  const fmt = (v) => (v == null ? '—' : v.toLocaleString());
+  const staffRows = h.categories.map((c, i) => {
+    const a = actual[i], e = evl[i];
+    const meet = (a != null && e != null) ? (a >= e ? '<span class="status-safe">達標</span>' : '<span class="status-danger">未達</span>') : '';
+    return `<tr><td>${escapeHtml(c)}</td><td style="text-align:right;">${fmt(a)}</td><td style="text-align:right;">${fmt(e)}</td><td style="text-align:center;">${meet}</td></tr>`;
+  }).join('');
+  const bedRows = h.bedTypes.map((b, i) => `<tr><td>${escapeHtml(b)}</td><td style="text-align:right;" colspan="3">${fmt(beds[i])} 床</td></tr>`).join('');
+  const tableHtml = `
+    <table class="data-table">
+      <thead><tr><th>職類</th><th style="text-align:right;">實際人數</th><th style="text-align:right;">評鑑基準</th><th style="text-align:center;">達標</th></tr></thead>
+      <tbody>${staffRows}
+        <tr><td colspan="4" style="background:var(--surface-soft);font-weight:600;">病床數</td></tr>
+        ${bedRows}
+      </tbody>
+    </table>`;
+  return { monthLabel: mLabel(m), tableHtml };
+}
+
 export function baseLineCfg(labels, datasets) {
   return {
     type: 'line',
