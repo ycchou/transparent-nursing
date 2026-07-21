@@ -5,9 +5,9 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { renderIcons } from './icons.js?v=afdc52b469';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=afdc52b469';
-import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=afdc52b469';
+import { renderIcons } from './icons.js?v=e32de5950a';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=e32de5950a';
+import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=e32de5950a';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -15,23 +15,23 @@ import {
   shiftStatus,
   classifyHospital,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=afdc52b469';
-import { loadAll } from './data-loader.js?v=afdc52b469';
-import { renderKpiStrip } from './stats-kpi.js?v=afdc52b469';
-import { renderTable, showDetailModal } from './table.js?v=afdc52b469';
-import { hasContributed } from './contribution-gate.js?v=afdc52b469';
-import { notePwaIntent } from './pwa-prompt.js?v=afdc52b469';
+} from './nurse-ratio-view.js?v=e32de5950a';
+import { loadAll } from './data-loader.js?v=e32de5950a';
+import { renderKpiStrip } from './stats-kpi.js?v=e32de5950a';
+import { renderTable, showDetailModal } from './table.js?v=e32de5950a';
+import { hasContributed } from './contribution-gate.js?v=e32de5950a';
+import { notePwaIntent } from './pwa-prompt.js?v=e32de5950a';
 import {
   loadFinancialsHospital, getFinancialFields,
   formatVal as finFormatVal, signClass as finSignClass, formatRocYear as finRocYear,
   renderFinancialTrendChart,
-} from './financials-view.js?v=afdc52b469';
-import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=afdc52b469';
+} from './financials-view.js?v=e32de5950a';
+import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=e32de5950a';
 import {
   loadPersonnelHospital, ensurePersonnelIndex,
   renderStaffChart as renderPmStaffChart, renderBedChart as renderPmBedChart,
   latestMonthTable,
-} from './personnel-view.js?v=afdc52b469';
+} from './personnel-view.js?v=e32de5950a';
 import {
   createCsvLoader,
   parseROCDate,
@@ -39,7 +39,7 @@ import {
   shortenLocation,
   fineToWan,
   formatROCDate,
-} from './records-common.js?v=afdc52b469';
+} from './records-common.js?v=e32de5950a';
 
 const MERGED_URL = 'data/hospitals-merged.json?v=c017631e69';
 const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=f3d4b868a4';
@@ -547,17 +547,17 @@ function renderFinancialsSection(code) {
 function renderPersonnelPanel(h, panel) {
   const latest = latestMonthTable(h);
   const latestBlock = latest.monthLabel ? `
-    <h4 style="margin:0 4px 4px;font-size:0.95rem;">
+    <h4 style="margin:24px 4px 4px;font-size:0.95rem;">
       <span data-icon="layout" data-size="16" style="color:var(--primary);vertical-align:middle;"></span>
       最新月一覽（民國 ${latest.monthLabel}）
     </h4>
-    <div class="data-table-wrap" style="margin-bottom:22px;">${latest.tableHtml}</div>` : '';
+    <div class="data-table-wrap">${latest.tableHtml}</div>` : '';
   panel.innerHTML = `
-    ${latestBlock}
     <p style="color:var(--muted-light);font-size:0.8rem;margin:0 4px 10px;">各職類實際人數（逐月）；預設顯示護產，點圖例可加看其他職類。未填報之月份線段中斷、不補值。</p>
     <div class="chart-canvas-wrap" style="height:300px;"><canvas class="pm-staff-canvas"></canvas></div>
     <h4 style="margin:20px 4px 4px;font-size:0.95rem;">病床數量（逐月）</h4>
-    <div class="chart-canvas-wrap" style="height:260px;"><canvas class="pm-bed-canvas"></canvas></div>`;
+    <div class="chart-canvas-wrap" style="height:260px;"><canvas class="pm-bed-canvas"></canvas></div>
+    ${latestBlock}`;
   renderPmStaffChart(panel.querySelector('.pm-staff-canvas'), h, null);
   // 病床圖：無登錄床數時以提示取代（renderPmBedChart 回傳 null）
   const bedCanvas = panel.querySelector('.pm-bed-canvas');
