@@ -6,7 +6,7 @@
 //     hospitals: [{ id, name, level, history: { "11207": {day, eve, night} } }]
 //   }
 
-import { renderIcons } from './icons.js?v=5f6b6ec96e';
+import { renderIcons } from './icons.js?v=dfa9421fa8';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -14,7 +14,8 @@ import {
   shiftStatus,
   classifyHospital as classifyHospitalView,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=5f6b6ec96e';
+} from './nurse-ratio-view.js?v=dfa9421fa8';
+import { skeletonRows } from './skeleton.js?v=dfa9421fa8';
 
 const DATA_URL = 'data/nurse-ratio.json?v=1dbde60d94';
 
@@ -426,7 +427,7 @@ function renderOverview() {
 export async function initNurseRatio() {
   const container = document.getElementById('hospital-list');
   if (container) {
-    container.innerHTML = '<div style="padding:24px;color:var(--muted);">載入中⋯</div>';
+    container.innerHTML = skeletonRows(7);
   }
 
   try {

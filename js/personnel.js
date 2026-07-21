@@ -2,13 +2,14 @@
 // 資料：data/personnel-index.json（picker 清單）＋ data/personnel/{code}.json（單院時間序列）
 // 來源：衛福部「醫院醫事人力持續性監測結果」。
 
-import { renderIcons, icon } from './icons.js?v=5f6b6ec96e';
-import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=5f6b6ec96e';
+import { renderIcons, icon } from './icons.js?v=dfa9421fa8';
+import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=dfa9421fa8';
 import {
   CAT_COLORS, BED_COLORS, DEFAULT_ON, mLabel, baseLineCfg,
   renderStaffChart, renderBedChart, loadPersonnelHospital, latestMonthTable,
-} from './personnel-view.js?v=5f6b6ec96e';
-import { showToast } from './toast.js?v=5f6b6ec96e';
+} from './personnel-view.js?v=dfa9421fa8';
+import { showToast } from './toast.js?v=dfa9421fa8';
+import { skeletonRows } from './skeleton.js?v=dfa9421fa8';
 
 const INDEX_URL = 'data/personnel-index.json';
 const AGG_URL = 'data/personnel-aggregate.json';
@@ -267,7 +268,7 @@ function setupShare() {
 // ---------- init ----------
 export async function initPersonnel() {
   const container = document.getElementById('personnel-list');
-  if (container) container.innerHTML = '<div style="padding:24px;color:var(--muted);">載入中⋯</div>';
+  if (container) container.innerHTML = skeletonRows(6);
   try {
     const [idx, agg] = await Promise.all([
       fetchJson(INDEX_URL),

@@ -5,9 +5,9 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { renderIcons } from './icons.js?v=5f6b6ec96e';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=5f6b6ec96e';
-import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=5f6b6ec96e';
+import { renderIcons } from './icons.js?v=dfa9421fa8';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=dfa9421fa8';
+import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=dfa9421fa8';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -15,23 +15,23 @@ import {
   shiftStatus,
   classifyHospital,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=5f6b6ec96e';
-import { loadAll } from './data-loader.js?v=5f6b6ec96e';
-import { renderKpiStrip } from './stats-kpi.js?v=5f6b6ec96e';
-import { renderTable, showDetailModal } from './table.js?v=5f6b6ec96e';
-import { hasContributed } from './contribution-gate.js?v=5f6b6ec96e';
-import { notePwaIntent } from './pwa-prompt.js?v=5f6b6ec96e';
+} from './nurse-ratio-view.js?v=dfa9421fa8';
+import { loadAll } from './data-loader.js?v=dfa9421fa8';
+import { renderKpiStrip } from './stats-kpi.js?v=dfa9421fa8';
+import { renderTable, showDetailModal } from './table.js?v=dfa9421fa8';
+import { hasContributed } from './contribution-gate.js?v=dfa9421fa8';
+import { notePwaIntent } from './pwa-prompt.js?v=dfa9421fa8';
 import {
   loadFinancialsHospital, getFinancialFields,
   formatVal as finFormatVal, signClass as finSignClass, formatRocYear as finRocYear,
   renderFinancialTrendChart,
-} from './financials-view.js?v=5f6b6ec96e';
-import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=5f6b6ec96e';
+} from './financials-view.js?v=dfa9421fa8';
+import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=dfa9421fa8';
 import {
   loadPersonnelHospital, ensurePersonnelIndex,
   renderStaffChart as renderPmStaffChart, renderBedChart as renderPmBedChart,
   latestMonthTable,
-} from './personnel-view.js?v=5f6b6ec96e';
+} from './personnel-view.js?v=dfa9421fa8';
 import {
   createCsvLoader,
   parseROCDate,
@@ -39,7 +39,8 @@ import {
   shortenLocation,
   fineToWan,
   formatROCDate,
-} from './records-common.js?v=5f6b6ec96e';
+} from './records-common.js?v=dfa9421fa8';
+import { skeletonRows } from './skeleton.js?v=dfa9421fa8';
 
 const MERGED_URL = 'data/hospitals-merged.json?v=c017631e69';
 const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=f3d4b868a4';
@@ -395,7 +396,7 @@ function renderBranchTabs(host, tabs, renderPanel) {
 function renderNurseSection(code, hosp) {
   const wrap = document.getElementById('nr-section-body');
   const empty = document.getElementById('nr-section-empty');
-  wrap.innerHTML = '<div style="padding:16px;color:var(--muted);">載入護病比資料中⋯</div>';
+  wrap.innerHTML = skeletonRows(3, { pad: 8 });
   empty.hidden = true;
 
   loadNurseByCode(code).then((data) => {
@@ -589,7 +590,7 @@ function renderPersonnelSection(code) {
     link.innerHTML = `<a href="personnel.html?id=${encodeURIComponent(campuses[0].id)}" style="color:var(--primary);text-decoration:underline;font-size:0.85rem;">查看人力監控 →</a>`;
 
     const loadPanel = (campus, panel) => {
-      panel.innerHTML = '<div style="padding:16px;color:var(--muted);">載入中⋯</div>';
+      panel.innerHTML = skeletonRows(3, { pad: 8 });
       loadPersonnelHospital(campus.id).then((h) => {
         if (state.currentCode !== code) return;
         renderPersonnelPanel(h, panel);
@@ -613,7 +614,7 @@ function renderPlatformSection(hosp) {
   const table = document.getElementById('pf-section-table');
   const empty = document.getElementById('pf-section-empty');
   kpi.innerHTML = '';
-  table.innerHTML = '<div style="padding:16px;color:var(--muted);">載入眾包資料中⋯</div>';
+  table.innerHTML = skeletonRows(4, { pad: 8 });
   empty.hidden = true;
 
   ensurePlatformRows().then((rows) => {
@@ -647,7 +648,7 @@ function renderViolationsSection(code, hosp) {
   const body = document.getElementById('vi-section-body');
   const empty = document.getElementById('vi-section-empty');
   const sum = document.getElementById('vi-section-summary');
-  body.innerHTML = '<div style="padding:16px;color:var(--muted);">載入違規資料中⋯</div>';
+  body.innerHTML = skeletonRows(4, { pad: 8 });
   sum.innerHTML = '';
   empty.hidden = true;
 
@@ -840,7 +841,7 @@ function setupLevelFilter() {
 // ---------- init ----------
 export async function initHospital() {
   const container = document.getElementById('hospital-list');
-  if (container) container.innerHTML = '<div style="padding:24px;color:var(--muted);">載入中⋯</div>';
+  if (container) container.innerHTML = skeletonRows(6);
   try {
     await Promise.all([loadBaseData(), ensureShortLoaded().catch(() => {})]);
     setupSearch();

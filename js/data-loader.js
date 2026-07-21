@@ -1,6 +1,6 @@
 // CSV 載入 + 解析 + 雙層 cache（記憶體 + localStorage）
 // 之後把 CATEGORIES[].csvUrl 改成 Google Sheet 發布 CSV URL 即可
-import { CATEGORIES } from './config.js?v=5f6b6ec96e';
+import { CATEGORIES } from './config.js?v=dfa9421fa8';
 
 // 記憶體 cache：同 session 內不重抓
 const cache = new Map();
@@ -219,6 +219,32 @@ export function preloadAll() {
     requestIdleCallback(trigger, { timeout: 3000 });
   } else {
     setTimeout(trigger, 500);
+  }
+}
+
+// 「樞紐」靜態大檔：被站內各處連過去、卻每次現抓的主檔。URL 需與各頁首抓相同
+// （HTTP 快取以完整 URL 為 key）：hospital.js / nurse-ratio.js 用帶 ?v= 版本（stamp-assets 維護）；
+// personnel.js 首抓的 picker 清單無版本號，故此處亦不帶。
+const HUB_STATIC_URLS = [
+  'data/hospitals-merged.json?v=c017631e69',  // 機構總覽
+  'data/nurse-ratio.json?v=1dbde60d94',       // 三班護病比
+  'data/personnel-index.json',                // 人力監控 picker
+];
+
+/**
+ * 背景預熱樞紐大檔，讓機構總覽 / 護病比 / 人力監控切頁近乎即開。
+ * - requestIdleCallback 不搶 main thread；省流量模式（saveData）下略過，尊重行動數據。
+ * - cache:'default' → 已快取走快取；失敗只忽略，絕不影響任何 UI。
+ */
+export function preloadStaticData() {
+  if (typeof navigator !== 'undefined' && navigator.connection && navigator.connection.saveData) return;
+  const trigger = () => {
+    HUB_STATIC_URLS.forEach((url) => { fetch(url, { cache: 'default' }).catch(() => {}); });
+  };
+  if (typeof requestIdleCallback === 'function') {
+    requestIdleCallback(trigger, { timeout: 4000 });
+  } else {
+    setTimeout(trigger, 800);
   }
 }
 

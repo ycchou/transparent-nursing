@@ -1,7 +1,7 @@
 // 共用 header / footer 注入 + 工具函式
-import { SITE, CATEGORIES } from './config.js?v=5f6b6ec96e';
-import { icon, renderIcons } from './icons.js?v=5f6b6ec96e';
-import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=5f6b6ec96e';
+import { SITE, CATEGORIES } from './config.js?v=dfa9421fa8';
+import { icon, renderIcons } from './icons.js?v=dfa9421fa8';
+import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=dfa9421fa8';
 
 // 主辦/協作工會 — 共用資料（footer / hero strip / about 都引用）
 export const ORGS = {
@@ -183,6 +183,33 @@ function footerHTML() {
   `;
 }
 
+// hover/觸控/focus 預取：滑到站內 .html 連結就以 <link rel=prefetch> 先暖目標 HTML。
+// 只在使用者顯露意圖時觸發、每個網址至多一次；跨頁切換時瀏覽器直接命中快取。
+const _prefetchedDocs = new Set();
+function prefetchDoc(href) {
+  if (!href) return;
+  const clean = href.split('#')[0];
+  // 僅站內 .html（含 records.html?type=… 這種帶 query 的）；略過外連 / mailto / 錨點
+  if (!clean || /^(https?:)?\/\//.test(clean) || clean.startsWith('mailto:')) return;
+  if (!/\.html(\?|$)/.test(clean) || _prefetchedDocs.has(clean)) return;
+  _prefetchedDocs.add(clean);
+  const l = document.createElement('link');
+  l.rel = 'prefetch';
+  l.href = clean;
+  document.head.appendChild(l);
+}
+function wireNavPrefetch(root) {
+  if (!root) return;
+  root.querySelectorAll('a[href]').forEach((a) => {
+    const href = a.getAttribute('href');
+    if (!href || /^(https?:)?\/\//.test(href) || href.startsWith('mailto:') || !/\.html(\?|$)/.test(href.split('#')[0])) return;
+    const fire = () => prefetchDoc(href);
+    a.addEventListener('mouseenter', fire, { once: true });
+    a.addEventListener('touchstart', fire, { once: true, passive: true });
+    a.addEventListener('focus', fire, { once: true });
+  });
+}
+
 export function mountLayout() {
   // header
   const headerSlot = document.getElementById('app-header');
@@ -220,20 +247,27 @@ export function mountLayout() {
   // PWA「加到主畫面」自動引導（10 秒後行動裝置彈出 banner）
   initPWAPrompt();
 
-  // 背景預載 platform 資料：使用者切到分享平台時即時顯示，無需等待 fetch
+  // 背景預載 platform 資料 + 樞紐大檔：切到分享平台/機構總覽/護病比/人力監控時即時顯示
   // 動態 import 避免循環依賴與初始 parse 成本
-  import('./data-loader.js?v=5f6b6ec96e')
-    .then(({ preloadAll }) => preloadAll && preloadAll())
+  import('./data-loader.js?v=dfa9421fa8')
+    .then(({ preloadAll, preloadStaticData }) => {
+      preloadAll && preloadAll();
+      preloadStaticData && preloadStaticData();
+    })
     .catch(() => { /* 預載失敗不影響任何 UI */ });
 
+  // 導覽列 hover / 觸控 / focus 時預取目標頁 HTML：跨頁切換近乎即開
+  wireNavPrefetch(document.getElementById('app-header'));
+  wireNavPrefetch(document.getElementById('app-footer'));
+
   // 背景預載勞檢/性平/職安紀錄資料：同樣讓使用者切過去時即時顯示
-  import('./violations.js?v=5f6b6ec96e')
+  import('./violations.js?v=dfa9421fa8')
     .then(({ preloadViolations }) => preloadViolations && preloadViolations())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./gender.js?v=5f6b6ec96e')
+  import('./gender.js?v=dfa9421fa8')
     .then(({ preloadGender }) => preloadGender && preloadGender())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./osha.js?v=5f6b6ec96e')
+  import('./osha.js?v=dfa9421fa8')
     .then(({ preloadOsha }) => preloadOsha && preloadOsha())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
 }

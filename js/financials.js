@@ -2,13 +2,14 @@
 //
 // 資料/圖表共用 js/financials-view.js；名稱↔代碼/簡稱重用 js/hospital-shortname.js
 
-import { renderIcons, icon } from './icons.js?v=5f6b6ec96e';
-import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=5f6b6ec96e';
+import { renderIcons, icon } from './icons.js?v=dfa9421fa8';
+import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=dfa9421fa8';
 import {
   ensureFinancialsLoaded, getAllFinancials, getFinancials, getFinancialFields,
   parseNum, formatVal, signClass, formatRocYear, renderFinancialTrendChart,
-} from './financials-view.js?v=5f6b6ec96e';
-import { reportMergedInfo } from './hospital-merges.js?v=5f6b6ec96e';
+} from './financials-view.js?v=dfa9421fa8';
+import { reportMergedInfo } from './hospital-merges.js?v=dfa9421fa8';
+import { skeletonRows } from './skeleton.js?v=dfa9421fa8';
 
 const LEVEL_ORDER = ['醫學中心', '區域醫院', '地區醫院', '精神科醫院', '精神科教學醫院', '診所', '其他'];
 const REGION_ORDER = ['臺北', '北區', '中區', '南區', '高屏', '東區'];
@@ -363,7 +364,7 @@ function closeModal() {
 // ---------- init ----------
 export async function initFinancials() {
   const container = document.getElementById('fin-table');
-  if (container) container.innerHTML = '<div style="padding:24px;color:var(--muted);">載入中⋯</div>';
+  if (container) container.innerHTML = skeletonRows(8);
   try {
     await Promise.all([ensureFinancialsLoaded(), ensureShortLoaded().catch(() => {})]);
     state.fields = getFinancialFields();
