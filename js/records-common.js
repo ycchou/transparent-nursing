@@ -1,8 +1,8 @@
 // 違規紀錄類頁面共用模組：CSV 抓取 / 解析 / cache / 通用工具
 // 給 violations.js (勞檢)、gender.js (性平)、osha.js (職安) 共用。
 
-import { getShort as getHospitalShort } from './hospital-shortname.js?v=e32de5950a';
-import { normalizeInstitutionName } from './institution-name.js?v=e32de5950a';
+import { getShort as getHospitalShort } from './hospital-shortname.js?v=5f6b6ec96e';
+import { normalizeInstitutionName } from './institution-name.js?v=5f6b6ec96e';
 
 // ============================================================
 // 通用工具
@@ -146,7 +146,7 @@ const DEFAULT_FETCH_TIMEOUT_MS = 15000;
 
 // localStorage 快取的 record 結構版本。改動 parseRow 產出的欄位（如新增 articles）時 +1，
 // 讓舊格式快取自動失效、重新抓取，避免新程式讀到缺欄位的舊快取而崩潰（如 r.articles.forEach）。
-const CACHE_SCHEMA_VERSION = 2;
+const CACHE_SCHEMA_VERSION = 3;
 
 /**
  * @param {Object} cfg
@@ -215,6 +215,10 @@ export function createCsvLoader(cfg) {
             const d = new Date(r[k]);
             if (!isNaN(d.getTime())) r[k] = d;
           }
+        }
+        // 自癒：舊快取若缺 articles（分類會退回原文），就從 lawArticle 重新抽條號
+        if (!Array.isArray(r.articles) && typeof r.lawArticle === 'string') {
+          r.articles = extractLawArticles(r.lawArticle);
         }
       });
       return { data: obj.data, valid, veryFresh, age };
@@ -287,9 +291,9 @@ export function createCsvLoader(cfg) {
 //   records-table-container
 // ============================================================
 
-import { icon, renderIcons } from './icons.js?v=e32de5950a';
-import { ensureTooltip } from './tooltip.js?v=e32de5950a';
-import { pageSlice, renderPagination } from './pagination.js?v=e32de5950a';
+import { icon, renderIcons } from './icons.js?v=5f6b6ec96e';
+import { ensureTooltip } from './tooltip.js?v=5f6b6ec96e';
+import { pageSlice, renderPagination } from './pagination.js?v=5f6b6ec96e';
 
 // 違規機構名稱 → 機構代號 對照表（離線預建，供機構名稱連到整合檔案頁）
 let _violHospitalMap = null;

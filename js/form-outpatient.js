@@ -1,13 +1,13 @@
 // 門診自建表單：只定義門診專屬區塊，其餘（機構基本資料 / 業務與工時共用欄 /
 // 薪資與年資 / 整體評價）沿用 form-sections.js 的共用正本；引擎邏輯在 form-engine.js。
 
-import { initDepartmentForm } from './form-engine.js?v=e32de5950a';
+import { initDepartmentForm } from './form-engine.js?v=5f6b6ec96e';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
   SALARY_SECTION,
   EVALUATION_SECTION,
-} from './form-sections.js?v=e32de5950a';
+} from './form-sections.js?v=5f6b6ec96e';
 
 // 選擇門診工作的原因（可複選）
 const CLINIC_REASONS = [
