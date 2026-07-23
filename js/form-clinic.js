@@ -1,13 +1,13 @@
 // 診所自建表單：只定義診所專屬區塊，其餘（機構基本資料 / 業務與工時共用欄 /
 // 薪資與年資 / 整體評價）沿用 form-sections.js 的共用正本；引擎邏輯在 form-engine.js。
 
-import { initDepartmentForm } from './form-engine.js?v=fa645f33b1';
+import { initDepartmentForm } from './form-engine.js?v=e1257f7f58';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
   SALARY_SECTION,
   EVALUATION_SECTION,
-} from './form-sections.js?v=fa645f33b1';
+} from './form-sections.js?v=e1257f7f58';
 
 // 診所科別（含醫美、洗腎診所等——皆為獨立基層診所）
 const CLINIC_SPECIALTIES = [

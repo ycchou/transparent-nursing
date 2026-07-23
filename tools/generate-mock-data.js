@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * 產生 9 大類別共 ~305 筆 mock CSV，輸出到 data/mock/*.csv
+ * 產生 10 大類別 mock CSV，輸出到 data/mock/*.csv
  * Usage: node tools/generate-mock-data.js
  */
 const fs = require('fs');

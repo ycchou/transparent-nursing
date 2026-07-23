@@ -1,6 +1,6 @@
 // CSV 載入 + 解析 + 雙層 cache（記憶體 + localStorage）
 // 之後把 CATEGORIES[].csvUrl 改成 Google Sheet 發布 CSV URL 即可
-import { CATEGORIES } from './config.js?v=fa645f33b1';
+import { CATEGORIES } from './config.js?v=e1257f7f58';
 
 // 記憶體 cache：同 session 內不重抓
 const cache = new Map();
@@ -202,7 +202,7 @@ export async function loadAll(opts = {}) {
 }
 
 /**
- * 背景預載：使用瀏覽器閒置時段抓回全部 9 個 CSV 並寫入 localStorage。
+ * 背景預載：使用瀏覽器閒置時段抓回全部類別 CSV 並寫入 localStorage。
  * 用途：在 about / participate 等不需要資料的頁面悄悄預熱，
  * 等使用者進入 platform.html 時資料已就緒，省下首次 fetch 的等待。
  *

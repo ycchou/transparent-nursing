@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#2E86AB" />
   <!-- 軟鎖總開關（js/gate.js）：鎖定期非公開頁導向 coming-soon -->
-  <script src="./js/gate.js?v=fa645f33b1"></script>
+  <script src="./js/gate.js?v=e1257f7f58"></script>
 
   <!-- SEO -->
   <title>統計摘要 — 護理職場透明化運動</title>
-  <meta name="description" content="從工時分布、加班費合規率、護病比、推薦指數等視覺化圖表，看護理職場的整體樣貌與 9 大工作場域的差異。資料即時更新，每 10 分鐘自動刷新。" />
+  <meta name="description" content="從工時分布、加班費合規率、護病比、推薦指數等視覺化圖表，看護理職場的整體樣貌與 10 大工作場域的差異。資料即時更新，每 10 分鐘自動刷新。" />
   <meta name="keywords" content="護理統計, 護病比分布, 工時分布, 加班費合規率, 護理職場數據, 醫療勞動統計" />
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <link rel="canonical" href="https://ycchou.github.io/transparent-nursing/stats.html" />
@@ -48,17 +48,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=3fd3fe2d52" />
+  <link rel="stylesheet" href="css/styles.css?v=54d4d09cc3" />
 
     <!-- modulepreload：平行載入 ES module 鏈（首次造訪快 30-50%） -->
-  <link rel="modulepreload" href="./js/charts.js?v=fa645f33b1" />
-  <link rel="modulepreload" href="./js/components.js?v=fa645f33b1" />
-  <link rel="modulepreload" href="./js/config.js?v=fa645f33b1" />
-  <link rel="modulepreload" href="./js/data-loader.js?v=fa645f33b1" />
-  <link rel="modulepreload" href="./js/icons.js?v=fa645f33b1" />
-  <link rel="modulepreload" href="./js/official-stats.js?v=fa645f33b1" />
-  <link rel="modulepreload" href="./js/pwa-prompt.js?v=fa645f33b1" />
-  <link rel="modulepreload" href="./js/toast.js?v=fa645f33b1" />
+  <link rel="modulepreload" href="./js/charts.js?v=e1257f7f58" />
+  <link rel="modulepreload" href="./js/components.js?v=e1257f7f58" />
+  <link rel="modulepreload" href="./js/config.js?v=e1257f7f58" />
+  <link rel="modulepreload" href="./js/data-loader.js?v=e1257f7f58" />
+  <link rel="modulepreload" href="./js/icons.js?v=e1257f7f58" />
+  <link rel="modulepreload" href="./js/official-stats.js?v=e1257f7f58" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=e1257f7f58" />
+  <link rel="modulepreload" href="./js/toast.js?v=e1257f7f58" />
 
   <!-- JSON-LD Structured Data：官方參考數據四份資料集 -->
   <script type="application/ld+json">
@@ -699,18 +699,18 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
   <script type="module">
-    import { CATEGORIES } from './js/config.js?v=fa645f33b1';
-    import { mountLayout } from './js/components.js?v=fa645f33b1';
-    import { renderIcons } from './js/icons.js?v=fa645f33b1';
-    import { loadAll, startAutoRefresh } from './js/data-loader.js?v=fa645f33b1';
+    import { CATEGORIES } from './js/config.js?v=e1257f7f58';
+    import { mountLayout } from './js/components.js?v=e1257f7f58';
+    import { renderIcons } from './js/icons.js?v=e1257f7f58';
+    import { loadAll, startAutoRefresh } from './js/data-loader.js?v=e1257f7f58';
     import {
       chartCategoryDistribution, chartInstitutionStacked, chartHoursHistogram,
       chartOvertimePolicy, chartRecommend, chartAtmosphereByCategory,
       chartLocationDistribution, chartSalaryDistribution,
-    } from './js/charts.js?v=fa645f33b1';
+    } from './js/charts.js?v=e1257f7f58';
     import {
       renderOfficialSourceA, renderOfficialSourceB, renderOfficialSourceC, renderOfficialSourceD,
-    } from './js/official-stats.js?v=fa645f33b1';
+    } from './js/official-stats.js?v=e1257f7f58';
 
     mountLayout();
     renderIcons();
