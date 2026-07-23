@@ -3,19 +3,19 @@
 // 只定義本類別專屬區塊，其餘（機構基本資料 / 業務與工時共用欄 / 薪資與年資 / 整體評價）
 // 沿用 form-sections.js 的共用正本；引擎邏輯在 form-engine.js。
 
-import { initDepartmentForm } from './form-engine.js?v=dfa9421fa8';
+import { initDepartmentForm } from './form-engine.js?v=fa645f33b1';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
   SALARY_SECTION,
   EVALUATION_SECTION,
-} from './form-sections.js?v=dfa9421fa8';
+} from './form-sections.js?v=fa645f33b1';
 
 // 職場類型：多元護理職涯的常見場域（選最接近者，可於短評補充）
 // 專科護理師（NP）等院內進階護理職務未被前 8 類收錄，於此類分享。
 const WORKPLACE_TYPES = [
   '專科護理師', '職護／廠護', '居家護理', '長照機構／護理之家', '學校護理師',
-  '月子中心', '診所／醫美', '藥廠／醫材（MSL/CRA/CRC）', '公共衛生／衛生所', '其他',
+  '月子中心', '藥廠／醫材（MSL/CRA/CRC）', '公共衛生／衛生所', '其他',
 ];
 
 // 護理師以外的其他證書／資格（可複選；此工作實際持有或要求者）

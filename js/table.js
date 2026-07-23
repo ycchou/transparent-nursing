@@ -1,11 +1,11 @@
 // 表格 / 卡片 渲染、排序、Modal
-import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=dfa9421fa8';
-import { fmt, recommendPill, categoryTag } from './components.js?v=dfa9421fa8';
-import { icon } from './icons.js?v=dfa9421fa8';
-import { generateShareCard, showSharePreview } from './share-card.js?v=dfa9421fa8';
-import { ensureTooltip } from './tooltip.js?v=dfa9421fa8';
-import { pageSlice, renderPagination } from './pagination.js?v=dfa9421fa8';
-import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=dfa9421fa8';
+import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=fa645f33b1';
+import { fmt, recommendPill, categoryTag } from './components.js?v=fa645f33b1';
+import { icon } from './icons.js?v=fa645f33b1';
+import { generateShareCard, showSharePreview } from './share-card.js?v=fa645f33b1';
+import { ensureTooltip } from './tooltip.js?v=fa645f33b1';
+import { pageSlice, renderPagination } from './pagination.js?v=fa645f33b1';
+import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=fa645f33b1';
 
 // 顯示用機構名稱：對得上評鑑醫院時改用 VPN 簡稱，否則沿用原填寫名稱。
 function displayInstitutionName(name) {
@@ -44,6 +44,7 @@ const DEFAULT_TABLE_COLUMNS = {
   er:         ['location', 'institutionType', 'institutionName', 'unitName', 'criticalRatio', 'weeklyHours', 'recommendIndex'],
   ward:       ['location', 'institutionType', 'institutionName', 'unitName', 'dayShiftRatio', 'weeklyHours', 'recommendIndex'],
   outpatient: ['location', 'institutionType', 'institutionName', 'unitName', 'clinicsPerNurse', 'weeklyHours', 'recommendIndex'],
+  clinic:     ['location', 'institutionType', 'institutionName', 'unitName', 'clinicSpecialty', 'weeklyHours', 'recommendIndex'],
   or:         ['location', 'institutionType', 'institutionName', 'unitName', 'orSpecialty', 'weeklyHours', 'recommendIndex'],
   special:    ['location', 'institutionType', 'institutionName', 'unitName', 'specialType', 'weeklyHours', 'recommendIndex'],
   other:      ['location', 'institutionType', 'institutionName', 'unitName', 'workplaceType', 'weeklyHours', 'recommendIndex'],
@@ -98,6 +99,17 @@ const KEY_LABELS = {
   patientComplaints: '被申訴頻率',
   salaryGrowth: '薪資依年資增加',
   clinicReason: '選擇門診原因',
+  // Clinic (診所)
+  clinicSpecialty: '診所科別',
+  clinicPayerType: '健保／自費',
+  clinicScale: '護理人力規模',
+  clinicDuties: '主要業務',
+  clinicShift: '看診時段／班別',
+  dailyPatients: '每日看診人次',
+  laborInsurance: '勞健保投保',
+  holidayCompliance: '國定假日補假／加倍',
+  annualLeave: '特休給假',
+  salaryStructure: '薪資結構',
   // OR (手術房)
   orSpecialty: '主要科別',
   orRole: '工作角色',

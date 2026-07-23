@@ -1,5 +1,5 @@
 // 一鍵產生單筆資料分享圖片（1080 × 1350，IG 4:5 直式）
-import { getCategory } from './config.js?v=dfa9421fa8';
+import { getCategory } from './config.js?v=fa645f33b1';
 
 const KEY_LABELS = {
   // ICU
@@ -32,6 +32,10 @@ const KEY_LABELS = {
   shiftType: '班別',
   lunchBreak: '休息一小時',
   patientComplaints: '被申訴頻率',
+  // Clinic (診所)
+  clinicSpecialty: '診所科別',
+  clinicScale: '護理人力規模',
+  dailyPatients: '每日看診人次',
   // OR
   orSpecialty: '主要科別',
   orRole: '工作角色',
@@ -62,6 +66,7 @@ const SHARE_FIELDS = {
   er:         ['erLevel',     'criticalRatio', 'violenceFreq',    'weeklyHours', 'overtimePolicy'],
   ward:       ['wardType',    'dayShiftRatio', 'nightShiftRatio', 'leaderSupport','weeklyHours'],
   outpatient: ['clinicType',  'clinicsPerNurse', 'weeklyPatients','shiftType', 'weeklyHours'],
+  clinic:     ['clinicSpecialty', 'clinicScale', 'dailyPatients', 'weeklyHours', 'overtimePolicy'],
   or:         ['orSpecialty', 'orRole',        'dailyCases',      'weeklyHours', 'overtimePolicy'],
   special:    ['specialType', 'dailyCases',    'onCallRequired',  'weeklyHours', 'overtimePolicy'],
   other:      ['workplaceType','scheduleSystem','violenceRisk',   'weeklyHours', 'overtimePolicy'],

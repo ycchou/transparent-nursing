@@ -605,6 +605,65 @@ function generateOther(n) {
   });
 }
 
+// ============ 診所（clinic）============
+const CLINIC_PREFIXES = ['康仁', '明德', '安欣', '家和', '立安', '惠民', '杏一', '德安', '仁愛', '大同', '宏恩', '光華', '欣民', '康聯'];
+// 科別 → 機構名稱後綴
+const CLINIC_SUFFIX = {
+  '家醫／一般內科': '內科診所', '小兒科': '小兒科診所', '耳鼻喉科': '耳鼻喉科診所',
+  '皮膚科': '皮膚科診所', '婦產科': '婦產科診所', '眼科': '眼科診所',
+  '骨科／復健': '骨科復健診所', '身心科': '身心診所', '泌尿／腸胃': '診所',
+  '醫美': '醫美診所', '洗腎診所': '洗腎診所', '牙科': '牙醫診所',
+  '中醫': '中醫診所', '健檢': '健檢中心', '其他': '診所',
+};
+const CLINIC_DUTY_COMBOS = [
+  '跟診協助、批價／掛號／櫃檯', '跟診協助、注射／抽血、衛教',
+  '批價／掛號／櫃檯、給藥／藥品調劑協助', '跟診協助、傷口換藥／小手術協助、疫苗接種',
+  '跟診協助、健保申報／行政、環境清潔／消毒', '批價／掛號／櫃檯、注射／抽血、進貨／庫存／藥械管理',
+];
+const CLINIC_AESTHETIC_DUTIES = ['醫美療程協助、衛教、進貨／庫存／藥械管理', '醫美療程協助、櫃檯諮詢', '醫美療程協助、注射／抽血、衛教'];
+function generateClinic(n) {
+  const specialties = Object.keys(CLINIC_SUFFIX);
+  return Array.from({ length: n }, () => {
+    const specialty = pick(specialties);
+    const isAesthetic = specialty === '醫美';
+    const isScreening = specialty === '健檢';
+    const institutionType = '診所';
+    const institutionName = pick(CLINIC_PREFIXES) + CLINIC_SUFFIX[specialty];
+    const jobTitle = pick(['診所護理師', '跟診護理師', '櫃檯護理師', '護理師', '護理長']);
+    const hours = pick(['40-45', '40-45', '45-50', '35-40']);
+    const w = genWellbeing(institutionType, hours);
+    const s = genSalary(institutionType, jobTitle);
+    const payerType = isAesthetic ? '自費為主（如醫美）'
+      : isScreening ? pick(['自費為主（如醫美）', '兩者皆有'])
+      : pick(['健保特約為主', '健保特約為主', '兩者皆有']);
+    return {
+      timestamp: genTimestamp(),
+      institutionType, institutionName,
+      unitName: specialty, location: pick(LOCATIONS), jobTitle,
+      clinicSpecialty: specialty,
+      clinicPayerType: payerType,
+      clinicScale: pick(['只有我一人', '只有我一人', '2–3 人', '2–3 人', '4 人以上']),
+      clinicDuties: isAesthetic ? pick(CLINIC_AESTHETIC_DUTIES) : pick(CLINIC_DUTY_COMBOS),
+      clinicShift: pick(['純早診', '早＋午診', '早＋午＋晚診', '含夜診', '週末門診輪值']),
+      dailyPatients: pick(['30 以下', '30–60', '60–100', '60–100', '100–150', '150 以上']),
+      lunchBreak: pick(['有，完整 1 小時', '有，但常被中斷／縮短', '無']),
+      laborInsurance: pick(['有，足額投保', '有，足額投保', '有，但以多報少', '無']),
+      holidayCompliance: pick(['依法給', '依法給', '部分', '無／不清楚']),
+      annualLeave: pick(['依法給足', '依法給足', '打折', '幾乎無']),
+      patientComplaints: pick(['偶爾', '罕見', '幾乎沒有', '經常']),
+      violenceRisk: pick(['低', '低', '中', '無']),
+      salaryStructure: isAesthetic ? pick(['月薪＋看診量／獎金', '固定月薪'])
+        : pick(['固定月薪', '固定月薪', '月薪＋看診量／獎金', '時薪']),
+      weeklyHours: hours, overtimePolicy: w.overtimePolicy,
+      yearsCurrent: s.yearsCurrent, yearsTotal: s.yearsTotal,
+      annualSalary: s.annualSalary, monthlyBase: s.monthlyBase, annualBonus: s.annualBonus,
+      specialBenefits: pick(['', '', '年節獎金', '員工旅遊補助', '彈性工時', '三節禮金']),
+      workAtmosphere: w.workAtmosphere, promotion: w.promotion,
+      recommendIndex: w.recommendIndex, comment: genComment(w.recommendIndex),
+    };
+  });
+}
+
 // ============ CSV writer ============
 function escapeCsvField(v) {
   if (v == null) return '';
@@ -646,6 +705,12 @@ const CFG = [
     cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
            'clinicType','clinicsPerNurse','weeklyPatients','shiftType','pShift','lunchBreak','clinicOvertimeWeekly',
            'patientComplaints','violenceRisk','salaryGrowth','clinicReason',
+           'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
+           'annualSalary','monthlyBase','annualBonus','specialBenefits','workAtmosphere','promotion','recommendIndex','comment'] },
+  { slug: 'clinic', n: 90, gen: generateClinic,
+    cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
+           'clinicSpecialty','clinicPayerType','clinicScale','clinicDuties','clinicShift','dailyPatients','lunchBreak',
+           'laborInsurance','holidayCompliance','annualLeave','patientComplaints','violenceRisk','salaryStructure',
            'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
            'annualSalary','monthlyBase','annualBonus','specialBenefits','workAtmosphere','promotion','recommendIndex','comment'] },
   { slug: 'dialysis', n: 105, gen: generateDialysis,
