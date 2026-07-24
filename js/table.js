@@ -1,11 +1,11 @@
 // 表格 / 卡片 渲染、排序、Modal
-import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=e1257f7f58';
-import { fmt, recommendPill, categoryTag } from './components.js?v=e1257f7f58';
-import { icon } from './icons.js?v=e1257f7f58';
-import { generateShareCard, showSharePreview } from './share-card.js?v=e1257f7f58';
-import { ensureTooltip } from './tooltip.js?v=e1257f7f58';
-import { pageSlice, renderPagination } from './pagination.js?v=e1257f7f58';
-import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=e1257f7f58';
+import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=9874ffb093';
+import { fmt, recommendPill, categoryTag } from './components.js?v=9874ffb093';
+import { icon } from './icons.js?v=9874ffb093';
+import { generateShareCard, showSharePreview } from './share-card.js?v=9874ffb093';
+import { ensureTooltip } from './tooltip.js?v=9874ffb093';
+import { pageSlice, renderPagination } from './pagination.js?v=9874ffb093';
+import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=9874ffb093';
 
 // 顯示用機構名稱：對得上評鑑醫院時改用 VPN 簡稱，否則沿用原填寫名稱。
 function displayInstitutionName(name) {
@@ -49,6 +49,35 @@ const DEFAULT_TABLE_COLUMNS = {
   special:    ['location', 'institutionType', 'institutionName', 'unitName', 'specialType', 'weeklyHours', 'recommendIndex'],
   other:      ['location', 'institutionType', 'institutionName', 'unitName', 'workplaceType', 'weeklyHours', 'recommendIndex'],
 };
+
+// 卡片視圖每類挑 3 個關鍵指標做「指標磚」（短標籤；key 皆為現有欄位）。
+// 機構名/單位/類別/地點/職稱只在卡片 header 出現，這裡不重複；空值的磚整個略過。
+const CARD_FIELDS = {
+  ward:       [['dayShiftRatio', '白班'], ['nightShiftRatio', '大夜'], ['weeklyHours', '工時']],
+  icu:        [['dayShiftRatio', '白班'], ['nightShiftRatio', '大夜'], ['weeklyHours', '工時']],
+  er:         [['erLevel', '級別'], ['criticalRatio', '重症區'], ['weeklyHours', '工時']],
+  or:         [['orSpecialty', '科別'], ['dailyCases', '每日刀數'], ['weeklyHours', '工時']],
+  outpatient: [['clinicsPerNurse', '顧幾診'], ['weeklyPatients', '週人次'], ['weeklyHours', '工時']],
+  clinic:     [['clinicSpecialty', '科別'], ['clinicScale', '人力'], ['weeklyHours', '工時']],
+  dialysis:   [['dialysisType', '類別'], ['hdRatio', 'HD比'], ['weeklyHours', '工時']],
+  psych:      [['psychType', '類型'], ['dayShiftRatio', '白班'], ['weeklyHours', '工時']],
+  special:    [['specialType', '單位'], ['dailyCases', '每日案件'], ['onCallRequired', 'On-call']],
+  other:      [['workplaceType', '職場'], ['shiftPattern', '輪班'], ['weeklyHours', '工時']],
+};
+const CARD_FIELDS_FALLBACK = [['weeklyHours', '工時'], ['overtimePolicy', '加班費']];
+
+// 產生一張卡片的「指標磚」HTML（略過空值；全空則回空字串）
+function cardMetricsHtml(row) {
+  const defs = CARD_FIELDS[row._category] || CARD_FIELDS_FALLBACK;
+  const tiles = defs
+    .filter(([k]) => { const v = row[k]; return v !== null && v !== undefined && v !== '' && v !== '—'; })
+    .map(([k, label]) => `
+      <div class="data-card-metric">
+        <span class="data-card-metric-label">${label}</span>
+        <span class="data-card-metric-val">${row[k]}</span>
+      </div>`).join('');
+  return tiles ? `<div class="data-card-metrics">${tiles}</div>` : '';
+}
 
 const KEY_LABELS = {
   _category: '類別',
@@ -161,15 +190,6 @@ function renderCellValue(row, key) {
   return fmt.empty(v);
 }
 
-// card 視圖不截斷文字
-function renderCellValueForCard(row, key) {
-  const v = row[key];
-  if (key === '_category') return categoryTag(v);
-  if (key === 'recommendIndex') return recommendPill(v);
-  if (key === 'timestamp') return fmt.date(v);
-  return fmt.empty(v);
-}
-
 /**
  * 渲染表格
  * @param {HTMLElement} container
@@ -272,32 +292,28 @@ export function renderTable(container, rows, opts = {}) {
     <div class="data-cards">
       ${pageRows.length === 0
         ? `<div class="card" style="text-align:center;color:var(--muted);">沒有符合條件的資料</div>`
-        : pageRows.map((r, idx) => `
+        : pageRows.map((r, idx) => {
+          const meta = [r.institutionType, r.location, r.jobTitle].filter(Boolean).join(' · ');
+          return `
           <div class="data-card" data-idx="${idx}">
-            <div class="data-card-header">
-              <div style="min-width:0;flex:1;">
-                <div style="font-size:0.78rem;color:var(--muted-light);font-weight:600;letter-spacing:0.04em;margin-bottom:2px;">#${r._seq != null ? r._seq : (idx + 1)}</div>
-                <div class="data-card-title" title="${(r.institutionName || '').replaceAll('"','&quot;')}">${r.institutionName ? withHospitalLink(r.institutionName, displayInstitutionName(r.institutionName)) : fmt.empty(r.institutionName)}</div>
-                ${r.unitName ? `<div style="font-size:0.88rem;color:var(--ink-soft);font-weight:500;margin-top:2px;">${r.unitName}</div>` : ''}
-                <div style="font-size:0.82rem;color:var(--muted);margin-top:2px;">
-                  ${fmt.empty(r.institutionType)}${r.location ? ' · ' + r.location : ''}
-                </div>
-              </div>
-              ${slug === 'all' ? categoryTag(r._category) : recommendPill(r.recommendIndex)}
+            <div class="data-card-top">
+              ${categoryTag(r._category)}
+              ${recommendPill(r.recommendIndex)}
             </div>
-            ${cols.filter((k) => !['institutionName','institutionType','_category','recommendIndex','comment'].includes(k)).map((k) => `
-              <div class="data-card-row">
-                <span class="key">${KEY_LABELS[k] || k}</span>
-                <span class="val">${renderCellValueForCard(r, k)}</span>
-              </div>
-            `).join('')}
+            <div class="data-card-titlerow">
+              <div class="data-card-title" title="${(r.institutionName || '').replaceAll('"','&quot;')}">${r.institutionName ? withHospitalLink(r.institutionName, displayInstitutionName(r.institutionName)) : fmt.empty(r.institutionName)}</div>
+              <span class="data-card-seq">#${r._seq != null ? r._seq : (idx + 1)}</span>
+            </div>
+            ${r.unitName ? `<div class="data-card-unit">${r.unitName}</div>` : ''}
+            ${meta ? `<div class="data-card-meta">${meta}</div>` : ''}
+            ${cardMetricsHtml(r)}
             ${r.comment ? `
               <div class="data-card-comment">
                 <span class="key">短評</span>
                 ${r.comment}
               </div>` : ''}
           </div>
-        `).join('')
+        `; }).join('')
       }
     </div>
   `;

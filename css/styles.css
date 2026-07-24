@@ -1509,37 +1509,68 @@ body.viol-modal-open { overflow: hidden; }
   border: 1px solid var(--border-soft);
   box-shadow: var(--shadow-soft);
 }
-.data-card-header {
+/* 卡片頂列：類別 tag（左）＋ 推薦 pill（右），兩者常駐 */
+.data-card-top {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 12px;
+  align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.data-card-titlerow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
 }
 .data-card-title {
   font-weight: 600;
   color: var(--ink);
   font-size: 1rem;
   line-height: 1.4;
+  min-width: 0;
 }
-.data-card-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 6px 0;
-  font-size: 0.88rem;
-  gap: 12px;
-}
-.data-card-row .key {
-  color: var(--muted);
+.data-card-seq {
   flex-shrink: 0;
-  min-width: 80px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--muted-light);
+  letter-spacing: 0.03em;
 }
-.data-card-row .val {
+.data-card-unit {
+  font-size: 0.88rem;
   color: var(--ink-soft);
   font-weight: 500;
-  text-align: right;
+  margin-top: 2px;
+}
+.data-card-meta {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+/* 指標磚：手機自動一排 3 個、長字值自動 reflow，不橫向爆版 */
+.data-card-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+.data-card-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--surface-soft);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+.data-card-metric-label {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+.data-card-metric-val {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
   word-break: break-word;
 }
 /* full-width comment block inside card */
