@@ -63,7 +63,7 @@ export function chartCategoryDistribution(canvas, byCategory) {
 /** 2. 機構類別 × 類別 分布（堆疊長條） */
 export function chartInstitutionStacked(canvas, rows) {
   destroyIfExists(canvas);
-  const institutionTypes = ['醫學中心', '區域醫院', '地區醫院', '診所'];
+  const institutionTypes = ['醫學中心', '區域醫院', '地區醫院', '診所', '護理之家', '長照機構'];
   const datasets = CATEGORIES.map((cat, i) => ({
     label: cat.name,
     data: institutionTypes.map((t) => rows.filter((r) => r._category === cat.slug && r.institutionType === t).length),

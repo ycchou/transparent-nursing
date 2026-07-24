@@ -15,7 +15,7 @@ export const SITE = {
 export const COMMON_FIELDS = [
   { key: 'timestamp', label: '填寫時間', type: 'datetime' },
   { key: 'institutionType', label: '機構類別', type: 'enum',
-    options: ['醫學中心', '區域醫院', '地區醫院', '診所', '其他'] },
+    options: ['醫學中心', '區域醫院', '地區醫院', '診所', '護理之家', '長照機構', '其他'] },
   { key: 'institutionName', label: '機構名稱', type: 'string' },
   { key: 'unitName', label: '單位名稱', type: 'string' },
   { key: 'location', label: '工作地點', type: 'string' },

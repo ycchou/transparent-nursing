@@ -2,7 +2,7 @@
 import { COMMON_FIELDS } from './config.js?v=9874ffb093';
 import { getShort as getHospitalShort } from './hospital-shortname.js?v=9874ffb093';
 
-const INSTITUTION_TYPES = ['醫學中心', '區域醫院', '地區醫院', '診所', '其他'];
+const INSTITUTION_TYPES = ['醫學中心', '區域醫院', '地區醫院', '診所', '護理之家', '長照機構', '其他'];
 const RECOMMEND_LABELS = { 5: '非常推薦', 4: '推薦', 3: '保留', 2: '不推薦', 1: '非常不推薦' };
 const OVERTIME_OPTIONS = ['一律給', '合理範圍給', '主管判斷', '一律不給'];
 const HOURS_OPTIONS    = ['35-40', '40-45', '45-50', '50-55', '55-60', '60+'];
