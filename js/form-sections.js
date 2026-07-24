@@ -11,7 +11,7 @@ export const LOCATIONS = [
   '澎湖縣', '金門縣', '連江縣',
 ];
 
-export const INSTITUTION_TYPES = ['醫學中心', '區域醫院', '地區醫院', '診所', '護理之家', '長照機構', '其他'];
+export const INSTITUTION_TYPES = ['醫學中心', '區域醫院', '地區醫院', '診所', '護理之家', '長照機構', '居護所', '其他'];
 
 // 機構基本資料：欄位/label/type/required/options 各科別完全相同，
 // 只有 unitName / jobTitle 的範例提示（help）依科別帶入。

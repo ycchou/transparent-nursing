@@ -112,7 +112,7 @@ function genWellbeing(institutionType, hours) {
 }
 
 function genSalary(institutionType, jobTitle) {
-  let base = { '醫學中心': 100, '區域醫院': 85, '地區醫院': 70, '診所': 65, '護理之家': 78, '長照機構': 78, '其他': 78 }[institutionType] || 80;
+  let base = { '醫學中心': 100, '區域醫院': 85, '地區醫院': 70, '診所': 65, '護理之家': 78, '長照機構': 78, '居護所': 78, '其他': 78 }[institutionType] || 80;
   const titleBonus = { 'N0': -5, 'N1': 0, 'N2': 5, 'N3': 15, 'N4': 30,
                        '專科護理師': 20, '護理長': 35, '副護理長': 25,
                        '個案管理師': 10, '學校護理師': 0, '廠護': 18, '督導': 30, '公衛護士': 5 }[jobTitle] || 0;
@@ -577,9 +577,10 @@ function generateOther(n) {
     else if (p.customCategory === '學校單位') institutionName = pick(['中山', '建國', '景美', '師大附中', '北一女', '南港', '永和', '中正']) + p.unitName.replace('保健室', '');
     else institutionName = p.unitName.replace('某', '');
     const institutionType =
-      p.customCategory === '月子中心' ? '診所'
+      p.customCategory === '月子中心' ? '護理之家'      // 產後護理之家歸為護理之家
+      : p.customCategory === '居家護理' ? '居護所'
       : p.unitName === '護理之家' ? '護理之家'
-      : p.customCategory === '長期照護' ? '長照機構'
+      : p.customCategory === '長期照護' ? '長照機構'    // 長照機構／日照中心
       : '其他';
     const jobTitle = pick(p.titles);
     const hours = pick(['35-40', '40-45', '40-45', '45-50']);
