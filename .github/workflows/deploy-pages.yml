@@ -1,0 +1,41 @@
+name: Deploy to GitHub Pages
+
+# 靜態網站部署：push 到 main 或手動觸發時，將 repo 根目錄整包上傳到 GitHub Pages。
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# 部署 Pages 所需的最小權限
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一時間只跑一個部署；新的 push 進來就取消還在進行的舊部署
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # 整個 repo 根目錄就是網站內容（純靜態，無建置步驟）
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
