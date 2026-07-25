@@ -82,7 +82,7 @@ export const CATEGORIES = [
       { key: 'nightShiftRatio', label: '大夜常態護病比', type: 'string' },
       { key: 'nightPeakRatio', label: '大夜最忙時', type: 'string' },
       { key: 'shiftSystem', label: '班別', type: 'enum',
-        options: ['三班制', '兩班制', '其他'] },
+        options: ['三班制', '兩班制', '混合制', '其他'] },
       { key: 'eveningAllowanceNonPack', label: '小夜津貼/班(非包班)', type: 'string' },
       { key: 'eveningAllowancePack', label: '小夜津貼/班(包班)', type: 'string' },
       { key: 'nightAllowanceNonPack', label: '大夜津貼/班(非包班)', type: 'string' },
