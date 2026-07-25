@@ -1,11 +1,11 @@
 // 表格 / 卡片 渲染、排序、Modal
-import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=ecc88dff27';
-import { fmt, recommendPill, categoryTag } from './components.js?v=ecc88dff27';
-import { icon } from './icons.js?v=ecc88dff27';
-import { generateShareCard, showSharePreview } from './share-card.js?v=ecc88dff27';
-import { ensureTooltip } from './tooltip.js?v=ecc88dff27';
-import { pageSlice, renderPagination } from './pagination.js?v=ecc88dff27';
-import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=ecc88dff27';
+import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=2eb60ed8b0';
+import { fmt, recommendPill, categoryTag } from './components.js?v=2eb60ed8b0';
+import { icon } from './icons.js?v=2eb60ed8b0';
+import { generateShareCard, showSharePreview } from './share-card.js?v=2eb60ed8b0';
+import { ensureTooltip } from './tooltip.js?v=2eb60ed8b0';
+import { pageSlice, renderPagination } from './pagination.js?v=2eb60ed8b0';
+import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=2eb60ed8b0';
 
 // 顯示用機構名稱：對得上評鑑醫院時改用 VPN 簡稱，否則沿用原填寫名稱。
 function displayInstitutionName(name) {
@@ -49,6 +49,23 @@ const DEFAULT_TABLE_COLUMNS = {
   special:    ['location', 'institutionType', 'institutionName', 'unitName', 'specialType', 'weeklyHours', 'recommendIndex'],
   other:      ['location', 'institutionType', 'institutionName', 'unitName', 'workplaceType', 'weeklyHours', 'recommendIndex'],
 };
+
+// 卡片統計列：累計年資 + 年薪（兩個亮點數值，空值自動略過；全空回空字串）
+const CARD_STATS = [
+  ['yearsTotal',   '累計年資', '年'],
+  ['annualSalary', '年薪',     '萬'],
+];
+function hasVal(v) { return v !== null && v !== undefined && v !== '' && v !== '—'; }
+function cardStatsHtml(row) {
+  const cells = CARD_STATS
+    .filter(([k]) => hasVal(row[k]))
+    .map(([k, label, unit]) => `
+      <div class="data-card-stat">
+        <span class="data-card-stat-label">${label}</span>
+        <span class="data-card-stat-val">${row[k]}<span class="data-card-stat-unit">${unit}</span></span>
+      </div>`).join('');
+  return cells ? `<div class="data-card-stats">${cells}</div>` : '';
+}
 
 const KEY_LABELS = {
   _category: '類別',
@@ -277,6 +294,7 @@ export function renderTable(container, rows, opts = {}) {
             </div>
             ${r.unitName ? `<div class="data-card-unit">${r.unitName}</div>` : ''}
             ${meta ? `<div class="data-card-meta">${meta}</div>` : ''}
+            ${cardStatsHtml(r)}
             ${r.comment ? `
               <div class="data-card-comment">
                 <span class="key">短評</span>

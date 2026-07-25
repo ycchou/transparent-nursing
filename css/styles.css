@@ -1548,30 +1548,41 @@ body.viol-modal-open { overflow: hidden; }
   color: var(--muted);
   margin-top: 2px;
 }
-/* 指標磚：手機自動一排 3 個、長字值自動 reflow，不橫向爆版 */
-.data-card-metrics {
+/* 亮點統計列：累計年資 + 年薪（兩欄等寬；只有一個值時自動撐滿） */
+.data-card-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(92px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
   margin-top: 12px;
 }
-.data-card-metric {
+.data-card-stat {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  background: var(--surface-soft);
-  border-radius: 10px;
-  padding: 8px 10px;
+  gap: 3px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: linear-gradient(135deg,
+    rgba(46,134,171,0.08) 0%,
+    rgba(168,218,220,0.14) 100%);
+  border: 1px solid rgba(46,134,171,0.15);
 }
-.data-card-metric-label {
+.data-card-stat-label {
   font-size: 0.72rem;
   color: var(--muted);
+  letter-spacing: 0.02em;
 }
-.data-card-metric-val {
-  font-size: 0.95rem;
+.data-card-stat-val {
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--primary-dark);
+  font-variant-numeric: tabular-nums;
+}
+.data-card-stat-unit {
+  font-size: 0.78rem;
   font-weight: 600;
-  color: var(--ink);
-  word-break: break-word;
+  color: var(--muted);
+  margin-left: 3px;
 }
 /* full-width comment block inside card */
 .data-card-comment {
