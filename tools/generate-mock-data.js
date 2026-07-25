@@ -11,7 +11,7 @@ const OUT_DIR = path.join(__dirname, '..', 'data', 'mock');
 // ============ 真實評鑑醫院名單 ============
 // 從 data/hospitals.json（衛福部醫院評鑑合格名單）讀入，讓多數測試資料掛在
 // 真實醫院名稱上，機構總覽頁（hospital.html）才能以名稱對應到眾包資料。
-const MIN_REAL_ROWS = 800;  // 至少 800 筆用真實評鑑醫院名稱
+const MIN_REAL_ROWS = 2100;  // 至少 2100 筆用真實評鑑醫院名稱
 const REAL = { '醫學中心': [], '區域醫院': [], '地區醫院': [] };
 try {
   const hj = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'hospitals.json'), 'utf8'));
@@ -685,56 +685,56 @@ function toCsv(rows, columns) {
 }
 
 // ============ Main ============
-// 各類別筆數合計 1000；多數走真實評鑑醫院（只有 診所 / other 用假名）
+// 各類別筆數合計 3000；多數走真實評鑑醫院（只有 診所 / other 用假名）
 const CFG = [
-  { slug: 'ward', n: 175, gen: generateWard,
+  { slug: 'ward', n: 463, gen: generateWard,
     cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
            'wardType','dayShiftRatio','eveningShiftRatio','nightShiftRatio','leaderSupport','invasiveDuties',
            'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
            'annualSalary','monthlyBase','annualBonus','workAtmosphere','promotion','recommendIndex','comment'] },
-  { slug: 'icu', n: 160, gen: generateIcu,
+  { slug: 'icu', n: 423, gen: generateIcu,
     cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
            'icuType','dayShiftRatio','dayPeakRatio','eveningShiftRatio','eveningPeakRatio','nightShiftRatio','nightPeakRatio','ventilatorCare','shiftSystem',
            'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
            'annualSalary','monthlyBase','annualBonus','workAtmosphere','promotion','recommendIndex','comment'] },
-  { slug: 'er', n: 125, gen: generateEr,
+  { slug: 'er', n: 330, gen: generateEr,
     cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
            'erLevel','triageRatio','criticalRatio','observationRatio','violenceFreq',
            'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
            'annualSalary','monthlyBase','annualBonus','workAtmosphere','promotion','recommendIndex','comment'] },
-  { slug: 'or', n: 95, gen: generateOr,
+  { slug: 'or', n: 251, gen: generateOr,
     cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
            'orSpecialty','orRole','dailyCases','roomCount','dayShiftRatio','onCallSystem',
            'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
            'annualSalary','monthlyBase','annualBonus','workAtmosphere','promotion','recommendIndex','comment'] },
-  { slug: 'outpatient', n: 115, gen: generateOutpatient,
+  { slug: 'outpatient', n: 304, gen: generateOutpatient,
     cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
            'clinicType','clinicsPerNurse','weeklyPatients','shiftType','pShift','lunchBreak','clinicOvertimeWeekly',
            'patientComplaints','violenceRisk','salaryGrowth','clinicReason',
            'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
            'annualSalary','monthlyBase','annualBonus','specialBenefits','workAtmosphere','promotion','recommendIndex','comment'] },
-  { slug: 'clinic', n: 90, gen: generateClinic,
+  { slug: 'clinic', n: 238, gen: generateClinic,
     cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
            'clinicSpecialty','clinicPayerType','clinicScale','clinicDuties','clinicShift','dailyPatients','lunchBreak',
            'laborInsurance','holidayCompliance','annualLeave','patientComplaints','violenceRisk','salaryStructure',
            'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
            'annualSalary','monthlyBase','annualBonus','specialBenefits','workAtmosphere','promotion','recommendIndex','comment'] },
-  { slug: 'dialysis', n: 105, gen: generateDialysis,
+  { slug: 'dialysis', n: 278, gen: generateDialysis,
     cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
            'dialysisType','hdRatio','hdPeakRatio','pdCount','pdPeakRatio','batchShift','onCallType','onCallRotation','restInterval11h','onCallPay','workDuties',
            'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
            'annualSalary','monthlyBase','annualBonus','specialBenefits','workAtmosphere','promotion','recommendIndex','comment'] },
-  { slug: 'psych', n: 95, gen: generatePsych,
+  { slug: 'psych', n: 251, gen: generatePsych,
     cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
            'psychType','dayShiftRatio','eveningShiftRatio','nightShiftRatio','hasProtectionRoom','teamSupport','restraintFreq','violenceFreq',
            'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
            'annualSalary','monthlyBase','annualBonus','workAtmosphere','promotion','recommendIndex','comment'] },
-  { slug: 'special', n: 85, gen: generateSpecial,
+  { slug: 'special', n: 224, gen: generateSpecial,
     cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
            'specialType','dailyCases','onCallRequired','radiationExposure','dayShiftRatio',
            'weeklyHours','overtimePolicy','yearsCurrent','yearsTotal',
            'annualSalary','monthlyBase','annualBonus','workAtmosphere','promotion','recommendIndex','comment'] },
-  { slug: 'other', n: 90, gen: generateOther,
+  { slug: 'other', n: 238, gen: generateOther,
     cols: ['timestamp','institutionType','institutionName','unitName','location','jobTitle',
            'workplaceType','practiceRegistration','otherCerts','certRequired','scheduleSystem','shiftPattern',
            'fieldWork','violenceRisk','dailyOvertime',
