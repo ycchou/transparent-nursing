@@ -6,7 +6,7 @@
 //     hospitals: [{ id, name, level, history: { "11207": {day, eve, night} } }]
 //   }
 
-import { renderIcons } from './icons.js?v=9874ffb093';
+import { renderIcons } from './icons.js?v=e5dd93de1c';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -14,8 +14,8 @@ import {
   shiftStatus,
   classifyHospital as classifyHospitalView,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=9874ffb093';
-import { skeletonRows } from './skeleton.js?v=9874ffb093';
+} from './nurse-ratio-view.js?v=e5dd93de1c';
+import { skeletonRows } from './skeleton.js?v=e5dd93de1c';
 
 const DATA_URL = 'data/nurse-ratio.json?v=1dbde60d94';
 
@@ -96,7 +96,7 @@ async function loadManualCityOverlay() {
 // 由 tools/fetch-hospital-addresses.py 產生 data/hospitals-address-overlay.json）
 async function loadAddressOverlay() {
   try {
-    const r = await fetch('data/hospitals-address-overlay.json?v=4f090ac4c9', { cache: 'default' });
+    const r = await fetch('data/hospitals-address-overlay.json?v=50f6f147a8', { cache: 'default' });
     if (!r.ok) return {};
     const d = await r.json();
     return (d && d.overlay) || {};

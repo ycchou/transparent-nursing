@@ -1,6 +1,6 @@
 // 篩選器：縣市、機構類別、推薦指數、工時、加班費 + 機構名稱搜尋
-import { COMMON_FIELDS } from './config.js?v=9874ffb093';
-import { getShort as getHospitalShort } from './hospital-shortname.js?v=9874ffb093';
+import { COMMON_FIELDS } from './config.js?v=e5dd93de1c';
+import { getShort as getHospitalShort } from './hospital-shortname.js?v=e5dd93de1c';
 
 const INSTITUTION_TYPES = ['醫學中心', '區域醫院', '地區醫院', '診所', '護理之家', '長照機構', '居護所', '其他'];
 const RECOMMEND_LABELS = { 5: '非常推薦', 4: '推薦', 3: '保留', 2: '不推薦', 1: '非常不推薦' };
@@ -35,7 +35,7 @@ export function createFilterState() {
  * @param {Object} state
  * @param {Function} onChange
  */
-export function renderFilters(container, state, onChange) {
+export function renderFilters(container, state, onChange, rows = []) {
   container.innerHTML = `
     <div class="filter-panel">
       <div class="filter-section">
@@ -45,7 +45,7 @@ export function renderFilters(container, state, onChange) {
           value="${state.q || ''}" />
       </div>
 
-      ${chipGroup('location', '地點', LOCATIONS, state)}
+      ${locationGroup(state, rows)}
       ${chipGroup('institutionType', '機構類別', INSTITUTION_TYPES, state)}
       ${chipGroup('weeklyHours', '每週工時', HOURS_OPTIONS, state)}
       ${chipGroup('overtimePolicy', '加班費合規', OVERTIME_OPTIONS, state)}
@@ -83,9 +83,35 @@ export function renderFilters(container, state, onChange) {
   // reset
   container.querySelector('#filter-reset').addEventListener('click', () => {
     Object.assign(state, defaultState());
-    renderFilters(container, state, onChange);
+    renderFilters(container, state, onChange, rows);
     onChange();
   });
+}
+
+// 地點篩選：依填寫數量由多到少排列縣市，並在每個選項顯示筆數（mirror 機構總覽頁）。
+// rows 為空（資料尚未載入）時，退回顯示全部縣市、照地理序、不帶數字。
+function locationGroup(state, rows) {
+  const counts = {};
+  (rows || []).forEach((r) => {
+    if (r.location) counts[r.location] = (counts[r.location] || 0) + 1;
+  });
+  const keys = Object.keys(counts);
+  const ordered = keys.length
+    ? keys.sort((a, b) => counts[b] - counts[a])
+    : LOCATIONS;
+  return `
+    <div class="filter-section">
+      <h4>地點</h4>
+      <div class="filter-options">
+        ${ordered.map((c) => {
+          const isOn = state.location.has(c);
+          const n = counts[c] || 0;
+          const badge = n ? ` <span style="opacity:.55;font-size:0.82em;">${n}</span>` : '';
+          return `<span class="filter-chip ${isOn ? 'active' : ''}" data-key="location" data-value="${c}">${c}${badge}</span>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
 }
 
 function chipGroup(key, title, values, state, labelFn) {

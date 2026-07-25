@@ -1,11 +1,11 @@
 // 表格 / 卡片 渲染、排序、Modal
-import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=9874ffb093';
-import { fmt, recommendPill, categoryTag } from './components.js?v=9874ffb093';
-import { icon } from './icons.js?v=9874ffb093';
-import { generateShareCard, showSharePreview } from './share-card.js?v=9874ffb093';
-import { ensureTooltip } from './tooltip.js?v=9874ffb093';
-import { pageSlice, renderPagination } from './pagination.js?v=9874ffb093';
-import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=9874ffb093';
+import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=e5dd93de1c';
+import { fmt, recommendPill, categoryTag } from './components.js?v=e5dd93de1c';
+import { icon } from './icons.js?v=e5dd93de1c';
+import { generateShareCard, showSharePreview } from './share-card.js?v=e5dd93de1c';
+import { ensureTooltip } from './tooltip.js?v=e5dd93de1c';
+import { pageSlice, renderPagination } from './pagination.js?v=e5dd93de1c';
+import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=e5dd93de1c';
 
 // 顯示用機構名稱：對得上評鑑醫院時改用 VPN 簡稱，否則沿用原填寫名稱。
 function displayInstitutionName(name) {
