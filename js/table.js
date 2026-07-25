@@ -50,35 +50,6 @@ const DEFAULT_TABLE_COLUMNS = {
   other:      ['location', 'institutionType', 'institutionName', 'unitName', 'workplaceType', 'weeklyHours', 'recommendIndex'],
 };
 
-// 卡片視圖每類挑 3 個關鍵指標做「指標磚」（短標籤；key 皆為現有欄位）。
-// 機構名/單位/類別/地點/職稱只在卡片 header 出現，這裡不重複；空值的磚整個略過。
-const CARD_FIELDS = {
-  ward:       [['dayShiftRatio', '白班'], ['nightShiftRatio', '大夜'], ['weeklyHours', '工時']],
-  icu:        [['dayShiftRatio', '白班'], ['nightShiftRatio', '大夜'], ['weeklyHours', '工時']],
-  er:         [['erLevel', '級別'], ['criticalRatio', '重症區'], ['weeklyHours', '工時']],
-  or:         [['orSpecialty', '科別'], ['dailyCases', '每日刀數'], ['weeklyHours', '工時']],
-  outpatient: [['clinicsPerNurse', '顧幾診'], ['weeklyPatients', '週人次'], ['weeklyHours', '工時']],
-  clinic:     [['clinicSpecialty', '科別'], ['clinicScale', '人力'], ['weeklyHours', '工時']],
-  dialysis:   [['dialysisType', '類別'], ['hdRatio', 'HD比'], ['weeklyHours', '工時']],
-  psych:      [['psychType', '類型'], ['dayShiftRatio', '白班'], ['weeklyHours', '工時']],
-  special:    [['specialType', '單位'], ['dailyCases', '每日案件'], ['onCallRequired', 'On-call']],
-  other:      [['workplaceType', '職場'], ['shiftPattern', '輪班'], ['weeklyHours', '工時']],
-};
-const CARD_FIELDS_FALLBACK = [['weeklyHours', '工時'], ['overtimePolicy', '加班費']];
-
-// 產生一張卡片的「指標磚」HTML（略過空值；全空則回空字串）
-function cardMetricsHtml(row) {
-  const defs = CARD_FIELDS[row._category] || CARD_FIELDS_FALLBACK;
-  const tiles = defs
-    .filter(([k]) => { const v = row[k]; return v !== null && v !== undefined && v !== '' && v !== '—'; })
-    .map(([k, label]) => `
-      <div class="data-card-metric">
-        <span class="data-card-metric-label">${label}</span>
-        <span class="data-card-metric-val">${row[k]}</span>
-      </div>`).join('');
-  return tiles ? `<div class="data-card-metrics">${tiles}</div>` : '';
-}
-
 const KEY_LABELS = {
   _category: '類別',
   institutionType: '機構類別',
@@ -306,7 +277,6 @@ export function renderTable(container, rows, opts = {}) {
             </div>
             ${r.unitName ? `<div class="data-card-unit">${r.unitName}</div>` : ''}
             ${meta ? `<div class="data-card-meta">${meta}</div>` : ''}
-            ${cardMetricsHtml(r)}
             ${r.comment ? `
               <div class="data-card-comment">
                 <span class="key">短評</span>
