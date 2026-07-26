@@ -1,8 +1,8 @@
 // 違規紀錄類頁面共用模組：CSV 抓取 / 解析 / cache / 通用工具
 // 給 violations.js (勞檢)、gender.js (性平)、osha.js (職安) 共用。
 
-import { getShort as getHospitalShort } from './hospital-shortname.js?v=fd737669bd';
-import { normalizeInstitutionName } from './institution-name.js?v=fd737669bd';
+import { getShort as getHospitalShort } from './hospital-shortname.js?v=2118043f0b';
+import { normalizeInstitutionName } from './institution-name.js?v=2118043f0b';
 
 // ============================================================
 // 通用工具
@@ -291,9 +291,9 @@ export function createCsvLoader(cfg) {
 //   records-table-container
 // ============================================================
 
-import { icon, renderIcons } from './icons.js?v=fd737669bd';
-import { ensureTooltip } from './tooltip.js?v=fd737669bd';
-import { pageSlice, renderPagination } from './pagination.js?v=fd737669bd';
+import { icon, renderIcons } from './icons.js?v=2118043f0b';
+import { ensureTooltip } from './tooltip.js?v=2118043f0b';
+import { pageSlice, renderPagination } from './pagination.js?v=2118043f0b';
 
 // 違規機構名稱 → 機構代號 對照表（離線預建，供機構名稱連到整合檔案頁）
 let _violHospitalMap = null;
@@ -301,7 +301,7 @@ let _violHospitalMapLoading = null;
 function ensureViolHospitalMap() {
   if (_violHospitalMap) return Promise.resolve(_violHospitalMap);
   if (_violHospitalMapLoading) return _violHospitalMapLoading;
-  _violHospitalMapLoading = fetch('data/violations-hospital-map.json?v=f3d4b868a4', { cache: 'default' })
+  _violHospitalMapLoading = fetch('data/violations-hospital-map.json?v=bedb0c4373', { cache: 'default' })
     .then((r) => (r.ok ? r.json() : { map: {} }))
     .then((d) => { _violHospitalMap = (d && d.map) || {}; return _violHospitalMap; })
     .catch(() => { _violHospitalMap = {}; return _violHospitalMap; });

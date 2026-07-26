@@ -10,7 +10,7 @@
 //     rows:[{ YEAR, HOSP_CNT_TYPNAM, F1Val,F1Rank, F2Val,F2Rank, F3Val,F3Rank,
 //             F5Val, F6Val, F7Val, F8Val }] }] }
 
-const DATA_URL = 'data/hospital-financials.json?v=00ef43bb8c';
+const DATA_URL = 'data/hospital-financials.json?v=5ea9834039';
 
 let _doc = null;
 let _byCode = null;
@@ -52,7 +52,7 @@ const _codeCache = new Map();
 export async function loadFinancialsHospital(code) {
   if (_codeCache.has(code)) return _codeCache.get(code);
   try {
-    const r = await fetch(`data/financials/${code}.json?v=00ef43bb8c`, { cache: 'default' });
+    const r = await fetch(`data/financials/${code}.json?v=5ea9834039`, { cache: 'default' });
     const d = r.ok ? await r.json() : null;
     _codeCache.set(code, d);
     return d;

@@ -2097,6 +2097,25 @@ select.chart-select {
   padding: 12px 32px;
 }
 .donate-submit:disabled { opacity: .6; cursor: default; }
+/* 前往付款鈕：紅色實心、會跳動的愛心（lub-dub 心跳節奏） */
+.donate-submit .donate-heart {
+  fill: #E63946;
+  stroke: #E63946;
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: heartbeat 1.3s ease-in-out infinite;
+}
+.donate-submit:disabled .donate-heart { animation: none; }
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  15% { transform: scale(1.28); }
+  30% { transform: scale(1); }
+  45% { transform: scale(1.18); }
+  60% { transform: scale(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .donate-submit .donate-heart { animation: none; }
+}
 .donate-error {
   color: var(--danger);
   font-size: 0.88rem;
