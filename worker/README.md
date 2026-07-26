@@ -10,7 +10,8 @@ Cloudflare Worker + D1，提供首頁「今日訪客 / 累積人次」數字。�
 - `daily` 只存「日期 + 計數」。
 - 伺服器端去重以「IP × 裝置類別」為單位：`h = SHA-256(SALT | IP | 裝置桶 | day)`，其中「裝置桶」是把 User-Agent 壓成粗粒度 `OS|瀏覽器|主版本`（例 `iOS|Safari|17`）。同一 IP 下不同裝置能分開計，降低同一出口（診所/NAT）多人被算成 1 的低估。
 - 為避免「同 IP 狂換 User-Agent 灌水」，另存 `ipday = SHA-256(SALT | IP | day)` 做分群，**單一 IP 每天最多計 `CAP_PER_IP_PER_DAY`（目前 50）種裝置類別**。此上限在 `src/index.js` 頂部可調。
-- `seen` **只存雜湊、不存原始 IP／User-Agent、不可逆推**；前天以前的列會在寫入時自動清掉。
+- `seen` **只存雜湊、不存原始 IP／User-Agent、不可逆推**；前天以前的列由**每日 Cron**（`wrangler.toml` 的 `[triggers] crons`，20:00 UTC＝台北隔日 04:00）清掉，不再佔用計數熱路徑。
+- `/hit` **只接受帶合法 `Origin` 的瀏覽器請求**（白名單見 `ALLOWED_ORIGINS`），擋掉裸 `curl`／腳本灌水；真訪客跨網域一定帶 Origin，不受影響。
 - 前端 `js/visits.js` 的 localStorage 是第一層去重（減少後端寫入），伺服器端才是防灌水的關鍵一層。
 - `SALT` 為 Worker secret（見下方步驟），不進版控。
 

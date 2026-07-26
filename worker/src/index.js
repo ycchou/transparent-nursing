@@ -7,6 +7,8 @@
 //
 // 隱私：daily 只存「日期 + 計數」；seen 只存雜湊（SALT|IP|裝置桶|day 與 SALT|IP|day），
 //       「不記錄原始 IP／User-Agent、不可逆推」，仍屬匿名。SALT 為 Worker secret，見 README。
+//
+// 防灌水：/hit 只收帶合法 Origin 的瀏覽器請求；seen 舊列由每日 Cron（scheduled）清理。
 
 const ALLOWED_ORIGINS = [
   'https://ycchou.github.io',
@@ -18,8 +20,12 @@ const ALLOWED_ORIGINS = [
 // 又能把「同 IP 狂換 User-Agent 灌水」的上限鎖住。可調。
 const CAP_PER_IP_PER_DAY = 50;
 
+function originAllowed(origin) {
+  return !!origin && ALLOWED_ORIGINS.some((o) => origin === o || origin.startsWith(o + ':'));
+}
+
 function corsHeaders(origin) {
-  const ok = origin && ALLOWED_ORIGINS.some((o) => origin === o || origin.startsWith(o + ':'));
+  const ok = originAllowed(origin);
   return {
     'Access-Control-Allow-Origin': ok ? origin : 'https://ycchou.github.io',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -98,12 +104,8 @@ async function claimVisit(env, request, day) {
     .prepare('INSERT OR IGNORE INTO seen(h, ipday, day) VALUES(?, ?, ?)')
     .bind(h, ipday, day)
     .run();
-  const isNew = (res.meta && res.meta.changes) ? res.meta.changes > 0 : false;
-  if (isNew) {
-    // 順手清掉前天以前的雜湊（去重只需最近一兩天，跨午夜也安全）
-    await env.DB.prepare('DELETE FROM seen WHERE day < ?').bind(dayMinus(day, 1)).run();
-  }
-  return isNew;
+  // seen 舊列的清理已移出熱路徑，改由每日 Cron（scheduled）處理。
+  return (res.meta && res.meta.changes) ? res.meta.changes > 0 : false;
 }
 
 export default {
@@ -117,6 +119,11 @@ export default {
 
     try {
       if (url.pathname === '/hit' && request.method === 'POST') {
+        // 只接受帶合法 Origin 的瀏覽器請求：擋隨手 curl／腳本灌水。
+        // 真實訪客從 github.io 跨網域打 workers.dev，瀏覽器一定會帶 Origin。
+        if (!originAllowed(request.headers.get('Origin'))) {
+          return json({ error: 'forbidden' }, cors, 403);
+        }
         const day = taipeiDay();
         const isNew = await claimVisit(env, request, day);
         if (!isNew) return json(await readStats(env), cors);
@@ -151,5 +158,12 @@ export default {
     } catch (e) {
       return json({ error: String(e) }, cors, 500);
     }
+  },
+
+  // 每日 Cron（見 wrangler.toml 的 [triggers] crons）：清掉前天以前的去重雜湊。
+  // 去重只需最近一兩天，保留今天 + 昨天（跨午夜也安全）。
+  async scheduled(event, env, ctx) {
+    const cutoff = dayMinus(taipeiDay(), 1);
+    ctx.waitUntil(env.DB.prepare('DELETE FROM seen WHERE day < ?').bind(cutoff).run());
   },
 };

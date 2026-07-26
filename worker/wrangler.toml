@@ -8,3 +8,8 @@ compatibility_date = "2026-07-01"
 binding = "DB"
 database_name = "tn-visits"
 database_id = "295f6b9a-4c85-49b2-b3c5-93cbf597c681"
+
+# 每日清理 seen 去重舊列（見 src/index.js 的 scheduled）。
+# 20:00 UTC = 台北隔日 04:00，午夜換日後才清，保留今天+昨天。
+[triggers]
+crons = ["0 20 * * *"]
