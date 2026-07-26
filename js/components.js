@@ -1,7 +1,7 @@
 // 共用 header / footer 注入 + 工具函式
-import { SITE, CATEGORIES } from './config.js?v=bfd2057f85';
-import { icon, renderIcons } from './icons.js?v=bfd2057f85';
-import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=bfd2057f85';
+import { SITE, CATEGORIES } from './config.js?v=4dfc3ba126';
+import { icon, renderIcons } from './icons.js?v=4dfc3ba126';
+import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=4dfc3ba126';
 
 // 主辦/協作工會 — 共用資料（footer / hero strip / about 都引用）
 export const ORGS = {
@@ -52,6 +52,7 @@ const NAV_ITEMS = [
   ] },
   { href: 'participate.html', label: '填寫表單', match: ['participate.html'] },
   { href: 'about.html',       label: '關於',     match: ['about.html'] },
+  { href: 'support.html',     label: '支持我們', match: ['support.html'] },
 ];
 
 // 軟鎖：鎖定期只顯示公開頁的選單/頁尾連結（總開關與白名單在 js/gate.js）
@@ -166,6 +167,7 @@ function footerHTML() {
             <ul>
               <li><a href="mailto:${SITE.contactEmail}">${SITE.contactEmail}</a></li>
               <li><a href="about.html">運動緣起</a></li>
+              <li><a href="support.html">支持我們</a></li>
               <li><a href="participate.html">填寫表單</a></li>
               <li><a href="terms.html">服務條款</a></li>
               ${isAppInstalled() ? '' : `<li><a href="#" onclick="event.preventDefault();window.__nursingShowInstallGuide&&window.__nursingShowInstallGuide();">加到主畫面 (App 化)</a></li>`}
@@ -249,7 +251,7 @@ export function mountLayout() {
 
   // 背景預載 platform 資料 + 樞紐大檔：切到分享平台/機構總覽/護病比/人力監控時即時顯示
   // 動態 import 避免循環依賴與初始 parse 成本
-  import('./data-loader.js?v=bfd2057f85')
+  import('./data-loader.js?v=4dfc3ba126')
     .then(({ preloadAll, preloadStaticData }) => {
       preloadAll && preloadAll();
       preloadStaticData && preloadStaticData();
@@ -261,13 +263,13 @@ export function mountLayout() {
   wireNavPrefetch(document.getElementById('app-footer'));
 
   // 背景預載勞檢/性平/職安紀錄資料：同樣讓使用者切過去時即時顯示
-  import('./violations.js?v=bfd2057f85')
+  import('./violations.js?v=4dfc3ba126')
     .then(({ preloadViolations }) => preloadViolations && preloadViolations())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./gender.js?v=bfd2057f85')
+  import('./gender.js?v=4dfc3ba126')
     .then(({ preloadGender }) => preloadGender && preloadGender())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./osha.js?v=bfd2057f85')
+  import('./osha.js?v=4dfc3ba126')
     .then(({ preloadOsha }) => preloadOsha && preloadOsha())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
 }

@@ -10,7 +10,7 @@ var GATE_PUBLIC = [
   '', 'index.html', 'coming-soon.html',
   'participate.html', 'participate-icu.html', 'participate-dialysis.html',
   'participate-other.html', 'participate-outpatient.html', 'participate-clinic.html',
-  'about.html', 'terms.html',
+  'about.html', 'terms.html', 'support.html',
   // 軟鎖定期間也提前開放的資料頁：護病比、人力監控、財務、違規紀錄（含 3 個舊 URL）
   'nurse-ratio.html', 'personnel.html', 'financials.html',
   'records.html', 'violations.html', 'gender.html', 'osha.html',
