@@ -1,11 +1,11 @@
 // PWA「加到主畫面」引導
 // - 原生一鍵安裝（beforeinstallprompt）：Android / 桌面 Chromium 直接彈系統安裝
 // - 行為意圖觸發（notePwaIntent）：送出表單 / 瀏覽多家醫院 / 用完薪資試算等高意圖時刻
-// - 遞增退讓：關 1→7 天、關 2→30 天、關 3→30 天、關第 4→永久不再顯示
+// - 遞增退讓：關 1→7 天、關 2→14 天、關 3→14 天、關 4/5→30 天、關第 6 次→永久不再顯示
 // - 本地埋點（trackPwa）：dispatch CustomEvent + localStorage 累計（未接外部服務）
 // import { initPWAPrompt, showInstallGuide, notePwaIntent, isAppInstalled } from './pwa-prompt.js?v=...';
 
-import { showToast } from './toast.js?v=9bc2c481e9';
+import { showToast } from './toast.js?v=fd737669bd';
 
 const DISMISS_KEY = '__nursing_pwa_dismissed';          // 最近一次關閉/延後的時間戳
 const DISMISS_COUNT_KEY = '__nursing_pwa_dismiss_count'; // 累計「主動關閉」次數
@@ -21,9 +21,9 @@ const INTENT_DELAY_MS = 3 * 1000;         // 意圖觸發（下次載入讀 inte
 const INTENT_SHOWNOW_DELAY_MS = 2 * 1000; // 意圖觸發（當頁 showNow）延遲
 const INTENT_TTL_MS = 24 * 60 * 60 * 1000;// intent 旗標有效期
 
-// 遞增退讓天數：關 1→7、關 2→30、關 3→30；未列出（含第 4 次起）→ 永久 suppress
-const DISMISS_COOLDOWN_DAYS = { 1: 7, 2: 30, 3: 30 };
-const DISMISS_SUPPRESS_AT = 4;
+// 遞增退讓天數：關 1→7、關 2→14、關 3→14、關 4/5→30（未列出者預設 30）；關第 6 次 → 永久 suppress
+const DISMISS_COOLDOWN_DAYS = { 1: 7, 2: 14, 3: 14 };
+const DISMISS_SUPPRESS_AT = 6;
 const SNOOZE_DAYS = 7; // 「詳細步驟 / 原生取消」等軟性延後，不累計關閉次數
 
 let deferredInstallPrompt = null;
