@@ -51,7 +51,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=be23fbdf57" />
+  <link rel="stylesheet" href="css/styles.css?v=90a93f43cd" />
 
     <!-- modulepreload：平行載入 ES module 鏈（首次造訪快 30-50%） -->
   <link rel="modulepreload" href="./js/components.js?v=dc3b75cdb2" />
@@ -176,12 +176,17 @@
           <div class="stat-label">最後更新時間</div>
         </div>
         <div class="card stat-card">
-          <div class="stat-num" id="stat-visits-today">—</div>
-          <div class="stat-label">今日來客</div>
-        </div>
-        <div class="card stat-card">
-          <div class="stat-num" id="stat-visits-total">—</div>
-          <div class="stat-label">累計來客</div>
+          <div class="visits-split">
+            <div class="visits-cell">
+              <div class="stat-num" id="stat-visits-today">—</div>
+              <div class="stat-label">今日訪客</div>
+            </div>
+            <div class="visits-divider" aria-hidden="true"></div>
+            <div class="visits-cell">
+              <div class="stat-num" id="stat-visits-total">—</div>
+              <div class="stat-label">累積訪客</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -742,6 +742,32 @@ h1[id], h2[id], h3[id] {
   .stat-card .stat-label { font-size: 0.85rem; }
 }
 
+/* 訪客卡：今日 / 累積 並排於同一張卡，中間細分隔線 */
+.visits-split {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+.visits-split .visits-cell {
+  flex: 1;
+  min-width: 0;
+}
+.visits-split .stat-num {
+  font-size: 2.1rem;
+  font-variant-numeric: tabular-nums;
+}
+.visits-split .visits-divider {
+  align-self: stretch;
+  width: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+@media (max-width: 480px) {
+  .visits-split { gap: 12px; }
+  .visits-split .stat-num { font-size: 1.7rem; }
+}
+
 /* ---------- 統一 KPI 數字字卡（給有多種格式：純數字、數字+單位、日期、百分比） ---------- */
 /* 用 flex + min-height 強制每張卡的數字區塊高度一致，避免不同 font-size 讓 label 跑位 */
 .stat-card .kpi-num {
