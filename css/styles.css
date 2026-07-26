@@ -763,9 +763,16 @@ h1[id], h2[id], h3[id] {
   background: var(--border);
   margin: 4px 0;
 }
+/* 累積訪客：次要資訊，縮小 + 淡色，讓「今日訪客」為主 */
+.visits-split .visits-cell-secondary .stat-num {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--muted);
+}
 @media (max-width: 480px) {
   .visits-split { gap: 12px; }
   .visits-split .stat-num { font-size: 1.7rem; }
+  .visits-split .visits-cell-secondary .stat-num { font-size: 1.25rem; }
 }
 
 /* ---------- 統一 KPI 數字字卡（給有多種格式：純數字、數字+單位、日期、百分比） ---------- */
