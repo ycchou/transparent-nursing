@@ -5,10 +5,9 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { renderIcons } from './icons.js?v=e92508ad94';
-import { showComments } from './comments.js?v=e92508ad94';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=e92508ad94';
-import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=e92508ad94';
+import { renderIcons } from './icons.js?v=bfd2057f85';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=bfd2057f85';
+import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=bfd2057f85';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -16,23 +15,23 @@ import {
   shiftStatus,
   classifyHospital,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=e92508ad94';
-import { loadAll } from './data-loader.js?v=e92508ad94';
-import { renderKpiStrip } from './stats-kpi.js?v=e92508ad94';
-import { renderTable, showDetailModal } from './table.js?v=e92508ad94';
-import { hasContributed } from './contribution-gate.js?v=e92508ad94';
-import { notePwaIntent } from './pwa-prompt.js?v=e92508ad94';
+} from './nurse-ratio-view.js?v=bfd2057f85';
+import { loadAll } from './data-loader.js?v=bfd2057f85';
+import { renderKpiStrip } from './stats-kpi.js?v=bfd2057f85';
+import { renderTable, showDetailModal } from './table.js?v=bfd2057f85';
+import { hasContributed } from './contribution-gate.js?v=bfd2057f85';
+import { notePwaIntent } from './pwa-prompt.js?v=bfd2057f85';
 import {
   loadFinancialsHospital, getFinancialFields,
   formatVal as finFormatVal, signClass as finSignClass, formatRocYear as finRocYear,
   renderFinancialTrendChart,
-} from './financials-view.js?v=e92508ad94';
-import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=e92508ad94';
+} from './financials-view.js?v=bfd2057f85';
+import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=bfd2057f85';
 import {
   loadPersonnelHospital, ensurePersonnelIndex,
   renderStaffChart as renderPmStaffChart, renderBedChart as renderPmBedChart,
   latestMonthTable,
-} from './personnel-view.js?v=e92508ad94';
+} from './personnel-view.js?v=bfd2057f85';
 import {
   createCsvLoader,
   parseROCDate,
@@ -40,8 +39,8 @@ import {
   shortenLocation,
   fineToWan,
   formatROCDate,
-} from './records-common.js?v=e92508ad94';
-import { skeletonRows } from './skeleton.js?v=e92508ad94';
+} from './records-common.js?v=bfd2057f85';
+import { skeletonRows } from './skeleton.js?v=bfd2057f85';
 
 const MERGED_URL = 'data/hospitals-merged.json?v=c017631e69';
 const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=f3d4b868a4';
@@ -84,8 +83,6 @@ const state = {
   searchQuery: '',
   levelFilter: 'all',
   cityFilter: 'all',
-  commentsLoaded: false, // Disqus embed.js 是否已注入（整頁一次）
-  commentMeta: null,     // 當前機構的討論串 meta：{ identifier, url, title }
 };
 
 // ---------- utils ----------
@@ -333,7 +330,6 @@ function selectHospital(code, updateUrl = false) {
   renderPersonnelSection(code);
   renderPlatformSection(hosp);
   renderViolationsSection(code, hosp);
-  renderCommentsSection(hosp);
   activateHospTab('nr');   // 每次選院回到第一個頁簽
   renderIcons();
   try { window.scrollTo({ top: document.getElementById('hospital-detail').offsetTop - 60, behavior: 'smooth' }); } catch {}
@@ -645,39 +641,6 @@ function renderPlatformSection(hosp) {
       : { gated: true, limit: 5, isFilteredView: false };
     renderTable(table, matched, { slug: 'all', onRowClick: (r) => showDetailModal(r), gate });
   });
-}
-
-// 討論與留言（Disqus）：每機構一串（identifier=hospital:<code>），捲到才 lazy-load；
-// 切換機構時若已載入 → DISQUS.reset 換成新機構的討論串（見 comments.js）。
-let _commentObserver = null;
-function renderCommentsSection(hosp) {
-  const el = document.getElementById('disqus_thread');
-  if (!el) return;
-  const url = `${location.origin}${location.pathname}?code=${encodeURIComponent(hosp.code)}`;
-  state.commentMeta = {
-    identifier: `hospital:${hosp.code}`,
-    url,
-    title: `${hosp.name} — 機構總覽 · 護理職場透明化`,
-  };
-
-  // 已載入過 → 直接切換到本機構的討論串
-  if (state.commentsLoaded) {
-    showComments(el, state.commentMeta);
-    return;
-  }
-
-  // 尚未載入 → 捲動進入視窗才載入（讀當前 meta，故切院後再捲到也正確）
-  if (_commentObserver) return; // 觀察器已在等待，會用最新的 state.commentMeta 觸發
-  const section = document.getElementById('hosp-comments');
-  if (!section) return;
-  _commentObserver = new IntersectionObserver((entries) => {
-    if (!entries.some((e) => e.isIntersecting) || !state.commentMeta) return;
-    state.commentsLoaded = true;
-    _commentObserver.disconnect();
-    _commentObserver = null;
-    showComments(el, state.commentMeta);
-  }, { rootMargin: '200px' });
-  _commentObserver.observe(section);
 }
 
 // 違規紀錄：以離線對照表（名稱→代號）比對
