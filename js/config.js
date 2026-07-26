@@ -6,6 +6,8 @@ export const SITE = {
   tagline: '讓真實的職場資訊，被下一個護理師看見',
   contactEmail: 'transparentnursing@example.org',
   lastUpdated: '自動依資料動態計算',
+  // 捐款後端（綠界 ECPay）Cloudflare Worker。見 worker-donate/。留空＝顯示「設定中」。
+  donateApi: 'https://tn-donate.victory63225.workers.dev',
 };
 
 // 共用欄位（所有類別都會出現）

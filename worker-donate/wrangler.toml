@@ -1,0 +1,16 @@
+# Cloudflare Worker：綠界（ECPay）捐款後端。
+# 密鑰以 `wrangler secret put` 設定，不進 repo：
+#   ECPAY_MERCHANT_ID / ECPAY_HASH_KEY / ECPAY_HASH_IV
+# database_id 由 `wrangler d1 create tn-donate` 產生後填入。部署見 README.md。
+name = "tn-donate"
+main = "src/index.js"
+compatibility_date = "2026-07-01"
+
+# stage = 綠界測試環境（不扣真錢）；prod = 正式環境（真實刷卡）。
+[vars]
+ECPAY_ENV = "stage"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tn-donate"
+database_id = "95847dff-2139-4273-97d3-728e373e0b78"

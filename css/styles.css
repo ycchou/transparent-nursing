@@ -2042,6 +2042,73 @@ select.chart-select {
   .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr; }
 }
 
+/* ---------- 捐款 widget（js/donate.js） ---------- */
+.donate-tiers {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.donate-tier {
+  flex: 0 0 auto;
+  min-width: 92px;
+  padding: 10px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color .15s, background .15s, color .15s;
+}
+.donate-tier:hover { border-color: var(--primary); }
+.donate-tier.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.donate-custom-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 260px;
+  margin: 0 auto 14px;
+  border: 1.5px solid var(--primary);
+  border-radius: 12px;
+  padding: 8px 14px;
+}
+.donate-custom-prefix { color: var(--muted); font-weight: 600; }
+.donate-custom-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: transparent;
+  font-variant-numeric: tabular-nums;
+}
+.donate-submit {
+  font-size: 1rem;
+  padding: 12px 32px;
+}
+.donate-submit:disabled { opacity: .6; cursor: default; }
+.donate-error {
+  color: var(--danger);
+  font-size: 0.88rem;
+  margin: 12px 0 0;
+}
+.donate-note {
+  color: var(--muted-light);
+  font-size: 0.82rem;
+  line-height: 1.6;
+  margin: 14px 0 0;
+}
+
 /* ---------- Manifesto / About sections ---------- */
 .manifesto-grid {
   display: grid;
