@@ -1,11 +1,12 @@
 // tn-visits — 首頁匿名訪客計數 Worker。
 //
 // 端點：
-//   POST /hit            當天計數 +1（前端僅在「今天首訪」時呼叫，UV 去重靠前端 localStorage）
+//   POST /hit            當天計數 +1（伺服器端以「雜湊 IP + 當天」去重，同 IP 一天只計一次）
 //   GET  /stats          回 { today, total }
 //   GET  /stats?history=30  另附 history: [{ day, count }, ...]（近 N 天，供未來畫趨勢圖）
 //
-// 隱私：只讀寫 daily 表的「日期 + 計數」，不記錄 IP／任何可識別個資。
+// 隱私：daily 只存「日期 + 計數」；seen 只存 SHA-256(SALT|IP|day) 的雜湊，
+//       「不記錄原始 IP、不可逆推」，仍屬匿名。SALT 為 Worker secret，見 README。
 
 const ALLOWED_ORIGINS = [
   'https://ycchou.github.io',
@@ -28,6 +29,18 @@ function taipeiDay(d = new Date()) {
   return new Date(d.getTime() + 8 * 3600 * 1000).toISOString().slice(0, 10);
 }
 
+// dayStr 往前 n 天（用來清 seen 舊列）
+function dayMinus(dayStr, n) {
+  const d = new Date(dayStr + 'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate() - n);
+  return d.toISOString().slice(0, 10);
+}
+
+async function sha256Hex(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
 function json(obj, cors, status = 200) {
   return new Response(JSON.stringify(obj), {
     status,
@@ -42,6 +55,23 @@ async function readStats(env) {
   return { today: todayRow ? todayRow.count : 0, total: totalRow ? totalRow.total : 0 };
 }
 
+// 回傳 true 代表「這個 IP 今天第一次」→ 才需要計數。已看過則回 false。
+async function claimVisit(env, request, day) {
+  const ip = request.headers.get('CF-Connecting-IP') || '0.0.0.0';
+  const salt = env.SALT || 'tn-visits-fallback-salt';
+  const h = await sha256Hex(salt + '|' + ip + '|' + day);
+  const res = await env.DB
+    .prepare('INSERT OR IGNORE INTO seen(h, day) VALUES(?, ?)')
+    .bind(h, day)
+    .run();
+  const isNew = (res.meta && res.meta.changes) ? res.meta.changes > 0 : false;
+  if (isNew) {
+    // 順手清掉前天以前的雜湊（去重只需最近一兩天，跨午夜也安全）
+    await env.DB.prepare('DELETE FROM seen WHERE day < ?').bind(dayMinus(day, 1)).run();
+  }
+  return isNew;
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -53,9 +83,13 @@ export default {
 
     try {
       if (url.pathname === '/hit' && request.method === 'POST') {
-        await env.DB.prepare(
-          'INSERT INTO daily(day, count) VALUES(?, 1) ON CONFLICT(day) DO UPDATE SET count = count + 1'
-        ).bind(taipeiDay()).run();
+        const day = taipeiDay();
+        const isNew = await claimVisit(env, request, day);
+        if (isNew) {
+          await env.DB.prepare(
+            'INSERT INTO daily(day, count) VALUES(?, 1) ON CONFLICT(day) DO UPDATE SET count = count + 1'
+          ).bind(day).run();
+        }
         return json(await readStats(env), cors);
       }
 

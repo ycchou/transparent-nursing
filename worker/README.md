@@ -1,12 +1,16 @@
 # tn-visits — 首頁匿名訪客計數 Worker
 
-Cloudflare Worker + D1，提供首頁「今日來客 / 累計來客」數字。獨立部署，**不走 GitHub Pages**。
+Cloudflare Worker + D1，提供首頁「今日訪客 / 累積人次」數字。獨立部署，**不走 GitHub Pages**。
 
 - `src/index.js` — Worker 程式（`/hit`、`/stats`）
-- `schema.sql` — D1 資料表（`daily`：日期 + 計數）
+- `schema.sql` — D1 資料表（`daily`：日期 + 計數；`seen`：當天去重雜湊）
 - `wrangler.toml` — 設定（部署前需填 `database_id`）
 
-隱私：只存「日期 + 計數」，不記錄 IP／任何可識別個資。UV 去重靠前端 `js/visits.js` 的 localStorage。
+隱私與防灌水：
+- `daily` 只存「日期 + 計數」。
+- 伺服器端以 `SHA-256(SALT | IP | 當天)` 去重，同一 IP 一天只計一次；`seen` **只存雜湊、不存原始 IP、不可逆推**，前天以前的列會在寫入時自動清掉。
+- 前端 `js/visits.js` 的 localStorage 是第一層去重（減少後端寫入），伺服器端才是防灌水的關鍵一層。
+- `SALT` 為 Worker secret（見下方步驟），不進版控。
 
 ## 首次部署
 
@@ -23,7 +27,10 @@ wrangler d1 create tn-visits
 cd worker
 wrangler d1 execute tn-visits --remote --file=schema.sql
 
-# 4) 部署，取得 https://tn-visits.<你的子網域>.workers.dev
+# 4) 設定去重用的 SALT secret（隨機、不進版控；換值會讓當天去重重來一次，無妨）
+node -e "console.log(require('crypto').randomBytes(24).toString('hex'))" | wrangler secret put SALT
+
+# 5) 部署，取得 https://tn-visits.<你的子網域>.workers.dev
 wrangler deploy
 ```
 
