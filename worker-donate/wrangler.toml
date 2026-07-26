@@ -8,7 +8,7 @@ compatibility_date = "2026-07-01"
 
 # stage = 綠界測試環境（不扣真錢）；prod = 正式環境（真實刷卡）。
 [vars]
-ECPAY_ENV = "stage"
+ECPAY_ENV = "prod"
 
 [[d1_databases]]
 binding = "DB"
