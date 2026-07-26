@@ -2109,6 +2109,31 @@ select.chart-select {
   margin: 14px 0 0;
 }
 
+/* 「我們的承諾」清單：icon 包在有 class 的外層（renderIcons 會保留 class、丟掉 inline style），
+   顏色/對齊寫在此，確保每一則的打勾圖示完全一致。 */
+.promise-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  color: var(--ink-soft);
+  line-height: 1.8;
+}
+.promise-list li {
+  display: flex;
+  gap: 12px;
+  padding: 10px 0;
+}
+.promise-list li:not(:last-child) {
+  border-bottom: 1px solid var(--border);
+}
+.promise-ico {
+  flex: 0 0 auto;
+  display: inline-flex;
+  color: var(--primary);
+  line-height: 0;
+  margin-top: 3px;
+}
+
 /* ---------- Manifesto / About sections ---------- */
 .manifesto-grid {
   display: grid;
