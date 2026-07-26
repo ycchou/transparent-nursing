@@ -2,7 +2,7 @@
 // 後端：Cloudflare Worker + D1（見 worker/）。UV 去重：同一裝置當天只計一次，靠 localStorage。
 //
 // 部署 Worker 後，把下面網址換成你的 *.workers.dev（或自訂路由）：
-const VISITS_API = 'https://tn-visits.YOUR-SUBDOMAIN.workers.dev';
+const VISITS_API = 'https://tn-visits.victory63225.workers.dev';
 
 const DAY_KEY = 'tn_visit_day';
 

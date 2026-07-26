@@ -7,4 +7,4 @@ compatibility_date = "2026-07-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "tn-visits"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "295f6b9a-4c85-49b2-b3c5-93cbf597c681"
