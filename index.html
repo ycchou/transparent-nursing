@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#2E86AB" />
   <!-- 軟鎖總開關（js/gate.js）：鎖定期非公開頁導向 coming-soon -->
-  <script src="./js/gate.js?v=2eb60ed8b0"></script>
+  <script src="./js/gate.js?v=f043d4791a"></script>
 
   <!-- SEO 基本 -->
   <title>護理職場透明化運動 — 讓真實的職場資訊被下一個護理師看見</title>
@@ -54,12 +54,13 @@
   <link rel="stylesheet" href="css/styles.css?v=4ff593a8e3" />
 
     <!-- modulepreload：平行載入 ES module 鏈（首次造訪快 30-50%） -->
-  <link rel="modulepreload" href="./js/components.js?v=2eb60ed8b0" />
-  <link rel="modulepreload" href="./js/config.js?v=2eb60ed8b0" />
-  <link rel="modulepreload" href="./js/data-loader.js?v=2eb60ed8b0" />
-  <link rel="modulepreload" href="./js/icons.js?v=2eb60ed8b0" />
-  <link rel="modulepreload" href="./js/pwa-prompt.js?v=2eb60ed8b0" />
-  <link rel="modulepreload" href="./js/toast.js?v=2eb60ed8b0" />
+  <link rel="modulepreload" href="./js/components.js?v=f043d4791a" />
+  <link rel="modulepreload" href="./js/config.js?v=f043d4791a" />
+  <link rel="modulepreload" href="./js/data-loader.js?v=f043d4791a" />
+  <link rel="modulepreload" href="./js/icons.js?v=f043d4791a" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=f043d4791a" />
+  <link rel="modulepreload" href="./js/toast.js?v=f043d4791a" />
+  <link rel="modulepreload" href="./js/visits.js?v=f043d4791a" />
 
   <!-- 強制清除舊版 cache（只在版本更新時跑一次） -->
   <script>
@@ -174,6 +175,14 @@
           <div class="stat-num" id="stat-updated" style="font-size:1.4rem;line-height:1.4;padding-top:14px;">—</div>
           <div class="stat-label">最後更新時間</div>
         </div>
+        <div class="card stat-card">
+          <div class="stat-num" id="stat-visits-today">—</div>
+          <div class="stat-label">今日來客</div>
+        </div>
+        <div class="card stat-card">
+          <div class="stat-num" id="stat-visits-total">—</div>
+          <div class="stat-label">累計來客</div>
+        </div>
       </div>
     </div>
   </section>
@@ -244,12 +253,22 @@
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
   <script type="module">
-    import { CATEGORIES } from './js/config.js?v=2eb60ed8b0';
-    import { mountLayout, fmt, orgStripHTML } from './js/components.js?v=2eb60ed8b0';
-    import { icon, renderIcons } from './js/icons.js?v=2eb60ed8b0';
-    import { getStats, startAutoRefresh } from './js/data-loader.js?v=2eb60ed8b0';
+    import { CATEGORIES } from './js/config.js?v=f043d4791a';
+    import { mountLayout, fmt, orgStripHTML } from './js/components.js?v=f043d4791a';
+    import { icon, renderIcons } from './js/icons.js?v=f043d4791a';
+    import { getStats, startAutoRefresh } from './js/data-loader.js?v=f043d4791a';
+    import { getVisitStats } from './js/visits.js?v=f043d4791a';
 
     mountLayout();
+
+    // 訪客統計（今日 / 累計）— 獨立呼叫後端 Worker，失敗靜默、不影響其他內容
+    getVisitStats().then((v) => {
+      if (!v) return;
+      const t = document.getElementById('stat-visits-today');
+      const a = document.getElementById('stat-visits-total');
+      if (t && typeof v.today === 'number') t.textContent = v.today.toLocaleString();
+      if (a && typeof v.total === 'number') a.textContent = v.total.toLocaleString();
+    });
 
     // 首頁 hero 下方 trust strip
     const trustMount = document.getElementById('hero-trust-strip-mount');

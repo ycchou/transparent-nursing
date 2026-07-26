@@ -1,0 +1,10 @@
+# Cloudflare Worker：首頁匿名訪客計數（今日 / 累計）
+# 部署見 worker/README.md。database_id 由 `wrangler d1 create tn-visits` 產生後填入。
+name = "tn-visits"
+main = "src/index.js"
+compatibility_date = "2026-07-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tn-visits"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
