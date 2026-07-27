@@ -2095,13 +2095,17 @@ select.chart-select {
 .donate-submit {
   font-size: 1rem;
   padding: 12px 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
 }
 .donate-submit:disabled { opacity: .6; cursor: default; }
 /* 站標同款心型：實心、色隨父層（用於「支持平台走得更遠」裝飾） */
 .support-heart { fill: currentColor; stroke: none; }
 /* 前往付款鈕：紅色實心、會跳動的愛心（lub-dub 心跳節奏） */
 .donate-submit .donate-heart {
-  fill: #E63946;
+  fill: currentColor;
   stroke: none;
   transform-origin: center;
   transform-box: fill-box;
@@ -2889,9 +2893,11 @@ body.calc-modal-open { overflow: hidden; }
   box-shadow: 0 6px 18px rgba(46, 134, 171, 0.14);
 }
 .calc-trigger-icon {
-  font-size: 28px;
   flex-shrink: 0;
   line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  color: var(--primary);
 }
 .calc-trigger-body { flex: 1; min-width: 0; }
 .calc-trigger-title {
