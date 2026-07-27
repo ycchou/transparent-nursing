@@ -2097,10 +2097,12 @@ select.chart-select {
   padding: 12px 32px;
 }
 .donate-submit:disabled { opacity: .6; cursor: default; }
+/* 站標同款心型：實心、色隨父層（用於「支持平台走得更遠」裝飾） */
+.support-heart { fill: currentColor; stroke: none; }
 /* 前往付款鈕：紅色實心、會跳動的愛心（lub-dub 心跳節奏） */
 .donate-submit .donate-heart {
   fill: #E63946;
-  stroke: #E63946;
+  stroke: none;
   transform-origin: center;
   transform-box: fill-box;
   animation: heartbeat 1.3s ease-in-out infinite;
