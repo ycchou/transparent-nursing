@@ -2,12 +2,12 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=0fa1ef9a9a';
-import { renderIcons, icon } from './icons.js?v=0fa1ef9a9a';
-import { markContributed } from './contribution-gate.js?v=0fa1ef9a9a';
-import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=0fa1ef9a9a';
-import { showToast } from './toast.js?v=0fa1ef9a9a';
-import { notePwaIntent } from './pwa-prompt.js?v=0fa1ef9a9a';
+import { mountLayout } from './components.js?v=b7340baddb';
+import { renderIcons, icon } from './icons.js?v=b7340baddb';
+import { markContributed } from './contribution-gate.js?v=b7340baddb';
+import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=b7340baddb';
+import { showToast } from './toast.js?v=b7340baddb';
+import { notePwaIntent } from './pwa-prompt.js?v=b7340baddb';
 
 const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 避開易混字元 0/O/1/I/L
 let currentCaptcha = '';

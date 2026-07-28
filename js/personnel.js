@@ -2,14 +2,14 @@
 // 資料：data/personnel-index.json（picker 清單）＋ data/personnel/{code}.json（單院時間序列）
 // 來源：衛福部「醫院醫事人力持續性監測結果」。
 
-import { renderIcons, icon } from './icons.js?v=0fa1ef9a9a';
-import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=0fa1ef9a9a';
+import { renderIcons, icon } from './icons.js?v=b7340baddb';
+import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=b7340baddb';
 import {
   CAT_COLORS, BED_COLORS, DEFAULT_ON, mLabel, baseLineCfg,
   renderStaffChart, renderBedChart, loadPersonnelHospital, latestMonthTable,
-} from './personnel-view.js?v=0fa1ef9a9a';
-import { showToast } from './toast.js?v=0fa1ef9a9a';
-import { skeletonRows } from './skeleton.js?v=0fa1ef9a9a';
+} from './personnel-view.js?v=b7340baddb';
+import { showToast } from './toast.js?v=b7340baddb';
+import { skeletonRows } from './skeleton.js?v=b7340baddb';
 
 const INDEX_URL = 'data/personnel-index.json';
 const AGG_URL = 'data/personnel-aggregate.json';

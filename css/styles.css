@@ -2103,8 +2103,8 @@ select.chart-select {
 .donate-submit:disabled { opacity: .6; cursor: default; }
 /* 站標同款心型：實心、色隨父層（用於「支持平台走得更遠」裝飾） */
 .support-heart { fill: currentColor; stroke: none; }
-/* 前往付款鈕：紅色實心、會跳動的愛心（lub-dub 心跳節奏） */
-.donate-submit .donate-heart {
+/* 跳動白愛心：共用於「前往付款」鈕與分享平台浮動贊助入口（lub-dub 心跳節奏） */
+.donate-heart {
   display: inline-block;
   transform-origin: center;
   animation: heartbeat 1.1s ease-in-out infinite;
@@ -2118,8 +2118,55 @@ select.chart-select {
   72% { transform: scale(1); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .donate-submit .donate-heart { animation: none; }
+  .donate-heart { animation: none; }
 }
+
+/* 分享平台右下角浮動贊助入口：白愛心、可拖曳、可關閉 */
+.donate-fab {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 1000;
+  width: 56px;
+  height: 56px;
+}
+.donate-fab-btn {
+  width: 56px;
+  height: 56px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary) 0%, #1D3557 100%);
+  color: #fff;
+  font-size: 24px;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(29, 53, 87, 0.3);
+  touch-action: none;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.donate-fab-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(29, 53, 87, 0.38); }
+.donate-fab.dragging .donate-fab-btn { cursor: grabbing; transition: none; }
+.donate-fab-close {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: #64748b;
+  color: #fff;
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+.donate-fab-close:hover { background: #475569; }
 .donate-error {
   color: var(--danger);
   font-size: 0.88rem;
