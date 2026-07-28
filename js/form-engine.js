@@ -2,12 +2,12 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=61fd87da63';
-import { renderIcons, icon } from './icons.js?v=61fd87da63';
-import { markContributed } from './contribution-gate.js?v=61fd87da63';
-import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=61fd87da63';
-import { showToast } from './toast.js?v=61fd87da63';
-import { notePwaIntent } from './pwa-prompt.js?v=61fd87da63';
+import { mountLayout } from './components.js?v=ae09c4c1c9';
+import { renderIcons, icon } from './icons.js?v=ae09c4c1c9';
+import { markContributed } from './contribution-gate.js?v=ae09c4c1c9';
+import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=ae09c4c1c9';
+import { showToast } from './toast.js?v=ae09c4c1c9';
+import { notePwaIntent } from './pwa-prompt.js?v=ae09c4c1c9';
 
 const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 避開易混字元 0/O/1/I/L
 let currentCaptcha = '';
@@ -17,6 +17,8 @@ const DRAFT_DEBOUNCE_MS = 500;
 let SCHEMA = [];
 let DRAFT_KEY = '';
 let SUBMIT_ENDPOINT = ''; // 空字串 = 測試模式
+let FORM_LOAD_TS = 0;     // 表單初始化時間戳（反垃圾：填寫過快判為機器）
+const MIN_FILL_MS = 3000; // 少於此秒數送出 → 視為可疑（本表單很長，真人不可能這麼快）
 
 // ===== 工具函式 =====
 
@@ -364,6 +366,19 @@ function attachDraftAutosave() {
 
 async function onSubmit(e) {
   e.preventDefault();
+
+  // 反垃圾①：honeypot 有值 → 幾乎必為機器。靜默丟棄（不給反饋，避免對方調參重試）
+  const hp = document.getElementById('dform-hp');
+  if (hp && hp.value.trim() !== '') {
+    console.warn('[DFORM] honeypot triggered — submission dropped');
+    return;
+  }
+  // 反垃圾②：填寫過快 → 提示再確認（真人第二次送出時多半已超過門檻）
+  if (FORM_LOAD_TS && Date.now() - FORM_LOAD_TS < MIN_FILL_MS) {
+    showToast('請再確認一下填寫內容後送出', 'warn');
+    return;
+  }
+
   const data = serializeForm();
   const errors = validate(data);
   if (errors.length) {
@@ -931,7 +946,14 @@ export function initDepartmentForm({ schema, draftKey, submitEndpoint = '' }) {
   renderIcons();
 
   const formEl = document.getElementById('dform');
-  if (formEl) formEl.addEventListener('submit', onSubmit);
+  if (formEl) {
+    // 反垃圾 honeypot：對真人隱藏、不在 SCHEMA（不會被送出），機器常會誤填
+    formEl.insertAdjacentHTML('afterbegin',
+      '<div aria-hidden="true" tabindex="-1" style="position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden;">' +
+      '<label>如果你是人，請勿填寫此欄<input type="text" id="dform-hp" name="website" tabindex="-1" autocomplete="off" /></label></div>');
+    formEl.addEventListener('submit', onSubmit);
+  }
+  FORM_LOAD_TS = Date.now();  // 反垃圾：記錄表單就緒時間，供送出時計算填寫耗時
 
   // 法律條款 checkbox 任一切換 → 清掉錯誤狀態
   const consentCardEl = document.getElementById('dform-consent-card');
