@@ -8,9 +8,14 @@ const CLOSED_KEY = 'tn_fab_closed';
 const DRAG_THRESHOLD = 6; // px：位移超過才算拖曳，否則視為點擊 → 前往捐款頁
 const MARGIN = 8;         // 距視窗邊緣最小留白
 
+// Asia/Taipei（UTC+8）當天日期 YYYY-MM-DD：關閉只記「當天」，隔天會再跳出來
+function taipeiToday() {
+  return new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10);
+}
+
 export function mountDonateFab({ link = DEFAULT_LINK } = {}) {
   if (typeof document === 'undefined') return;
-  try { if (localStorage.getItem(CLOSED_KEY) === '1') return; } catch (_) {}
+  try { if (localStorage.getItem(CLOSED_KEY) === taipeiToday()) return; } catch (_) {}
   if (document.querySelector('.donate-fab')) return;
 
   const fab = document.createElement('div');
@@ -48,7 +53,7 @@ export function mountDonateFab({ link = DEFAULT_LINK } = {}) {
   closeBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     fab.remove();
-    try { localStorage.setItem(CLOSED_KEY, '1'); } catch (_) {}
+    try { localStorage.setItem(CLOSED_KEY, taipeiToday()); } catch (_) {}
   });
 
   // 拖曳（Pointer Events，滑鼠/觸控通用）
