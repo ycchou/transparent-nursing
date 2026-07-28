@@ -2122,17 +2122,18 @@ select.chart-select {
 }
 
 /* 分享平台右下角浮動贊助入口：白愛心、可拖曳、可關閉 */
+body.donate-modal-open .donate-fab { display: none; }  /* 開捐款彈窗時隱藏浮標 */
 .donate-fab {
   position: fixed;
   right: 20px;
   bottom: 20px;
   z-index: 1000;
-  width: 56px;
-  height: 56px;
+  width: 46px;
+  height: 46px;
 }
 .donate-fab-btn {
-  width: 56px;
-  height: 56px;
+  width: 46px;
+  height: 46px;
   border: none;
   border-radius: 50%;
   background: linear-gradient(135deg, #2E86AB 0%, #57BFD6 100%);

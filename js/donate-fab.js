@@ -13,7 +13,7 @@ function taipeiToday() {
   return new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10);
 }
 
-export function mountDonateFab({ link = DEFAULT_LINK } = {}) {
+export function mountDonateFab({ link = DEFAULT_LINK, onActivate = null } = {}) {
   if (typeof document === 'undefined') return;
   try { if (localStorage.getItem(CLOSED_KEY) === taipeiToday()) return; } catch (_) {}
   if (document.querySelector('.donate-fab')) return;
@@ -84,7 +84,9 @@ export function mountDonateFab({ link = DEFAULT_LINK } = {}) {
       const r = fab.getBoundingClientRect();
       try { localStorage.setItem(POS_KEY, JSON.stringify({ left: r.left, top: r.top })); } catch (_) {}
     } else {
-      location.href = link;   // 未拖曳 → 視為點擊，前往捐款頁
+      // 未拖曳 → 視為點擊：優先開啟彈窗，否則退回導向捐款頁
+      if (typeof onActivate === 'function') onActivate();
+      else location.href = link;
     }
   });
 
