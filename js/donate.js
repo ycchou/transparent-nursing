@@ -2,8 +2,8 @@
 // 金額檔位 + 自訂 → 呼叫 tn-donate Worker /create → 拿到已簽章參數 → 自動 submit 到綠界付款頁。
 // 密鑰與簽章都在 Worker，前端只送金額、不碰任何機密。
 
-import { SITE } from './config.js?v=5dc6864f4d';
-import { renderIcons } from './icons.js?v=5dc6864f4d';
+import { SITE } from './config.js?v=34019d6b69';
+import { renderIcons } from './icons.js?v=34019d6b69';
 
 const TIERS = [100, 300, 500, 1000, 2000];
 const DEFAULT_AMOUNT = 500;
@@ -47,7 +47,7 @@ export function mountDonate(mountEl) {
       <input type="number" class="donate-custom-input" min="${MIN}" max="${MAX}" step="1" inputmode="numeric" placeholder="輸入金額" />
     </div>
     <button type="button" class="btn btn-primary donate-submit">
-      <span class="donate-heart" aria-hidden="true">🤍</span> <span class="donate-submit-label">前往付款</span>
+      <span class="donate-heart" aria-hidden="true">🤍</span> <span class="donate-submit-label">前往捐款</span>
     </button>
     <p class="donate-error" role="alert" hidden></p>
     <p class="donate-note">將前往綠界金流安全結帳，款項由台灣呼吸治療產業工會統一代收。</p>
@@ -109,7 +109,7 @@ export function mountDonate(mountEl) {
     } catch (e) {
       showError('連線失敗，請稍後再試。');
       submitBtn.disabled = false;
-      submitLabel.textContent = '前往付款';
+      submitLabel.textContent = '前往捐款';
     }
   });
 
