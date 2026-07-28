@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#2E86AB" />
   <!-- 軟鎖總開關（js/gate.js）：鎖定期非公開頁導向 coming-soon -->
-  <script src="./js/gate.js?v=34019d6b69"></script>
+  <script src="./js/gate.js?v=61fd87da63"></script>
 
   <!-- SEO -->
   <title>分享平台 — 護理職場透明化運動</title>
@@ -51,23 +51,23 @@
   <link rel="stylesheet" href="css/styles.css?v=45db52c8d5" />
 
     <!-- modulepreload：平行載入 ES module 鏈（首次造訪快 30-50%） -->
-  <link rel="modulepreload" href="./js/components.js?v=34019d6b69" />
-  <link rel="modulepreload" href="./js/config.js?v=34019d6b69" />
-  <link rel="modulepreload" href="./js/contribution-gate.js?v=34019d6b69" />
-  <link rel="modulepreload" href="./js/data-loader.js?v=34019d6b69" />
-  <link rel="modulepreload" href="./js/donate-fab.js?v=34019d6b69" />
-  <link rel="modulepreload" href="./js/donate.js?v=34019d6b69" />
-  <link rel="modulepreload" href="./js/filters.js?v=34019d6b69" />
-  <link rel="modulepreload" href="./js/hospital-shortname.js?v=34019d6b69" />
-  <link rel="modulepreload" href="./js/icons.js?v=34019d6b69" />
-  <link rel="modulepreload" href="./js/institution-name.js?v=34019d6b69" />
-  <link rel="modulepreload" href="./js/pagination.js?v=34019d6b69" />
-  <link rel="modulepreload" href="./js/pwa-prompt.js?v=34019d6b69" />
-  <link rel="modulepreload" href="./js/share-card.js?v=34019d6b69" />
-  <link rel="modulepreload" href="./js/stats-kpi.js?v=34019d6b69" />
-  <link rel="modulepreload" href="./js/table.js?v=34019d6b69" />
-  <link rel="modulepreload" href="./js/toast.js?v=34019d6b69" />
-  <link rel="modulepreload" href="./js/tooltip.js?v=34019d6b69" />
+  <link rel="modulepreload" href="./js/components.js?v=61fd87da63" />
+  <link rel="modulepreload" href="./js/config.js?v=61fd87da63" />
+  <link rel="modulepreload" href="./js/contribution-gate.js?v=61fd87da63" />
+  <link rel="modulepreload" href="./js/data-loader.js?v=61fd87da63" />
+  <link rel="modulepreload" href="./js/donate-fab.js?v=61fd87da63" />
+  <link rel="modulepreload" href="./js/donate.js?v=61fd87da63" />
+  <link rel="modulepreload" href="./js/filters.js?v=61fd87da63" />
+  <link rel="modulepreload" href="./js/hospital-shortname.js?v=61fd87da63" />
+  <link rel="modulepreload" href="./js/icons.js?v=61fd87da63" />
+  <link rel="modulepreload" href="./js/institution-name.js?v=61fd87da63" />
+  <link rel="modulepreload" href="./js/pagination.js?v=61fd87da63" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=61fd87da63" />
+  <link rel="modulepreload" href="./js/share-card.js?v=61fd87da63" />
+  <link rel="modulepreload" href="./js/stats-kpi.js?v=61fd87da63" />
+  <link rel="modulepreload" href="./js/table.js?v=61fd87da63" />
+  <link rel="modulepreload" href="./js/toast.js?v=61fd87da63" />
+  <link rel="modulepreload" href="./js/tooltip.js?v=61fd87da63" />
 
   <!-- 強制清除舊版 cache -->
   <script>
@@ -201,16 +201,6 @@
 
   <div id="app-footer"></div>
 
-  <!-- 捐款彈出視窗（由右下角浮動愛心開啟） -->
-  <div class="modal-backdrop" id="donate-modal">
-    <div class="modal donate-modal-card" role="dialog" aria-modal="true" aria-label="支持我們">
-      <button class="modal-close donate-modal-close-btn" id="donate-modal-close" aria-label="關閉">✕</button>
-      <h3 style="margin:0 0 6px;padding-right:40px;">支持平台走得更遠</h3>
-      <p style="color:var(--muted);margin:0 0 18px;line-height:1.7;">選擇一個金額，用信用卡安全完成單筆捐款。</p>
-      <div id="donate-widget-modal"></div>
-    </div>
-  </div>
-
   <style>
     @media (max-width: 768px) {
       #table-container .table-view { display: none !important; }
@@ -222,42 +212,19 @@
   <!-- PapaParse 必須先載（CSV 解析）；html2canvas 改為點「產生分享圖」時 lazy load -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
   <script type="module">
-    import { CATEGORIES } from './js/config.js?v=34019d6b69';
-    import { mountLayout } from './js/components.js?v=34019d6b69';
-    import { icon, renderIcons } from './js/icons.js?v=34019d6b69';
-    import { loadCategory, loadAll, startAutoRefresh } from './js/data-loader.js?v=34019d6b69';
-    import { renderTable, setView, showDetailModal } from './js/table.js?v=34019d6b69';
-    import { createFilterState, renderFilters, applyFilters } from './js/filters.js?v=34019d6b69';
-    import { renderKpiStrip, mountSalaryCalculator } from './js/stats-kpi.js?v=34019d6b69';
-    import { getGate } from './js/contribution-gate.js?v=34019d6b69';
-    import { showToast } from './js/toast.js?v=34019d6b69';
-    import { mountDonateFab } from './js/donate-fab.js?v=34019d6b69';
-    import { mountDonate } from './js/donate.js?v=34019d6b69';
+    import { CATEGORIES } from './js/config.js?v=61fd87da63';
+    import { mountLayout } from './js/components.js?v=61fd87da63';
+    import { icon, renderIcons } from './js/icons.js?v=61fd87da63';
+    import { loadCategory, loadAll, startAutoRefresh } from './js/data-loader.js?v=61fd87da63';
+    import { renderTable, setView, showDetailModal } from './js/table.js?v=61fd87da63';
+    import { createFilterState, renderFilters, applyFilters } from './js/filters.js?v=61fd87da63';
+    import { renderKpiStrip, mountSalaryCalculator } from './js/stats-kpi.js?v=61fd87da63';
+    import { getGate } from './js/contribution-gate.js?v=61fd87da63';
+    import { showToast } from './js/toast.js?v=61fd87da63';
+    import { mountDonateFab } from './js/donate-fab.js?v=61fd87da63';
 
     mountLayout();
-
-    // 捐款彈出視窗：右下角浮動白愛心點擊 → 開啟（widget 首次開啟才掛載）
-    const donateModal = document.getElementById('donate-modal');
-    const donateModalClose = document.getElementById('donate-modal-close');
-    let donateMounted = false;
-    function openDonateModal() {
-      if (!donateMounted) { mountDonate(document.getElementById('donate-widget-modal')); donateMounted = true; }
-      donateModal.classList.add('open');
-      document.body.classList.add('donate-modal-open');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeDonateModal() {
-      donateModal.classList.remove('open');
-      document.body.classList.remove('donate-modal-open');
-      document.body.style.overflow = '';
-    }
-    donateModalClose.addEventListener('click', closeDonateModal);
-    donateModal.addEventListener('click', (e) => { if (e.target === donateModal) closeDonateModal(); });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && donateModal.classList.contains('open')) closeDonateModal();
-    });
-
-    mountDonateFab({ onActivate: openDonateModal });  // 右下角浮動白愛心（可拖曳、可關閉）
+    mountDonateFab();  // 右下角浮動白愛心（可拖曳、可關閉；點擊開內建捐款彈窗）
 
     // ===== Deep-link & toast helpers =====
     function parseDeepLinkId() {
