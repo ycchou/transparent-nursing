@@ -48,7 +48,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=1b5e9f2b47" />
+  <link rel="stylesheet" href="css/styles.css?v=2d2216099d" />
 
     <!-- modulepreload：平行載入 ES module 鏈（首次造訪快 30-50%） -->
   <link rel="modulepreload" href="./js/components.js?v=5dc6864f4d" />
@@ -203,11 +203,9 @@
 
   <!-- 捐款彈出視窗（由右下角浮動愛心開啟） -->
   <div class="modal-backdrop" id="donate-modal">
-    <div class="modal" role="dialog" aria-modal="true" aria-label="支持我們" style="max-width:480px;">
-      <div class="modal-header">
-        <h3 style="margin:0;">支持平台走得更遠</h3>
-        <button class="modal-close" id="donate-modal-close" aria-label="關閉">✕</button>
-      </div>
+    <div class="modal donate-modal-card" role="dialog" aria-modal="true" aria-label="支持我們">
+      <button class="modal-close donate-modal-close-btn" id="donate-modal-close" aria-label="關閉">✕</button>
+      <h3 style="margin:0 0 6px;padding-right:40px;">支持平台走得更遠</h3>
       <p style="color:var(--muted);margin:0 0 18px;line-height:1.7;">選擇一個金額，用信用卡安全完成單筆捐款。</p>
       <div id="donate-widget-modal"></div>
     </div>

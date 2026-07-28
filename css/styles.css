@@ -2168,6 +2168,16 @@ body.donate-modal-open .donate-fab { display: none; }  /* 開捐款彈窗時隱�
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
 }
 .donate-fab-close:hover { background: #475569; }
+/* 捐款彈窗：關閉鈕固定右上角（不套用明細視窗 modal-header 的 RWD 規則） */
+.donate-modal-card { position: relative; max-width: 480px; }
+.donate-modal-close-btn { position: absolute; top: 16px; right: 16px; }
+/* 捐款彈窗內：前往付款鈕置中 */
+#donate-widget-modal .donate-submit {
+  display: flex;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}
 .donate-error {
   color: var(--danger);
   font-size: 0.88rem;
