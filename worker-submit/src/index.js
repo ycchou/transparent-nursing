@@ -12,7 +12,7 @@
 //   TURNSTILE_SECRET / APPS_SCRIPT_URL / APPS_SCRIPT_SECRET / SALT（限流雜湊鹽，不存原始 IP/UA）
 
 const ALLOWED_ORIGINS = ['https://ycchou.github.io', 'http://localhost', 'http://127.0.0.1'];
-const CAP_PER_KEY_PER_DAY = 10;  // 單一「IP+裝置+版本」每日提交上限（可調）
+const CAP_PER_KEY_PER_DAY = 5;  // 單一「IP+裝置+版本」每日提交上限（可調）
 const MAX_LINKS = 0;             // 自由文字允許的連結數（廣告多帶連結；0 = 不允許，可調）
 
 function originAllowed(o) { return !!o && ALLOWED_ORIGINS.some((a) => o === a || o.startsWith(a + ':')); }

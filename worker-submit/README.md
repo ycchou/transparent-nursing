@@ -11,7 +11,7 @@
 - **honeypot + 填寫耗時（≥1 分鐘）** 在前端 `js/form-engine.js`。
 - **單一裝置每日 5 筆、兩次間隔 ≥5 分鐘** 也在前端（localStorage，軟限，可被清 storage 繞過）。
 - **限流（伺服器端硬限）** 在本 Worker：以「**IP + 裝置 + 版本**」（裝置桶＝OS|瀏覽器|主版本）為單位，
-  單一組合每日上限 `CAP_PER_KEY_PER_DAY`（預設 **10**）。同一 IP 下不同裝置分開算，避免共用出口誤傷。
+  單一組合每日上限 `CAP_PER_KEY_PER_DAY`（預設 **5**）。同一 IP 下不同裝置分開算，避免共用出口誤傷。
 
 ## 你需要先準備
 
@@ -56,7 +56,7 @@ wrangler deploy                   # 取得 https://tn-submit.<子網域>.workers
 
 - 前端（`js/form-engine.js` 頂部）：`MAX_SUBMITS_PER_DAY`（每日上限，預設 5）、
   `MIN_SUBMIT_INTERVAL_MS`（最小間隔，預設 5 分鐘）、`MIN_FILL_MS`（填寫耗時門檻，預設 1 分鐘）。
-- Worker（`src/index.js` 頂部）：`CAP_PER_KEY_PER_DAY`（單一 IP+裝置+版本 每日上限，預設 10）、
+- Worker（`src/index.js` 頂部）：`CAP_PER_KEY_PER_DAY`（單一 IP+裝置+版本 每日上限，預設 5）、
   `MAX_LINKS`（自由文字允許連結數，預設 0）、`ALLOWED_ORIGINS`。
 
 ## 驗證
