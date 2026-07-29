@@ -8,7 +8,7 @@ compatibility_date = "2026-07-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "tn-submit"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "c390a55b-1dfa-4118-ad14-da687c6e5c0f"
 
 # 每日清限流舊列（見 src/index.js 的 scheduled）。20:00 UTC = 台北隔日 04:00。
 [triggers]
