@@ -4,7 +4,11 @@ CREATE TABLE IF NOT EXISTS orders (
   amount     INTEGER NOT NULL,               -- 金額（新台幣，整數）
   status     TEXT NOT NULL DEFAULT 'created', -- created | paid | failed
   rtn_code   TEXT,                           -- 綠界回傳的 RtnCode
+  source     TEXT,                           -- 捐款來源：nursing | rt（分辨平台）
   created_at INTEGER NOT NULL,               -- epoch ms
   paid_at    INTEGER                         -- epoch ms（付款成功時）
 );
 CREATE INDEX IF NOT EXISTS idx_orders_created ON orders(created_at);
+
+-- 既有資料庫升級用（欄位已存在時會報錯，可忽略）：
+-- ALTER TABLE orders ADD COLUMN source TEXT;

@@ -11,12 +11,17 @@
 
 const ALLOWED_ORIGINS = [
   'https://ycchou.github.io',
+  'https://trtu.org.tw',
   'http://localhost',
   'http://127.0.0.1',
 ];
 
 // 付款成功後導回本站感謝頁（前端讀 ?donate=done 顯示感謝橫幅）。
 const THANKYOU_URL = 'https://ycchou.github.io/transparent-nursing/support.html?donate=done';
+// RT 職場透明化平台（source='rt'）預設導回頁；若前端有帶合法 backUrl 則優先用之。
+const RT_THANKYOU_URL = 'https://trtu.org.tw/RT_platform/?donate=done';
+// 允許作為導回網址的主機（防開放式轉址）。
+const BACKURL_ALLOWED_HOSTS = ['trtu.org.tw', 'www.trtu.org.tw'];
 
 const AIO_URL = {
   stage: 'https://payment-stage.ecpay.com.tw/Cashier/AioCheckOut/V5',
@@ -38,6 +43,19 @@ function corsHeaders(origin) {
     'Access-Control-Allow-Headers': 'Content-Type',
     'Vary': 'Origin',
   };
+}
+
+// RT 導回網址：僅接受白名單主機（防開放式轉址），附上 ?donate=done；不合法則退回預設。
+function rtBackUrl(backUrl) {
+  try {
+    const u = new URL(String(backUrl));
+    if ((u.protocol === 'https:' || u.protocol === 'http:') && BACKURL_ALLOWED_HOSTS.includes(u.hostname)) {
+      u.hash = '';
+      u.searchParams.set('donate', 'done');
+      return u.toString();
+    }
+  } catch (_) { /* 非合法網址，忽略 */ }
+  return RT_THANKYOU_URL;
 }
 
 function json(obj, cors, status = 200) {
@@ -108,6 +126,12 @@ async function handleCreate(request, env, cors) {
     return json({ error: '金流尚未設定' }, cors, 503);
   }
 
+  // 來源：'rt' = RT 職場透明化平台；其餘（含未帶）維持護理平台原行為。
+  const source = (body && body.source) === 'rt' ? 'rt' : 'nursing';
+  const isRt = source === 'rt';
+  const itemName = isRt ? 'RT職場透明化平台捐款' : '護理職場透明化平台捐款';
+  const clientBackUrl = isRt ? rtBackUrl(body && body.backUrl) : THANKYOU_URL;
+
   const tradeNo = genTradeNo();
   const returnUrl = new URL(request.url).origin + '/callback';
 
@@ -118,15 +142,18 @@ async function handleCreate(request, env, cors) {
     MerchantTradeDate: ecpayDate(),
     PaymentType: 'aio',
     TotalAmount: String(amount),
-    TradeDesc: '護理職場透明化平台捐款',
-    ItemName: '護理職場透明化平台捐款',
+    TradeDesc: itemName,
+    ItemName: itemName,
     ReturnURL: returnUrl,
-    ClientBackURL: THANKYOU_URL,
+    ClientBackURL: clientBackUrl,
     ChoosePayment: 'Credit',
     EncryptType: '1',
   };
   fields.CheckMacValue = await checkMacValue(fields, hashKey, hashIV);
 
+  // 註：不寫入 source 欄位，避免對共用正式 D1 做 schema 遷移；
+  // 來源可由 ItemName（RT/護理品名不同）區分。若日後要在 DB 記 source，
+  // 先執行 `ALTER TABLE orders ADD COLUMN source TEXT;` 再改回含 source 的 INSERT。
   await env.DB.prepare(
     'INSERT INTO orders(trade_no, amount, status, created_at) VALUES(?, ?, ?, ?)'
   ).bind(tradeNo, amount, 'created', Date.now()).run();
