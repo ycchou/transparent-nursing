@@ -2,12 +2,12 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=ae09c4c1c9';
-import { renderIcons, icon } from './icons.js?v=ae09c4c1c9';
-import { markContributed } from './contribution-gate.js?v=ae09c4c1c9';
-import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=ae09c4c1c9';
-import { showToast } from './toast.js?v=ae09c4c1c9';
-import { notePwaIntent } from './pwa-prompt.js?v=ae09c4c1c9';
+import { mountLayout } from './components.js?v=f21dd448bb';
+import { renderIcons, icon } from './icons.js?v=f21dd448bb';
+import { markContributed } from './contribution-gate.js?v=f21dd448bb';
+import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=f21dd448bb';
+import { showToast } from './toast.js?v=f21dd448bb';
+import { notePwaIntent } from './pwa-prompt.js?v=f21dd448bb';
 
 const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 避開易混字元 0/O/1/I/L
 let currentCaptcha = '';
@@ -17,8 +17,12 @@ const DRAFT_DEBOUNCE_MS = 500;
 let SCHEMA = [];
 let DRAFT_KEY = '';
 let SUBMIT_ENDPOINT = ''; // 空字串 = 測試模式
-let FORM_LOAD_TS = 0;     // 表單初始化時間戳（反垃圾：填寫過快判為機器）
-const MIN_FILL_MS = 3000; // 少於此秒數送出 → 視為可疑（本表單很長，真人不可能這麼快）
+let FORM_LOAD_TS = 0;      // 表單初始化時間戳（反垃圾：填寫過快判為機器）
+const MIN_FILL_MS = 60000; // 少於 1 分鐘送出 → 視為可疑
+// 反垃圾：單一裝置（localStorage）限制。可被清 storage／無痕繞過，屬軟限制。
+const MAX_SUBMITS_PER_DAY = 5;                 // 每日提交上限
+const MIN_SUBMIT_INTERVAL_MS = 5 * 60 * 1000;  // 兩次提交最小間隔（5 分鐘）
+const SUBMITS_KEY = 'tn:submits';
 
 // ===== 工具函式 =====
 
@@ -364,6 +368,23 @@ function attachDraftAutosave() {
 
 // ===== 送出 =====
 
+// Asia/Taipei（UTC+8）當天日期，與每日上限的「一天」一致
+function taipeiToday() {
+  return new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10);
+}
+// 取本裝置今日提交紀錄（跨日自動歸零）
+function getSubmitRecord() {
+  const today = taipeiToday();
+  try {
+    const r = JSON.parse(localStorage.getItem(SUBMITS_KEY) || 'null');
+    if (r && r.day === today) return r;
+  } catch (_) {}
+  return { day: today, count: 0, lastTs: 0 };
+}
+function saveSubmitRecord(r) {
+  try { localStorage.setItem(SUBMITS_KEY, JSON.stringify(r)); } catch (_) {}
+}
+
 async function onSubmit(e) {
   e.preventDefault();
 
@@ -376,6 +397,17 @@ async function onSubmit(e) {
   // 反垃圾②：填寫過快 → 提示再確認（真人第二次送出時多半已超過門檻）
   if (FORM_LOAD_TS && Date.now() - FORM_LOAD_TS < MIN_FILL_MS) {
     showToast('請再確認一下填寫內容後送出', 'warn');
+    return;
+  }
+  // 反垃圾③：單一裝置每日上限與最小間隔
+  const rec = getSubmitRecord();
+  if (rec.count >= MAX_SUBMITS_PER_DAY) {
+    showToast(`今天的填寫已達上限（每日 ${MAX_SUBMITS_PER_DAY} 筆），請明天再來`, 'warn');
+    return;
+  }
+  if (rec.lastTs && Date.now() - rec.lastTs < MIN_SUBMIT_INTERVAL_MS) {
+    const wait = Math.ceil((MIN_SUBMIT_INTERVAL_MS - (Date.now() - rec.lastTs)) / 60000);
+    showToast(`兩次填寫需間隔 5 分鐘，請約 ${wait} 分鐘後再送出`, 'warn');
     return;
   }
 
@@ -437,6 +469,9 @@ async function onSubmit(e) {
       console.log('[DFORM] would submit:', data);
       await new Promise((r) => setTimeout(r, 600));
     }
+    // 反垃圾：成功送出才計入本裝置每日次數與時間戳
+    const rec2 = getSubmitRecord();
+    saveSubmitRecord({ day: taipeiToday(), count: rec2.count + 1, lastTs: Date.now() });
     clearDraft();
     showThanks();
   } catch (err) {
