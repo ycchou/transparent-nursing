@@ -1,18 +1,19 @@
 // tn-submit — 表單提交防護代理。
 //
-// 流程：前端 →（帶 Turnstile token）→ 本 Worker → ①驗 Turnstile ②內容檢查（連結/洗版）
+// 流程：前端 →（帶 Turnstile token）→ 本 Worker → ①驗 Turnstile ②限流 ③內容檢查
 //        → 帶 shared secret 轉發 Apps Script（寫 Google Sheet）。
 //
-// 註：每日提交上限與最小間隔改由「單一裝置」在前端（js/form-engine.js, localStorage）處理，
-//     本 Worker 不做 IP 限流，因此不需要 D1。
+// 限流單位＝「IP + 裝置 + 版本」：key = SHA-256(SALT | IP | 裝置桶 | day)，
+//   裝置桶把 User-Agent 壓成粗粒度「OS|瀏覽器|主版本」（例：iOS|Safari|17）。
+//   同一 IP 下不同裝置分開算，避免共用出口（診所/NAT）多人互相擋掉。
+//   單一組合每日上限 CAP_PER_KEY_PER_DAY。前端另有「單一裝置每日 5 筆、間隔 5 分鐘」軟限。
 //
 // 機密皆為 Worker secret（見 README）：
-//   TURNSTILE_SECRET     Turnstile 的 Secret Key
-//   APPS_SCRIPT_URL      Apps Script Web App /exec 網址
-//   APPS_SCRIPT_SECRET   與 Apps Script 內 SHARED_SECRET 相同（擋人直接打 Apps Script）
+//   TURNSTILE_SECRET / APPS_SCRIPT_URL / APPS_SCRIPT_SECRET / SALT（限流雜湊鹽，不存原始 IP/UA）
 
 const ALLOWED_ORIGINS = ['https://ycchou.github.io', 'http://localhost', 'http://127.0.0.1'];
-const MAX_LINKS = 0;  // 自由文字允許的連結數（廣告多帶連結；0 = 不允許，可調）
+const CAP_PER_KEY_PER_DAY = 10;  // 單一「IP+裝置+版本」每日提交上限（可調）
+const MAX_LINKS = 0;             // 自由文字允許的連結數（廣告多帶連結；0 = 不允許，可調）
 
 function originAllowed(o) { return !!o && ALLOWED_ORIGINS.some((a) => o === a || o.startsWith(a + ':')); }
 function corsHeaders(o) {
@@ -23,8 +24,34 @@ function corsHeaders(o) {
     'Vary': 'Origin',
   };
 }
+function taipeiDay(d = new Date()) { return new Date(d.getTime() + 8 * 3600 * 1000).toISOString().slice(0, 10); }
+function dayMinus(s, n) { const d = new Date(s + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() - n); return d.toISOString().slice(0, 10); }
+async function sha256(s) {
+  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return [...new Uint8Array(b)].map((x) => x.toString(16).padStart(2, '0')).join('');
+}
 function json(o, c, s = 200) {
   return new Response(JSON.stringify(o), { status: s, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store', ...c } });
+}
+
+// 把 User-Agent 壓成粗粒度「OS|瀏覽器|主版本」桶（例：iOS|Safari|17）
+function uaBucket(ua) {
+  ua = ua || '';
+  let os = 'other';
+  if (/iPhone|iPad|iPod|iOS/.test(ua)) os = 'iOS';
+  else if (/Android/.test(ua)) os = 'Android';
+  else if (/Windows/.test(ua)) os = 'Windows';
+  else if (/Macintosh|Mac OS X/.test(ua)) os = 'macOS';
+  else if (/Linux/.test(ua)) os = 'Linux';
+
+  let br = 'other', ver = '0', m;
+  if ((m = ua.match(/Edg\/(\d+)/))) { br = 'Edge'; ver = m[1]; }
+  else if ((m = ua.match(/OPR\/(\d+)/))) { br = 'Opera'; ver = m[1]; }
+  else if ((m = ua.match(/Firefox\/(\d+)/))) { br = 'Firefox'; ver = m[1]; }
+  else if ((m = ua.match(/Chrome\/(\d+)/))) { br = 'Chrome'; ver = m[1]; }
+  else if (/Safari/.test(ua) && (m = ua.match(/Version\/(\d+)/))) { br = 'Safari'; ver = m[1]; }
+
+  return os + '|' + br + '|' + ver;
 }
 
 async function verifyTurnstile(token, ip, secret) {
@@ -46,6 +73,18 @@ function looksLikeSpam(fields) {
   return null;
 }
 
+// 限流：以「IP+裝置+版本」為單位，單一組合每日上限。回 true 代表已超過（擋下）。
+async function rateLimited(env, ip, ua, day) {
+  const salt = env.SALT || 'tn-submit-fallback-salt';
+  const h = await sha256(salt + '|' + ip + '|' + uaBucket(ua) + '|' + day);
+  const row = await env.DB.prepare('SELECT count FROM sub_rate WHERE k = ?').bind(h).first();
+  if (row && row.count >= CAP_PER_KEY_PER_DAY) return true;
+  await env.DB.prepare(
+    'INSERT INTO sub_rate(k, day, count) VALUES(?, ?, 1) ON CONFLICT(k) DO UPDATE SET count = count + 1'
+  ).bind(h, day).run();
+  return false;
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get('Origin');
@@ -61,12 +100,16 @@ export default {
         fields[k] = fields[k] !== undefined ? [].concat(fields[k], v) : v;
       }
       const ip = request.headers.get('CF-Connecting-IP') || '0.0.0.0';
+      const ua = request.headers.get('User-Agent') || '';
+      const day = taipeiDay();
 
       // ① Turnstile
       if (!(await verifyTurnstile(fields['cf-turnstile-response'], ip, env.TURNSTILE_SECRET))) {
         return json({ error: 'captcha' }, cors, 403);
       }
-      // ② 內容檢查
+      // ② 限流（IP+裝置+版本，每日上限）
+      if (await rateLimited(env, ip, ua, day)) return json({ error: 'rate' }, cors, 429);
+      // ③ 內容檢查
       const spam = looksLikeSpam(fields);
       if (spam) return json({ error: 'spam', reason: spam }, cors, 422);
 
@@ -83,5 +126,11 @@ export default {
     } catch (e) {
       return json({ error: String(e) }, cors, 500);
     }
+  },
+
+  // 每日 Cron（見 wrangler.toml [triggers]）：清限流舊列
+  async scheduled(event, env, ctx) {
+    const cutoff = dayMinus(taipeiDay(), 1);
+    ctx.waitUntil(env.DB.prepare('DELETE FROM sub_rate WHERE day < ?').bind(cutoff).run());
   },
 };

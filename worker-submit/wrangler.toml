@@ -1,7 +1,15 @@
-# Cloudflare Worker：表單提交防護代理（Turnstile + 內容檢查 → 轉發 Apps Script）
-# 部署見 worker-submit/README.md。
-# 機密（TURNSTILE_SECRET / APPS_SCRIPT_URL / APPS_SCRIPT_SECRET）用 `wrangler secret put`，不寫這裡。
-# 每日上限／最小間隔改由前端（單一裝置）處理，本 Worker 不需 D1。
+# Cloudflare Worker：表單提交防護代理（Turnstile + 限流 + 內容檢查 → 轉發 Apps Script）
+# 部署見 worker-submit/README.md。database_id 由 `wrangler d1 create tn-submit` 產生後填入。
+# 機密（TURNSTILE_SECRET / APPS_SCRIPT_URL / APPS_SCRIPT_SECRET / SALT）用 `wrangler secret put`，不寫這裡。
 name = "tn-submit"
 main = "src/index.js"
 compatibility_date = "2026-07-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "tn-submit"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+# 每日清限流舊列（見 src/index.js 的 scheduled）。20:00 UTC = 台北隔日 04:00。
+[triggers]
+crons = ["0 20 * * *"]
