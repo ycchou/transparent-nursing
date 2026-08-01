@@ -3,7 +3,7 @@
 // 可拖曳任意移動、可按關閉鍵；點擊（未拖曳）→ 開內建捐款彈窗（重用 mountDonate widget）。
 // 關閉狀態與擺放位置記在 localStorage：各頁共用同一組 key → 同一天在任一頁關閉，當天各頁都不再出現。
 
-import { mountDonate } from './donate.js?v=e72337db31';
+import { mountDonate } from './donate.js?v=770f10b529';
 
 const DEFAULT_LINK = 'support.html';
 const POS_KEY = 'tn_fab_pos';

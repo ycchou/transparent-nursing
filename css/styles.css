@@ -194,7 +194,7 @@ h1[id], h2[id], h3[id] {
 .site-nav a.nav-external {
   color: var(--muted-light);
   font-weight: 400;
-  font-size: 0.86rem;
+  font-size: 0.8rem;
 }
 .site-nav a.nav-external:hover { color: var(--muted); }
 .nav-external-arrow { font-size: 0.78em; opacity: 0.55; }
