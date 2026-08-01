@@ -9,7 +9,7 @@ import {
   createCsvLoader,
   initRecordsPage,
   getCachedCount,
-} from './records-common.js?v=9d0c2cc16e';
+} from './records-common.js?v=e72337db31';
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSpvfTkfNPgrf4dtpZrpRmign7EB9ISShRslgAhVcxRu-WO3G9I4W5efjSjMan_RnId0-rDvju4gzfy/pub?gid=1540285352&single=true&output=csv';
 const STORAGE_KEY = 'nursing_gender_v1';
