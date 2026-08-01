@@ -190,6 +190,8 @@ h1[id], h2[id], h3[id] {
 .site-nav a.active {
   color: var(--primary);
 }
+/* 外部連結頁簽（RT 姊妹站）的 ↗ 小箭頭 */
+.nav-external-arrow { font-size: 0.78em; opacity: 0.6; }
 
 .site-nav a.active::after {
   content: '';
