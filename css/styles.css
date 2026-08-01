@@ -190,8 +190,14 @@ h1[id], h2[id], h3[id] {
 .site-nav a.active {
   color: var(--primary);
 }
-/* 外部連結頁簽（RT 姊妹站）的 ↗ 小箭頭 */
-.nav-external-arrow { font-size: 0.78em; opacity: 0.6; }
+/* 外部連結頁簽（RT 姊妹站）：比其他頁簽更淡、更細、略小，退為次要 */
+.site-nav a.nav-external {
+  color: var(--muted-light);
+  font-weight: 400;
+  font-size: 0.86rem;
+}
+.site-nav a.nav-external:hover { color: var(--muted); }
+.nav-external-arrow { font-size: 0.78em; opacity: 0.55; }
 
 /* 橫向可捲動列的「左右滑動」提示（由 js/scroll-hint.js 動態插入） */
 .scroll-hint {
