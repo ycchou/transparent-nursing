@@ -1,15 +1,12 @@
-// donate-fab.js — 右下角浮動贊助入口（分享平台、機構總覽等頁共用）。
+// donate-fab.js — 右下角固定的浮動贊助入口（分享平台、機構總覽等頁共用）。
 // 重用捐款鈕同款白愛心（.donate-heart：emoji 🤍 + heartbeat 跳動）。
-// 可拖曳任意移動、可按關閉鍵；點擊（未拖曳）→ 開內建捐款彈窗（重用 mountDonate widget）。
-// 關閉狀態與擺放位置記在 localStorage：各頁共用同一組 key → 同一天在任一頁關閉，當天各頁都不再出現。
+// 固定右下角、不可拖曳；點擊 → 開內建捐款彈窗（重用 mountDonate widget）。
+// 可按關閉鍵：當天不再出現，隔天再跳出（localStorage，各頁共用同一 key）。
 
-import { mountDonate } from './donate.js?v=770f10b529';
+import { mountDonate } from './donate.js?v=d4284cfe27';
 
 const DEFAULT_LINK = 'support.html';
-const POS_KEY = 'tn_fab_pos';
 const CLOSED_KEY = 'tn_fab_closed';
-const DRAG_THRESHOLD = 6; // px：位移超過才算拖曳，否則視為點擊
-const MARGIN = 8;         // 距視窗邊緣最小留白
 
 // Asia/Taipei（UTC+8）當天日期 YYYY-MM-DD：關閉只記「當天」，隔天會再跳出來
 function taipeiToday() {
@@ -57,7 +54,7 @@ function closeDonateModal() {
   document.body.style.overflow = '';
 }
 
-// ===== 浮動愛心 =====
+// ===== 浮動愛心（固定右下角、不可拖曳） =====
 // onActivate 預設開內建捐款彈窗；傳入 false 則退回導向 link（DEFAULT_LINK）。
 export function mountDonateFab({ link = DEFAULT_LINK, onActivate } = {}) {
   if (typeof document === 'undefined') return;
@@ -76,72 +73,14 @@ export function mountDonateFab({ link = DEFAULT_LINK, onActivate } = {}) {
   `;
   document.body.appendChild(fab);
 
-  const btn = fab.querySelector('.donate-fab-btn');
-  const closeBtn = fab.querySelector('.donate-fab-close');
-
-  // 以 left/top 定位（拖曳時才切換），夾在可視範圍內
-  function applyPos(left, top) {
-    const w = fab.offsetWidth, h = fab.offsetHeight;
-    left = Math.max(MARGIN, Math.min(window.innerWidth - w - MARGIN, left));
-    top = Math.max(MARGIN, Math.min(window.innerHeight - h - MARGIN, top));
-    fab.style.left = left + 'px';
-    fab.style.top = top + 'px';
-    fab.style.right = 'auto';
-    fab.style.bottom = 'auto';
-  }
-
-  // 還原上次擺放位置
-  try {
-    const saved = JSON.parse(localStorage.getItem(POS_KEY) || 'null');
-    if (saved && typeof saved.left === 'number' && typeof saved.top === 'number') {
-      applyPos(saved.left, saved.top);
-    }
-  } catch (_) {}
-
-  closeBtn.addEventListener('click', (e) => {
+  fab.querySelector('.donate-fab-close').addEventListener('click', (e) => {
     e.stopPropagation();
     fab.remove();
     try { localStorage.setItem(CLOSED_KEY, taipeiToday()); } catch (_) {}
   });
 
-  // 拖曳（Pointer Events，滑鼠/觸控通用）
-  let dragging = false, moved = false, startX = 0, startY = 0, originLeft = 0, originTop = 0;
-
-  btn.addEventListener('pointerdown', (e) => {
-    dragging = true; moved = false;
-    startX = e.clientX; startY = e.clientY;
-    const r = fab.getBoundingClientRect();
-    originLeft = r.left; originTop = r.top;
-    try { btn.setPointerCapture(e.pointerId); } catch (_) {}
-    fab.classList.add('dragging');
-  });
-
-  btn.addEventListener('pointermove', (e) => {
-    if (!dragging) return;
-    const dx = e.clientX - startX, dy = e.clientY - startY;
-    if (!moved && Math.hypot(dx, dy) > DRAG_THRESHOLD) moved = true;
-    if (moved) applyPos(originLeft + dx, originTop + dy);
-  });
-
-  btn.addEventListener('pointerup', (e) => {
-    if (!dragging) return;
-    dragging = false;
-    fab.classList.remove('dragging');
-    try { btn.releasePointerCapture(e.pointerId); } catch (_) {}
-    if (moved) {
-      const r = fab.getBoundingClientRect();
-      try { localStorage.setItem(POS_KEY, JSON.stringify({ left: r.left, top: r.top })); } catch (_) {}
-    } else {
-      // 未拖曳 → 視為點擊
-      if (typeof activate === 'function') activate();
-      else location.href = link;
-    }
-  });
-
-  // 視窗縮放時把浮標拉回可視範圍
-  window.addEventListener('resize', () => {
-    if (!fab.style.left) return;
-    const r = fab.getBoundingClientRect();
-    applyPos(r.left, r.top);
+  fab.querySelector('.donate-fab-btn').addEventListener('click', () => {
+    if (typeof activate === 'function') activate();
+    else location.href = link;
   });
 }

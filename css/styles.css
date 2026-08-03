@@ -2172,16 +2172,14 @@ body.donate-modal-open .donate-fab { display: none; }  /* 開捐款彈窗時隱�
   background: linear-gradient(135deg, #2E86AB 0%, #57BFD6 100%);
   color: #fff;
   font-size: 19px;
-  cursor: grab;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 6px 18px rgba(46, 134, 171, 0.35);
-  touch-action: none;
   transition: transform .15s ease, box-shadow .15s ease;
 }
 .donate-fab-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 26px rgba(46, 134, 171, 0.45); }
-.donate-fab.dragging .donate-fab-btn { cursor: grabbing; transition: none; }
 .donate-fab-close {
   position: absolute;
   top: -6px;

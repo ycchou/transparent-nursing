@@ -1,8 +1,8 @@
 // 違規紀錄類頁面共用模組：CSV 抓取 / 解析 / cache / 通用工具
 // 給 violations.js (勞檢)、gender.js (性平)、osha.js (職安) 共用。
 
-import { getShort as getHospitalShort } from './hospital-shortname.js?v=770f10b529';
-import { normalizeInstitutionName } from './institution-name.js?v=770f10b529';
+import { getShort as getHospitalShort } from './hospital-shortname.js?v=d4284cfe27';
+import { normalizeInstitutionName } from './institution-name.js?v=d4284cfe27';
 
 // ============================================================
 // 通用工具
@@ -291,9 +291,9 @@ export function createCsvLoader(cfg) {
 //   records-table-container
 // ============================================================
 
-import { icon, renderIcons } from './icons.js?v=770f10b529';
-import { ensureTooltip } from './tooltip.js?v=770f10b529';
-import { pageSlice, renderPagination } from './pagination.js?v=770f10b529';
+import { icon, renderIcons } from './icons.js?v=d4284cfe27';
+import { ensureTooltip } from './tooltip.js?v=d4284cfe27';
+import { pageSlice, renderPagination } from './pagination.js?v=d4284cfe27';
 
 // 違規機構名稱 → 機構代號 對照表（離線預建，供機構名稱連到整合檔案頁）
 let _violHospitalMap = null;
