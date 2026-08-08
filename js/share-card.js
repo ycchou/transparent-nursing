@@ -1,5 +1,5 @@
 // 一鍵產生單筆資料分享圖片（1080 × 1350，IG 4:5 直式）
-import { getCategory } from './config.js?v=d4284cfe27';
+import { getCategory } from './config.js?v=fcd6263ac1';
 
 const KEY_LABELS = {
   // ICU

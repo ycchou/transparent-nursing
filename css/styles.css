@@ -1766,6 +1766,33 @@ body.viol-modal-open { overflow: hidden; }
 }
 @media (max-width: 600px) { .modal-grid { grid-template-columns: 1fr; } }
 
+/* 明細彈窗：機構/類別資訊列固定釘頂，其餘內容用內部捲軸；不撐滿螢幕 */
+.detail-modal {
+  display: flex;
+  flex-direction: column;
+  padding: 0;          /* padding 移到 header / body，讓 header 固定、body 獨立捲動 */
+  overflow: hidden;    /* 卡片本身不捲，交給 .modal-body */
+}
+.detail-modal .modal-header {
+  margin: 0;
+  padding: 20px 24px;
+  background: var(--surface);
+  flex-shrink: 0;      /* 固定在頂端、不隨內容捲動 */
+}
+.detail-modal .modal-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 20px 24px 28px;
+}
+@media (max-width: 600px) {
+  /* 手機：改置中固定卡片（取代整頁 bottom sheet），一開始就是固定版面 + 側邊捲軸 */
+  #detail-modal { padding: 16px; align-items: center; }
+  #detail-modal .detail-modal { border-radius: 16px; max-height: 82vh; margin-top: 0; }
+  .detail-modal .modal-header { padding: 16px 18px; }
+  .detail-modal .modal-body { padding: 16px 18px 22px; }
+}
+
 /* ---------- Spinner ---------- */
 @keyframes spin { to { transform: rotate(360deg); } }
 

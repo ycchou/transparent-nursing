@@ -1,11 +1,11 @@
 // 表格 / 卡片 渲染、排序、Modal
-import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=d4284cfe27';
-import { fmt, recommendPill, categoryTag } from './components.js?v=d4284cfe27';
-import { icon } from './icons.js?v=d4284cfe27';
-import { generateShareCard, showSharePreview } from './share-card.js?v=d4284cfe27';
-import { ensureTooltip } from './tooltip.js?v=d4284cfe27';
-import { pageSlice, renderPagination } from './pagination.js?v=d4284cfe27';
-import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=d4284cfe27';
+import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=fcd6263ac1';
+import { fmt, recommendPill, categoryTag } from './components.js?v=fcd6263ac1';
+import { icon } from './icons.js?v=fcd6263ac1';
+import { generateShareCard, showSharePreview } from './share-card.js?v=fcd6263ac1';
+import { ensureTooltip } from './tooltip.js?v=fcd6263ac1';
+import { pageSlice, renderPagination } from './pagination.js?v=fcd6263ac1';
+import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=fcd6263ac1';
 
 // 顯示用機構名稱：對得上評鑑醫院時改用 VPN 簡稱，否則沿用原填寫名稱。
 function displayInstitutionName(name) {
@@ -380,7 +380,7 @@ export function showDetailModal(row, opts = {}) {
   })();
 
   backdrop.innerHTML = `
-    <div class="modal" role="dialog">
+    <div class="modal detail-modal" role="dialog">
       <div class="modal-header">
         <div style="min-width:0;flex:1;">
           ${categoryTag(slug)}
@@ -402,6 +402,7 @@ export function showDetailModal(row, opts = {}) {
           <button class="modal-close" aria-label="關閉">${icon('x', { size: 16 })}</button>
         </div>
       </div>
+      <div class="modal-body">
       <div class="modal-grid">
         ${fields.filter((f) => f.key !== 'institutionName' && f.key !== 'institutionType' && f.key !== 'location' && f.key !== 'jobTitle' && f.key !== 'comment').map((f) => `
           <div>
@@ -417,6 +418,7 @@ export function showDetailModal(row, opts = {}) {
           <p style="margin:0;color:var(--ink-soft);line-height:1.8;">${row.comment}</p>
         </div>
       ` : ''}
+      </div>
     </div>
   `;
 
