@@ -1749,6 +1749,18 @@ body.viol-modal-open { overflow: hidden; }
   place-items: center;
 }
 .modal-close:hover { background: var(--border); color: var(--ink); }
+/* 統一所有關閉鈕的 ×／圖示置中（含只靠 line-height 未置中的幾個） */
+.modal-close,
+.pwa-prompt-close,
+.donate-fab-close,
+.calc-modal-close,
+.dform-picker-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  text-align: center;
+}
 
 .modal-grid {
   display: grid;
