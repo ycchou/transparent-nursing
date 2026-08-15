@@ -1,11 +1,11 @@
 // 表格 / 卡片 渲染、排序、Modal
-import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=fcd6263ac1';
-import { fmt, recommendPill, categoryTag } from './components.js?v=fcd6263ac1';
-import { icon } from './icons.js?v=fcd6263ac1';
-import { generateShareCard, showSharePreview } from './share-card.js?v=fcd6263ac1';
-import { ensureTooltip } from './tooltip.js?v=fcd6263ac1';
-import { pageSlice, renderPagination } from './pagination.js?v=fcd6263ac1';
-import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=fcd6263ac1';
+import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=611b4cb25a';
+import { fmt, recommendPill, categoryTag } from './components.js?v=611b4cb25a';
+import { icon } from './icons.js?v=611b4cb25a';
+import { generateShareCard, showSharePreview } from './share-card.js?v=611b4cb25a';
+import { ensureTooltip } from './tooltip.js?v=611b4cb25a';
+import { pageSlice, renderPagination } from './pagination.js?v=611b4cb25a';
+import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=611b4cb25a';
 
 // 顯示用機構名稱：對得上評鑑醫院時改用 VPN 簡稱，否則沿用原填寫名稱。
 function displayInstitutionName(name) {
@@ -52,6 +52,7 @@ const DEFAULT_TABLE_COLUMNS = {
 
 // 卡片統計列：累計年資 + 年薪（兩個亮點數值，空值自動略過；全空回空字串）
 const CARD_STATS = [
+  ['weeklyHours',  '週工時',   ''],
   ['yearsTotal',   '累計年資', '年'],
   ['annualSalary', '年薪',     '萬'],
 ];
@@ -282,15 +283,17 @@ export function renderTable(container, rows, opts = {}) {
         ? `<div class="card" style="text-align:center;color:var(--muted);">沒有符合條件的資料</div>`
         : pageRows.map((r, idx) => {
           const meta = [r.institutionType, r.location, r.jobTitle].filter(Boolean).join(' · ');
+          const seq = r._seq != null ? r._seq : (idx + 1);
+          const fdate = r.timestamp ? String(r.timestamp).slice(0, 10) : '';
           return `
           <div class="data-card" data-idx="${idx}">
             <div class="data-card-top">
               ${categoryTag(r._category)}
-              ${recommendPill(r.recommendIndex)}
+              <span class="data-card-time">${fdate ? '填寫 ' + fdate + ' · ' : ''}#${seq}</span>
             </div>
             <div class="data-card-titlerow">
               <div class="data-card-title" title="${(r.institutionName || '').replaceAll('"','&quot;')}">${r.institutionName ? withHospitalLink(r.institutionName, displayInstitutionName(r.institutionName)) : fmt.empty(r.institutionName)}</div>
-              <span class="data-card-seq">#${r._seq != null ? r._seq : (idx + 1)}</span>
+              ${recommendPill(r.recommendIndex)}
             </div>
             ${r.unitName ? `<div class="data-card-unit">${r.unitName}</div>` : ''}
             ${meta ? `<div class="data-card-meta">${meta}</div>` : ''}

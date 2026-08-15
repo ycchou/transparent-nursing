@@ -1574,6 +1574,13 @@ body.viol-modal-open { overflow: hidden; }
   padding: 16px;
   border: 1px solid var(--border-soft);
   box-shadow: var(--shadow-soft);
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+.data-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(29, 53, 87, 0.1);
+  border-color: rgba(46, 134, 171, 0.35);
 }
 /* 卡片頂列：類別 tag（左）＋ 推薦 pill（右），兩者常駐 */
 .data-card-top {
@@ -1581,19 +1588,26 @@ body.viol-modal-open { overflow: hidden; }
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+}
+.data-card-time {
+  flex-shrink: 0;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--muted-light);
+  letter-spacing: 0.02em;
 }
 .data-card-titlerow {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
-  gap: 8px;
+  align-items: center;
+  gap: 10px;
 }
 .data-card-title {
-  font-weight: 600;
+  font-weight: 700;
   color: var(--ink);
-  font-size: 1rem;
-  line-height: 1.4;
+  font-size: 1.12rem;
+  line-height: 1.35;
   min-width: 0;
 }
 .data-card-seq {
