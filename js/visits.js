@@ -11,6 +11,18 @@ function taipeiToday() {
   return new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10);
 }
 
+// 回傳近 N 天每日訪客 [{ day, count }, ...]；錯誤或無資料回 null
+export async function getVisitHistory(n = 30) {
+  try {
+    const res = await fetch(VISITS_API + '/stats?history=' + encodeURIComponent(n));
+    if (!res.ok) return null;
+    const data = await res.json();
+    return Array.isArray(data.history) ? data.history : null;
+  } catch (_) {
+    return null;
+  }
+}
+
 // 回傳 { today, total }；任何錯誤都回 null（呼叫端保持顯示「—」，不影響首頁其他內容）
 export async function getVisitStats() {
   const today = taipeiToday();

@@ -796,6 +796,21 @@ h1[id], h2[id], h3[id] {
   background: var(--border);
   margin: 4px 0;
 }
+/* 「累積人次」可點開趨勢圖：低調——只在 hover 時才透露可點 */
+.visits-cell-clickable { cursor: pointer; border-radius: 10px; transition: background .15s ease; outline: none; }
+.visits-cell-clickable:hover { background: rgba(46,134,171,0.06); }
+.visits-cell-clickable:hover .stat-label { color: var(--primary); }
+.visits-cell-clickable:focus-visible { box-shadow: 0 0 0 2px rgba(46,134,171,0.4); }
+
+/* 訪客趨勢彈窗 + 折線圖 */
+.vc-modal { position: relative; max-width: 680px; }
+.vc-close { position: absolute; top: 16px; right: 16px; }
+.vc-svg { width: 100%; height: auto; display: block; }
+.vc-grid { stroke: var(--border-soft); stroke-width: 1; }
+.vc-ylabel, .vc-xlabel { fill: var(--muted); font-size: 11px; }
+.vc-line { fill: none; stroke: var(--primary); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.vc-area { fill: rgba(46,134,171,0.10); stroke: none; }
+.vc-dot { fill: var(--primary); }
 /* 累積訪客：次要資訊，縮小 + 淡色，讓「今日訪客」為主 */
 .visits-split .visits-cell-secondary .stat-num {
   font-size: 1.5rem;
