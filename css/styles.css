@@ -811,6 +811,39 @@ h1[id], h2[id], h3[id] {
 .vc-line { fill: none; stroke: var(--primary); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
 .vc-area { fill: rgba(46,134,171,0.10); stroke: none; }
 .vc-dot { fill: var(--primary); }
+/* 折線圖 hover 互動 */
+.vc-chart { position: relative; }
+.vc-svg { touch-action: none; }
+.vc-cursor { stroke: var(--primary); stroke-width: 1; stroke-dasharray: 3 3; opacity: 0.5; }
+.vc-hoverdot { fill: var(--surface); stroke: var(--primary); stroke-width: 2.5; }
+.vc-tip {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  background: var(--ink);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  line-height: 1.35;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.vc-tip-day { font-size: 0.72rem; opacity: 0.75; }
+.vc-tip-val { font-weight: 700; font-variant-numeric: tabular-nums; }
+/* 手機：訪客趨勢彈窗置中（覆寫預設 bottom sheet） */
+@media (max-width: 600px) {
+  #visits-chart-modal { padding: 16px; align-items: center; }
+  #visits-chart-modal .modal {
+    border-radius: 16px;
+    max-height: 84vh;
+    margin-top: 0;
+    padding: 22px 18px 24px;
+  }
+}
 /* 累積訪客：次要資訊，縮小 + 淡色，讓「今日訪客」為主 */
 .visits-split .visits-cell-secondary .stat-num {
   font-size: 1.5rem;

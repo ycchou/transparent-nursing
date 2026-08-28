@@ -1,7 +1,7 @@
 // visits-chart.js — 近 30 天每日訪客折線圖彈窗（低調、點「累積人次」才開）。
 // 純內嵌 SVG，無外部依賴；重用站上既有 .modal-backdrop / .modal 樣式。
 
-import { getVisitHistory } from './visits.js?v=7a6fd7f3ca';
+import { getVisitHistory } from './visits.js?v=f4e9af9568';
 
 // 依日期補齊近 n 天（缺的日補 0），回傳 [{ day:'MM/DD', full:'YYYY-MM-DD', count }]
 function fillDays(history, n) {
@@ -18,13 +18,18 @@ function fillDays(history, n) {
   return out;
 }
 
+// 圖表幾何（viewBox 座標）— tooltip 定位也要用，故提到 module 層
+const VC = { W: 620, H: 260, padL: 40, padR: 16, padT: 16, padB: 34 };
+
 function lineChartSVG(rows) {
-  const W = 620, H = 260, padL = 40, padR = 16, padT = 16, padB = 34;
+  const { W, H, padL, padR, padT, padB } = VC;
   const iw = W - padL - padR, ih = H - padT - padB;
   const max = Math.max(1, ...rows.map((r) => r.count));
   const nice = max <= 5 ? 5 : Math.ceil(max / 5) * 5; // 讓 y 軸頂端好看
   const x = (i) => padL + (rows.length <= 1 ? iw / 2 : (iw * i) / (rows.length - 1));
   const y = (v) => padT + ih - (ih * v) / nice;
+  // 回存每點 viewBox 座標，供 tooltip 互動使用
+  rows.forEach((r, i) => { r.vbx = x(i); r.vby = y(r.count); });
 
   const pts = rows.map((r, i) => `${x(i).toFixed(1)},${y(r.count).toFixed(1)}`).join(' ');
   const area = `${padL},${padT + ih} ${pts} ${x(rows.length - 1)},${padT + ih}`;
@@ -47,12 +52,61 @@ function lineChartSVG(rows) {
     `<circle cx="${x(i).toFixed(1)}" cy="${y(r.count).toFixed(1)}" r="${i === rows.length - 1 ? 3.5 : 2}" class="vc-dot"><title>${r.full}：${r.count} 人</title></circle>`
   ).join('');
 
-  return `<svg viewBox="0 0 ${W} ${H}" class="vc-svg" role="img" aria-label="近 30 天每日訪客折線圖">
-    ${yTicks}
-    <polygon points="${area}" class="vc-area"/>
-    <polyline points="${pts}" class="vc-line"/>
-    ${dots}${xTicks}
-  </svg>`;
+  return `<div class="vc-chart">
+    <svg viewBox="0 0 ${W} ${H}" class="vc-svg" role="img" aria-label="近 30 天每日訪客折線圖">
+      ${yTicks}
+      <polygon points="${area}" class="vc-area"/>
+      <polyline points="${pts}" class="vc-line"/>
+      <line class="vc-cursor" x1="0" y1="${padT}" x2="0" y2="${padT + ih}" style="display:none"/>
+      <circle class="vc-hoverdot" r="4.5" style="display:none"/>
+      ${dots}${xTicks}
+    </svg>
+    <div class="vc-tip" hidden></div>
+  </div>`;
+}
+
+// 滑鼠/觸控移到圖上 → 顯示最近一天的日期與人數（含指示線與高亮點）
+function attachChartInteraction(container, rows) {
+  const chart = container.querySelector('.vc-chart');
+  const svg = container.querySelector('.vc-svg');
+  const cursor = container.querySelector('.vc-cursor');
+  const hoverdot = container.querySelector('.vc-hoverdot');
+  const tip = container.querySelector('.vc-tip');
+  if (!chart || !svg || !tip) return;
+  const { W, H, padL, padR } = VC;
+  const iw = W - padL - padR;
+  const step = rows.length > 1 ? iw / (rows.length - 1) : iw;
+
+  const move = (clientX) => {
+    const rect = svg.getBoundingClientRect();
+    const vbx = ((clientX - rect.left) / rect.width) * W;
+    let i = Math.round((vbx - padL) / step);
+    i = Math.max(0, Math.min(rows.length - 1, i));
+    const r = rows[i];
+    // viewBox → 容器像素
+    const px = (r.vbx / W) * rect.width;
+    const py = (r.vby / H) * rect.height;
+    cursor.setAttribute('x1', r.vbx); cursor.setAttribute('x2', r.vbx);
+    cursor.style.display = ''; hoverdot.style.display = '';
+    hoverdot.setAttribute('cx', r.vbx); hoverdot.setAttribute('cy', r.vby);
+    tip.hidden = false;
+    tip.innerHTML = `<span class="vc-tip-day">${r.full}</span><span class="vc-tip-val">${r.count.toLocaleString()} 人</span>`;
+    // 定位 tooltip：預設在點上方，靠邊時自動翻向
+    const tw = tip.offsetWidth, th = tip.offsetHeight;
+    let left = px - tw / 2;
+    left = Math.max(2, Math.min(rect.width - tw - 2, left));
+    let top = py - th - 10;
+    if (top < 0) top = py + 12;
+    tip.style.left = left + 'px';
+    tip.style.top = top + 'px';
+  };
+  const hide = () => { tip.hidden = true; cursor.style.display = 'none'; hoverdot.style.display = 'none'; };
+
+  svg.addEventListener('mousemove', (e) => move(e.clientX));
+  svg.addEventListener('mouseleave', hide);
+  svg.addEventListener('touchstart', (e) => { if (e.touches[0]) move(e.touches[0].clientX); }, { passive: true });
+  svg.addEventListener('touchmove', (e) => { if (e.touches[0]) move(e.touches[0].clientX); }, { passive: true });
+  svg.addEventListener('touchend', hide);
 }
 
 let modal;
@@ -93,7 +147,9 @@ async function openModal() {
     body.innerHTML = '<div style="color:var(--muted);text-align:center;padding:40px 0;">目前無法載入趨勢資料</div>';
     return;
   }
-  body.innerHTML = lineChartSVG(fillDays(history, 30));
+  const rows = fillDays(history, 30);
+  body.innerHTML = lineChartSVG(rows);
+  attachChartInteraction(body, rows);
 }
 
 // 讓「累積人次」可點開趨勢圖。低調：不加明顯按鈕，只讓數字可點 + 極淡提示。
