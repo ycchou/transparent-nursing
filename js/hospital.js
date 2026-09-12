@@ -42,7 +42,7 @@ import {
 } from './records-common.js?v=f4e9af9568';
 import { skeletonRows } from './skeleton.js?v=f4e9af9568';
 
-const MERGED_URL = 'data/hospitals-merged.json?v=c017631e69';
+const MERGED_URL = 'data/hospitals-merged.json?v=05ee0dcd69';
 const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=bedb0c4373';
 const ADDR_OVERLAY_URL = 'data/hospitals-address-overlay.json?v=50f6f147a8';
 
@@ -170,7 +170,7 @@ const _nrCodeCache = new Map();
 async function loadNurseByCode(code) {
   if (_nrCodeCache.has(code)) return _nrCodeCache.get(code);
   try {
-    const r = await fetch(`data/nurse-ratio/by-code/${code}.json?v=1dbde60d94`, { cache: 'default' });
+    const r = await fetch(`data/nurse-ratio/by-code/${code}.json?v=5cc1ee8233`, { cache: 'default' });
     const d = r.ok ? await r.json() : null;
     _nrCodeCache.set(code, d);
     return d;

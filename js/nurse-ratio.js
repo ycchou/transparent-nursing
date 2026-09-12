@@ -17,7 +17,7 @@ import {
 } from './nurse-ratio-view.js?v=f4e9af9568';
 import { skeletonRows } from './skeleton.js?v=f4e9af9568';
 
-const DATA_URL = 'data/nurse-ratio.json?v=1dbde60d94';
+const DATA_URL = 'data/nurse-ratio.json?v=5cc1ee8233';
 
 // 合規分類綁定本頁 state.data.months（共用邏輯在 nurse-ratio-view.js）
 function classifyHospital(hosp) {

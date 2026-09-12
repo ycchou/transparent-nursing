@@ -226,8 +226,8 @@ export function preloadAll() {
 // （HTTP 快取以完整 URL 為 key）：hospital.js / nurse-ratio.js 用帶 ?v= 版本（stamp-assets 維護）；
 // personnel.js 首抓的 picker 清單無版本號，故此處亦不帶。
 const HUB_STATIC_URLS = [
-  'data/hospitals-merged.json?v=c017631e69',  // 機構總覽
-  'data/nurse-ratio.json?v=1dbde60d94',       // 三班護病比
+  'data/hospitals-merged.json?v=05ee0dcd69',  // 機構總覽
+  'data/nurse-ratio.json?v=5cc1ee8233',       // 三班護病比
   'data/personnel-index.json',                // 人力監控 picker
 ];
 

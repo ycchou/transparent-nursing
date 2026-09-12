@@ -586,7 +586,7 @@ function reRenderPickerIfOpen() {
     input.dispatchEvent(new Event('input', { bubbles: true }));
   }
 }
-fetch('data/hospitals-master.json?v=4fa5c785d4')
+fetch('data/hospitals-master.json?v=6592884ae9')
   .then((r) => (r.ok ? r.json() : null))
   .then((d) => { if (d && Array.isArray(d.hospitals)) { HOSPITALS_ALL = d.hospitals; reRenderPickerIfOpen(); } })
   .catch((e) => console.warn('[form] 機構主檔載入失敗:', e.message));
