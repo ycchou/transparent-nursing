@@ -1714,6 +1714,85 @@ body.viol-modal-open { overflow: hidden; }
   margin-bottom: 4px;
 }
 
+/* 送出後：短評被屏蔽的提示 */
+.dform-thanks-blocked {
+  margin: 14px auto 0;
+  max-width: 38em;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: rgba(244,162,97,0.12);
+  border: 1px solid rgba(244,162,97,0.35);
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+  line-height: 1.7;
+  text-align: left;
+}
+
+/* ---------- 屏蔽短評（AI 審稿判定 block）---------- */
+.comment-blocked {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-soft);
+  padding: 10px 12px;
+  cursor: default;
+}
+.comment-blocked-reason {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+.comment-blocked-lock { flex-shrink: 0; }
+.comment-blocked-text {
+  filter: blur(5px);
+  user-select: none;
+  pointer-events: none;
+  color: var(--ink-soft);
+  line-height: 1.8;
+  max-height: 4.6em;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.comment-blocked.is-compact .comment-blocked-text {
+  max-height: 3em;
+  filter: blur(4px);
+}
+.comment-unlock-label {
+  display: block;
+  color: var(--muted-light);
+  font-size: 0.76rem;
+  margin-bottom: 5px;
+}
+.comment-unlock-row { display: flex; gap: 6px; }
+.comment-unlock-input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-btn);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--ink);
+  background: var(--surface);
+}
+.comment-unlock-input:focus { outline: none; border-color: var(--primary-soft); }
+.comment-unlock-input.is-error { border-color: var(--danger); }
+.comment-unlock-btn { padding: 6px 14px; font-size: 0.82rem; flex-shrink: 0; }
+.comment-unlock-err {
+  color: var(--danger);
+  font-size: 0.76rem;
+  margin-top: 5px;
+}
+/* 表格窄欄位：只給一行鎖定提示 */
+.comment-cell-blocked {
+  color: var(--muted-light);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
 /* ---------- Recommend pill ---------- */
 .pill {
   display: inline-flex;

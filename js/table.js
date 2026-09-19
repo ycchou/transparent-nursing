@@ -1,11 +1,12 @@
 // 表格 / 卡片 渲染、排序、Modal
-import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=f4e9af9568';
-import { fmt, recommendPill, categoryTag } from './components.js?v=f4e9af9568';
-import { icon } from './icons.js?v=f4e9af9568';
-import { generateShareCard, showSharePreview } from './share-card.js?v=f4e9af9568';
-import { ensureTooltip } from './tooltip.js?v=f4e9af9568';
-import { pageSlice, renderPagination } from './pagination.js?v=f4e9af9568';
-import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=f4e9af9568';
+import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=5582ae07e5';
+import { fmt, recommendPill, categoryTag } from './components.js?v=5582ae07e5';
+import { icon } from './icons.js?v=5582ae07e5';
+import { generateShareCard, showSharePreview } from './share-card.js?v=5582ae07e5';
+import { ensureTooltip } from './tooltip.js?v=5582ae07e5';
+import { pageSlice, renderPagination } from './pagination.js?v=5582ae07e5';
+import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=5582ae07e5';
+import { commentHtml, commentCellHtml, initCommentUnlock } from './moderation.js?v=5582ae07e5';
 
 // 顯示用機構名稱：對得上評鑑醫院時改用 VPN 簡稱，否則沿用原填寫名稱。
 function displayInstitutionName(name) {
@@ -164,7 +165,8 @@ function renderCellValue(row, key) {
   if (key === 'recommendIndex') return recommendPill(v);
   if (key === 'timestamp') return fmt.date(v);
   if (key === 'comment') {
-    return `<span class="truncate" title="${(v || '').replaceAll('"','&quot;')}">${fmt.empty(v)}</span>`;
+    // 被 AI 審稿判定屏蔽時只顯示一行鎖定提示（解鎖框放在卡片與詳情彈窗）
+    return row.comment ? commentCellHtml(row) : fmt.empty(v);
   }
   // 機構名稱、單位名稱：太長時截斷顯示「...」，hover 顯示完整名稱
   if (key === 'institutionName' || key === 'unitName') {
@@ -298,7 +300,7 @@ export function renderTable(container, rows, opts = {}) {
             ${r.comment ? `
               <div class="data-card-comment">
                 <span class="key">短評</span>
-                ${r.comment}
+                ${commentHtml(r, { compact: true })}
               </div>` : ''}
           </div>
         `; }).join('')
@@ -354,6 +356,8 @@ export function renderTable(container, rows, opts = {}) {
 
   // 全名 tooltip：當機構/單位被截斷時 hover 顯示完整名稱（共用模組）
   ensureTooltip();
+  // 屏蔽短評的「輸入日期展開」事件（全域委派）
+  initCommentUnlock();
 }
 
 /** Switch view: 'table' | 'card' */
@@ -415,7 +419,7 @@ export function showDetailModal(row, opts = {}) {
         <hr class="divider" />
         <div>
           <div class="key" style="color:var(--muted);font-size:0.85rem;margin-bottom:6px;">個人短評</div>
-          <p style="margin:0;color:var(--ink-soft);line-height:1.8;">${row.comment}</p>
+          <div style="margin:0;color:var(--ink-soft);line-height:1.8;">${commentHtml(row)}</div>
         </div>
       ` : ''}
       </div>
@@ -423,6 +427,7 @@ export function showDetailModal(row, opts = {}) {
   `;
 
   backdrop.classList.add('open');
+  initCommentUnlock();
   const close = () => {
     backdrop.classList.remove('open');
     opts.onClose?.(row);

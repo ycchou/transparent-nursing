@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#2E86AB" />
   <!-- 軟鎖總開關（js/gate.js）：鎖定期非公開頁導向 coming-soon -->
-  <script src="./js/gate.js?v=f4e9af9568"></script>
+  <script src="./js/gate.js?v=5582ae07e5"></script>
 
   <!-- SEO -->
   <title>填寫表單 — 護理職場透明化運動</title>
@@ -48,16 +48,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=511084338e" />
+  <link rel="stylesheet" href="css/styles.css?v=06c270b5da" />
 
     <!-- modulepreload：平行載入 ES module 鏈（首次造訪快 30-50%） -->
-  <link rel="modulepreload" href="./js/components.js?v=f4e9af9568" />
-  <link rel="modulepreload" href="./js/config.js?v=f4e9af9568" />
-  <link rel="modulepreload" href="./js/contribution-gate.js?v=f4e9af9568" />
-  <link rel="modulepreload" href="./js/icons.js?v=f4e9af9568" />
-  <link rel="modulepreload" href="./js/pwa-prompt.js?v=f4e9af9568" />
-  <link rel="modulepreload" href="./js/scroll-hint.js?v=f4e9af9568" />
-  <link rel="modulepreload" href="./js/toast.js?v=f4e9af9568" />
+  <link rel="modulepreload" href="./js/components.js?v=5582ae07e5" />
+  <link rel="modulepreload" href="./js/config.js?v=5582ae07e5" />
+  <link rel="modulepreload" href="./js/contribution-gate.js?v=5582ae07e5" />
+  <link rel="modulepreload" href="./js/icons.js?v=5582ae07e5" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=5582ae07e5" />
+  <link rel="modulepreload" href="./js/scroll-hint.js?v=5582ae07e5" />
+  <link rel="modulepreload" href="./js/toast.js?v=5582ae07e5" />
 
   <!-- 強制清除舊版 cache -->
   <script>
@@ -137,8 +137,10 @@
           </div>
           <h3>直接公開</h3>
           <p style="color:var(--muted);margin:0;">
-            送出後資料會直接顯示在分享平台供瀏覽，<strong style="color:var(--ink);">沒有審核或延遲</strong>。
+            送出後資料會直接顯示在分享平台供瀏覽，<strong style="color:var(--ink);">沒有人工審核或延遲</strong>。
             這代表你填的每一個欄位都會被看見——填寫前請審視欄位內容，量力分享。
+            短評與特殊福利欄位會在送出當下經 AI 自動檢查，判定可能涉及個資或違規時，
+            該欄在平台上會先打上模糊、標示理由（仍可被展開），其餘欄位照常公開。
           </p>
         </div>
         <div class="card card-flat" style="border:2px solid var(--danger);">
@@ -199,7 +201,7 @@
         <details>
           <summary>填了會不會被認出來？</summary>
           <p>
-            因為我們<strong>不審核、不延遲、直接公開</strong>，是否會被認出來，<strong style="color:var(--ink);">需要你自己評估與承擔</strong>。
+            因為我們<strong>不做人工審核、不延遲、直接公開</strong>（AI 只會把疑似違規的短評打模糊，不會擋下投稿），是否會被認出來，<strong style="color:var(--ink);">需要你自己評估與承擔</strong>。
             建議在送出前自我檢視：
           </p>
           <ul style="color:var(--muted);line-height:1.85;padding-left:1.2rem;margin:8px 0 0;">
@@ -248,10 +250,10 @@
   <div id="app-footer"></div>
 
   <script type="module">
-    import { CATEGORIES } from './js/config.js?v=f4e9af9568';
-    import { mountLayout } from './js/components.js?v=f4e9af9568';
-    import { icon, renderIcons } from './js/icons.js?v=f4e9af9568';
-    import { hasContributed, markContributed } from './js/contribution-gate.js?v=f4e9af9568';
+    import { CATEGORIES } from './js/config.js?v=5582ae07e5';
+    import { mountLayout } from './js/components.js?v=5582ae07e5';
+    import { icon, renderIcons } from './js/icons.js?v=5582ae07e5';
+    import { hasContributed, markContributed } from './js/contribution-gate.js?v=5582ae07e5';
 
     mountLayout();
 

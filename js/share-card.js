@@ -1,5 +1,5 @@
 // 一鍵產生單筆資料分享圖片（1080 × 1350，IG 4:5 直式）
-import { getCategory } from './config.js?v=f4e9af9568';
+import { getCategory } from './config.js?v=5582ae07e5';
 
 const KEY_LABELS = {
   // ICU
@@ -93,8 +93,10 @@ function buildShareCardHTML(row) {
   const recLabel = REC_LABEL[recIdx] || '—';
   const recColor = REC_COLOR[recIdx] || '#6B7C93';
   const recBg    = REC_BG[recIdx]    || 'rgba(107,124,147,0.10)';
-  const commentText = truncateComment(row.comment);
-  const commentTruncated = row.comment && row.comment.length > MAX_COMMENT_LENGTH;
+  // 被 AI 審稿屏蔽的短評不放進分享圖，避免違規內容被截圖擴散
+  const shareComment = String(row.modVerdict || '').toLowerCase() === 'block' ? '' : row.comment;
+  const commentText = truncateComment(shareComment);
+  const commentTruncated = shareComment && shareComment.length > MAX_COMMENT_LENGTH;
 
   const dataRows = fields.map((k, i) => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;${i === fields.length - 1 ? '' : 'border-bottom:1px solid #E5E9F0;'}">

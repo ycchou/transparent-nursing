@@ -1,6 +1,6 @@
 // 篩選器：縣市、機構類別、推薦指數、工時、加班費 + 機構名稱搜尋
-import { COMMON_FIELDS } from './config.js?v=f4e9af9568';
-import { getShort as getHospitalShort } from './hospital-shortname.js?v=f4e9af9568';
+import { COMMON_FIELDS } from './config.js?v=5582ae07e5';
+import { getShort as getHospitalShort } from './hospital-shortname.js?v=5582ae07e5';
 
 const INSTITUTION_TYPES = ['醫學中心', '區域醫院', '地區醫院', '診所', '護理之家', '長照機構', '居護所', '其他'];
 const RECOMMEND_LABELS = { 5: '非常推薦', 4: '推薦', 3: '保留', 2: '不推薦', 1: '非常不推薦' };
@@ -144,7 +144,9 @@ export function applyFilters(rows, state) {
         return true;
       }
       const short = getHospitalShort(r.institutionName) || '';
-      const hay = `${r.institutionName || ''} ${short} ${r.unitName || ''} ${r.comment || ''} ${r.location || ''} #${r._seq || ''}`.toLowerCase();
+      // 被 AI 審稿屏蔽的短評不納入比對，避免用關鍵字搜尋反推被遮住的內容
+      const searchableComment = String(r.modVerdict || '').toLowerCase() === 'block' ? '' : (r.comment || '');
+      const hay = `${r.institutionName || ''} ${short} ${r.unitName || ''} ${searchableComment} ${r.location || ''} #${r._seq || ''}`.toLowerCase();
       if (!hay.includes(q)) return false;
     }
     return true;

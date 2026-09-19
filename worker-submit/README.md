@@ -1,7 +1,9 @@
 # tn-submit — 表單提交防護代理
 
-前端 →（帶 Turnstile token）→ 本 Worker → ①驗 Turnstile ②限流 ③內容檢查
+前端 →（帶 Turnstile token）→ 本 Worker → ①驗 Turnstile ②限流 ③規則內容檢查 ④AI 審稿
 → 帶 shared secret 轉發 Apps Script（寫 Google Sheet）。獨立部署，不走 GitHub Pages。
+
+④ 只決定「前端要不要把短評打馬賽克」，不擋投稿；設計與調參見 [../docs/moderation.md](../docs/moderation.md)。
 
 - `src/index.js` — Worker（`/submit`）
 - `schema.sql` — D1 限流表（`sub_rate`，只存雜湊）
@@ -42,6 +44,7 @@ echo -n '<Turnstile Secret Key>'  | wrangler secret put TURNSTILE_SECRET
 echo -n '<Apps Script /exec 網址>' | wrangler secret put APPS_SCRIPT_URL
 echo -n '<上面那組 shared secret>' | wrangler secret put APPS_SCRIPT_SECRET
 node -e "console.log(require('crypto').randomBytes(24).toString('hex'))" | wrangler secret put SALT
+echo -n '<Google AI Studio API key>' | wrangler secret put GEMINI_API_KEY   # AI 審稿；不設就等於關閉
 
 wrangler deploy                   # 取得 https://tn-submit.<子網域>.workers.dev
 ```
@@ -58,6 +61,8 @@ wrangler deploy                   # 取得 https://tn-submit.<子網域>.workers
   `MIN_SUBMIT_INTERVAL_MS`（最小間隔，預設 5 分鐘）、`MIN_FILL_MS`（填寫耗時門檻，預設 1 分鐘）。
 - Worker（`src/index.js` 頂部）：`CAP_PER_KEY_PER_DAY`（單一 IP+裝置+版本 每日上限，預設 5）、
   `MAX_LINKS`（自由文字允許連結數，預設 0）、`ALLOWED_ORIGINS`。
+- AI 審稿（`src/index.js` 的 ④ 區塊）：`GEMINI_MODEL`、`MOD_TIMEOUT_MS`（預設 6 秒，逾時放行）、
+  `MOD_FIELDS`（要審的欄位）、`MOD_SYSTEM_PROMPT`（判定規則）。
 
 ## 驗證
 

@@ -2,12 +2,12 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=f4e9af9568';
-import { renderIcons, icon } from './icons.js?v=f4e9af9568';
-import { markContributed } from './contribution-gate.js?v=f4e9af9568';
-import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=f4e9af9568';
-import { showToast } from './toast.js?v=f4e9af9568';
-import { notePwaIntent } from './pwa-prompt.js?v=f4e9af9568';
+import { mountLayout } from './components.js?v=5582ae07e5';
+import { renderIcons, icon } from './icons.js?v=5582ae07e5';
+import { markContributed } from './contribution-gate.js?v=5582ae07e5';
+import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=5582ae07e5';
+import { showToast } from './toast.js?v=5582ae07e5';
+import { notePwaIntent } from './pwa-prompt.js?v=5582ae07e5';
 
 const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 避開易混字元 0/O/1/I/L
 let currentCaptcha = '';
@@ -451,6 +451,7 @@ async function onSubmit(e) {
   btn.disabled = true;
   btn.innerHTML = `<span class="dform-spinner" aria-hidden="true"></span><span>送出中…</span>`;
 
+  let moderationVerdict = '';
   try {
     if (SUBMIT_ENDPOINT) {
       // 第二階段：真正打 Apps Script
@@ -464,6 +465,9 @@ async function onSubmit(e) {
       });
       const res = await fetch(SUBMIT_ENDPOINT, { method: 'POST', body });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      // Worker 回傳 AI 審稿判定；被屏蔽時在感謝畫面告知投稿者（其餘欄位照常公開）
+      const payload = await res.json().catch(() => null);
+      moderationVerdict = payload?.moderation?.verdict || '';
     } else {
       // 第一階段：模擬送出
       console.log('[DFORM] would submit:', data);
@@ -473,7 +477,7 @@ async function onSubmit(e) {
     const rec2 = getSubmitRecord();
     saveSubmitRecord({ day: taipeiToday(), count: rec2.count + 1, lastTs: Date.now() });
     clearDraft();
-    showThanks();
+    showThanks({ blocked: moderationVerdict === 'block' });
   } catch (err) {
     console.error(err);
     showToast('送出失敗：' + err.message, 'error');
@@ -482,7 +486,7 @@ async function onSubmit(e) {
   }
 }
 
-function showThanks() {
+function showThanks(opts = {}) {
   // Soft Give-to-Get：成功送出 = 解鎖分享平台完整資料
   markContributed();
 
@@ -509,6 +513,12 @@ function showThanks() {
         ${SUBMIT_ENDPOINT ? '資料已送出，將在彙整後顯示於分享平台。' : '（測試模式）資料已記錄於 console，未實際送出。'}<br/>
         你的經驗會成為下一位護理師選擇職場時最真實的參考。
       </p>
+      ${opts.blocked ? `
+        <p class="dform-thanks-blocked">
+          🔒 你填寫的短評經自動檢查後判定可能違反平台使用規範，
+          在分享平台上會先以模糊方式呈現；其餘欄位照常公開。
+          若你認為判定有誤，可來信平台說明。
+        </p>` : ''}
       <p class="dform-thanks-countdown" id="thanks-countdown-text">
         <span id="thanks-countdown-num">10</span> 秒後自動回首頁
       </p>

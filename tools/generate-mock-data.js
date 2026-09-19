@@ -756,6 +756,30 @@ function generateAll() {
   }
 }
 
+
+// ============ AI 審稿欄位（mock）============
+// 真實資料由 tn-submit Worker 在送出當下寫入 modVerdict / modCode；
+// mock 這裡隨機讓少數幾筆呈現「被屏蔽」狀態，方便本機檢視馬賽克與解鎖 UI。
+const BLOCKED_SAMPLES = [
+  { code: 'B', comment: '護理長王〇〇每天在交班時點名罵人，副護理長也不敢講話。' },
+  { code: 'F', comment: '那個資深的〇姐超級機車，看到她就想吐，真的很垃圾。' },
+  { code: 'G', comment: '我們單位缺人快來，加 LINE 問我，介紹有獎金。' },
+  { code: 'C', comment: '上次那個 32 床肝癌末期的阿伯家屬一直來吵，護理師被罵到哭。' },
+  { code: 'J', comment: 'aaaaaaa 測試測試 123456' },
+];
+const BLOCK_RATE = 0.012;   // 約 1.2% 的筆數示範屏蔽
+
+function assignModeration(rows) {
+  rows.forEach((r) => { r.modVerdict = 'allow'; r.modCode = ''; });
+  rows.forEach((r) => {
+    if (!r.comment || Math.random() > BLOCK_RATE) return;
+    const sample = pick(BLOCKED_SAMPLES);
+    r.comment = sample.comment;
+    r.modVerdict = 'block';
+    r.modCode = sample.code;
+  });
+}
+
 const { perCat, all, realCount } = generateAll();
 if (realCount < MIN_REAL_ROWS) {
   console.error(`真實醫院筆數 ${realCount} 未達 ${MIN_REAL_ROWS}，請調整權重。`);
@@ -770,7 +794,8 @@ CFG.forEach(({ slug, cols }, i) => {
   if (rows[0] && !/\d{2}:\d{2}/.test(rows[0].timestamp)) {
     rows[0].timestamp += ' ' + String(randint(7, 23)).padStart(2, '0') + ':' + String(randint(0, 59)).padStart(2, '0');
   }
-  fs.writeFileSync(path.join(OUT_DIR, `${slug}.csv`), toCsv(rows, cols), 'utf8');
+  assignModeration(rows);
+  fs.writeFileSync(path.join(OUT_DIR, `${slug}.csv`), toCsv(rows, cols.concat(['modVerdict', 'modCode'])), 'utf8');
   console.log(`✓ ${slug}.csv: ${rows.length} rows`);
   total += rows.length;
 });

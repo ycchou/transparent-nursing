@@ -27,7 +27,15 @@ function doPost(e) {
       const keys = Object.keys(p).filter((k) => k !== 'secret').sort();
       sh.appendRow(['_ts'].concat(keys));
     }
-    const header = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
+    // 表頭已存在但少了新欄位（例如後來才加的 modVerdict / modCode）→ 自動補在最右邊，
+    // 舊資料列該欄留空。這樣 Worker 加欄位時不必手動改試算表。
+    let header = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
+    const missing = Object.keys(p).filter((k) => k !== 'secret' && header.indexOf(k) === -1).sort();
+    if (missing.length) {
+      sh.getRange(1, header.length + 1, 1, missing.length).setValues([missing]);
+      header = header.concat(missing);
+    }
+
     const row = header.map((h) => (h === '_ts' ? new Date() : (p[h] !== undefined ? p[h] : '')));
     sh.appendRow(row);
 
