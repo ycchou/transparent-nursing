@@ -1744,6 +1744,20 @@ body.viol-modal-open { overflow: hidden; }
   text-align: left;
 }
 
+/* 詳情彈窗：屏蔽筆數取代分享／連結按鈕的提示 */
+.modal-share-blocked {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-btn);
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
 /* ---------- 屏蔽短評（AI 審稿判定 block）---------- */
 .comment-blocked {
   border: 1px solid var(--border);

@@ -1,12 +1,12 @@
 // 表格 / 卡片 渲染、排序、Modal
-import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=bc013aa3c8';
-import { fmt, recommendPill, categoryTag } from './components.js?v=bc013aa3c8';
-import { icon } from './icons.js?v=bc013aa3c8';
-import { generateShareCard, showSharePreview } from './share-card.js?v=bc013aa3c8';
-import { ensureTooltip } from './tooltip.js?v=bc013aa3c8';
-import { pageSlice, renderPagination } from './pagination.js?v=bc013aa3c8';
-import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=bc013aa3c8';
-import { commentHtml, commentCellHtml, initCommentUnlock } from './moderation.js?v=bc013aa3c8';
+import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=195619d02b';
+import { fmt, recommendPill, categoryTag } from './components.js?v=195619d02b';
+import { icon } from './icons.js?v=195619d02b';
+import { generateShareCard, showSharePreview } from './share-card.js?v=195619d02b';
+import { ensureTooltip } from './tooltip.js?v=195619d02b';
+import { pageSlice, renderPagination } from './pagination.js?v=195619d02b';
+import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=195619d02b';
+import { commentHtml, commentCellHtml, initCommentUnlock, isBlocked } from './moderation.js?v=195619d02b';
 
 // 顯示用機構名稱：對得上評鑑醫院時改用 VPN 簡稱，否則沿用原填寫名稱。
 function displayInstitutionName(name) {
@@ -383,6 +383,9 @@ export function showDetailModal(row, opts = {}) {
     return el;
   })();
 
+  // 短評被 AI 審稿屏蔽的筆數不提供分享圖與永久連結（避免違規內容被轉出去）
+  const blocked = isBlocked(row);
+
   backdrop.innerHTML = `
     <div class="modal detail-modal" role="dialog">
       <div class="modal-header">
@@ -395,6 +398,11 @@ export function showDetailModal(row, opts = {}) {
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:flex-start;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
+          ${blocked ? `
+            <div class="modal-share-blocked" title="短評經自動檢查判定可能違反使用規範，暫停對外分享">
+              <span aria-hidden="true">🔒</span>
+              <span>此筆暫停分享</span>
+            </div>` : `
           <button id="modal-copylink-btn" class="btn btn-secondary" style="padding:8px 14px;font-size:0.85rem;gap:6px;" title="複製這筆的永久連結">
             ${icon('link', { size: 14 })}
             <span>複製連結</span>
@@ -402,7 +410,7 @@ export function showDetailModal(row, opts = {}) {
           <button id="modal-share-btn" class="btn btn-primary" style="padding:8px 14px;font-size:0.85rem;gap:6px;">
             ${icon('share', { size: 14 })}
             <span>產生分享圖</span>
-          </button>
+          </button>`}
           <button class="modal-close" aria-label="關閉">${icon('x', { size: 16 })}</button>
         </div>
       </div>
@@ -439,7 +447,7 @@ export function showDetailModal(row, opts = {}) {
   });
 
   // Copy-link button — 永久連結（依賴 row._seq 全域穩定編號）
-  const copyBtn = backdrop.querySelector('#modal-copylink-btn');
+  const copyBtn = backdrop.querySelector('#modal-copylink-btn');   // 屏蔽時不存在
   const copyLabelEl = copyBtn?.querySelector('span:last-child');
   let copyResetTimer;
   copyBtn?.addEventListener('click', async () => {
@@ -472,8 +480,9 @@ export function showDetailModal(row, opts = {}) {
     }
   });
 
-  // Share button
+  // Share button（屏蔽時整顆不渲染）
   const shareBtn = backdrop.querySelector('#modal-share-btn');
+  if (!shareBtn) return;
   const originalShareHTML = shareBtn.innerHTML;
   shareBtn.addEventListener('click', async () => {
     if (shareBtn.disabled) return;

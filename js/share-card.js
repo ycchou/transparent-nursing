@@ -1,5 +1,5 @@
 // 一鍵產生單筆資料分享圖片（1080 × 1350，IG 4:5 直式）
-import { getCategory } from './config.js?v=bc013aa3c8';
+import { getCategory } from './config.js?v=195619d02b';
 
 const KEY_LABELS = {
   // ICU
@@ -210,6 +210,10 @@ function loadHtml2Canvas() {
 
 /** 產生分享圖片，回傳 { blob, dataUrl } */
 export async function generateShareCard(row) {
+  // 防線：短評被 AI 審稿屏蔽的筆數不產分享圖（UI 已隱藏按鈕，這裡擋程式呼叫）
+  if (String(row?.modVerdict || '').toLowerCase() === 'block') {
+    throw new Error('此筆短評已屏蔽，暫停分享');
+  }
   // 延遲載入 html2canvas（首次按下才下載）
   const html2canvas = await loadHtml2Canvas();
 
