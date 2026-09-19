@@ -101,7 +101,7 @@ async function rateLimited(env, ip, ua, day) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const GEMINI_MODEL = 'gemini-3.8-flash';   // 模型 ID；換模型改這行即可
-const MOD_TIMEOUT_MS = 6000;               // 逾時就放行，不讓使用者卡在送出中
+const MOD_TIMEOUT_MS = 8000;               // 逾時就放行，不讓使用者卡在送出中（實測 1.2-3.8 秒）
 const MOD_MAX_CHARS = 2000;                // 送進模型的文字上限（短評本來就短）
 const MOD_FIELDS = ['comment', 'specialBenefits'];  // 需要審的自由文字欄位
 
@@ -129,7 +129,7 @@ A 明知不實、惡意捏造，足以損害他人名譽或信用。注意：主
   可查證的勞動條件陳述都不算 A。
 B 揭露同事、主管、病人、家屬可識別之資訊（真實姓名、綽號＋職稱、床號、員編、
   足以指認特定個人的描述）。機構名稱與單位名稱是平台既有欄位，不算。
-C 違反醫療法 §72 的具體病情、診斷或個案事件細節。
+C 違反醫療法 §72 的具體病情、診斷或個案事件細節。病人的床號、病情、診斷屬 C 不是 B。
 D 涉及兒童及少年身分之可識別資訊（兒少法 §69）。
 E 涉及性侵害被害人身分之可識別資訊（性侵害防治法 §13）。
 F 仇恨言論、針對特定個人的人身攻擊、騷擾或威脅。
@@ -193,7 +193,9 @@ async function moderate(fields, env) {
           safetySettings: MOD_SAFETY,
           generationConfig: {
             temperature: 0,
-            maxOutputTokens: 256,
+            // Gemini 3.x 預設會思考，思考 token 與輸出共用這個額度（實測約 200-300）。
+            // 256 會讓完整提示詞下的回應被截斷 → JSON 解析失敗 → 靜默 fail-open。
+            maxOutputTokens: 1024,
             responseMimeType: 'application/json',
             responseSchema: MOD_SCHEMA,
           },
