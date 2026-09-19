@@ -34,3 +34,7 @@ yarn.lock
 *.bak
 *.cache
 /tmp/
+
+# Apps Script（clasp 本機設定，含 scriptId）
+apps-script/.clasp.json
+.clasprc.json

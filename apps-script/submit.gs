@@ -26,6 +26,9 @@ const CATEGORIES = ['ward', 'icu', 'er', 'or', 'outpatient', 'clinic', 'dialysis
 // 只存在 audit 分頁、不進公開分頁的欄位
 const AUDIT_ONLY = ['modReason', 'modStatus'];
 
+// 標記資料來源：'form' = 真投稿、'mock' = seed.gs 灌的測試資料（見 seed.gs）
+const DATA_SOURCE_COLUMN = 'dataSource';
+
 function doPost(e) {
   try {
     const p = (e && e.parameter) || {};
@@ -44,18 +47,21 @@ function doPost(e) {
       .sort();
 
     if (sh.getLastRow() === 0) {
-      sh.appendRow(['timestamp'].concat(publicKeys));
+      sh.appendRow(['timestamp'].concat(publicKeys).concat([DATA_SOURCE_COLUMN]));
     }
     // 表頭已存在但少了新欄位（例如後來才加的 modVerdict / modCode）→ 自動補在最右邊，
     // 舊資料列該欄留空。這樣改欄位時不必手動改試算表。
     let header = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
-    const missing = publicKeys.filter(function (k) { return header.indexOf(k) === -1; });
+    const missing = publicKeys.concat([DATA_SOURCE_COLUMN])
+      .filter(function (k) { return header.indexOf(k) === -1; });
     if (missing.length) {
       sh.getRange(1, header.length + 1, 1, missing.length).setValues([missing]);
       header = header.concat(missing);
     }
     sh.appendRow(header.map(function (h) {
-      return h === 'timestamp' ? ts : (p[h] !== undefined ? p[h] : '');
+      if (h === 'timestamp') return ts;
+      if (h === DATA_SOURCE_COLUMN) return 'form';   // 'mock' = seed.gs 灌的測試資料
+      return p[h] !== undefined ? p[h] : '';
     }));
 
     // ② 稽核分頁：AI 審稿理由原文（勿發布）
@@ -70,6 +76,46 @@ function doPost(e) {
   } catch (err) {
     return _json({ error: String(err) });
   }
+}
+
+/**
+ * 健康檢查：部署完把 /exec 網址貼進瀏覽器，看到 {"ok":true,...} 就代表部署成功。
+ * 不吐任何投稿內容。
+ */
+function doGet() {
+  let sheetOk = false;
+  try {
+    SpreadsheetApp.openById(SHEET_ID);
+    sheetOk = true;
+  } catch (err) {
+    sheetOk = false;
+  }
+  return _json({
+    ok: true,
+    service: 'transparent-nursing submit',
+    sheetReachable: sheetOk,
+    secretConfigured: SHARED_SECRET !== 'REPLACE_WITH_SHARED_SECRET',
+    now: Utilities.formatDate(new Date(), TIMEZONE, 'yyyy-MM-dd HH:mm'),
+  });
+}
+
+/**
+ * 自我測試：不經 Worker，直接模擬一筆投稿寫進 sub_other 與 audit。
+ * 在編輯器選這個函式按執行，確認試算表真的寫得進去。測完記得把那列刪掉。
+ */
+function selftest() {
+  const res = doPost({ parameter: {
+    secret: SHARED_SECRET,
+    category: 'other',
+    institutionName: '【測試】請刪除這一列',
+    comment: 'selftest',
+    modVerdict: 'allow',
+    modCode: '',
+    modStatus: 'skip',
+    modReason: '',
+  } });
+  Logger.log(res.getContent());
+  return res.getContent();
 }
 
 function _json(obj) {

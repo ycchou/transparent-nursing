@@ -48,12 +48,38 @@ export const MODE = 'mock';   // 'mock' | 'live'
 
 ## Step 2：部署 Apps Script
 
-1. 新建 Apps Script 專案，把 `apps-script/submit.gs` 整份貼進去
-2. 填最上面的 `SHEET_ID`、`SHARED_SECRET`（自己產一組隨機字串，等下 Worker 要用同一組）
+1. 新建 Apps Script 專案，把 `apps-script/submit.gs` 與 `apps-script/seed.gs` 貼進去
+   （或用 clasp 從 repo 推送，見 `apps-script/README.md`）
+2. 填兩支檔案最上面的 `SHEET_ID` / `SEED_SHEET_ID`，以及 `SHARED_SECRET`
+   （自己產一組隨機字串，等下 Worker 要用同一組）
 3. 部署 → 新增部署作業 → 網頁應用程式；執行身分「我」、存取權「任何人」→ 取得 `/exec` 網址
 
-> 改過 `submit.gs` 之後要「管理部署作業 → 編輯 → 版本：新版本」才會生效，
-> 只存檔不會更新線上版本。
+**確認部署成功**：把 `/exec` 網址直接貼進瀏覽器，應該看到
+
+```json
+{"ok":true,"sheetReachable":true,"secretConfigured":true,"now":"..."}
+```
+
+`sheetReachable: false` → SHEET_ID 填錯；`secretConfigured: false` → SHARED_SECRET 還沒改。
+
+**確認寫得進去**：在編輯器選 `selftest` 執行，會往 `sub_other` 寫一列
+「【測試】請刪除這一列」，確認後把那列刪掉。
+
+> ⚠ 改過程式碼之後要「管理部署作業 → 編輯 → 版本：**新版本**」才會生效。
+> 只存檔（或 clasp push）不會更新線上的 `/exec`，這是最常見的踩雷點。
+
+## Step 2.5：把測試資料灌進 Sheet（選用）
+
+正式 Sheet 剛建好是空的，直接切 live 會看到空白平台。想先讓整條線有資料可跑：
+
+在 Apps Script 編輯器選 `seedAll` 執行 → 從線上抓 10 個 `data/mock/*.csv`，
+寫進各自的 `sub_<類別>` 分頁（約 3000 列）。每一列都會標記 `dataSource = 'mock'`，
+真投稿則是 `'form'`。重跑 `seedAll` 會先清掉舊的 mock 列，不會重複堆疊。
+
+> ⚠ **正式對外開放前一定要執行 `clearSeeded()`。**
+> mock 資料是「真實醫院名稱 + 假的職場條件」，留在正式 Sheet 裡，
+> 瀏覽者無法分辨哪些是真投稿——這比空白平台糟糕得多。
+> 更保險的做法是開兩份試算表：測試那份灌 mock，正式那份保持乾淨。
 
 ## Step 3：Turnstile
 
@@ -134,7 +160,9 @@ csvUrls: {
 
 ## 上線檢查表
 
+- [ ] `/exec` 健康檢查回 `sheetReachable: true`、`secretConfigured: true`
 - [ ] Sheet 的 `sub_*` 分頁有資料，`audit` 分頁有審稿紀錄
+- [ ] **已執行 `clearSeeded()`**，`sub_*` 分頁裡沒有 `dataSource = 'mock'` 的列
 - [ ] `audit` 分頁**沒有**被發布
 - [ ] `js/env.js`：`MODE = 'live'`、`submitEndpoint` 已填、要開放的類別 `csvUrls` 已填
 - [ ] `js/env.js` 的 `turnstileSiteKey` 已填，且表單上真的看得到 widget
