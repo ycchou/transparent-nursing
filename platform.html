@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#2E86AB" />
   <!-- 軟鎖總開關（js/gate.js）：鎖定期非公開頁導向 coming-soon -->
-  <script src="./js/gate.js?v=fc32ea82a0"></script>
+  <script src="./js/gate.js?v=df3713909c"></script>
 
   <!-- SEO -->
   <title>分享平台 — 護理職場透明化運動</title>
@@ -51,26 +51,26 @@
   <link rel="stylesheet" href="css/styles.css?v=b7fabb7cea" />
 
     <!-- modulepreload：平行載入 ES module 鏈（首次造訪快 30-50%） -->
-  <link rel="modulepreload" href="./js/components.js?v=fc32ea82a0" />
-  <link rel="modulepreload" href="./js/config.js?v=fc32ea82a0" />
-  <link rel="modulepreload" href="./js/contribution-gate.js?v=fc32ea82a0" />
-  <link rel="modulepreload" href="./js/data-loader.js?v=fc32ea82a0" />
-  <link rel="modulepreload" href="./js/donate-fab.js?v=fc32ea82a0" />
-  <link rel="modulepreload" href="./js/donate.js?v=fc32ea82a0" />
-  <link rel="modulepreload" href="./js/env.js?v=fc32ea82a0" />
-  <link rel="modulepreload" href="./js/filters.js?v=fc32ea82a0" />
-  <link rel="modulepreload" href="./js/hospital-shortname.js?v=fc32ea82a0" />
-  <link rel="modulepreload" href="./js/icons.js?v=fc32ea82a0" />
-  <link rel="modulepreload" href="./js/institution-name.js?v=fc32ea82a0" />
-  <link rel="modulepreload" href="./js/moderation.js?v=fc32ea82a0" />
-  <link rel="modulepreload" href="./js/pagination.js?v=fc32ea82a0" />
-  <link rel="modulepreload" href="./js/pwa-prompt.js?v=fc32ea82a0" />
-  <link rel="modulepreload" href="./js/scroll-hint.js?v=fc32ea82a0" />
-  <link rel="modulepreload" href="./js/share-card.js?v=fc32ea82a0" />
-  <link rel="modulepreload" href="./js/stats-kpi.js?v=fc32ea82a0" />
-  <link rel="modulepreload" href="./js/table.js?v=fc32ea82a0" />
-  <link rel="modulepreload" href="./js/toast.js?v=fc32ea82a0" />
-  <link rel="modulepreload" href="./js/tooltip.js?v=fc32ea82a0" />
+  <link rel="modulepreload" href="./js/components.js?v=df3713909c" />
+  <link rel="modulepreload" href="./js/config.js?v=df3713909c" />
+  <link rel="modulepreload" href="./js/contribution-gate.js?v=df3713909c" />
+  <link rel="modulepreload" href="./js/data-loader.js?v=df3713909c" />
+  <link rel="modulepreload" href="./js/donate-fab.js?v=df3713909c" />
+  <link rel="modulepreload" href="./js/donate.js?v=df3713909c" />
+  <link rel="modulepreload" href="./js/env.js?v=df3713909c" />
+  <link rel="modulepreload" href="./js/filters.js?v=df3713909c" />
+  <link rel="modulepreload" href="./js/hospital-shortname.js?v=df3713909c" />
+  <link rel="modulepreload" href="./js/icons.js?v=df3713909c" />
+  <link rel="modulepreload" href="./js/institution-name.js?v=df3713909c" />
+  <link rel="modulepreload" href="./js/moderation.js?v=df3713909c" />
+  <link rel="modulepreload" href="./js/pagination.js?v=df3713909c" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=df3713909c" />
+  <link rel="modulepreload" href="./js/scroll-hint.js?v=df3713909c" />
+  <link rel="modulepreload" href="./js/share-card.js?v=df3713909c" />
+  <link rel="modulepreload" href="./js/stats-kpi.js?v=df3713909c" />
+  <link rel="modulepreload" href="./js/table.js?v=df3713909c" />
+  <link rel="modulepreload" href="./js/toast.js?v=df3713909c" />
+  <link rel="modulepreload" href="./js/tooltip.js?v=df3713909c" />
 
   <!-- 強制清除舊版 cache -->
   <script>
@@ -215,16 +215,16 @@
   <!-- PapaParse 必須先載（CSV 解析）；html2canvas 改為點「產生分享圖」時 lazy load -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
   <script type="module">
-    import { CATEGORIES } from './js/config.js?v=fc32ea82a0';
-    import { mountLayout } from './js/components.js?v=fc32ea82a0';
-    import { icon, renderIcons } from './js/icons.js?v=fc32ea82a0';
-    import { loadCategory, loadAll, startAutoRefresh } from './js/data-loader.js?v=fc32ea82a0';
-    import { renderTable, setView, showDetailModal } from './js/table.js?v=fc32ea82a0';
-    import { createFilterState, renderFilters, applyFilters } from './js/filters.js?v=fc32ea82a0';
-    import { renderKpiStrip, mountSalaryCalculator } from './js/stats-kpi.js?v=fc32ea82a0';
-    import { getGate } from './js/contribution-gate.js?v=fc32ea82a0';
-    import { showToast } from './js/toast.js?v=fc32ea82a0';
-    import { mountDonateFab } from './js/donate-fab.js?v=fc32ea82a0';
+    import { CATEGORIES } from './js/config.js?v=df3713909c';
+    import { mountLayout } from './js/components.js?v=df3713909c';
+    import { icon, renderIcons } from './js/icons.js?v=df3713909c';
+    import { loadCategory, loadAll, startAutoRefresh } from './js/data-loader.js?v=df3713909c';
+    import { renderTable, setView, showDetailModal } from './js/table.js?v=df3713909c';
+    import { createFilterState, renderFilters, applyFilters } from './js/filters.js?v=df3713909c';
+    import { renderKpiStrip, mountSalaryCalculator } from './js/stats-kpi.js?v=df3713909c';
+    import { getGate } from './js/contribution-gate.js?v=df3713909c';
+    import { showToast } from './js/toast.js?v=df3713909c';
+    import { mountDonateFab } from './js/donate-fab.js?v=df3713909c';
 
     mountLayout();
     mountDonateFab();  // 右下角浮動白愛心（可拖曳、可關閉；點擊開內建捐款彈窗）
