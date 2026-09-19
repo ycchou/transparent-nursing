@@ -101,7 +101,7 @@ async function rateLimited(env, ip, ua, day) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const GEMINI_MODEL = 'gemini-3.8-flash';   // 模型 ID；換模型改這行即可
-const MOD_TIMEOUT_MS = 8000;               // 逾時就放行，不讓使用者卡在送出中（實測 1.2-3.8 秒）
+const MOD_TIMEOUT_MS = 10000;              // 逾時就放行，不讓使用者卡在送出中（關思考後實測 1.3-1.5 秒）
 const MOD_MAX_CHARS = 2000;                // 送進模型的文字上限（短評本來就短）
 const MOD_FIELDS = ['comment', 'specialBenefits'];  // 需要審的自由文字欄位
 
@@ -181,7 +181,9 @@ async function moderate(fields, env) {
   if (!env.GEMINI_API_KEY) return { status: 'error', verdict: 'allow', code: '', reason: 'no-key' };
 
   try {
-    const r = await fetch(
+    // 關閉思考：實測判定結果與開啟時完全一致，但延遲從 1.7-5.5 秒（變異大）
+    // 收斂到 1.3-1.5 秒。思考模式的長尾會撞上逾時 → 靜默放行，得不償失。
+    const call = (thinking) => fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
       {
         method: 'POST',
@@ -193,15 +195,21 @@ async function moderate(fields, env) {
           safetySettings: MOD_SAFETY,
           generationConfig: {
             temperature: 0,
-            // Gemini 3.x 預設會思考，思考 token 與輸出共用這個額度（實測約 200-300）。
-            // 256 會讓完整提示詞下的回應被截斷 → JSON 解析失敗 → 靜默 fail-open。
+            // Gemini 3.x 的思考 token 與輸出共用這個額度（實測約 200-300）。
+            // 調小會讓回應被截斷 → JSON 解析失敗 → 靜默 fail-open。不要調小。
             maxOutputTokens: 1024,
             responseMimeType: 'application/json',
             responseSchema: MOD_SCHEMA,
+            ...(thinking ? {} : { thinkingConfig: { thinkingBudget: 0 } }),
           },
         }),
       },
     );
+
+    // 換了不支援 thinkingConfig 的模型時會回 400；退回開思考重試一次，
+    // 免得因為一個設定欄位就整套靜默失效。
+    let r = await call(false);
+    if (r.status === 400) r = await call(true);
     if (!r.ok) return { status: 'error', verdict: 'allow', code: '', reason: 'http-' + r.status };
 
     const d = await r.json();

@@ -93,12 +93,19 @@ npx wrangler deploy
 |---|---|---|
 | `GEMINI_MODEL` | `gemini-3.8-flash` | 模型 ID。換模型或 ID 有出入時改這行 |
 | `MOD_TIMEOUT_MS` | `8000` | 逾時就放行，不讓使用者卡在「送出中」（實測 1.5–6 秒） |
-| `MOD_MAX_CHARS` | `2000` | 送進模型的文字上限 |
+| `MOD_MAX_CHARS` | `2000` | 送進模型的文字上限。超過的部分**不會被審**，所以要比表單的字數上限大（目前表單 1000 字，見 `js/form-engine.js` 的 `TEXTAREA_MAX_LENGTH`） |
 | `MOD_FIELDS` | `comment`, `specialBenefits` | 要審的欄位 |
 | `MOD_SYSTEM_PROMPT` | — | 判定規則，見下節 |
 
 **fail-open**：逾時、HTTP 錯誤、JSON 壞掉、沒設 key，一律 `allow` 並記 `modStatus=error`。
 寧可漏判（事後人工下架），不要因為 AI 掛掉就擋下真實投稿。
+
+**延遲與長文**：思考模式的延遲變異大（同樣長度 1.7–5.5 秒），長尾會撞上逾時 →
+靜默放行。因此關閉思考（`thinkingBudget: 0`），實測收斂到 1.3–1.5 秒，判定結果不變；
+偶爾仍有 5–6 秒的尖峰，所以逾時設 10 秒。若換到不支援 `thinkingConfig` 的模型，
+API 會回 400，程式會自動退回開思考重試一次，不會因為一個設定欄位整套失效。
+
+字數：表單限 1000 字，實測 1000 字仍穩定在 1.3–1.5 秒。
 
 ⚠ **`maxOutputTokens` 不能調小。** Gemini 3.x 預設會思考，思考 token 與輸出**共用**
 這個額度（實測每次約 200–300）。原本設 256 時，完整提示詞下的回應會被截斷，

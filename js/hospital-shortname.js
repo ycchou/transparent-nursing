@@ -10,7 +10,7 @@
 //
 // 頁面若要在載入完成後自動 re-render，可監聽 window 'hospitalShortNamesReady' event。
 
-import { normalizeInstitutionName } from './institution-name.js?v=195619d02b';
+import { normalizeInstitutionName } from './institution-name.js?v=c89de21e4b';
 
 const SHORT_MAP = new Map();       // 正式名稱 → 簡稱
 const CODE_MAP = new Map();        // 正規化名稱 → 機構代碼

@@ -2,13 +2,13 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=195619d02b';
-import { renderIcons, icon } from './icons.js?v=195619d02b';
-import { markContributed } from './contribution-gate.js?v=195619d02b';
-import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=195619d02b';
-import { showToast } from './toast.js?v=195619d02b';
-import { submitEndpoint as envSubmitEndpoint, turnstileSiteKey } from './env.js?v=195619d02b';
-import { notePwaIntent } from './pwa-prompt.js?v=195619d02b';
+import { mountLayout } from './components.js?v=c89de21e4b';
+import { renderIcons, icon } from './icons.js?v=c89de21e4b';
+import { markContributed } from './contribution-gate.js?v=c89de21e4b';
+import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=c89de21e4b';
+import { showToast } from './toast.js?v=c89de21e4b';
+import { submitEndpoint as envSubmitEndpoint, turnstileSiteKey } from './env.js?v=c89de21e4b';
+import { notePwaIntent } from './pwa-prompt.js?v=c89de21e4b';
 
 const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 避開易混字元 0/O/1/I/L
 let currentCaptcha = '';
@@ -21,6 +21,7 @@ let SUBMIT_ENDPOINT = '';  // 空字串 = 測試模式（只模擬送出）
 let CATEGORY_SLUG = '';    // 類別 slug，決定寫入 Sheet 的哪個分頁
 let FORM_LOAD_TS = 0;      // 表單初始化時間戳（反垃圾：填寫過快判為機器）
 const MIN_FILL_MS = 60000; // 少於 1 分鐘送出 → 視為可疑
+const TEXTAREA_MAX_LENGTH = 1000;  // 自由文字欄位字數上限（可用 field.maxLength 覆寫）
 // 反垃圾：單一裝置（localStorage）限制。可被清 storage／無痕繞過，屬軟限制。
 const MAX_SUBMITS_PER_DAY = 5;                 // 每日提交上限
 const MIN_SUBMIT_INTERVAL_MS = 5 * 60 * 1000;  // 兩次提交最小間隔（5 分鐘）
@@ -66,9 +67,12 @@ function renderField(field) {
                     inputmode="numeric" min="${field.min ?? 0}" step="${field.step ?? 1}"
                     ${field.required ? 'required' : ''} aria-describedby="err-${field.name}" />`;
   } else if (field.type === 'textarea') {
+    // 字數上限：太長的短評會撐爆卡片版面，也會拉長 AI 審稿時間（逾時＝沒審到）
+    const maxLen = field.maxLength ?? TEXTAREA_MAX_LENGTH;
     inputHtml = `<textarea class="dform-textarea" id="f-${field.name}" name="${field.name}"
-                    rows="${field.rows ?? 3}" ${field.required ? 'required' : ''}
-                    aria-describedby="err-${field.name}"></textarea>`;
+                    rows="${field.rows ?? 3}" maxlength="${maxLen}" ${field.required ? 'required' : ''}
+                    aria-describedby="err-${field.name}"></textarea>
+                 <div class="dform-charcount" data-for="${field.name}" data-max="${maxLen}">0 / ${maxLen}</div>`;
   } else if (field.type === 'select') {
     const opts = normalizeOptions(field.options);
     inputHtml = `
@@ -1106,6 +1110,20 @@ export function initDepartmentForm({ schema, draftKey, slug = '', submitEndpoint
     formEl.addEventListener('submit', onSubmit);
   }
   FORM_LOAD_TS = Date.now();  // 反垃圾：記錄表單就緒時間，供送出時計算填寫耗時
+
+  // 自由文字欄位：即時字數計數（接近上限時變色）
+  document.querySelectorAll('.dform-textarea[maxlength]').forEach((ta) => {
+    const counter = ta.parentElement?.querySelector('.dform-charcount');
+    if (!counter) return;
+    const max = Number(counter.dataset.max) || TEXTAREA_MAX_LENGTH;
+    const update = () => {
+      const n = ta.value.length;
+      counter.textContent = `${n} / ${max}`;
+      counter.classList.toggle('is-near', n >= max * 0.9);
+    };
+    ta.addEventListener('input', update);
+    update();
+  });
 
   // 法律條款 checkbox 任一切換 → 清掉錯誤狀態
   const consentCardEl = document.getElementById('dform-consent-card');
