@@ -118,6 +118,37 @@ function doGet() {
 }
 
 /**
+ * 一鍵產生並儲存 SHARED_SECRET（不必開終端機）。
+ *
+ * 在編輯器選這個函式按「執行」，它會產生一串 64 碼隨機字串存進指令碼屬性，
+ * 並印在下方的「執行記錄」。複製那串去設 Worker 的 APPS_SCRIPT_SECRET，
+ * 兩邊一字不差就通了。
+ *
+ * 已經有值時不會覆蓋（避免把正在用的密鑰洗掉），只會把現有的印出來。
+ * 真要換一組，先執行 clearSecret() 再跑這支。
+ */
+function setupSecret() {
+  const props = PropertiesService.getScriptProperties();
+  const existing = props.getProperty('SHARED_SECRET');
+  if (existing) {
+    Logger.log('已經有 SHARED_SECRET，沿用現有這組：\n' + existing);
+    return existing;
+  }
+  // UUID 去掉連字號 = 32 碼十六進位；串兩組成 64 碼
+  const secret = (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, '');
+  props.setProperty('SHARED_SECRET', secret);
+  Logger.log('已產生並儲存 SHARED_SECRET：\n' + secret +
+             '\n\n請複製上面那串，設成 Worker 的 APPS_SCRIPT_SECRET。');
+  return secret;
+}
+
+/** 刪掉現有的 SHARED_SECRET（要換密鑰時用）。刪掉後 doPost 會拒絕所有請求。 */
+function clearSecret() {
+  PropertiesService.getScriptProperties().deleteProperty('SHARED_SECRET');
+  Logger.log('已刪除 SHARED_SECRET。記得重新執行 setupSecret() 並同步更新 Worker。');
+}
+
+/**
  * 自我測試：不經 Worker、也不經密鑰檢查，直接寫一筆進 sub_other 與 audit。
  * 在編輯器選這個函式按執行，確認試算表真的寫得進去。測完記得把那列刪掉。
  */

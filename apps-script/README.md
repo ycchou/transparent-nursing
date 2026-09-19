@@ -16,7 +16,12 @@
 | `SHARED_SECRET` | ✅ | 與 Worker 的 `APPS_SCRIPT_SECRET` 相同。**沒設就一律拒絕所有請求** |
 | `SHEET_ID` | — | 綁定在試算表上的專案不必設，會自動用所屬那份 |
 
-設定路徑：Apps Script 編輯器 → 左側齒輪「專案設定」→ 最下方「指令碼屬性」→ 新增。
+**最簡單的設法**：在編輯器選 `setupSecret` 函式按「執行」，它會自動產生一組 64 碼
+隨機字串存好，並印在下方「執行記錄」。複製那串去設 Worker 的 `APPS_SCRIPT_SECRET`。
+要換一組就先執行 `clearSecret()` 再跑一次 `setupSecret()`。
+
+手動設也可以：編輯器 → 左側齒輪「專案設定」→ 最下方「指令碼屬性」→
+「新增指令碼屬性」→ 屬性填 `SHARED_SECRET`、值填隨機字串 → 儲存。
 
 ## 首次設定
 
