@@ -2,13 +2,13 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=c89de21e4b';
-import { renderIcons, icon } from './icons.js?v=c89de21e4b';
-import { markContributed } from './contribution-gate.js?v=c89de21e4b';
-import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=c89de21e4b';
-import { showToast } from './toast.js?v=c89de21e4b';
-import { submitEndpoint as envSubmitEndpoint, turnstileSiteKey } from './env.js?v=c89de21e4b';
-import { notePwaIntent } from './pwa-prompt.js?v=c89de21e4b';
+import { mountLayout } from './components.js?v=129363d8ee';
+import { renderIcons, icon } from './icons.js?v=129363d8ee';
+import { markContributed } from './contribution-gate.js?v=129363d8ee';
+import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=129363d8ee';
+import { showToast } from './toast.js?v=129363d8ee';
+import { submitEndpoint as envSubmitEndpoint, turnstileSiteKey } from './env.js?v=129363d8ee';
+import { notePwaIntent } from './pwa-prompt.js?v=129363d8ee';
 
 const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 避開易混字元 0/O/1/I/L
 let currentCaptcha = '';
@@ -1033,9 +1033,8 @@ function initTurnstile() {
   const host = document.createElement('div');
   host.className = 'dform-field dform-turnstile-field';
   host.id = 'dform-turnstile-field';
+  // widget 本身已經說明得夠清楚，不再加標題與說明文字
   host.innerHTML = `
-    <label class="dform-label">人機驗證<span class="dform-required" aria-hidden="true">*</span></label>
-    <div class="dform-help">由 Cloudflare Turnstile 提供，多數情況會自動通過，不必輸入任何東西</div>
     <div id="dform-turnstile"></div>
     <div class="dform-error-msg" id="err-turnstile">請完成人機驗證後再送出</div>`;
   bar.parentNode.insertBefore(host, bar);
