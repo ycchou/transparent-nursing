@@ -1774,64 +1774,94 @@ body.viol-modal-open { overflow: hidden; }
 }
 
 /* ---------- 屏蔽短評（AI 審稿判定 block）---------- */
-.comment-blocked {
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface-soft);
-  padding: 10px 12px;
-  cursor: default;
-}
-.comment-blocked-reason {
-  display: flex;
-  align-items: flex-start;
-  gap: 6px;
-  color: var(--muted);
-  font-size: 0.82rem;
-  line-height: 1.5;
-  margin-bottom: 8px;
-}
-.comment-blocked-lock { flex-shrink: 0; }
+/* 低調優先：預設只有一段柔化的文字 + 一行淡灰說明，不加框、不加底色、不用 emoji。
+   數學題收在 .comment-unlock 裡，點「展開」才出現。 */
+.comment-blocked { cursor: default; }
+
 .comment-blocked-text {
-  filter: blur(5px);
+  filter: blur(4.5px);
+  opacity: 0.55;
   user-select: none;
   pointer-events: none;
   color: var(--ink-soft);
   line-height: 1.8;
   max-height: 4.6em;
   overflow: hidden;
-  margin-bottom: 10px;
 }
 .comment-blocked.is-compact .comment-blocked-text {
   max-height: 3em;
   filter: blur(4px);
 }
-.comment-unlock-label {
-  display: block;
+
+.comment-blocked-foot {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.comment-blocked-reason {
   color: var(--muted-light);
   font-size: 0.76rem;
-  margin-bottom: 5px;
+  letter-spacing: 0.01em;
 }
-.comment-unlock-row { display: flex; gap: 6px; }
+.comment-unlock-toggle {
+  border: 0;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 0.76rem;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.comment-unlock-toggle:hover { color: var(--primary); }
+
+/* 數學題：展開後才出現，維持同樣的淡色調 */
+.comment-unlock {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.comment-unlock-q {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.03em;
+}
 .comment-unlock-input {
-  flex: 1;
-  min-width: 0;
-  padding: 6px 10px;
+  width: 4.5em;
+  padding: 4px 8px;
   border: 1px solid var(--border);
-  border-radius: var(--radius-btn);
+  border-radius: 8px;
   font-family: var(--font-sans);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   color: var(--ink);
   background: var(--surface);
+  text-align: center;
 }
 .comment-unlock-input:focus { outline: none; border-color: var(--primary-soft); }
 .comment-unlock-input.is-error { border-color: var(--danger); }
-.comment-unlock-btn { padding: 6px 14px; font-size: 0.82rem; flex-shrink: 0; }
+.comment-unlock-btn {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 8px;
+  padding: 4px 12px;
+  font: inherit;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.comment-unlock-btn:hover { border-color: var(--primary-soft); color: var(--primary); }
 .comment-unlock-err {
   color: var(--danger);
   font-size: 0.76rem;
-  margin-top: 5px;
 }
-/* 表格窄欄位：只給一行鎖定提示 */
+
+/* 表格窄欄位：只給一行提示 */
 .comment-cell-blocked {
   color: var(--muted-light);
   font-size: 0.82rem;

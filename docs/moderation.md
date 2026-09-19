@@ -2,7 +2,7 @@
 
 投稿送出當下由 Gemini 判斷「自由文字欄位」是否可能違反服務條款第 4 條。
 **判定不擋下投稿**：所有欄位照常即時公開，只有被判 block 的短評在分享平台上先打模糊、
-標示理由，瀏覽者輸入當天日期即可展開。
+標示理由，瀏覽者答對一題數學（a × b ± c）即可展開。
 
 ## 三種判定
 
@@ -178,6 +178,6 @@ J. 明顯亂填、無意義、灌水（亂碼、複製貼上、與欄位無關�
 
 - `worker-submit/src/index.js` — ④ AI 審稿（提示詞、Gemini 呼叫、fail-open）
 - `apps-script/submit.gs` — 表頭自動補欄
-- `js/moderation.js` — 前端馬賽克、理由文案、日期解鎖
+- `js/moderation.js` — 前端馬賽克、理由文案、數學題解鎖
 - `js/table.js` / `js/filters.js` / `js/share-card.js` — 屏蔽短評不進搜尋、不進分享圖
 - `terms.html` §1、§5（v1.1）、`participate.html` — 對外說明
