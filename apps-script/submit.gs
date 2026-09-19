@@ -49,47 +49,51 @@ function doPost(e) {
     if (!secret || p.secret !== secret) {
       return _json({ error: 'forbidden' });
     }
-
-    const ss = book_();
-    const slug = CATEGORIES.indexOf(String(p.category || '')) >= 0 ? String(p.category) : 'other';
-    const ts = Utilities.formatDate(new Date(), TIMEZONE, 'yyyy-MM-dd HH:mm');
-
-    // ① 公開分頁：sub_<類別>
-    const sh = ss.getSheetByName('sub_' + slug) || ss.insertSheet('sub_' + slug);
-    const publicKeys = Object.keys(p)
-      .filter(function (k) { return k !== 'secret' && k !== 'category' && AUDIT_ONLY.indexOf(k) < 0; })
-      .sort();
-
-    if (sh.getLastRow() === 0) {
-      sh.appendRow(['timestamp'].concat(publicKeys).concat([DATA_SOURCE_COLUMN]));
-    }
-    // 表頭已存在但少了新欄位（例如後來才加的 modVerdict / modCode）→ 自動補在最右邊，
-    // 舊資料列該欄留空。這樣改欄位時不必手動改試算表。
-    let header = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
-    const missing = publicKeys.concat([DATA_SOURCE_COLUMN])
-      .filter(function (k) { return header.indexOf(k) === -1; });
-    if (missing.length) {
-      sh.getRange(1, header.length + 1, 1, missing.length).setValues([missing]);
-      header = header.concat(missing);
-    }
-    sh.appendRow(header.map(function (h) {
-      if (h === 'timestamp') return ts;
-      if (h === DATA_SOURCE_COLUMN) return 'form';   // 'mock' = seed.gs 灌的測試資料
-      return p[h] !== undefined ? p[h] : '';
-    }));
-
-    // ② 稽核分頁：AI 審稿理由原文（勿發布）
-    const audit = ss.getSheetByName('audit') || ss.insertSheet('audit');
-    if (audit.getLastRow() === 0) {
-      audit.appendRow(['timestamp', 'category', 'modVerdict', 'modCode', 'modStatus', 'modReason', 'comment']);
-    }
-    audit.appendRow([ts, slug, p.modVerdict || '', p.modCode || '',
-                     p.modStatus || '', p.modReason || '', p.comment || '']);
-
-    return _json({ ok: true, sheet: 'sub_' + slug });
+    return _json(writeSubmission_(p));
   } catch (err) {
     return _json({ error: String(err) });
   }
+}
+
+/** 實際寫入試算表。密鑰檢查在 doPost，這裡只管寫，讓 selftest 可以直接呼叫。 */
+function writeSubmission_(p) {
+  const ss = book_();
+  const slug = CATEGORIES.indexOf(String(p.category || '')) >= 0 ? String(p.category) : 'other';
+  const ts = Utilities.formatDate(new Date(), TIMEZONE, 'yyyy-MM-dd HH:mm');
+
+  // ① 公開分頁：sub_<類別>
+  const sh = ss.getSheetByName('sub_' + slug) || ss.insertSheet('sub_' + slug);
+  const publicKeys = Object.keys(p)
+    .filter(function (k) { return k !== 'secret' && k !== 'category' && AUDIT_ONLY.indexOf(k) < 0; })
+    .sort();
+
+  if (sh.getLastRow() === 0) {
+    sh.appendRow(['timestamp'].concat(publicKeys).concat([DATA_SOURCE_COLUMN]));
+  }
+  // 表頭已存在但少了新欄位（例如後來才加的 modVerdict / modCode）→ 自動補在最右邊，
+  // 舊資料列該欄留空。這樣改欄位時不必手動改試算表。
+  let header = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
+  const missing = publicKeys.concat([DATA_SOURCE_COLUMN])
+    .filter(function (k) { return header.indexOf(k) === -1; });
+  if (missing.length) {
+    sh.getRange(1, header.length + 1, 1, missing.length).setValues([missing]);
+    header = header.concat(missing);
+  }
+  sh.appendRow(header.map(function (h) {
+    if (h === 'timestamp') return ts;
+    if (h === DATA_SOURCE_COLUMN) return 'form';   // 'mock' = seed.gs 灌的測試資料
+    return p[h] !== undefined ? p[h] : '';
+  }));
+
+  // ② 稽核分頁：AI 審稿理由原文（勿發布）
+  const audit = ss.getSheetByName('audit') || ss.insertSheet('audit');
+  if (audit.getLastRow() === 0) {
+    audit.appendRow(['timestamp', 'category', 'modVerdict', 'modCode', 'modStatus', 'modReason', 'comment']);
+  }
+  audit.appendRow([ts, slug, p.modVerdict || '', p.modCode || '',
+                   p.modStatus || '', p.modReason || '', p.comment || '']);
+
+  return { ok: true, sheet: 'sub_' + slug };
 }
 
 /**
@@ -114,12 +118,11 @@ function doGet() {
 }
 
 /**
- * 自我測試：不經 Worker，直接模擬一筆投稿寫進 sub_other 與 audit。
+ * 自我測試：不經 Worker、也不經密鑰檢查，直接寫一筆進 sub_other 與 audit。
  * 在編輯器選這個函式按執行，確認試算表真的寫得進去。測完記得把那列刪掉。
  */
 function selftest() {
-  const res = doPost({ parameter: {
-    secret: prop_('SHARED_SECRET'),
+  const res = writeSubmission_({
     category: 'other',
     institutionName: '【測試】請刪除這一列',
     comment: 'selftest',
@@ -127,9 +130,9 @@ function selftest() {
     modCode: '',
     modStatus: 'skip',
     modReason: '',
-  } });
-  Logger.log(res.getContent());
-  return res.getContent();
+  });
+  Logger.log(JSON.stringify(res));
+  return res;
 }
 
 function _json(obj) {
