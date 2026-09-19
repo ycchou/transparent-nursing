@@ -2,7 +2,7 @@
 //
 // 資料來源由 js/env.js 的 MODE 決定：mock 讀下面的 csvUrlMock（data/mock/*.csv），
 // live 讀 env.js 的 LIVE.csvUrls（Google Sheet 發布 CSV）。這裡不必再改。
-import { csvUrlFor } from './env.js?v=5a73c56fcf';
+import { csvUrlFor } from './env.js?v=4d01035720';
 
 export const SITE = {
   name: '護理職場透明化運動',
@@ -10,7 +10,7 @@ export const SITE = {
   contactEmail: 'transparentnursing@example.org',
   lastUpdated: '自動依資料動態計算',
   // 捐款後端（綠界 ECPay）Cloudflare Worker。見 worker-donate/。留空＝顯示「設定中」。
-  donateApi: 'https://tn-donate.victory63225.workers.dev',
+  donateApi: 'https://tn-donate.ycchou-1005.workers.dev',
 };
 
 // 共用欄位（所有類別都會出現）
