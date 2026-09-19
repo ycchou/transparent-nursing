@@ -1837,7 +1837,7 @@ body.viol-modal-open { overflow: hidden; }
   letter-spacing: 0.03em;
 }
 .comment-unlock-input {
-  width: 4.5em;
+  width: 5em;
   padding: 4px 8px;
   border: 1px solid var(--border);
   border-radius: 8px;

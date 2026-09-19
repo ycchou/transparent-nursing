@@ -41,19 +41,32 @@ export function blockReason(row) {
 }
 
 /**
- * 解鎖用的數學題：a × b ± c，同時含乘法與加減法。
- * 難度刻意壓在心算範圍（乘數 2-9、加減 1-19），目的是讓人多花三秒、擋掉隨手點開，
- * 不是要考倒人。每次渲染都重新出題，同一則短評再打開也要重算。
+ * 解鎖用的數學題：一定同時含乘法與加減法，兩種題型隨機挑一種。
+ *   A  兩位數 × 一位數 ± 兩位數     例：17 × 6 − 38
+ *   B  兩組乘積相加減                例：8 × 7 + 9 × 4
+ * 難度目標：需要真的動腦算十幾秒，但不必紙筆；答案一律為正整數。
+ * 每次渲染都重新出題，同一則短評再打開也要重算。
  */
 export function mathChallenge() {
   const pick = (min, max) => min + Math.floor(Math.random() * (max - min + 1));
-  const a = pick(2, 9);
-  const b = pick(2, 9);
-  const c = pick(1, 19);
-  // 減法時結果要為正，否則改用加法（a×b 最小 4，c 最大 19，有機會變負）
-  const op = (Math.random() < 0.5 && a * b > c) ? '−' : '+';
-  const answer = op === '+' ? a * b + c : a * b - c;
-  return { text: `${a} × ${b} ${op} ${c}`, answer, a, b, c, op };
+
+  if (Math.random() < 0.5) {
+    // A：兩位數 × 一位數 ± 兩位數
+    const a = pick(11, 29);
+    const b = pick(3, 9);
+    const c = pick(11, 49);
+    const op = (Math.random() < 0.5 && a * b > c) ? '−' : '+';
+    const answer = op === '+' ? a * b + c : a * b - c;
+    return { text: `${a} × ${b} ${op} ${c}`, answer };
+  }
+
+  // B：兩組乘積相加減
+  let a = pick(3, 12), b = pick(3, 9), c = pick(3, 12), d = pick(2, 9);
+  let op = Math.random() < 0.5 ? '−' : '+';
+  if (op === '−' && a * b < c * d) { [a, c] = [c, a]; [b, d] = [d, b]; }  // 保證為正
+  if (op === '−' && a * b === c * d) op = '+';                            // 避開答案 0
+  const answer = op === '+' ? a * b + c * d : a * b - c * d;
+  return { text: `${a} × ${b} ${op} ${c} × ${d}`, answer };
 }
 
 /**
