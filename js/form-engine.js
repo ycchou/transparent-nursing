@@ -2,13 +2,13 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=3eafcab1f5';
-import { renderIcons, icon } from './icons.js?v=3eafcab1f5';
-import { markContributed } from './contribution-gate.js?v=3eafcab1f5';
-import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=3eafcab1f5';
-import { showToast } from './toast.js?v=3eafcab1f5';
-import { submitEndpoint as envSubmitEndpoint, turnstileSiteKey } from './env.js?v=3eafcab1f5';
-import { notePwaIntent } from './pwa-prompt.js?v=3eafcab1f5';
+import { mountLayout } from './components.js?v=a8db27857e';
+import { renderIcons, icon } from './icons.js?v=a8db27857e';
+import { markContributed } from './contribution-gate.js?v=a8db27857e';
+import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=a8db27857e';
+import { showToast } from './toast.js?v=a8db27857e';
+import { submitEndpoint as envSubmitEndpoint, turnstileSiteKey } from './env.js?v=a8db27857e';
+import { notePwaIntent } from './pwa-prompt.js?v=a8db27857e';
 
 const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 避開易混字元 0/O/1/I/L
 let currentCaptcha = '';
