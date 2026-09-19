@@ -1793,6 +1793,10 @@ body.viol-modal-open { overflow: hidden; }
   filter: blur(4px);
 }
 
+/* display:flex 會蓋過瀏覽器對 [hidden] 的 display:none，要明確擋回來 */
+.comment-blocked-foot[hidden],
+.comment-unlock[hidden] { display: none; }
+
 .comment-blocked-foot {
   display: flex;
   align-items: baseline;
