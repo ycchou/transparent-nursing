@@ -6,7 +6,7 @@
 // 臨時切換不必改檔：網址加 ?data=live 或 ?data=mock，該分頁（sessionStorage）內持續有效，
 // 關掉分頁就恢復 MODE 的設定。方便正式站上偷看測試資料、或測試站驗正式資料。
 
-export const MODE = 'mock';   // ← 上線切成 'live'
+export const MODE = 'live';   // 'mock' = 測試資料；'live' = 正式 Sheet
 
 export const LIVE = {
   // tn-submit Worker 的 /submit 網址（部署後填；見 worker-submit/README.md）
@@ -20,16 +20,16 @@ export const LIVE = {
   // 各類別的 Google Sheet「發布到網路 → CSV」連結（見 docs/sheet-setup.md）
   // 留空的類別在 live 模式下會自動退回該類別的測試資料，並在 console 提示。
   csvUrls: {
-    ward: '',
-    icu: '',
-    er: '',
-    or: '',
-    outpatient: '',
-    clinic: '',
-    dialysis: '',
-    psych: '',
-    special: '',
-    other: '',
+    ward: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRnAcUKN-H2XeRtwJNkpFKnCvYp0jT6fTcrnvfjWLLgn2BrikNJ9ou-XbNpZ4muZjCX9-MG_Km_egWD/pub?gid=1619966913&single=true&output=csv',
+    icu: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRnAcUKN-H2XeRtwJNkpFKnCvYp0jT6fTcrnvfjWLLgn2BrikNJ9ou-XbNpZ4muZjCX9-MG_Km_egWD/pub?gid=1085245300&single=true&output=csv',
+    er: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRnAcUKN-H2XeRtwJNkpFKnCvYp0jT6fTcrnvfjWLLgn2BrikNJ9ou-XbNpZ4muZjCX9-MG_Km_egWD/pub?gid=1958504913&single=true&output=csv',
+    or: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRnAcUKN-H2XeRtwJNkpFKnCvYp0jT6fTcrnvfjWLLgn2BrikNJ9ou-XbNpZ4muZjCX9-MG_Km_egWD/pub?gid=1769109021&single=true&output=csv',
+    outpatient: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRnAcUKN-H2XeRtwJNkpFKnCvYp0jT6fTcrnvfjWLLgn2BrikNJ9ou-XbNpZ4muZjCX9-MG_Km_egWD/pub?gid=1738656482&single=true&output=csv',
+    clinic: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRnAcUKN-H2XeRtwJNkpFKnCvYp0jT6fTcrnvfjWLLgn2BrikNJ9ou-XbNpZ4muZjCX9-MG_Km_egWD/pub?gid=572861337&single=true&output=csv',
+    dialysis: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRnAcUKN-H2XeRtwJNkpFKnCvYp0jT6fTcrnvfjWLLgn2BrikNJ9ou-XbNpZ4muZjCX9-MG_Km_egWD/pub?gid=955402923&single=true&output=csv',
+    psych: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRnAcUKN-H2XeRtwJNkpFKnCvYp0jT6fTcrnvfjWLLgn2BrikNJ9ou-XbNpZ4muZjCX9-MG_Km_egWD/pub?gid=1474979905&single=true&output=csv',
+    special: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRnAcUKN-H2XeRtwJNkpFKnCvYp0jT6fTcrnvfjWLLgn2BrikNJ9ou-XbNpZ4muZjCX9-MG_Km_egWD/pub?gid=1310869433&single=true&output=csv',
+    other: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRnAcUKN-H2XeRtwJNkpFKnCvYp0jT6fTcrnvfjWLLgn2BrikNJ9ou-XbNpZ4muZjCX9-MG_Km_egWD/pub?gid=1127558216&single=true&output=csv',
   },
 };
 
