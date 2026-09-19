@@ -4,8 +4,8 @@
  * 用途：正式 Sheet 剛建好是空的，直接切 live 會看到空白平台。這支從線上抓
  *       10 個 mock CSV 寫進各自的 sub_<類別> 分頁，讓整條線可以先跑起來。
  *
- * 使用：跟 submit.gs 放在同一個 Apps Script 專案，填好下面的 SHEET_ID，
- *       在編輯器選 seedAll 按執行。第一次會要求授權（存取試算表 + 外部網址）。
+ * 使用：跟 submit.gs 放在同一個 Apps Script 專案，在編輯器選 seedAll 按執行。
+ *       第一次會要求授權（存取試算表 + 外部網址）。
  *
  * ⚠ 這些是**假資料，但用的是真實醫院名稱**。灌進正式 Sheet 後，
  *   瀏覽者無法分辨哪些是真投稿。所以：
@@ -13,7 +13,7 @@
  *     · 正式對外開放前請執行 clearSeeded() 把它們全部刪掉
  *     · 更保險的做法是開兩份試算表：測試用的灌 mock、正式的保持乾淨
  */
-const SEED_SHEET_ID = 'REPLACE_WITH_SHEET_ID';   // 與 submit.gs 的 SHEET_ID 相同
+// 試算表由 submit.gs 的 book_() 決定（指令碼屬性 SHEET_ID，或本專案所屬的試算表）
 const SEED_BASE_URL = 'https://ycchou.github.io/transparent-nursing/data/mock/';
 const SEED_CATEGORIES = ['ward', 'icu', 'er', 'or', 'outpatient', 'clinic', 'dialysis', 'psych', 'special', 'other'];
 const SEED_MARK_COLUMN = 'dataSource';           // 'mock' = 本支灌的，'form' = 真投稿
@@ -27,7 +27,7 @@ function seedAll() {
 
 /** 灌單一類別；分頁已有測試資料時先清掉再灌，不會重複堆疊 */
 function seedCategory(slug) {
-  const ss = SpreadsheetApp.openById(SEED_SHEET_ID);
+  const ss = book_();
   const name = 'sub_' + slug;
 
   let csv;
@@ -83,7 +83,7 @@ function seedCategory(slug) {
 
 /** 刪掉所有 dataSource = 'mock' 的列（真投稿不動）。正式開放前務必執行一次。 */
 function clearSeeded() {
-  const ss = SpreadsheetApp.openById(SEED_SHEET_ID);
+  const ss = book_();
   const report = SEED_CATEGORIES.map(function (slug) {
     const sh = ss.getSheetByName('sub_' + slug);
     if (!sh) return 'sub_' + slug + '：分頁不存在';

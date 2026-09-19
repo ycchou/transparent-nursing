@@ -7,14 +7,39 @@
 | `appsscript.json` | 專案設定（時區、Web App 權限） |
 | `.clasp.json.example` | clasp 設定範本，複製成 `.clasp.json` 並填 scriptId |
 
+## 機密怎麼放
+
+**不要寫在程式碼裡**——這個 repo 是公開的。改放「專案設定 → 指令碼屬性」：
+
+| 屬性 | 必填 | 說明 |
+|---|---|---|
+| `SHARED_SECRET` | ✅ | 與 Worker 的 `APPS_SCRIPT_SECRET` 相同。**沒設就一律拒絕所有請求** |
+| `SHEET_ID` | — | 綁定在試算表上的專案不必設，會自動用所屬那份 |
+
+設定路徑：Apps Script 編輯器 → 左側齒輪「專案設定」→ 最下方「指令碼屬性」→ 新增。
+
 ## 首次設定
 
-1. 開一個新的 Apps Script 專案，記下網址裡的 **scriptId**
-   （`https://script.google.com/.../projects/<scriptId>/edit`）
-2. 把 `submit.gs`、`seed.gs` 貼進去，或用下面的 clasp 推送
-3. 填好兩支檔案最上面的 `SHEET_ID` / `SEED_SHEET_ID` 與 `SHARED_SECRET`
-4. 部署 → 新增部署作業 → **網頁應用程式**；執行身分「我」、存取權「任何人」
-5. 複製 `/exec` 網址，設成 Worker secret `APPS_SCRIPT_URL`
+用 clasp 一次建好試算表 + 綁定的指令碼專案：
+
+```bash
+npx clasp login                      # 若還沒登入
+cd apps-script
+npx clasp create-script --type sheets --title "護理職場透明化 — 投稿資料"
+npx clasp push --force               # ⚠ create-script 會覆蓋本地 appsscript.json，
+                                     #   先 git checkout apps-script/appsscript.json 再 push
+npx clasp create-deployment --description "tn-submit web app"
+```
+
+接著**一定要在瀏覽器完成授權**，否則 Web App 對外會回 403：
+
+1. `npx clasp open-script` 開啟編輯器
+2. 選 `selftest` 函式按執行 → 出現授權視窗 → 允許（存取試算表、連外網址）
+3. 回到 `/exec` 網址，應該就看得到 JSON 了
+
+> Web App 以 API 建立的部署，在擁有者完成 OAuth 同意前一律 403，這不是設定錯誤。
+
+最後複製 `/exec` 網址，設成 Worker secret `APPS_SCRIPT_URL`。
 
 ## 用 clasp 從這個 repo 推送
 
@@ -25,7 +50,9 @@ cp apps-script/.clasp.json.example apps-script/.clasp.json
 cd apps-script && npx clasp push    # 把 .gs 推上去
 ```
 
-> `.clasp.json` 已列入 .gitignore，不會進版控。
+> `.clasp.json`（含 scriptId 與試算表 id）已列入 .gitignore，不會進版控。
+> `clasp create-script` 會用預設 manifest 覆蓋本地 `appsscript.json`（時區、Web App 權限都會掉），
+> push 前記得 `git checkout apps-script/appsscript.json`。
 
 ## 改完程式碼一定要「部署新版本」
 
@@ -39,9 +66,10 @@ clasp push 或在編輯器存檔都**只更新原始碼，不會更新線上的 
 ## 確認有沒有活著
 
 - **健康檢查**：把 `/exec` 網址直接貼進瀏覽器，應該看到
-  `{"ok":true,"sheetReachable":true,"secretConfigured":true,...}`
-  - `sheetReachable: false` → `SHEET_ID` 填錯或沒有存取權
-  - `secretConfigured: false` → `SHARED_SECRET` 還是範本的預設值
+  `{"ok":true,"sheetReachable":true,"sheetTitle":"...","secretConfigured":true,...}`
+  - HTTP 403 → 擁有者還沒在編輯器完成授權，見「首次設定」第 2 步
+  - `sheetReachable: false` → `SHEET_ID` 屬性填錯，或專案沒綁在試算表上
+  - `secretConfigured: false` → 還沒設 `SHARED_SECRET` 指令碼屬性
 - **寫入測試**：在編輯器選 `selftest` 執行，會往 `sub_other` 寫一列
   「【測試】請刪除這一列」。確認寫得進去後把那列刪掉。
 

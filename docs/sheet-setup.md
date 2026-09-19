@@ -37,7 +37,11 @@ export const MODE = 'mock';   // 'mock' | 'live'
 
 ## Step 1：建 Google Sheet
 
-建一份試算表就好（不必一個類別一份），記下網址 `/d/<這段>/edit` 的 SHEET_ID。
+`npx clasp create-script --type sheets` 會一次建好試算表 + 綁定的指令碼專案
+（見 `apps-script/README.md`），不必分開建，也不必記 SHEET_ID。
+
+手動建也可以：建一份試算表就好（不必一個類別一份），
+記下網址 `/d/<這段>/edit` 設成指令碼屬性 `SHEET_ID`。
 
 分頁會自動長出來，不用先建：
 
@@ -50,8 +54,9 @@ export const MODE = 'mock';   // 'mock' | 'live'
 
 1. 新建 Apps Script 專案，把 `apps-script/submit.gs` 與 `apps-script/seed.gs` 貼進去
    （或用 clasp 從 repo 推送，見 `apps-script/README.md`）
-2. 填兩支檔案最上面的 `SHEET_ID` / `SEED_SHEET_ID`，以及 `SHARED_SECRET`
-   （自己產一組隨機字串，等下 Worker 要用同一組）
+2. 在「專案設定 → 指令碼屬性」新增 `SHARED_SECRET`（自己產一組隨機字串，
+   等下 Worker 要用同一組）。**機密不寫在程式碼裡，這個 repo 是公開的。**
+   專案綁在試算表上時不必設 `SHEET_ID`
 3. 部署 → 新增部署作業 → 網頁應用程式；執行身分「我」、存取權「任何人」→ 取得 `/exec` 網址
 
 **確認部署成功**：把 `/exec` 網址直接貼進瀏覽器，應該看到

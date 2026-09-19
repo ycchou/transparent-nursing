@@ -15,9 +15,22 @@
  *   audit       AI 審稿的理由原文集中在這裡，**不要**發布。公開分頁只留
  *               modVerdict / modCode 兩欄，前端靠它們決定是否打馬賽克。
  */
-const SHEET_ID = 'REPLACE_WITH_SHEET_ID';          // 目標試算表 ID（網址 /d/<這段>/edit）
-const SHARED_SECRET = 'REPLACE_WITH_SHARED_SECRET'; // 與 Worker 的 APPS_SCRIPT_SECRET 相同
+// 機密與 ID 都放「專案設定 → 指令碼屬性」，不寫在程式碼裡
+// （本 repo 是公開的，寫死會直接外流）：
+//   SHARED_SECRET  必填，與 Worker 的 APPS_SCRIPT_SECRET 相同。沒設 → 一律拒絕，
+//                  所以在你設定之前，這個 Web App 收不下任何東西。
+//   SHEET_ID       選填。本專案綁在試算表上時不必設，會自動用所屬的那份。
 const TIMEZONE = 'Asia/Taipei';
+
+function prop_(key) {
+  return PropertiesService.getScriptProperties().getProperty(key) || '';
+}
+
+/** 目標試算表：優先用 SHEET_ID 屬性，沒有就用本專案所屬的試算表 */
+function book_() {
+  const id = prop_('SHEET_ID');
+  return id ? SpreadsheetApp.openById(id) : SpreadsheetApp.getActiveSpreadsheet();
+}
 
 // 允許的類別 slug（與 js/config.js 的 CATEGORIES 一致）。不在清單內一律歸 other，
 // 避免有人偽造 category 參數在試算表裡長出一堆垃圾分頁。
@@ -32,11 +45,12 @@ const DATA_SOURCE_COLUMN = 'dataSource';
 function doPost(e) {
   try {
     const p = (e && e.parameter) || {};
-    if (p.secret !== SHARED_SECRET) {
+    const secret = prop_('SHARED_SECRET');
+    if (!secret || p.secret !== secret) {
       return _json({ error: 'forbidden' });
     }
 
-    const ss = SpreadsheetApp.openById(SHEET_ID);
+    const ss = book_();
     const slug = CATEGORIES.indexOf(String(p.category || '')) >= 0 ? String(p.category) : 'other';
     const ts = Utilities.formatDate(new Date(), TIMEZONE, 'yyyy-MM-dd HH:mm');
 
@@ -83,18 +97,18 @@ function doPost(e) {
  * 不吐任何投稿內容。
  */
 function doGet() {
-  let sheetOk = false;
+  let sheetName = '';
   try {
-    SpreadsheetApp.openById(SHEET_ID);
-    sheetOk = true;
+    sheetName = book_().getName();
   } catch (err) {
-    sheetOk = false;
+    sheetName = '';
   }
   return _json({
     ok: true,
     service: 'transparent-nursing submit',
-    sheetReachable: sheetOk,
-    secretConfigured: SHARED_SECRET !== 'REPLACE_WITH_SHARED_SECRET',
+    sheetReachable: !!sheetName,
+    sheetTitle: sheetName,
+    secretConfigured: !!prop_('SHARED_SECRET'),
     now: Utilities.formatDate(new Date(), TIMEZONE, 'yyyy-MM-dd HH:mm'),
   });
 }
@@ -105,7 +119,7 @@ function doGet() {
  */
 function selftest() {
   const res = doPost({ parameter: {
-    secret: SHARED_SECRET,
+    secret: prop_('SHARED_SECRET'),
     category: 'other',
     institutionName: '【測試】請刪除這一列',
     comment: 'selftest',
