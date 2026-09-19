@@ -1,6 +1,7 @@
 // CSV 載入 + 解析 + 雙層 cache（記憶體 + localStorage）
 // 之後把 CATEGORIES[].csvUrl 改成 Google Sheet 發布 CSV URL 即可
-import { CATEGORIES } from './config.js?v=5582ae07e5';
+import { CATEGORIES } from './config.js?v=9dce8622e3';
+import { currentMode } from './env.js?v=9dce8622e3';
 
 // 記憶體 cache：同 session 內不重抓
 const cache = new Map();
@@ -8,7 +9,8 @@ const cache = new Map();
 // localStorage cache 設定
 const CACHE_VERSION = 'v13';                 // v13: 新增 AI 審稿欄位 modVerdict/modCode（屏蔽短評）；v12: 加護病房班別新增「混合制」+ mock 全量重跑（ICU 160 筆）；v11: 新增第 10 類「診所」；v10: mock 資料擴充；v9: 推薦指數 1-5 + 精神科
 const TTL_MS = 10 * 60 * 1000;                // 10 分鐘自動失效
-const STORAGE_KEY = (slug) => `nursing_csv_${CACHE_VERSION}_${slug}`;
+// key 帶資料模式：測試資料與正式資料各自 cache，切換 ?data= 不會讀到另一邊的殘留
+const STORAGE_KEY = (slug) => `nursing_csv_${CACHE_VERSION}_${currentMode()}_${slug}`;
 const FETCH_TIMEOUT_MS = 12000;
 const AUTO_REFRESH_INTERVAL_MS = 10 * 60 * 1000;  // 10 分鐘自動背景刷新
 

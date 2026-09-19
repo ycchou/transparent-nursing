@@ -101,6 +101,13 @@
 
 ⚠️ **送出後無法撤回任何單一筆資料** — 因為我們不知道哪一筆是你的。請在送出前審慎評估你填的內容。
 
+## 正式資料 / 測試資料開關
+
+全站只有 `js/env.js` 一個開關：`MODE = 'mock'` 讀 `data/mock/*.csv`、表單只模擬送出；
+`MODE = 'live'` 讀 Google Sheet 發布的 CSV、表單真的送出。
+臨時切換可在網址加 `?data=live` 或 `?data=mock`（該分頁有效，右下角會顯示標記）。
+接線步驟見 [docs/sheet-setup.md](docs/sheet-setup.md)。
+
 ## 怎麼參與？
 
 ### 我想分享我的職場

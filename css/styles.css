@@ -1714,6 +1714,22 @@ body.viol-modal-open { overflow: hidden; }
   margin-bottom: 4px;
 }
 
+/* 資料來源臨時覆寫（網址 ?data=live / ?data=mock）時的小標記 */
+.tn-mode-badge {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 9999;
+  padding: 4px 10px;
+  border-radius: var(--radius-tag);
+  background: rgba(29, 53, 87, 0.85);
+  color: #fff;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  box-shadow: var(--shadow-soft);
+}
+
 /* 送出後：短評被屏蔽的提示 */
 .dform-thanks-blocked {
   margin: 14px auto 0;

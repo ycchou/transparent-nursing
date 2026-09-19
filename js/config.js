@@ -1,5 +1,8 @@
 // 全站設定：類別 metadata、欄位 schema、CSV 連結
-// 第二階段把 csvUrl 換成 Google Sheet「發布到網路 → CSV」連結即可
+//
+// 資料來源由 js/env.js 的 MODE 決定：mock 讀下面的 csvUrlMock（data/mock/*.csv），
+// live 讀 env.js 的 LIVE.csvUrls（Google Sheet 發布 CSV）。這裡不必再改。
+import { csvUrlFor } from './env.js?v=9dce8622e3';
 
 export const SITE = {
   name: '護理職場透明化運動',
@@ -44,7 +47,7 @@ export const CATEGORIES = [
     accent: '#FCE2C8',
     description: '收治內、外、婦、兒、安寧等各科住院病人，是護理人力配置的主力。',
     icon: 'bed',
-    csvUrl: 'data/mock/ward.csv',
+    csvUrlMock: 'data/mock/ward.csv',
     formUrl: '',
     formStatus: 'coming-soon',
     specificFields: [
@@ -66,7 +69,7 @@ export const CATEGORIES = [
     accent: '#A8DADC',
     description: '照護需密集監測的重症病人，第一線面對呼吸器、血流動力監測與各式維生管路。',
     icon: 'activity',
-    csvUrl: 'data/mock/icu.csv',
+    csvUrlMock: 'data/mock/icu.csv',
     formUrl: 'participate-icu.html',
     formStatus: 'live',
     specificFields: [
@@ -106,7 +109,7 @@ export const CATEGORIES = [
     accent: '#FAD2CF',
     description: '同時運轉檢傷、急救與留觀，病情與人流難以預測，是全院步調最緊湊的單位。',
     icon: 'siren',
-    csvUrl: 'data/mock/er.csv',
+    csvUrlMock: 'data/mock/er.csv',
     formUrl: '',
     formStatus: 'coming-soon',
     specificFields: [
@@ -127,7 +130,7 @@ export const CATEGORIES = [
     accent: '#FDD5E2',
     description: '負責刷手、流動與恢復室照護，是手術全程不可或缺的一環。',
     icon: 'scissors',
-    csvUrl: 'data/mock/or.csv',
+    csvUrlMock: 'data/mock/or.csv',
     formUrl: '',
     formStatus: 'coming-soon',
     specificFields: [
@@ -150,7 +153,7 @@ export const CATEGORIES = [
     accent: '#E0CFF7',
     description: '醫院體系的門診部（醫學中心／區域／地區醫院），協助看診、檢查、衛教與行政。獨立診所請見「診所」。',
     icon: 'calendar-check',
-    csvUrl: 'data/mock/outpatient.csv',
+    csvUrlMock: 'data/mock/outpatient.csv',
     formUrl: 'participate-outpatient.html',
     formStatus: 'live',
     specificFields: [
@@ -184,7 +187,7 @@ export const CATEGORIES = [
     accent: '#CBEEF6',
     description: '獨立於醫院之外的基層診所（家醫、小兒、耳鼻喉、皮膚、婦產、身心、復健、醫美、洗腎診所等）。多為單一或少數醫師、護理人力精簡，常一人身兼跟診、批價、給藥、注射與行政，勞動條件與醫院體系差異大。',
     icon: 'building',
-    csvUrl: 'data/mock/clinic.csv',
+    csvUrlMock: 'data/mock/clinic.csv',
     formUrl: 'participate-clinic.html',
     formStatus: 'live',
     specificFields: [
@@ -223,7 +226,7 @@ export const CATEGORIES = [
     accent: '#C6E8DC',
     description: '照護長期透析（血液、腹膜）的慢性病人，值班與待命制度差異大。',
     icon: 'droplet',
-    csvUrl: 'data/mock/dialysis.csv',
+    csvUrlMock: 'data/mock/dialysis.csv',
     formUrl: 'participate-dialysis.html',
     formStatus: 'live',
     specificFields: [
@@ -250,7 +253,7 @@ export const CATEGORIES = [
     accent: '#C7D2FE',
     description: '收治精神急性、慢性與日間照護病人，著重保護室、約束隔離與人權保障，照護邏輯與一般病房截然不同。',
     icon: 'brain',
-    csvUrl: 'data/mock/psych.csv',
+    csvUrlMock: 'data/mock/psych.csv',
     formUrl: '',
     formStatus: 'coming-soon',
     specificFields: [
@@ -277,7 +280,7 @@ export const CATEGORIES = [
     accent: '#B7E9E1',
     description: '執行心導管、電燒、內視鏡、血管攝影、高壓氧等檢查與介入治療，技術專精、風險高，常需 on-call 並面對輻射暴露。',
     icon: 'zap',
-    csvUrl: 'data/mock/special.csv',
+    csvUrlMock: 'data/mock/special.csv',
     formUrl: '',
     formStatus: 'coming-soon',
     specificFields: [
@@ -299,7 +302,7 @@ export const CATEGORIES = [
     accent: '#D1D9E2',
     description: '涵蓋前述場域以外的護理職務：專科護理師、居家／社區、長照、學校、月子中心、公衛，以及廠護／職護、臨床研究（CRA／CRC）、藥廠醫材等較少被看見的職涯。',
     icon: 'briefcase-medical',
-    csvUrl: 'data/mock/other.csv',
+    csvUrlMock: 'data/mock/other.csv',
     formUrl: 'participate-other.html',
     formStatus: 'live',
     specificFields: [
@@ -322,6 +325,16 @@ export const CATEGORIES = [
     ],
   },
 ];
+
+// 依 js/env.js 的模式決定每個類別實際要讀的 CSV。
+// 用 getter 而非固定值，讓網址 ?data=live / ?data=mock 的臨時切換即時生效。
+CATEGORIES.forEach((c) => {
+  Object.defineProperty(c, 'csvUrl', {
+    enumerable: true,
+    get() { return csvUrlFor(this.slug, this.csvUrlMock); },
+  });
+});
+
 
 export function getCategory(slug) {
   return CATEGORIES.find((c) => c.slug === slug) || null;

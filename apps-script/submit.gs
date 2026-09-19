@@ -8,10 +8,23 @@
  *
  * 安全：只接受帶正確 secret 的請求（由 tn-submit Worker 轉發並附上）。
  *       直接打本 Web App 而未帶 secret 者一律拒絕。
+ *
+ * 分頁配置：
+ *   sub_<類別>  每個類別一個分頁（sub_icu、sub_ward…），各自「發布到網路 → CSV」
+ *               後填進 js/env.js 的 LIVE.csvUrls。欄位隨投稿自動長出來。
+ *   audit       AI 審稿的理由原文集中在這裡，**不要**發布。公開分頁只留
+ *               modVerdict / modCode 兩欄，前端靠它們決定是否打馬賽克。
  */
 const SHEET_ID = 'REPLACE_WITH_SHEET_ID';          // 目標試算表 ID（網址 /d/<這段>/edit）
-const SHEET_NAME = 'submissions';                   // 分頁名稱，不存在會自動建立
 const SHARED_SECRET = 'REPLACE_WITH_SHARED_SECRET'; // 與 Worker 的 APPS_SCRIPT_SECRET 相同
+const TIMEZONE = 'Asia/Taipei';
+
+// 允許的類別 slug（與 js/config.js 的 CATEGORIES 一致）。不在清單內一律歸 other，
+// 避免有人偽造 category 參數在試算表裡長出一堆垃圾分頁。
+const CATEGORIES = ['ward', 'icu', 'er', 'or', 'outpatient', 'clinic', 'dialysis', 'psych', 'special', 'other'];
+
+// 只存在 audit 分頁、不進公開分頁的欄位
+const AUDIT_ONLY = ['modReason', 'modStatus'];
 
 function doPost(e) {
   try {
@@ -19,27 +32,41 @@ function doPost(e) {
     if (p.secret !== SHARED_SECRET) {
       return _json({ error: 'forbidden' });
     }
-    const ss = SpreadsheetApp.openById(SHEET_ID);
-    const sh = ss.getSheetByName(SHEET_NAME) || ss.insertSheet(SHEET_NAME);
 
-    // 第一次寫入時建立表頭（_ts + 各欄位名，排除 secret）
+    const ss = SpreadsheetApp.openById(SHEET_ID);
+    const slug = CATEGORIES.indexOf(String(p.category || '')) >= 0 ? String(p.category) : 'other';
+    const ts = Utilities.formatDate(new Date(), TIMEZONE, 'yyyy-MM-dd HH:mm');
+
+    // ① 公開分頁：sub_<類別>
+    const sh = ss.getSheetByName('sub_' + slug) || ss.insertSheet('sub_' + slug);
+    const publicKeys = Object.keys(p)
+      .filter(function (k) { return k !== 'secret' && k !== 'category' && AUDIT_ONLY.indexOf(k) < 0; })
+      .sort();
+
     if (sh.getLastRow() === 0) {
-      const keys = Object.keys(p).filter((k) => k !== 'secret').sort();
-      sh.appendRow(['_ts'].concat(keys));
+      sh.appendRow(['timestamp'].concat(publicKeys));
     }
     // 表頭已存在但少了新欄位（例如後來才加的 modVerdict / modCode）→ 自動補在最右邊，
-    // 舊資料列該欄留空。這樣 Worker 加欄位時不必手動改試算表。
+    // 舊資料列該欄留空。這樣改欄位時不必手動改試算表。
     let header = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
-    const missing = Object.keys(p).filter((k) => k !== 'secret' && header.indexOf(k) === -1).sort();
+    const missing = publicKeys.filter(function (k) { return header.indexOf(k) === -1; });
     if (missing.length) {
       sh.getRange(1, header.length + 1, 1, missing.length).setValues([missing]);
       header = header.concat(missing);
     }
+    sh.appendRow(header.map(function (h) {
+      return h === 'timestamp' ? ts : (p[h] !== undefined ? p[h] : '');
+    }));
 
-    const row = header.map((h) => (h === '_ts' ? new Date() : (p[h] !== undefined ? p[h] : '')));
-    sh.appendRow(row);
+    // ② 稽核分頁：AI 審稿理由原文（勿發布）
+    const audit = ss.getSheetByName('audit') || ss.insertSheet('audit');
+    if (audit.getLastRow() === 0) {
+      audit.appendRow(['timestamp', 'category', 'modVerdict', 'modCode', 'modStatus', 'modReason', 'comment']);
+    }
+    audit.appendRow([ts, slug, p.modVerdict || '', p.modCode || '',
+                     p.modStatus || '', p.modReason || '', p.comment || '']);
 
-    return _json({ ok: true });
+    return _json({ ok: true, sheet: 'sub_' + slug });
   } catch (err) {
     return _json({ error: String(err) });
   }

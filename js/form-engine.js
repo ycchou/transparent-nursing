@@ -2,12 +2,13 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=5582ae07e5';
-import { renderIcons, icon } from './icons.js?v=5582ae07e5';
-import { markContributed } from './contribution-gate.js?v=5582ae07e5';
-import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=5582ae07e5';
-import { showToast } from './toast.js?v=5582ae07e5';
-import { notePwaIntent } from './pwa-prompt.js?v=5582ae07e5';
+import { mountLayout } from './components.js?v=9dce8622e3';
+import { renderIcons, icon } from './icons.js?v=9dce8622e3';
+import { markContributed } from './contribution-gate.js?v=9dce8622e3';
+import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=9dce8622e3';
+import { showToast } from './toast.js?v=9dce8622e3';
+import { submitEndpoint as envSubmitEndpoint } from './env.js?v=9dce8622e3';
+import { notePwaIntent } from './pwa-prompt.js?v=9dce8622e3';
 
 const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 避開易混字元 0/O/1/I/L
 let currentCaptcha = '';
@@ -16,7 +17,8 @@ const DRAFT_DEBOUNCE_MS = 500;
 // ===== 每頁單例狀態（由 initDepartmentForm 設定）=====
 let SCHEMA = [];
 let DRAFT_KEY = '';
-let SUBMIT_ENDPOINT = ''; // 空字串 = 測試模式
+let SUBMIT_ENDPOINT = '';  // 空字串 = 測試模式（只模擬送出）
+let CATEGORY_SLUG = '';    // 類別 slug，決定寫入 Sheet 的哪個分頁
 let FORM_LOAD_TS = 0;      // 表單初始化時間戳（反垃圾：填寫過快判為機器）
 const MIN_FILL_MS = 60000; // 少於 1 分鐘送出 → 視為可疑
 // 反垃圾：單一裝置（localStorage）限制。可被清 storage／無痕繞過，屬軟限制。
@@ -456,6 +458,7 @@ async function onSubmit(e) {
     if (SUBMIT_ENDPOINT) {
       // 第二階段：真正打 Apps Script
       const body = new URLSearchParams();
+      body.append('category', CATEGORY_SLUG);   // 決定寫入 Sheet 的哪個分頁
       Object.entries(data).forEach(([k, v]) => {
         if (Array.isArray(v)) {
           v.forEach((item) => body.append(k, item));
@@ -977,10 +980,13 @@ function isCaptchaValid() {
 
 // ===== 對外初始化 =====
 
-export function initDepartmentForm({ schema, draftKey, submitEndpoint = '' }) {
+export function initDepartmentForm({ schema, draftKey, slug = '', submitEndpoint = null }) {
   SCHEMA = schema || [];
   DRAFT_KEY = draftKey || 'dform_draft';
-  SUBMIT_ENDPOINT = submitEndpoint || '';
+  // 類別 slug：決定寫進 Google Sheet 的哪個分頁。預設由 draftKey 推導（dform_draft_icu → icu）
+  CATEGORY_SLUG = slug || DRAFT_KEY.replace(/^dform_draft_?/, '') || 'other';
+  // 未指定就依 js/env.js 的模式決定：mock 模式回空字串＝只模擬送出，不寫到任何地方
+  SUBMIT_ENDPOINT = submitEndpoint == null ? envSubmitEndpoint() : (submitEndpoint || '');
 
   mountLayout();
   renderForm();

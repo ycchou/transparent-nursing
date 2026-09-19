@@ -1,74 +1,158 @@
-# Google Sheet 發布 CSV 教學
+# 投稿管線接線指南
 
-本網站採「Google Form → Google Sheet → CSV → 前端」的資料流。
-本文教你怎麼把每一份 Sheet 設定成可直接 fetch 的 CSV 連結。
+從「表單送出」到「網站讀到」的完整一條線，以及正式／測試資料的開關。
 
-## Step 1：表單對應到試算表
-
-1. 開啟你的 Google Form
-2. 切到「回覆」分頁
-3. 點右上角 Google Sheet 圖示「在試算表中查看」
-4. 第一次會問你要建立新試算表還是用既有的——選新建立
-5. 試算表會自動命名（如「{表單名稱}（回應）」）
-
-> 建議：5 個類別各自一份試算表，比較好獨立管理權限與資料
-
-## Step 2：發布為 CSV
-
-1. 在試算表頁面，點「檔案 → 共用 → 發布到網路」
-2. 在彈窗左側選擇要發布的「分頁」（通常是「表單回應 1」）
-3. 在右側格式選 **「逗號分隔值 (.csv)」**
-4. 勾選「自動重新發布變更內容」
-5. 點「發布」，會給你一個連結，類似：
-   ```
-   https://docs.google.com/spreadsheets/d/e/2PACX-1vXXXXXXXXXXXXX/pub?gid=0&single=true&output=csv
-   ```
-6. 複製這個連結
-
-## Step 3：更新前端設定
-
-打開 `js/config.js`，找到對應類別，把 `csvUrl` 改成剛剛拿到的連結：
-
-```js
-{
-  slug: 'icu',
-  // ...
-  csvUrl: 'https://docs.google.com/spreadsheets/d/e/2PACX-1v.../pub?gid=0&single=true&output=csv',
-  // ...
-}
+```
+表單 ──► tn-submit Worker ──► Apps Script ──► Google Sheet ──► 發布 CSV ──► 網站
+        Turnstile/限流/AI審稿    分類別寫分頁                      js/env.js
 ```
 
-5 個類別都更新後 push 到 GitHub，等 Pages 重新部署。
+程式碼已經全部接好，剩下的都是「開帳號、拿網址、填進 `js/env.js`」。
 
-## Step 4：欄位對齊（重要！）
+---
 
-`data-loader.js` 依靠 CSV 的 **column header** 來認欄位。
-建議在 Google Sheet 第一列把 header 改成跟 `config.js` 裡的 `key` 一致（英文 key），
-或在試算表上方加一列做 mapping。
+## 開關：正式版 vs 測試資料
 
-最簡單的方式：
+全站只有 **`js/env.js`** 這一個開關：
 
-1. 開啟試算表，第一列是 Google Form 自動生成的中文題目
-2. **在第 1 列「上方」插入一個空白列**（變成新的第 1 列）
-3. 把每一欄填入對應的英文 key（參考 `js/config.js` 的 `COMMON_FIELDS` + 該類別 `specificFields`）
-4. 修改發布範圍：再次「檔案 → 共用 → 發布到網路」，調整成從第 1 列開始（包含 header）
-5. 隱藏第 2 列原本的中文題目列（在 Sheet 內隱藏，但 CSV 仍會包含）
+```js
+export const MODE = 'mock';   // 'mock' | 'live'
+```
 
-**或更簡單的方式**：在試算表右側建一個「彙整」分頁，用 `=QUERY(Sheet1!A:Z, "SELECT ...")` 重組欄位順序 + 改英文 header，發布這個彙整分頁的 CSV。
+| | `mock`（預設） | `live` |
+|---|---|---|
+| 分享平台讀的資料 | `data/mock/*.csv`（假資料） | `LIVE.csvUrls` 的 Google Sheet CSV |
+| 表單送出 | 只 `console.log`，不寫任何地方 | 真的送到 tn-submit Worker |
 
-## Step 5：權限注意
+**臨時切換不必改檔**：網址加 `?data=live` 或 `?data=mock`，該分頁內持續有效（記在 sessionStorage），
+關掉分頁就恢復預設，右下角會出現一個小標記提醒你正在看哪一份資料。
+正式站上線後想確認假資料長相，或上線前想先偷看真實資料，都用這個。
 
-- 發布到網路 ≠ 公開檔案。發布後任何人**只能透過 CSV URL 讀**，不能編輯。
-- 試算表本身仍受權限保護，分享設定不需要改成「任何人都能檢視」。
-- 個資保護：表單建議**不要**收 email、IP、Google 帳號（在 Form「設定 → 回應」關閉「收集電子郵件地址」「限制每人回覆 1 次」這些會綁定 Google 帳號的選項）。
+兩種資料的 localStorage cache 是分開的，切換不會讀到另一邊的殘留。
+
+**保險絲**：`MODE = 'live'` 但 `LIVE` 什麼都沒填 → 自動退回 mock 並在 console 警告；
+個別類別沒填 CSV → 只有該類別退回測試資料。不會出現空白頁面。
+
+---
+
+## Step 1：建 Google Sheet
+
+建一份試算表就好（不必一個類別一份），記下網址 `/d/<這段>/edit` 的 SHEET_ID。
+
+分頁會自動長出來，不用先建：
+
+| 分頁 | 內容 | 要發布嗎 |
+|---|---|---|
+| `sub_icu`、`sub_ward`… | 各類別的投稿，欄位隨投稿自動增長 | **要**，每個分頁各發布一條 CSV |
+| `audit` | AI 審稿的理由原文 | **不要**，這是內部複查用 |
+
+## Step 2：部署 Apps Script
+
+1. 新建 Apps Script 專案，把 `apps-script/submit.gs` 整份貼進去
+2. 填最上面的 `SHEET_ID`、`SHARED_SECRET`（自己產一組隨機字串，等下 Worker 要用同一組）
+3. 部署 → 新增部署作業 → 網頁應用程式；執行身分「我」、存取權「任何人」→ 取得 `/exec` 網址
+
+> 改過 `submit.gs` 之後要「管理部署作業 → 編輯 → 版本：新版本」才會生效，
+> 只存檔不會更新線上版本。
+
+## Step 3：Turnstile
+
+Cloudflare Dashboard → Turnstile → 新增網站，網域填 `ycchou.github.io`，拿到：
+- **Site Key**（公開）
+- **Secret Key**（機密）
+
+> 註：目前表單用的是站內自製驗證碼，Turnstile 的前端 widget 還沒掛上。
+> Worker 端的 Turnstile 驗證是開著的，所以在掛上 widget 之前，
+> **live 模式的送出會被 Worker 以 `captcha` 擋掉**。兩條路選一條：
+> (a) 先掛 widget 再開 live；(b) 暫時把 Worker 的 ① Turnstile 檢查跳過。
+
+## Step 4：部署 Worker
+
+```bash
+cd worker-submit
+npx wrangler d1 create tn-submit        # 把回傳的 database_id 填回 wrangler.toml
+npx wrangler d1 execute tn-submit --remote --file=schema.sql
+
+echo -n '<Turnstile Secret Key>'     | npx wrangler secret put TURNSTILE_SECRET
+echo -n '<Apps Script /exec 網址>'    | npx wrangler secret put APPS_SCRIPT_URL
+echo -n '<Step 2 那組 shared secret>' | npx wrangler secret put APPS_SCRIPT_SECRET
+node -e "console.log(require('crypto').randomBytes(24).toString('hex'))" | npx wrangler secret put SALT
+echo -n '<Google AI Studio API key>' | npx wrangler secret put GEMINI_API_KEY   # AI 審稿；不設＝關閉
+
+npx wrangler deploy                     # 取得 https://tn-submit.<子網域>.workers.dev
+```
+
+## Step 5：先讓表單寫得進去
+
+把 Worker 網址填進 `js/env.js`：
+
+```js
+export const LIVE = {
+  submitEndpoint: 'https://tn-submit.<子網域>.workers.dev/submit',
+  ...
+};
+```
+
+把 `MODE` 改成 `'live'`，跑 `python tools/stamp-assets.py` 後 push。
+送一筆測試投稿，確認 Sheet 的 `sub_<類別>` 分頁真的長出資料列。
+
+> 這時分享平台仍讀測試資料（`csvUrls` 還沒填），不會影響線上瀏覽。
+
+## Step 6：把 Sheet 發布成 CSV
+
+每個 `sub_<類別>` 分頁各做一次：
+
+1. 檔案 → 共用 → 發布到網路
+2. 左側選該分頁，右側格式選 **逗號分隔值 (.csv)**
+3. 勾「自動重新發布變更內容」→ 發布，複製連結
+
+填進 `js/env.js`：
+
+```js
+csvUrls: {
+  icu: 'https://docs.google.com/spreadsheets/d/e/2PACX-.../pub?gid=0&single=true&output=csv',
+  ward: '...',
+  // 沒開放投稿的類別留空即可，會自動用測試資料
+},
+```
+
+跑 `python tools/stamp-assets.py` 後 push，分享平台就吃真實資料了。
+
+**欄位對齊**：`js/data-loader.js` 認 CSV 的 header 名稱，而 `submit.gs` 寫進去的 header
+就是表單欄位的 `name`（與 `js/config.js` 的 `key` 同名），所以不需要額外做 mapping。
+`timestamp` 由 Apps Script 以 `yyyy-MM-dd HH:mm` 寫入，與前端解析格式一致。
+
+**發布 ≠ 公開檔案**：發布後任何人只能透過 CSV URL 讀，不能編輯；試算表本身的權限不用改。
+`audit` 分頁不要發布。
+
+---
+
+## 上線檢查表
+
+- [ ] Sheet 的 `sub_*` 分頁有資料，`audit` 分頁有審稿紀錄
+- [ ] `audit` 分頁**沒有**被發布
+- [ ] `js/env.js`：`MODE = 'live'`、`submitEndpoint` 已填、要開放的類別 `csvUrls` 已填
+- [ ] Turnstile widget 已掛上（或已確認 Worker 的 ① 檢查處置方式）
+- [ ] 跑過 `python tools/stamp-assets.py`
+- [ ] 網址加 `?data=mock` 確認還能切回測試資料
+- [ ] 送一筆含人名的測試投稿，確認短評在平台上被打上馬賽克（見 `docs/moderation.md`）
+
+## 個資注意
+
+表單不要收 email、IP、Google 帳號。若用 Google Form 當備援入口，
+記得在「設定 → 回應」關閉「收集電子郵件地址」與「限制每人回覆 1 次」。
 
 ## Troubleshooting
 
-**Q：fetch 拿到的 CSV 是空的或被截斷**
-A：CSV URL 預設只發布 2000 個欄位/列。如果未來資料量大，改用 Apps Script 寫 endpoint 較穩。
+**送出回 `captcha`** — Turnstile widget 還沒掛上，見 Step 3。
 
-**Q：CSV 有 BOM 開頭，第一個欄位被解析錯**
-A：PapaParse 預設會處理 BOM，但若仍有問題，在 `data-loader.js` 的 PapaParse config 加 `skipFirstNLines: 0` 或手動 `.replace(/^﻿/, '')`。
+**送出回 `upstream`** — Apps Script 那邊出錯：多半是 `SHARED_SECRET` 兩邊不一致，
+或改完 `submit.gs` 忘了發布新版本。
 
-**Q：時間戳記格式 `2024/3/15 上午 10:30:45` 解析錯誤**
-A：在 `data-loader.js` 的 `normalizeRow` 加 timestamp 解析邏輯，或在試算表把欄位格式統一改成 ISO 8601。
+**Sheet 有資料但網站看不到** — CSV 連結沒填進 `csvUrls`、或 `MODE` 還是 `mock`、
+或前端 cache 未過期（10 分鐘，或換個 `?data=` 強制切）。
+
+**CSV 被截斷** — 發布 CSV 預設有欄位/列數上限，資料量大時改用 Apps Script 寫 endpoint 較穩。
+
+**短評沒有被打馬賽克** — 確認該分頁的 CSV 有 `modVerdict`、`modCode` 兩欄，
+以及 Worker 的 `GEMINI_API_KEY` 有設（沒設時審稿整段跳過，一律 allow）。
