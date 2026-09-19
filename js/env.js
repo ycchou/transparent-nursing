@@ -10,12 +10,12 @@ export const MODE = 'mock';   // ← 上線切成 'live'
 
 export const LIVE = {
   // tn-submit Worker 的 /submit 網址（部署後填；見 worker-submit/README.md）
-  submitEndpoint: '',
+  submitEndpoint: 'https://tn-submit.ycchou-1005.workers.dev/submit',
 
   // Cloudflare Turnstile 的 Site Key（公開值，可進版控；Secret Key 只放 Worker secret）。
   // 留空 → 表單不掛 widget。注意 Worker 端的 Turnstile 驗證是開著的，
   // 所以 live 模式沒填這個的話，送出會被 Worker 以 captcha 擋掉。
-  turnstileSiteKey: '',
+  turnstileSiteKey: '0x4AAAAAAE8v4Oes5qX-yykM',
 
   // 各類別的 Google Sheet「發布到網路 → CSV」連結（見 docs/sheet-setup.md）
   // 留空的類別在 live 模式下會自動退回該類別的測試資料，並在 console 提示。

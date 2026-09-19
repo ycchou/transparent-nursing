@@ -38,3 +38,6 @@ yarn.lock
 # Apps Script（clasp 本機設定，含 scriptId）
 apps-script/.clasp.json
 .clasprc.json
+
+# 舊 Cloudflare 帳號的 D1 匯出備份（營運資料，不進版控）
+backup/
