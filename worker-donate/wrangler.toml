@@ -13,4 +13,4 @@ ECPAY_ENV = "prod"
 [[d1_databases]]
 binding = "DB"
 database_name = "tn-donate"
-database_id = "95847dff-2139-4273-97d3-728e373e0b78"
+database_id = "8d4914d0-e909-467a-a75b-35d3ea3fde0c"
