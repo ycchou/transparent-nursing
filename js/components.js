@@ -1,9 +1,9 @@
 // 共用 header / footer 注入 + 工具函式
-import { SITE, CATEGORIES } from './config.js?v=9dce8622e3';
-import { icon, renderIcons } from './icons.js?v=9dce8622e3';
-import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=9dce8622e3';
-import { initScrollHints } from './scroll-hint.js?v=9dce8622e3';
-import { mountModeBadge } from './env.js?v=9dce8622e3';
+import { SITE, CATEGORIES } from './config.js?v=3eafcab1f5';
+import { icon, renderIcons } from './icons.js?v=3eafcab1f5';
+import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=3eafcab1f5';
+import { initScrollHints } from './scroll-hint.js?v=3eafcab1f5';
+import { mountModeBadge } from './env.js?v=3eafcab1f5';
 
 // 主辦/協作工會 — 共用資料（footer / hero strip / about 都引用）
 export const ORGS = {
@@ -260,7 +260,7 @@ export function mountLayout() {
 
   // 背景預載 platform 資料 + 樞紐大檔：切到分享平台/機構總覽/護病比/人力監控時即時顯示
   // 動態 import 避免循環依賴與初始 parse 成本
-  import('./data-loader.js?v=9dce8622e3')
+  import('./data-loader.js?v=3eafcab1f5')
     .then(({ preloadAll, preloadStaticData }) => {
       preloadAll && preloadAll();
       preloadStaticData && preloadStaticData();
@@ -272,13 +272,13 @@ export function mountLayout() {
   wireNavPrefetch(document.getElementById('app-footer'));
 
   // 背景預載勞檢/性平/職安紀錄資料：同樣讓使用者切過去時即時顯示
-  import('./violations.js?v=9dce8622e3')
+  import('./violations.js?v=3eafcab1f5')
     .then(({ preloadViolations }) => preloadViolations && preloadViolations())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./gender.js?v=9dce8622e3')
+  import('./gender.js?v=3eafcab1f5')
     .then(({ preloadGender }) => preloadGender && preloadGender())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./osha.js?v=9dce8622e3')
+  import('./osha.js?v=3eafcab1f5')
     .then(({ preloadOsha }) => preloadOsha && preloadOsha())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
 }

@@ -2,13 +2,13 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=9dce8622e3';
-import { renderIcons, icon } from './icons.js?v=9dce8622e3';
-import { markContributed } from './contribution-gate.js?v=9dce8622e3';
-import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=9dce8622e3';
-import { showToast } from './toast.js?v=9dce8622e3';
-import { submitEndpoint as envSubmitEndpoint } from './env.js?v=9dce8622e3';
-import { notePwaIntent } from './pwa-prompt.js?v=9dce8622e3';
+import { mountLayout } from './components.js?v=3eafcab1f5';
+import { renderIcons, icon } from './icons.js?v=3eafcab1f5';
+import { markContributed } from './contribution-gate.js?v=3eafcab1f5';
+import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=3eafcab1f5';
+import { showToast } from './toast.js?v=3eafcab1f5';
+import { submitEndpoint as envSubmitEndpoint, turnstileSiteKey } from './env.js?v=3eafcab1f5';
+import { notePwaIntent } from './pwa-prompt.js?v=3eafcab1f5';
 
 const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 避開易混字元 0/O/1/I/L
 let currentCaptcha = '';
@@ -420,8 +420,8 @@ async function onSubmit(e) {
     showToast(`還有 ${errors.length} 個必填欄位沒完成`, 'warn');
     return;
   }
-  // 驗證碼檢查（不分大小寫）
-  if (!isCaptchaValid()) {
+  // 驗證碼檢查（不分大小寫）。Turnstile 掛上時由它接手，跳過站內驗證碼
+  if (!(turnstileActive() && TURNSTILE_REPLACES_LOCAL_CAPTCHA) && !isCaptchaValid()) {
     const captchaField = document.getElementById('dform-captcha-field');
     if (captchaField) {
       captchaField.classList.add('has-error');
@@ -448,6 +448,19 @@ async function onSubmit(e) {
     return;
   }
 
+  // 人機驗證（Turnstile）— 沒掛 widget 時 turnstileActive() 為 false，整段跳過
+  const tsToken = turnstileToken();
+  if (turnstileActive() && !tsToken) {
+    const tsField = document.getElementById('dform-turnstile-field');
+    if (tsField) {
+      tsField.classList.add('has-error');
+      tsField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    showToast('請完成人機驗證後再送出', 'warn');
+    return;
+  }
+  document.getElementById('dform-turnstile-field')?.classList.remove('has-error');
+
   const btn = document.querySelector('.dform-submit-btn');
   const origHtml = btn.innerHTML;
   btn.disabled = true;
@@ -459,6 +472,7 @@ async function onSubmit(e) {
       // 第二階段：真正打 Apps Script
       const body = new URLSearchParams();
       body.append('category', CATEGORY_SLUG);   // 決定寫入 Sheet 的哪個分頁
+      if (tsToken) body.append('cf-turnstile-response', tsToken);   // Worker ① 會驗這個
       Object.entries(data).forEach(([k, v]) => {
         if (Array.isArray(v)) {
           v.forEach((item) => body.append(k, item));
@@ -467,9 +481,9 @@ async function onSubmit(e) {
         }
       });
       const res = await fetch(SUBMIT_ENDPOINT, { method: 'POST', body });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      // Worker 回傳 AI 審稿判定；被屏蔽時在感謝畫面告知投稿者（其餘欄位照常公開）
       const payload = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(submitErrorMessage(payload?.error, res.status));
+      // Worker 回傳 AI 審稿判定；被屏蔽時在感謝畫面告知投稿者（其餘欄位照常公開）
       moderationVerdict = payload?.moderation?.verdict || '';
     } else {
       // 第一階段：模擬送出
@@ -483,7 +497,9 @@ async function onSubmit(e) {
     showThanks({ blocked: moderationVerdict === 'block' });
   } catch (err) {
     console.error(err);
-    showToast('送出失敗：' + err.message, 'error');
+    const msg = err instanceof TypeError ? '連線失敗，請檢查網路後再試一次' : err.message;
+    showToast('送出失敗：' + msg, 'error');
+    resetTurnstile();   // token 一次性，重送要換新的
     btn.disabled = false;
     btn.innerHTML = origHtml;
   }
@@ -978,6 +994,90 @@ function isCaptchaValid() {
   return v === currentCaptcha;
 }
 
+// tn-submit Worker 的錯誤碼 → 給填表者看的說明
+function submitErrorMessage(code, status) {
+  switch (code) {
+    case 'captcha':  return '人機驗證沒通過，請重新勾選驗證框後再送出';
+    case 'rate':     return '今天這台裝置送出的份數已達上限，請明天再試';
+    case 'spam':     return '內容含有連結或重複字元，請移除後再送出';
+    case 'upstream': return '資料庫暫時無法寫入，請稍後再試一次';
+    case 'forbidden':return '來源網域不被允許，請從官方網站填寫';
+    default:         return `伺服器回應異常（HTTP ${status}）`;
+  }
+}
+
+// ===== Cloudflare Turnstile =====
+//
+// 只有 live 模式且 js/env.js 填了 Site Key 才會掛上。Worker 端（tn-submit）的 ①
+// 一定會驗 token，所以 live 模式沒掛 widget 的話送出必被擋。
+//
+// Turnstile 掛上時會取代站內自製驗證碼（兩個人機驗證連在一起對填表的人太煩，
+// 且 Turnstile 嚴格強過自製那個）。要兩個都留就把下面改成 false。
+const TURNSTILE_REPLACES_LOCAL_CAPTCHA = true;
+
+const TURNSTILE_API = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=__tnTurnstileReady';
+let TURNSTILE_WIDGET_ID = null;
+
+function turnstileActive() { return TURNSTILE_WIDGET_ID !== null; }
+
+function initTurnstile() {
+  const siteKey = turnstileSiteKey();
+  if (!siteKey) return;                                   // mock 模式或沒填 key
+  const bar = document.querySelector('.dform-submit-bar');
+  if (!bar || document.getElementById('dform-turnstile')) return;
+
+  const host = document.createElement('div');
+  host.className = 'dform-field dform-turnstile-field';
+  host.id = 'dform-turnstile-field';
+  host.innerHTML = `
+    <label class="dform-label">人機驗證<span class="dform-required" aria-hidden="true">*</span></label>
+    <div class="dform-help">由 Cloudflare Turnstile 提供，多數情況會自動通過，不必輸入任何東西</div>
+    <div id="dform-turnstile"></div>
+    <div class="dform-error-msg" id="err-turnstile">請完成人機驗證後再送出</div>`;
+  bar.parentNode.insertBefore(host, bar);
+
+  // explicit render：等 API 載入後由這個 callback 掛 widget
+  window.__tnTurnstileReady = () => {
+    try {
+      TURNSTILE_WIDGET_ID = window.turnstile.render('#dform-turnstile', {
+        sitekey: siteKey,
+        theme: 'light',
+        language: 'zh-tw',
+        'refresh-expired': 'auto',     // token 5 分鐘過期；長表單填到一半會自動換新的
+        'error-callback': () => console.warn('[turnstile] widget 錯誤'),
+      });
+      if (TURNSTILE_REPLACES_LOCAL_CAPTCHA) hideLocalCaptcha();
+    } catch (e) {
+      console.warn('[turnstile] render 失敗：', e.message);
+    }
+  };
+
+  const el = document.createElement('script');
+  el.src = TURNSTILE_API;
+  el.async = true;
+  el.defer = true;
+  // 載不到（擋廣告外掛、網路問題）就維持自製驗證碼，至少表單還能填
+  el.onerror = () => console.warn('[turnstile] API 載入失敗，沿用站內驗證碼');
+  document.head.appendChild(el);
+}
+
+// Turnstile 成功掛上後隱藏站內自製驗證碼，並讓它的檢查自動通過
+function hideLocalCaptcha() {
+  const field = document.getElementById('dform-captcha-field');
+  if (field) field.hidden = true;
+}
+
+function turnstileToken() {
+  if (!turnstileActive() || !window.turnstile) return '';
+  try { return window.turnstile.getResponse(TURNSTILE_WIDGET_ID) || ''; } catch { return ''; }
+}
+
+// token 是一次性的：送出失敗要換一個新的，否則重送必定被 Worker 判為無效
+function resetTurnstile() {
+  if (!turnstileActive() || !window.turnstile) return;
+  try { window.turnstile.reset(TURNSTILE_WIDGET_ID); } catch {}
+}
+
 // ===== 對外初始化 =====
 
 export function initDepartmentForm({ schema, draftKey, slug = '', submitEndpoint = null }) {
@@ -994,6 +1094,7 @@ export function initDepartmentForm({ schema, draftKey, slug = '', submitEndpoint
   attachDraftAutosave();
   attachInstitutionAutocomplete();
   attachCaptcha();
+  initTurnstile();   // live 模式且有 Site Key 才會真的掛上
   renderIcons();
 
   const formEl = document.getElementById('dform');

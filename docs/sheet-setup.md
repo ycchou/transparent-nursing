@@ -58,13 +58,18 @@ export const MODE = 'mock';   // 'mock' | 'live'
 ## Step 3：Turnstile
 
 Cloudflare Dashboard → Turnstile → 新增網站，網域填 `ycchou.github.io`，拿到：
-- **Site Key**（公開）
-- **Secret Key**（機密）
+- **Site Key**（公開值，填進 `js/env.js` 的 `LIVE.turnstileSiteKey`）
+- **Secret Key**（機密，Step 4 設成 Worker secret）
 
-> 註：目前表單用的是站內自製驗證碼，Turnstile 的前端 widget 還沒掛上。
-> Worker 端的 Turnstile 驗證是開著的，所以在掛上 widget 之前，
-> **live 模式的送出會被 Worker 以 `captcha` 擋掉**。兩條路選一條：
-> (a) 先掛 widget 再開 live；(b) 暫時把 Worker 的 ① Turnstile 檢查跳過。
+widget 已經接好了：live 模式且 `turnstileSiteKey` 有填時，表單會自動在送出鍵上方
+掛出 Turnstile，並把 token 附在送出的 `cf-turnstile-response` 一起送給 Worker。
+mock 模式完全不載入，測試時不會跳人機驗證。
+
+Turnstile 掛上時會**取代**站內自製的 6 碼驗證碼（兩個人機驗證連著對填表的人太煩）。
+要兩個都保留，把 `js/form-engine.js` 的 `TURNSTILE_REPLACES_LOCAL_CAPTCHA` 改成 `false`。
+
+> ⚠ Worker 端的 Turnstile 驗證一律會跑。所以 live 模式若沒填 Site Key，
+> 送出會被 Worker 以 `captcha` 擋掉——要嘛填 key，要嘛先別開 live。
 
 ## Step 4：部署 Worker
 
@@ -132,7 +137,7 @@ csvUrls: {
 - [ ] Sheet 的 `sub_*` 分頁有資料，`audit` 分頁有審稿紀錄
 - [ ] `audit` 分頁**沒有**被發布
 - [ ] `js/env.js`：`MODE = 'live'`、`submitEndpoint` 已填、要開放的類別 `csvUrls` 已填
-- [ ] Turnstile widget 已掛上（或已確認 Worker 的 ① 檢查處置方式）
+- [ ] `js/env.js` 的 `turnstileSiteKey` 已填，且表單上真的看得到 widget
 - [ ] 跑過 `python tools/stamp-assets.py`
 - [ ] 網址加 `?data=mock` 確認還能切回測試資料
 - [ ] 送一筆含人名的測試投稿，確認短評在平台上被打上馬賽克（見 `docs/moderation.md`）
@@ -144,7 +149,8 @@ csvUrls: {
 
 ## Troubleshooting
 
-**送出回 `captcha`** — Turnstile widget 還沒掛上，見 Step 3。
+**送出回 `captcha`** — `turnstileSiteKey` 沒填、或 Turnstile 的網域設定不含目前網域
+（本機測試要在 Turnstile 後台把 `localhost` / `127.0.0.1` 加進允許網域），見 Step 3。
 
 **送出回 `upstream`** — Apps Script 那邊出錯：多半是 `SHARED_SECRET` 兩邊不一致，
 或改完 `submit.gs` 忘了發布新版本。

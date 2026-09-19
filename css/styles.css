@@ -3443,6 +3443,12 @@ body.calc-modal-open { overflow: hidden; }
 }
 .dform-field.has-error .dform-error-msg { display: block; }
 
+/* Cloudflare Turnstile widget（只有 live 模式且填了 Site Key 才會出現） */
+.dform-turnstile-field #dform-turnstile {
+  margin-top: 6px;
+  min-height: 65px;   /* 預留 widget 高度，載入時不跳版 */
+}
+
 /* Text / number / email / textarea */
 .dform-input, .dform-textarea {
   width: 100%;

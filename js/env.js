@@ -12,6 +12,11 @@ export const LIVE = {
   // tn-submit Worker 的 /submit 網址（部署後填；見 worker-submit/README.md）
   submitEndpoint: '',
 
+  // Cloudflare Turnstile 的 Site Key（公開值，可進版控；Secret Key 只放 Worker secret）。
+  // 留空 → 表單不掛 widget。注意 Worker 端的 Turnstile 驗證是開著的，
+  // 所以 live 模式沒填這個的話，送出會被 Worker 以 captcha 擋掉。
+  turnstileSiteKey: '',
+
   // 各類別的 Google Sheet「發布到網路 → CSV」連結（見 docs/sheet-setup.md）
   // 留空的類別在 live 模式下會自動退回該類別的測試資料，並在 console 提示。
   csvUrls: {
@@ -64,6 +69,11 @@ export function csvUrlFor(slug, mockUrl) {
   if (live) return live;
   console.warn(`[env] live 模式但 ${slug} 沒有正式 CSV → 用測試資料 ${mockUrl}`);
   return mockUrl;
+}
+
+/** Turnstile Site Key：mock 模式一律回空字串（測試時不跳人機驗證） */
+export function turnstileSiteKey() {
+  return isLive() ? (LIVE.turnstileSiteKey || '') : '';
 }
 
 /** 表單送出端點：mock 模式回空字串（form-engine 收到空字串就只模擬送出） */
