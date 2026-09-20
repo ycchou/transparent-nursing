@@ -1,6 +1,7 @@
 // 篩選器：縣市、機構類別、推薦指數、工時、加班費 + 機構名稱搜尋
-import { COMMON_FIELDS } from './config.js?v=46eed67209';
-import { getShort as getHospitalShort } from './hospital-shortname.js?v=46eed67209';
+import { COMMON_FIELDS } from './config.js?v=0509cd84fb';
+import { getShort as getHospitalShort } from './hospital-shortname.js?v=0509cd84fb';
+import { escapeHtml } from './moderation.js?v=0509cd84fb';
 
 const INSTITUTION_TYPES = ['醫學中心', '區域醫院', '地區醫院', '診所', '護理之家', '長照機構', '居護所', '其他'];
 const RECOMMEND_LABELS = { 5: '非常推薦', 4: '推薦', 3: '保留', 2: '不推薦', 1: '非常不推薦' };
@@ -42,7 +43,7 @@ export function renderFilters(container, state, onChange, rows = []) {
         <h4>關鍵字</h4>
         <input id="filter-q" type="search" placeholder="搜尋機構、單位、短評、序號 (#42)..."
           style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.92rem;font-family:inherit;color:var(--ink);"
-          value="${state.q || ''}" />
+          value="${escapeHtml(state.q || '')}" />
       </div>
 
       ${locationGroup(state, rows)}
@@ -107,7 +108,9 @@ function locationGroup(state, rows) {
           const isOn = state.location.has(c);
           const n = counts[c] || 0;
           const badge = n ? ` <span style="opacity:.55;font-size:0.82em;">${n}</span>` : '';
-          return `<span class="filter-chip ${isOn ? 'active' : ''}" data-key="location" data-value="${c}">${c}${badge}</span>`;
+          // c 來自投稿的 location 欄位（使用者可填任意字串）→ 必須跳脫
+          const safe = escapeHtml(c);
+          return `<span class="filter-chip ${isOn ? 'active' : ''}" data-key="location" data-value="${safe}">${safe}${badge}</span>`;
         }).join('')}
       </div>
     </div>

@@ -18,6 +18,65 @@ const ALLOWED_ORIGINS = ['https://ycchou.github.io', 'http://localhost', 'http:/
 const CAP_PER_KEY_PER_DAY = 5;  // 單一「IP+裝置+版本」每日提交上限（可調）
 const MAX_LINKS = 0;             // 自由文字允許的連結數（廣告多帶連結；0 = 不允許，可調）
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 欄位白名單與長度上限
+//
+// 沒有這道的話，任何人都能直接打本 Worker 送出任意欄名與任意長度的值：
+//   · 偽造欄名 → Apps Script 會「看到沒見過的欄名就自動長一欄」，表頭被污染、前端解析亂掉
+//   · 超長字串 → 撐爆 Sheet 與發布的 CSV，全站前端載入失敗（一個人就能弄掛分享平台）
+//
+// 清單來源 = js/config.js 的 COMMON_FIELDS + 各類別 specificFields，加上 js/form-*.js
+// 的欄位名。**新增表單欄位時要同步加進這裡**，否則該欄會被靜默丟掉。
+// 不在清單內的欄位不擋投稿、只丟棄，並在回應的 ignored 陣列列出來（方便測試時發現漏加）。
+//
+// timestamp 不收（由 Apps Script 產生）；mod* 也不收（判定由本 Worker 自己寫，
+// 收下等於讓投稿者偽造「已通過審稿」）。
+// ─────────────────────────────────────────────────────────────────────────────
+const ALLOWED_FIELDS = new Set([
+  'category', 'advancedTherapyTraining', 'annualBonus', 'annualLeave', 'annualSalary',
+ 'batchShift', 'bedbathFreq', 'certRequired', 'clinicDuties', 'clinicOvertimeWeekly',
+ 'clinicPayerType', 'clinicReason', 'clinicScale', 'clinicShift', 'clinicSpecialty',
+ 'clinicsPerNurse', 'clinicType', 'comment', 'criticalRatio', 'dailyCases', 'dailyOvertime',
+ 'dailyPatients', 'dayPeakRatio', 'dayShiftRatio', 'dialysisType', 'erLevel',
+ 'eveningAllowanceNonPack', 'eveningAllowancePack', 'eveningPeakRatio', 'eveningShiftRatio',
+ 'fieldWork', 'hasOnCall', 'hasProtectionRoom', 'hdPeakRatio', 'hdRatio', 'holidayCompliance',
+ 'icuTrainingContract', 'icuTrainingPeriod', 'icuTrainingRequired', 'institutionName',
+ 'institutionType', 'invasiveDuties', 'jobTitle', 'laborInsurance', 'leaderSupport', 'location',
+ 'lunchBreak', 'monthlyBase', 'nightAllowanceNonPack', 'nightAllowancePack', 'nightPeakRatio',
+ 'nightShiftRatio', 'observationRatio', 'onCallPay', 'onCallRequired', 'onCallRotation',
+ 'onCallSystem', 'onCallType', 'orRole', 'orSpecialty', 'otherCerts', 'overtimePolicy',
+ 'pShift', 'patientComplaints', 'pdCount', 'pdPeakRatio', 'ppCareFreq', 'practiceRegistration',
+ 'promotion', 'promotionReport', 'psychType', 'radiationExposure', 'recommendIndex',
+ 'restInterval11h', 'restraintFreq', 'roomCount', 'salaryGrowth', 'salaryStructure',
+ 'scheduleSystem', 'shiftPattern', 'shiftSystem', 'shiftType', 'specialBenefits', 'specialType',
+ 'teamSupport', 'triageRatio', 'unitName', 'violenceFreq', 'violenceRisk', 'wardType',
+ 'weeklyHours', 'weeklyPatients', 'workAtmosphere', 'workDuties', 'workplaceType',
+ 'yearsCurrent', 'yearsTotal',
+]);
+
+// 自由文字（textarea）給多一點，其餘欄位都是選項或短字串。超過就截斷，不擋投稿。
+const LONG_FIELDS = new Set(['comment', 'specialBenefits', 'annualBonus']);
+const MAX_LEN_LONG = 1000;
+const MAX_LEN_DEFAULT = 200;
+const MAX_VALUES_PER_FIELD = 20;   // 複選欄位的值數上限
+
+function sanitizeFields(fields) {
+  const clean = {};
+  const ignored = [];
+  for (const [k, v] of Object.entries(fields)) {
+    if (!ALLOWED_FIELDS.has(k)) {
+      if (!/^cf-turnstile/.test(k)) ignored.push(k.slice(0, 40));
+      continue;
+    }
+    const cap = LONG_FIELDS.has(k) ? MAX_LEN_LONG : MAX_LEN_DEFAULT;
+    const vals = (Array.isArray(v) ? v : [v])
+      .slice(0, MAX_VALUES_PER_FIELD)
+      .map((x) => String(x ?? '').slice(0, cap));
+    clean[k] = vals.length === 1 ? vals[0] : vals;
+  }
+  return { clean, ignored: ignored.slice(0, 10) };
+}
+
 function originAllowed(o) { return !!o && ALLOWED_ORIGINS.some((a) => o === a || o.startsWith(a + ':')); }
 function corsHeaders(o) {
   return {
@@ -258,17 +317,18 @@ export default {
       }
       // ② 限流（IP+裝置+版本，每日上限）
       if (await rateLimited(env, ip, ua, day)) return json({ error: 'rate' }, cors, 429);
+      // ②′ 欄位白名單 + 長度上限（未知欄名一律丟棄，不寫進試算表）
+      const { clean, ignored } = sanitizeFields(fields);
       // ③ 內容檢查（規則）
-      const spam = looksLikeSpam(fields);
+      const spam = looksLikeSpam(clean);
       if (spam) return json({ error: 'spam', reason: spam }, cors, 422);
 
       // ④ AI 審稿（不擋投稿，只決定前端是否打馬賽克；失敗一律放行）
-      const mod = await moderate(fields, env);
+      const mod = await moderate(clean, env);
 
-      // 轉發 Apps Script（移除 turnstile token 與使用者自帶的 mod* 欄位、加 shared secret）
+      // 轉發 Apps Script（只送白名單欄位，加 shared secret）
       const out = new URLSearchParams();
-      for (const [k, v] of Object.entries(fields)) {
-        if (/^cf-turnstile/.test(k) || /^mod[A-Z]/.test(k)) continue;
+      for (const [k, v] of Object.entries(clean)) {
         (Array.isArray(v) ? v : [v]).forEach((x) => out.append(k, x));
       }
       out.append('modVerdict', mod.verdict);   // allow | review | block
@@ -279,7 +339,11 @@ export default {
       const r = await fetch(env.APPS_SCRIPT_URL, { method: 'POST', body: out });
       if (!r.ok) return json({ error: 'upstream', status: r.status }, cors, 502);
       // 回傳判定給前端，讓投稿者當下就知道短評被屏蔽（不回 AI 原文理由）
-      return json({ ok: true, moderation: { verdict: mod.verdict, code: mod.code } }, cors);
+      return json({
+        ok: true,
+        moderation: { verdict: mod.verdict, code: mod.code },
+        ...(ignored.length ? { ignored } : {}),   // 被丟棄的未知欄名（表單新增欄位忘了加白名單時會看到）
+      }, cors);
     } catch (e) {
       return json({ error: String(e) }, cors, 500);
     }

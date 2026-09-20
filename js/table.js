@@ -1,12 +1,12 @@
 // 表格 / 卡片 渲染、排序、Modal
-import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=46eed67209';
-import { fmt, recommendPill, categoryTag } from './components.js?v=46eed67209';
-import { icon } from './icons.js?v=46eed67209';
-import { generateShareCard, showSharePreview } from './share-card.js?v=46eed67209';
-import { ensureTooltip } from './tooltip.js?v=46eed67209';
-import { pageSlice, renderPagination } from './pagination.js?v=46eed67209';
-import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=46eed67209';
-import { commentHtml, commentCellHtml, initCommentUnlock, isBlocked } from './moderation.js?v=46eed67209';
+import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=0509cd84fb';
+import { fmt, recommendPill, categoryTag } from './components.js?v=0509cd84fb';
+import { icon } from './icons.js?v=0509cd84fb';
+import { generateShareCard, showSharePreview } from './share-card.js?v=0509cd84fb';
+import { ensureTooltip } from './tooltip.js?v=0509cd84fb';
+import { pageSlice, renderPagination } from './pagination.js?v=0509cd84fb';
+import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=0509cd84fb';
+import { commentHtml, commentCellHtml, initCommentUnlock, isBlocked, escapeHtml } from './moderation.js?v=0509cd84fb';
 
 // 顯示用機構名稱：對得上評鑑醫院時改用 VPN 簡稱，否則沿用原填寫名稱。
 function displayInstitutionName(name) {
@@ -63,7 +63,7 @@ function cardStatsHtml(row) {
     .map(([k, label, unit]) => `
       <div class="data-card-stat">
         <span class="data-card-stat-label">${label}</span>
-        <span class="data-card-stat-val">${row[k]}<span class="data-card-stat-unit">${unit}</span></span>
+        <span class="data-card-stat-val">${escapeHtml(row[k])}<span class="data-card-stat-unit">${unit}</span></span>
       </div>`).join('');
   return cells ? `<div class="data-card-stats">${cells}</div>` : '';
 }
@@ -166,18 +166,18 @@ function renderCellValue(row, key) {
   if (key === 'timestamp') return fmt.date(v);
   if (key === 'comment') {
     // 被 AI 審稿判定屏蔽時只顯示一行鎖定提示（解鎖框放在卡片與詳情彈窗）
-    return row.comment ? commentCellHtml(row) : fmt.empty(v);
+    return row.comment ? commentCellHtml(row) : escapeHtml(fmt.empty(v));
   }
   // 機構名稱、單位名稱：太長時截斷顯示「...」，hover 顯示完整名稱
   if (key === 'institutionName' || key === 'unitName') {
-    if (!v) return fmt.empty(v);
-    const safe = String(v).replaceAll('"', '&quot;');
+    if (!v) return escapeHtml(fmt.empty(v));
+    const safe = escapeHtml(v);
     // 機構名稱顯示簡稱（hover 仍看得到完整原名）；單位名稱維持原樣
     const disp = key === 'institutionName' ? displayInstitutionName(v) : v;
-    const span = `<span class="cell-trunc" data-key="${key}" title="${safe}">${disp}</span>`;
+    const span = `<span class="cell-trunc" data-key="${key}" title="${safe}">${escapeHtml(disp)}</span>`;
     return key === 'institutionName' ? withHospitalLink(v, span) : span;
   }
-  return fmt.empty(v);
+  return escapeHtml(fmt.empty(v));
 }
 
 /**
@@ -283,7 +283,7 @@ export function renderTable(container, rows, opts = {}) {
       ${pageRows.length === 0
         ? `<div class="card" style="text-align:center;color:var(--muted);">沒有符合條件的資料</div>`
         : pageRows.map((r, idx) => {
-          const meta = [r.institutionType, r.location, r.jobTitle].filter(Boolean).join(' · ');
+          const meta = [r.institutionType, r.location, r.jobTitle].filter(Boolean).map(escapeHtml).join(' · ');
           return `
           <div class="data-card" data-idx="${idx}">
             <div class="data-card-top">
@@ -291,10 +291,10 @@ export function renderTable(container, rows, opts = {}) {
               ${recommendPill(r.recommendIndex)}
             </div>
             <div class="data-card-titlerow">
-              <div class="data-card-title" title="${(r.institutionName || '').replaceAll('"','&quot;')}">${r.institutionName ? withHospitalLink(r.institutionName, displayInstitutionName(r.institutionName)) : fmt.empty(r.institutionName)}</div>
+              <div class="data-card-title" title="${escapeHtml(r.institutionName || '')}">${r.institutionName ? withHospitalLink(r.institutionName, escapeHtml(displayInstitutionName(r.institutionName))) : escapeHtml(fmt.empty(r.institutionName))}</div>
               <span class="data-card-seq">#${r._seq != null ? r._seq : (idx + 1)}</span>
             </div>
-            ${r.unitName ? `<div class="data-card-unit">${r.unitName}</div>` : ''}
+            ${r.unitName ? `<div class="data-card-unit">${escapeHtml(r.unitName)}</div>` : ''}
             ${meta ? `<div class="data-card-meta">${meta}</div>` : ''}
             ${cardStatsHtml(r)}
             ${r.comment ? `
@@ -391,10 +391,10 @@ export function showDetailModal(row, opts = {}) {
       <div class="modal-header">
         <div style="min-width:0;flex:1;">
           ${categoryTag(slug)}
-          <h3 style="margin:8px 0 0;">${row.institutionName || '未填寫'}</h3>
-          ${row.unitName ? `<div style="color:var(--ink-soft);font-size:0.95rem;font-weight:500;margin-top:2px;">${row.unitName}</div>` : ''}
+          <h3 style="margin:8px 0 0;">${escapeHtml(row.institutionName || '未填寫')}</h3>
+          ${row.unitName ? `<div style="color:var(--ink-soft);font-size:0.95rem;font-weight:500;margin-top:2px;">${escapeHtml(row.unitName)}</div>` : ''}
           <div style="color:var(--muted);font-size:0.88rem;margin-top:4px;">
-            ${row.institutionType || ''}${row.location ? ' · ' + row.location : ''}${row.jobTitle ? ' · ' + row.jobTitle : ''}
+            ${escapeHtml(row.institutionType || '')}${row.location ? ' · ' + escapeHtml(row.location) : ''}${row.jobTitle ? ' · ' + escapeHtml(row.jobTitle) : ''}
           </div>
         </div>
         <div style="display:flex;gap:8px;align-items:flex-start;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">

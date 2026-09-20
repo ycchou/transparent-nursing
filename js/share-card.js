@@ -1,5 +1,6 @@
 // 一鍵產生單筆資料分享圖片（1080 × 1350，IG 4:5 直式）
-import { getCategory } from './config.js?v=46eed67209';
+import { getCategory } from './config.js?v=0509cd84fb';
+import { escapeHtml } from './moderation.js?v=0509cd84fb';
 
 const KEY_LABELS = {
   // ICU
@@ -101,12 +102,12 @@ function buildShareCardHTML(row) {
   const dataRows = fields.map((k, i) => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;${i === fields.length - 1 ? '' : 'border-bottom:1px solid #E5E9F0;'}">
       <span style="color:#6B7C93;font-size:28px;letter-spacing:0.01em;">${KEY_LABELS[k] || k}</span>
-      <span style="color:#1D3557;font-weight:600;font-size:30px;">${row[k] || '—'}</span>
+      <span style="color:#1D3557;font-weight:600;font-size:30px;">${escapeHtml(row[k] || '—')}</span>
     </div>
   `).join('');
 
   const subtitle = [row.institutionType, row.location, row.jobTitle]
-    .filter(Boolean).join(' · ');
+    .filter(Boolean).map(escapeHtml).join(' · ');
 
   return `
     <div id="share-card-root" style="
@@ -145,9 +146,9 @@ function buildShareCardHTML(row) {
 
         <!-- Institution name -->
         <h1 style="font-family:'Lora','Noto Serif TC',serif;font-size:56px;font-weight:700;margin:0 0 6px;line-height:1.15;letter-spacing:-0.01em;">
-          ${row.institutionName || '匿名機構'}
+          ${escapeHtml(row.institutionName || '匿名機構')}
         </h1>
-        ${row.unitName ? `<div style="font-size:28px;color:#1D3557;font-weight:600;margin-bottom:8px;line-height:1.3;">${row.unitName}</div>` : ''}
+        ${row.unitName ? `<div style="font-size:28px;color:#1D3557;font-weight:600;margin-bottom:8px;line-height:1.3;">${escapeHtml(row.unitName)}</div>` : ''}
         <div style="font-size:22px;color:#6B7C93;margin-bottom:20px;line-height:1.5;">
           ${subtitle || '—'}
         </div>
@@ -175,13 +176,13 @@ function buildShareCardHTML(row) {
               <div style="font-size:18px;color:#6B7C93;letter-spacing:0.02em;">分享者短評</div>
               ${commentTruncated ? `<div style="font-size:14px;color:#6B7C93;">已顯示前 ${MAX_COMMENT_LENGTH} 字</div>` : ''}
             </div>
-            <div style="font-size:22px;line-height:1.55;color:#1D3557;font-weight:500;">${commentText}</div>
+            <div style="font-size:22px;line-height:1.55;color:#1D3557;font-weight:500;">${escapeHtml(commentText)}</div>
           </div>` : ''}
 
         <!-- Footer -->
         <div style="margin-top:auto;padding-top:20px;border-top:1px solid ${cat.color}33;text-align:center;">
           <div style="font-size:18px;color:#6B7C93;letter-spacing:0.02em;">
-            ${row.timestamp ? '填寫於 ' + row.timestamp : ''}
+            ${row.timestamp ? '填寫於 ' + escapeHtml(row.timestamp) : ''}
           </div>
         </div>
       </div>
