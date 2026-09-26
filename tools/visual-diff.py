@@ -2,7 +2,8 @@
 """
 比對兩次 visual-snapshot.mjs 的截圖，列出有畫面差異的頁面。
 
-用法：python tools/visual-diff.py before after
+用法：python tools/visual-diff.py before after [--tolerance N]
+  --tolerance N  忽略每個色彩通道差 ≤ N 的像素（圖表 canvas 反鋸齒偶有 ±1 的誤差；預設 0＝逐像素嚴格比對）
 輸出：.build-cache/visual/diff-<before>-<after>/ 內每個有差異頁面的比對圖
       （左：前、中：後、右：差異以紅色標出）。完全相同時 exit 0，有差異時 exit 1。
 需要：pip install pillow
@@ -20,8 +21,13 @@ VIS = os.path.join(ROOT, '.build-cache', 'visual')
 
 
 def main():
-    if len(sys.argv) < 3:
-        sys.exit('用法：python tools/visual-diff.py <前> <後>')
+    args = [a for a in sys.argv[1:] if not a.startswith('--')]
+    tol = int(sys.argv[sys.argv.index('--tolerance') + 1]) if '--tolerance' in sys.argv else 0
+    if tol:
+        args = [a for a in args if a != str(tol)]
+    if len(args) < 2:
+        sys.exit('用法：python tools/visual-diff.py <前> <後> [--tolerance N]')
+    sys.argv[1:3] = args[:2]
     a_dir, b_dir = (os.path.join(VIS, x) for x in sys.argv[1:3])
     out = os.path.join(VIS, f'diff-{sys.argv[1]}-{sys.argv[2]}')
     os.makedirs(out, exist_ok=True)
@@ -42,6 +48,8 @@ def main():
             a2, b2 = Image.new('RGB', (w, h), 'white'), Image.new('RGB', (w, h), 'white')
             a2.paste(a); b2.paste(b); a, b = a2, b2
         diff = ImageChops.difference(a, b)
+        if tol:
+            diff = diff.point(lambda x: 0 if x <= tol else x)
         bbox = diff.getbbox()
         if not bbox and not (changed and changed[-1][0] == name):
             continue

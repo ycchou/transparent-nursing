@@ -1,29 +1,30 @@
 // Chart.js 視覺化封裝
-import { CATEGORIES } from './config.js?v=a213c376e1';
+import { C } from './theme.js?v=477d66648f';
+import { CATEGORIES } from './config.js?v=477d66648f';
 
 const FONT_FAMILY = "'Noto Sans TC', 'Inter', sans-serif";
-const PALETTE = ['#2E86AB', '#06A77D', '#E63946', '#F4A261', '#9D4EDD', '#A8DADC', '#1D3557', '#46557A'];
+const PALETTE = [C.primaryFill, C.success, C.dangerFill, C.warning, C.purple, C.accent, C.ink, C.inkSoft];
 
 const baseOpts = {
   responsive: true,
   maintainAspectRatio: false,
   plugins: {
     legend: {
-      labels: { font: { family: FONT_FAMILY, size: 12 }, color: '#46557A', usePointStyle: true, padding: 14 },
+      labels: { font: { family: FONT_FAMILY, size: 12 }, color: C.inkSoft, usePointStyle: true, padding: 14 },
     },
     tooltip: {
-      backgroundColor: '#1D3557', titleFont: { family: FONT_FAMILY }, bodyFont: { family: FONT_FAMILY },
+      backgroundColor: C.ink, titleFont: { family: FONT_FAMILY }, bodyFont: { family: FONT_FAMILY },
       padding: 10, cornerRadius: 8,
     },
   },
   scales: {
     x: {
-      grid: { display: false }, border: { color: '#E5E9F0' },
-      ticks: { color: '#4F5D72', font: { family: FONT_FAMILY, size: 11 } },
+      grid: { display: false }, border: { color: C.border },
+      ticks: { color: C.muted, font: { family: FONT_FAMILY, size: 11 } },
     },
     y: {
-      grid: { color: '#F1F3F7' }, border: { display: false },
-      ticks: { color: '#4F5D72', font: { family: FONT_FAMILY, size: 11 } },
+      grid: { color: C.borderSoft }, border: { display: false },
+      ticks: { color: C.muted, font: { family: FONT_FAMILY, size: 11 } },
     },
   },
 };
@@ -52,7 +53,7 @@ export function chartCategoryDistribution(canvas, byCategory) {
       plugins: {
         legend: {
           position: 'right',
-          labels: { font: { family: FONT_FAMILY, size: 12 }, color: '#46557A', usePointStyle: true, padding: 10 },
+          labels: { font: { family: FONT_FAMILY, size: 12 }, color: C.inkSoft, usePointStyle: true, padding: 10 },
         },
         tooltip: baseOpts.plugins.tooltip,
       },
@@ -95,7 +96,7 @@ export function chartHoursHistogram(canvas, rows) {
         label: '回應數',
         data,
         backgroundColor: buckets.map((b, i) =>
-          (b === '55-60' || b === '60+') ? '#E63946' : (b === '50-55' ? '#F4A261' : '#2E86AB')
+          (b === '55-60' || b === '60+') ? C.dangerFill : (b === '50-55' ? C.warning : C.primaryFill)
         ),
         borderRadius: 6,
       }],
@@ -114,7 +115,7 @@ export function chartHoursHistogram(canvas, rows) {
 export function chartOvertimePolicy(canvas, rows) {
   destroyIfExists(canvas);
   const opts = ['一律給', '合理範圍給', '主管判斷', '一律不給'];
-  const colorMap = ['#06A77D', '#2E86AB', '#F4A261', '#E63946'];
+  const colorMap = [C.success, C.primaryFill, C.warning, C.dangerFill];
   const data = opts.map((o) => rows.filter((r) => r.overtimePolicy === o).length);
   return new Chart(canvas, {
     type: 'bar',
@@ -137,7 +138,7 @@ export function chartOvertimePolicy(canvas, rows) {
 export function chartRecommend(canvas, rows) {
   destroyIfExists(canvas);
   const labels = ['1 非常不推薦', '2 不推薦', '3 保留', '4 推薦', '5 非常推薦'];
-  const colors = ['#991B1B', '#E63946', '#F4A261', '#2E86AB', '#06A77D'];
+  const colors = [C.dangerDeep, C.dangerFill, C.warning, C.primaryFill, C.success];
   const data = [1, 2, 3, 4, 5].map((v) => rows.filter((r) => Number(r.recommendIndex) === v).length);
   return new Chart(canvas, {
     type: 'bar',
@@ -167,9 +168,9 @@ export function chartLocationDistribution(canvas, rows) {
   const max = Math.max(...data, 1);
   const colors = data.map((v) => {
     const ratio = v / max;
-    if (ratio > 0.66) return '#2E86AB';
-    if (ratio > 0.33) return '#5BA8C6';
-    return '#A8DADC';
+    if (ratio > 0.66) return C.primaryFill;
+    if (ratio > 0.33) return C.primarySoft;
+    return C.accent;
   });
 
   return new Chart(canvas, {
@@ -255,8 +256,8 @@ export function chartSalaryDistribution(canvas, rows, statsEl) {
     return salaries.filter((s) => isLast ? s >= b.min : (s >= b.min && s < b.max)).length;
   });
 
-  const colors = ['#E63946', '#F4A261', '#F4A261', '#F4C84C',
-                  '#2E86AB', '#5BA8C6', '#06A77D', '#06A77D'];
+  const colors = [C.dangerFill, C.warning, C.warning, C.yellow,
+                  C.primaryFill, C.primarySoft, C.success, C.success];
 
   // 自訂 plugin：在 chart 上畫 Q1 / 中位數 / Q3 三條虛線
   // label 靠近時（範圍收窄）自動把 Q1 / Q3 上推到第二排避免重疊
@@ -277,9 +278,9 @@ export function chartSalaryDistribution(canvas, rows, statsEl) {
       const q3Close = (q2x != null && q3x != null) && (q3x - q2x) < THRESHOLD;
 
       const lines = [
-        { label: 'Q1',    value: stats.q1, color: '#5BA8C6', x: q1x, lifted: q1Close },
-        { label: '中位數', value: stats.q2, color: '#1D3557', x: q2x, lifted: false },
-        { label: 'Q3',    value: stats.q3, color: '#5BA8C6', x: q3x, lifted: q3Close },
+        { label: 'Q1',    value: stats.q1, color: C.primarySoft, x: q1x, lifted: q1Close },
+        { label: '中位數', value: stats.q2, color: C.ink, x: q2x, lifted: false },
+        { label: 'Q3',    value: stats.q3, color: C.primarySoft, x: q3x, lifted: q3Close },
       ];
 
       lines.forEach(({ label, value, color, x, lifted }) => {

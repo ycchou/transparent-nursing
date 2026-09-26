@@ -31,12 +31,40 @@
   --border: #E5E9F0;
   --border-soft: #F1F3F7;
 
-  /* 類別色（與 config.js 同步） */
-  --cat-icu: #2E86AB;
-  --cat-dialysis: #06A77D;
-  --cat-er: #E63946;
-  --cat-ward: #F4A261;
-  --cat-outpatient: #9D4EDD;
+  /* 圖形填色：長條、線條、圓點、色塊用（圖形只需 3:1 對比）。不可當文字色——文字請用上面的文字色 */
+  --primary-fill: #2E86AB;
+  --danger-fill: #E63946;   /* 也是 logo 心電圖線的紅 */
+  --danger-deep: #991B1B;
+  --neutral-fill: #6B7C93;
+  --gray-fill: #9AA5B8;
+  --navy-deep: #0F2541;
+  --standard-line: #B22234; /* 護病比圖的「公告標準」虛線 */
+
+  /* 類別色：10 大工作場域（js/config.js 的 CATEGORIES 由此取色），-soft 為淡色底 */
+  --cat-ward: #F4A261;        --cat-ward-soft: #FCE2C8;
+  --cat-icu: #2E86AB;         --cat-icu-soft: #A8DADC;
+  --cat-er: #E63946;          --cat-er-soft: #FAD2CF;
+  --cat-or: #FF6B9D;          --cat-or-soft: #FDD5E2;
+  --cat-outpatient: #9D4EDD;  --cat-outpatient-soft: #E0CFF7;
+  --cat-clinic: #0891B2;      --cat-clinic-soft: #CBEEF6;
+  --cat-dialysis: #06A77D;    --cat-dialysis-soft: #C6E8DC;
+  --cat-psych: #4F46E5;       --cat-psych-soft: #C7D2FE;
+  --cat-special: #14B8A6;     --cat-special-soft: #B7E9E1;
+  --cat-other: #64748B;       --cat-other-soft: #D1D9E2;
+
+  /* 延伸序列色：圖表需要超過類別色的數量時（人力 13 職類、財務指標序列） */
+  --viz-coral: #E76F51;
+  --viz-amber: #F59E0B;
+  --viz-yellow: #F4C84C;
+  --viz-sky: #0EA5E9;
+  --viz-lime: #84CC16;
+  --viz-violet: #A855F7;
+
+  /* 淡色底：分享圖、試算結果的漸層背景 */
+  --tint-danger: #FEF2F2;
+  --tint-warning: #FFFAF0;
+  --tint-success: #ECFDF5;
+  --tint-mint: #F8FBFA;
 
   /* 設計 token */
   /* 圓角：只用這 5 階（＋圓形用 50%） */

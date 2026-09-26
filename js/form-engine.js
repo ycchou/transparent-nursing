@@ -2,13 +2,14 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=a213c376e1';
-import { renderIcons, icon } from './icons.js?v=a213c376e1';
-import { markContributed } from './contribution-gate.js?v=a213c376e1';
-import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=a213c376e1';
-import { showToast } from './toast.js?v=a213c376e1';
-import { submitEndpoint as envSubmitEndpoint, turnstileSiteKey } from './env.js?v=a213c376e1';
-import { notePwaIntent } from './pwa-prompt.js?v=a213c376e1';
+import { C } from './theme.js?v=477d66648f';
+import { mountLayout } from './components.js?v=477d66648f';
+import { renderIcons, icon } from './icons.js?v=477d66648f';
+import { markContributed } from './contribution-gate.js?v=477d66648f';
+import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=477d66648f';
+import { showToast } from './toast.js?v=477d66648f';
+import { submitEndpoint as envSubmitEndpoint, turnstileSiteKey } from './env.js?v=477d66648f';
+import { notePwaIntent } from './pwa-prompt.js?v=477d66648f';
 
 const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 避開易混字元 0/O/1/I/L
 let currentCaptcha = '';
@@ -966,7 +967,7 @@ function generateCaptcha() {
 function drawCaptcha() {
   const display = document.getElementById('captcha-display');
   if (!display) return;
-  const colors = ['#2E86AB', '#1D3557', '#06A77D', '#E63946'];
+  const colors = [C.primaryFill, C.ink, C.success, C.dangerFill];
   const chars = (currentCaptcha || '').split('');
   display.innerHTML = chars.map((ch, i) => {
     const angle = ((Math.random() - 0.5) * 24).toFixed(1); // ±12 度

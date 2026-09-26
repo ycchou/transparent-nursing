@@ -5,7 +5,8 @@
 // - 本地埋點（trackPwa）：dispatch CustomEvent + localStorage 累計（未接外部服務）
 // import { initPWAPrompt, showInstallGuide, notePwaIntent, isAppInstalled } from './pwa-prompt.js?v=...';
 
-import { showToast } from './toast.js?v=a213c376e1';
+import { C } from './theme.js?v=477d66648f';
+import { showToast } from './toast.js?v=477d66648f';
 
 const DISMISS_KEY = '__nursing_pwa_dismissed';          // 最近一次關閉/延後的時間戳
 const DISMISS_COUNT_KEY = '__nursing_pwa_dismiss_count'; // 累計「主動關閉」次數
@@ -160,7 +161,7 @@ function consumeIntent() { lsDel(INTENT_KEY); }
 // ===== 視覺素材 =====
 const LOGO_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
   <path d="M12 20.6 c-5.6 -3.8 -9.2 -8.2 -9.2 -13.0 a4.6 4.6 0 0 1 9.2 -1 a4.6 4.6 0 0 1 9.2 1 c0 4.8 -3.6 9.2 -9.2 13.0 z" fill="white"/>
-  <path d="M5.6 10.2 h3.4 l1.4 -2.6 l2.4 5.2 l1.4 -3.2 h5.6" stroke="#E63946" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M5.6 10.2 h3.4 l1.4 -2.6 l2.4 5.2 l1.4 -3.2 h5.6" stroke="${C.dangerFill}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
 </svg>`;
 
 // iOS 分享圖示（方框＋上箭頭），取代 emoji ⬆︎；用 currentColor 隨文字色。

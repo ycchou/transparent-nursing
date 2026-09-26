@@ -1,10 +1,11 @@
+import { C } from './theme.js?v=477d66648f';
 // 人力監控共用視圖：職類/病床折線圖與單院資料載入。
 // 供「人力監控」頁(personnel.js)與「機構總覽」頁(hospital.js)共用，單一來源。
 // 資料忠實呈現：未填報(null)不補值，折線圖於該月中斷(spanGaps:false)。
 
-export const CAT_COLORS = ['#2E86AB', '#E63946', '#06A77D', '#1D3557', '#F4A261', '#9D4EDD',
-  '#14B8A6', '#FF6B9D', '#F59E0B', '#4F46E5', '#0EA5E9', '#84CC16', '#A855F7'];
-export const BED_COLORS = ['#2E86AB', '#E63946', '#9D4EDD', '#F4A261'];
+export const CAT_COLORS = [C.primaryFill, C.dangerFill, C.success, C.ink, C.warning, C.purple,
+  C.teal, C.pink, C.amber, C.indigo, C.sky, C.lime, C.violet];
+export const BED_COLORS = [C.primaryFill, C.dangerFill, C.purple, C.warning];
 // 預設只顯示「護產」，其餘職類由使用者點圖例自行開啟
 export const DEFAULT_ON = new Set(['護產']);
 

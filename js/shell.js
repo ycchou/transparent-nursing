@@ -85,7 +85,7 @@
   // 顯示尺寸 26px 在 32px 色塊內 → 心型佔 32px 方塊約 62% 寬度）
   var HEART_PULSE_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" style="display:block;">' +
     '<path d="M12 20.6 c-5.6 -3.8 -9.2 -8.2 -9.2 -13.0 a4.6 4.6 0 0 1 9.2 -1 a4.6 4.6 0 0 1 9.2 1 c0 4.8 -3.6 9.2 -9.2 13.0 z" fill="white"/>' +
-    '<path d="M5.6 10.2 h3.4 l1.4 -2.6 l2.4 5.2 l1.4 -3.2 h5.6" stroke="#E63946" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>' +
+    '<path d="M5.6 10.2 h3.4 l1.4 -2.6 l2.4 5.2 l1.4 -3.2 h5.6" style="stroke:var(--danger-fill)" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>' +
     '</svg>';
 
   // 軟鎖：鎖定期只顯示公開頁的選單/頁尾連結（總開關與白名單在 js/gate.js）

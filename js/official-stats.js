@@ -1,3 +1,4 @@
+import { C } from './theme.js?v=477d66648f';
 // 官方參考數據：衛福部護理及健康照護司「112 年醫院護理服務量調查」
 // 資料來源 PDF：https://www.nurse.org.tw/filecenter/B/8DDC60185347C25058/...
 // 公開於：社團法人臺灣護理學會（全聯會）
@@ -273,9 +274,9 @@ export const NET_GROWTH = {
 // ============== Chart 渲染函式 ==============
 
 const FONT_FAMILY = "'Noto Sans TC', 'Inter', sans-serif";
-const COLOR_MC = '#1D3557';    // 醫學中心（深藍）
-const COLOR_RG = '#2E86AB';    // 區域醫院
-const COLOR_DT = '#5BA8C6';    // 地區醫院
+const COLOR_MC = C.ink;    // 醫學中心（深藍）
+const COLOR_RG = C.primaryFill;    // 區域醫院
+const COLOR_DT = C.primarySoft;    // 地區醫院
 
 function destroyIfExists(canvas) {
   const existing = Chart.getChart(canvas);
@@ -287,20 +288,20 @@ const baseOpts = {
   maintainAspectRatio: false,
   plugins: {
     legend: {
-      labels: { font: { family: FONT_FAMILY, size: 12 }, color: '#46557A', usePointStyle: true, padding: 14 },
+      labels: { font: { family: FONT_FAMILY, size: 12 }, color: C.inkSoft, usePointStyle: true, padding: 14 },
     },
     tooltip: {
-      backgroundColor: '#1D3557',
+      backgroundColor: C.ink,
       titleFont: { family: FONT_FAMILY },
       bodyFont: { family: FONT_FAMILY },
       padding: 10, cornerRadius: 8,
     },
   },
   scales: {
-    x: { grid: { display: false }, border: { color: '#E5E9F0' },
-         ticks: { color: '#4F5D72', font: { family: FONT_FAMILY, size: 11 } } },
-    y: { grid: { color: '#F1F3F7' }, border: { display: false },
-         ticks: { color: '#4F5D72', font: { family: FONT_FAMILY, size: 11 } } },
+    x: { grid: { display: false }, border: { color: C.border },
+         ticks: { color: C.muted, font: { family: FONT_FAMILY, size: 11 } } },
+    y: { grid: { color: C.borderSoft }, border: { display: false },
+         ticks: { color: C.muted, font: { family: FONT_FAMILY, size: 11 } } },
   },
 };
 
@@ -385,10 +386,10 @@ export function chartTurnoverTrend(canvas) {
       datasets: [{
         label: '離職率',
         data: d.values,
-        borderColor: '#E63946',
-        backgroundColor: '#E6394633',
+        borderColor: C.dangerFill,
+        backgroundColor: C.dangerFill + '33',
         tension: 0.3, borderWidth: 2.5, pointRadius: 5,
-        pointBackgroundColor: '#E63946',
+        pointBackgroundColor: C.dangerFill,
         fill: true,
       }],
     },
@@ -449,8 +450,8 @@ export function chartCertAllowance(canvas) {
       datasets: [
         { label: '護理師', data: d.nurse,     borderColor: COLOR_RG, backgroundColor: COLOR_RG + '22',
           tension: 0.3, borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: COLOR_RG, fill: false },
-        { label: '護士',   data: d.assistant, borderColor: '#F4A261', backgroundColor: '#F4A26122',
-          tension: 0.3, borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: '#F4A261', fill: false },
+        { label: '護士',   data: d.assistant, borderColor: C.warning, backgroundColor: C.warning + '22',
+          tension: 0.3, borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: C.warning, fill: false },
       ],
     },
     options: freshOpts({
@@ -472,7 +473,7 @@ export function chartCertAllowance(canvas) {
 export function chartEducation(canvas) {
   destroyIfExists(canvas);
   const d = EDUCATION_DIST_2023;
-  const colors = ['#9AA5B8', '#5BA8C6', '#2E86AB', '#1D3557', '#0F2541'];
+  const colors = [C.grayFill, C.primarySoft, C.primaryFill, C.ink, C.navyDeep];
   return new Chart(canvas, {
     type: 'doughnut',
     data: { labels: d.labels, datasets: [{ data: d.values, backgroundColor: colors,
@@ -482,7 +483,7 @@ export function chartEducation(canvas) {
       cutout: '62%',
       plugins: {
         legend: { position: 'right',
-          labels: { font: { family: FONT_FAMILY, size: 12 }, color: '#46557A', usePointStyle: true, padding: 10 } },
+          labels: { font: { family: FONT_FAMILY, size: 12 }, color: C.inkSoft, usePointStyle: true, padding: 10 } },
         tooltip: { ...baseOpts.plugins.tooltip,
           callbacks: { label: (ctx) => `${ctx.label}: ${ctx.parsed}%` } },
       },
@@ -523,10 +524,10 @@ export function chartPublicPrivate(canvas) {
     data: {
       labels,
       datasets: [
-        { label: '公立醫院 · 護理師', data: d.publicNurse, borderColor: '#1D3557', backgroundColor: '#1D355733',
-          tension: 0.3, borderWidth: 2.5, pointRadius: 5, pointBackgroundColor: '#1D3557' },
-        { label: '私立醫院 · 護理師', data: d.privateNurse, borderColor: '#F4A261', backgroundColor: '#F4A26133',
-          tension: 0.3, borderWidth: 2.5, pointRadius: 5, pointBackgroundColor: '#F4A261' },
+        { label: '公立醫院 · 護理師', data: d.publicNurse, borderColor: C.ink, backgroundColor: C.ink + '33',
+          tension: 0.3, borderWidth: 2.5, pointRadius: 5, pointBackgroundColor: C.ink },
+        { label: '私立醫院 · 護理師', data: d.privateNurse, borderColor: C.warning, backgroundColor: C.warning + '33',
+          tension: 0.3, borderWidth: 2.5, pointRadius: 5, pointBackgroundColor: C.warning },
       ],
     },
     options: freshOpts({
@@ -551,7 +552,7 @@ export function chartNewHireTurnover(canvas) {
   const d = NEW_HIRE_TURNOVER_2022;
   // Chart.js floating bar：data 是 [min, max] 配對
   const ranges = d.labels.map((_, i) => [d.min[i], d.max[i]]);
-  const colors = ['#1D3557', '#2E86AB', '#5BA8C6'];
+  const colors = [C.ink, C.primaryFill, C.primarySoft];
 
   return new Chart(canvas, {
     type: 'bar',
@@ -645,18 +646,18 @@ export function chartWorkplaceRatio(canvas) {
       labels,
       datasets: [
         // 左軸 (8-20%)：其他三類
-        { label: '診所',  data: d.clinic,   borderColor: '#06A77D', backgroundColor: '#06A77D33',
-          tension: 0.3, borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: '#06A77D',
+        { label: '診所',  data: d.clinic,   borderColor: C.success, backgroundColor: C.success + '33',
+          tension: 0.3, borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: C.success,
           yAxisID: 'yLeft', fill: false },
-        { label: '長照',  data: d.longTerm, borderColor: '#F4A261', backgroundColor: '#F4A26133',
-          tension: 0.3, borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: '#F4A261',
+        { label: '長照',  data: d.longTerm, borderColor: C.warning, backgroundColor: C.warning + '33',
+          tension: 0.3, borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: C.warning,
           yAxisID: 'yLeft', fill: false },
-        { label: '其他',  data: d.other,    borderColor: '#9D4EDD', backgroundColor: '#9D4EDD33',
-          tension: 0.3, borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: '#9D4EDD',
+        { label: '其他',  data: d.other,    borderColor: C.purple, backgroundColor: C.purple + '33',
+          tension: 0.3, borderWidth: 2.5, pointRadius: 4, pointBackgroundColor: C.purple,
           yAxisID: 'yLeft', fill: false },
         // 右軸 (60-70%)：醫院
-        { label: '醫院',  data: d.hospital, borderColor: '#1D3557', backgroundColor: '#1D355722',
-          tension: 0.3, borderWidth: 3, pointRadius: 5, pointBackgroundColor: '#1D3557',
+        { label: '醫院',  data: d.hospital, borderColor: C.ink, backgroundColor: C.ink + '22',
+          tension: 0.3, borderWidth: 3, pointRadius: 5, pointBackgroundColor: C.ink,
           yAxisID: 'yRight', fill: false, borderDash: [] },
       ],
     },
@@ -670,18 +671,18 @@ export function chartWorkplaceRatio(canvas) {
       scales: {
         x: baseOpts.scales.x,
         yLeft:  { type: 'linear', position: 'left',
-                  title: { display: true, text: '其他場域 (%)', color: '#46557A',
+                  title: { display: true, text: '其他場域 (%)', color: C.inkSoft,
                            font: { family: FONT_FAMILY, size: 11 } },
                   beginAtZero: false, suggestedMin: 8, suggestedMax: 20,
-                  grid: { color: '#F1F3F7' }, border: { display: false },
-                  ticks: { color: '#4F5D72', font: { family: FONT_FAMILY, size: 11 },
+                  grid: { color: C.borderSoft }, border: { display: false },
+                  ticks: { color: C.muted, font: { family: FONT_FAMILY, size: 11 },
                            callback: (v) => v + '%' } },
         yRight: { type: 'linear', position: 'right',
-                  title: { display: true, text: '醫院 (%)', color: '#1D3557',
+                  title: { display: true, text: '醫院 (%)', color: C.ink,
                            font: { family: FONT_FAMILY, size: 11, weight: '600' } },
                   beginAtZero: false, suggestedMin: 60, suggestedMax: 68,
                   grid: { drawOnChartArea: false }, border: { display: false },
-                  ticks: { color: '#1D3557', font: { family: FONT_FAMILY, size: 11 },
+                  ticks: { color: C.ink, font: { family: FONT_FAMILY, size: 11 },
                            callback: (v) => v + '%' } },
       },
     }),
@@ -699,10 +700,10 @@ export function chartAvgTenure(canvas) {
       datasets: [{
         label: '平均年資',
         data: d.values,
-        borderColor: '#9D4EDD',
-        backgroundColor: '#9D4EDD33',
+        borderColor: C.purple,
+        backgroundColor: C.purple + '33',
         tension: 0.3, borderWidth: 2.5, pointRadius: 5,
-        pointBackgroundColor: '#9D4EDD', fill: true,
+        pointBackgroundColor: C.purple, fill: true,
       }],
     },
     options: freshOpts({
@@ -732,10 +733,10 @@ export function chartFirstTimePractice(canvas) {
       datasets: [{
         label: '首次執業人數',
         data: d.values,
-        borderColor: '#2E86AB',
-        backgroundColor: '#2E86AB33',
+        borderColor: C.primaryFill,
+        backgroundColor: C.primaryFill + '33',
         tension: 0.3, borderWidth: 2.5, pointRadius: 5,
-        pointBackgroundColor: '#2E86AB', fill: true,
+        pointBackgroundColor: C.primaryFill, fill: true,
       }],
     },
     options: freshOpts({
@@ -764,11 +765,11 @@ export function chartNetGrowth(canvas) {
       datasets: [
         // order 越小越晚畫（會在上層）：線設 0、bar 設 1，確保線不被 bar 蓋住
         { type: 'line', label: '成長率 (%)', data: d.growthRate,
-          borderColor: '#E63946', backgroundColor: '#E6394633',
+          borderColor: C.dangerFill, backgroundColor: C.dangerFill + '33',
           borderWidth: 2.5, tension: 0.3, pointRadius: 4,
-          pointBackgroundColor: '#E63946', yAxisID: 'y1', fill: false, order: 0 },
+          pointBackgroundColor: C.dangerFill, yAxisID: 'y1', fill: false, order: 0 },
         { type: 'bar', label: '淨增加人數', data: d.netIncrease,
-          backgroundColor: '#5BA8C6', borderRadius: 6, yAxisID: 'y', order: 1 },
+          backgroundColor: C.primarySoft, borderRadius: 6, yAxisID: 'y', order: 1 },
       ],
     },
     options: freshOpts({
@@ -785,12 +786,12 @@ export function chartNetGrowth(canvas) {
       scales: {
         x: baseOpts.scales.x,
         y:  { type: 'linear', position: 'left', beginAtZero: true,
-              grid: { color: '#F1F3F7' }, border: { display: false },
-              ticks: { color: '#4F5D72', font: { family: FONT_FAMILY, size: 11 },
+              grid: { color: C.borderSoft }, border: { display: false },
+              ticks: { color: C.muted, font: { family: FONT_FAMILY, size: 11 },
                        callback: (v) => v.toLocaleString() } },
         y1: { type: 'linear', position: 'right', beginAtZero: true, suggestedMax: 4,
               grid: { drawOnChartArea: false }, border: { display: false },
-              ticks: { color: '#E63946', font: { family: FONT_FAMILY, size: 11 },
+              ticks: { color: C.dangerFill, font: { family: FONT_FAMILY, size: 11 },
                        callback: (v) => v + '%' } },
       },
     }),
@@ -923,7 +924,7 @@ function makeMolLineChart(canvas, { data, color, yTitle, tickFmt, tooltipFmt, da
       scales: {
         x: baseOpts.scales.x,
         y: { ...baseOpts.scales.y, beginAtZero: false,
-             title: { display: true, text: yTitle, color: '#46557A',
+             title: { display: true, text: yTitle, color: C.inkSoft,
                       font: { family: FONT_FAMILY, size: 11 } },
              ticks: { ...baseOpts.scales.y.ticks, callback: tickFmt } },
       },
@@ -934,7 +935,7 @@ function makeMolLineChart(canvas, { data, color, yTitle, tickFmt, tooltipFmt, da
 /** 勞動部 — 護理人員 7 月經常性薪資 3 年趨勢 */
 export function chartMolSalary(canvas) {
   return makeMolLineChart(canvas, {
-    data: MOL_NURSE_TREND.monthlySalary, color: '#2E86AB',
+    data: MOL_NURSE_TREND.monthlySalary, color: C.primaryFill,
     yTitle: '月薪 (元)',
     tickFmt: (v) => Number(v).toLocaleString(),
     tooltipFmt: (v) => fmtTWD(v) + ' / 月',
@@ -944,7 +945,7 @@ export function chartMolSalary(canvas) {
 /** 勞動部 — 護理人員上年全年薪資所得 3 年趨勢 */
 export function chartMolIncome(canvas) {
   return makeMolLineChart(canvas, {
-    data: MOL_NURSE_TREND.annualIncome, color: '#1D3557',
+    data: MOL_NURSE_TREND.annualIncome, color: C.ink,
     yTitle: '全年所得 (萬元)',
     tickFmt: (v) => (v / 10000).toFixed(0) + ' 萬',
     tooltipFmt: (v) => (v / 10000).toFixed(1) + ' 萬元',
@@ -954,7 +955,7 @@ export function chartMolIncome(canvas) {
 /** 勞動部 — 護理人員受僱人數 3 年趨勢 */
 export function chartMolHeadcount(canvas) {
   return makeMolLineChart(canvas, {
-    data: MOL_NURSE_TREND.headcount, color: '#06A77D',
+    data: MOL_NURSE_TREND.headcount, color: C.success,
     yTitle: '受僱人數',
     tickFmt: (v) => (v / 1000).toFixed(0) + ' 千',
     tooltipFmt: (v) => Number(v).toLocaleString() + ' 人',

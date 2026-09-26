@@ -1,3 +1,4 @@
+import { C, alpha } from './theme.js?v=477d66648f';
 // 三班護病比・共用視圖工具
 //
 // 從 nurse-ratio.js 抽出，供護病比頁與單一機構整合頁（hospital.js）共用：
@@ -16,19 +17,19 @@ export const STANDARDS = {
 
 // 三班顏色（白班藍 / 小夜粉 / 大夜橙）
 export const COLORS = {
-  day:   { line: '#2E86AB', fill: 'rgba(46,134,171,0.15)' },
-  eve:   { line: '#E63946', fill: 'rgba(230,57,70,0.12)' },
-  night: { line: '#F4A261', fill: 'rgba(244,162,97,0.15)' },
-  std:   'rgba(230, 57, 70, 0.55)',
+  day:   { line: C.primaryFill, fill: alpha(C.primaryFill, 0.15) },
+  eve:   { line: C.dangerFill, fill: alpha(C.dangerFill, 0.12) },
+  night: { line: C.warning, fill: alpha(C.warning, 0.15) },
+  std:   alpha(C.dangerFill, 0.55),
 };
 
 // 合規分類容差 ±5% 與四類標籤/顏色
 export const COMPLIANCE_TOLERANCE = 0.05;
 export const COMPLIANCE_CLASSES = {
-  A: { key: 'A', label: '達標', color: '#06A77D', text: '#05805F', bg: 'rgba(6,167,125,0.13)' },
-  B: { key: 'B', label: '觀察', color: '#F4A261', text: '#B45309', bg: 'rgba(244,162,97,0.15)' },
-  C: { key: 'C', label: '警戒', color: '#E63946', text: '#C62B37', bg: 'rgba(230,57,70,0.13)' },
-  N: { key: 'N', label: '未報', color: '#6B7C93', text: '#4F5D72', bg: 'rgba(107,124,147,0.10)' },
+  A: { key: 'A', label: '達標', color: C.success, text: C.successText, bg: alpha(C.success, 0.13) },
+  B: { key: 'B', label: '觀察', color: C.warning, text: C.warningText, bg: alpha(C.warning, 0.15) },
+  C: { key: 'C', label: '警戒', color: C.dangerFill, text: C.danger, bg: alpha(C.dangerFill, 0.13) },
+  N: { key: 'N', label: '未報', color: C.neutralFill, text: C.muted, bg: alpha(C.neutralFill, 0.10) },
 };
 
 // ROC yyyymm → 顯示字串
@@ -119,7 +120,7 @@ export function renderNurseChart(canvas, hosp, months) {
       content: `${shiftLabel}標準 1:${value}`,
       position: 'end',
       backgroundColor: 'rgba(255,255,255,0.85)',
-      color: '#B22234',
+      color: C.standardLine,
       font: { family: "'Noto Sans TC', sans-serif", size: 10, weight: 'bold' },
       padding: { top: 2, bottom: 2, left: 6, right: 6 },
       yAdjust: -10,
@@ -151,13 +152,13 @@ export function renderNurseChart(canvas, hosp, months) {
           position: 'bottom',
           labels: {
             font: { family: "'Noto Sans TC', sans-serif", size: 12 },
-            color: '#46557A',
+            color: C.inkSoft,
             usePointStyle: true,
             padding: 12,
           },
         },
         tooltip: {
-          backgroundColor: '#1D3557',
+          backgroundColor: C.ink,
           titleFont: { family: "'Noto Sans TC', sans-serif" },
           bodyFont: { family: "'Noto Sans TC', sans-serif" },
           padding: 10,
@@ -174,9 +175,9 @@ export function renderNurseChart(canvas, hosp, months) {
       scales: {
         x: {
           grid: { display: false },
-          border: { color: '#E5E9F0' },
+          border: { color: C.border },
           ticks: {
-            color: '#4F5D72',
+            color: C.muted,
             font: { family: "'Noto Sans TC', sans-serif", size: 10 },
             maxRotation: 45,
             minRotation: 0,
@@ -188,15 +189,15 @@ export function renderNurseChart(canvas, hosp, months) {
           title: {
             display: true,
             text: '護病比',
-            color: '#46557A',
+            color: C.inkSoft,
             font: { family: "'Noto Sans TC', sans-serif", size: 12 },
           },
-          grid: { color: '#F1F3F7' },
+          grid: { color: C.borderSoft },
           border: { display: false },
           beginAtZero: false,
           suggestedMin: 4,
           ticks: {
-            color: '#4F5D72',
+            color: C.muted,
             font: { family: "'Noto Sans TC', sans-serif", size: 11 },
           },
         },

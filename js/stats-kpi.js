@@ -1,7 +1,8 @@
 // 薪資百分位數 KPI 條 + 可拖曳浮動氣泡式薪資試算工具
 // 給 platform.html 使用：依目前篩選後的資料即時計算
-import { icon } from './icons.js?v=a213c376e1';
-import { notePwaIntent } from './pwa-prompt.js?v=a213c376e1';
+import { C, alpha } from './theme.js?v=477d66648f';
+import { icon } from './icons.js?v=477d66648f';
+import { notePwaIntent } from './pwa-prompt.js?v=477d66648f';
 
 /** 線性插值法百分位數（標準 type-7） */
 export function percentile(sortedValues, p) {
@@ -190,12 +191,7 @@ export function mountSalaryCalculator(getRows, getConditions) {
 
   // hex (#RRGGBB) → rgba(r,g,b,a) — 給 verdict / edge note 動態著色
   // 用 rgba() 而非 color-mix()，避免 Chrome computed style 回傳 color(srgb ...) 讓 html2canvas 抓不到
-  function hexToRgba(hex, alpha) {
-    const m = /^#([0-9a-f]{6})$/i.exec(hex || '');
-    if (!m) return `rgba(46,134,171,${alpha})`;
-    const n = parseInt(m[1], 16);
-    return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${alpha})`;
-  }
+  const hexToRgba = (hex, a) => alpha(/^#[0-9a-f]{6}$/i.test(hex || '') ? hex : C.primaryFill, a);
 
   function run() {
     const val = Number(input.value);
@@ -233,10 +229,10 @@ export function mountSalaryCalculator(getRows, getConditions) {
       : rank >= 75 ? '頂尖區' : rank >= 50 ? '中段偏上' : rank >= 25 ? '中段偏下' : '低段';
     // 文字用色（白底 ≥ 4.5:1）
     const colorHex = belowMin
-      ? '#C62B37'
+      ? C.danger
       : aboveMax
-      ? '#05805F'
-      : rank >= 75 ? '#05805F' : rank >= 50 ? '#236F8F' : rank >= 25 ? '#B45309' : '#C62B37';
+      ? C.successText
+      : rank >= 75 ? C.successText : rank >= 50 ? C.primary : rank >= 25 ? C.warningText : C.danger;
 
     const span = Math.max(1, maxV - minV);
     const markerLeft = clamp(((val - minV) / span) * 100, 0, 100);
@@ -414,7 +410,7 @@ export function mountSalaryCalculator(getRows, getConditions) {
   // 心型 + ECG 線 logo（與站內 header 一致）
   const HEART_PULSE_SVG = `<svg width="42" height="42" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path d="M12 20.6 c-5.6 -3.8 -9.2 -8.2 -9.2 -13.0 a4.6 4.6 0 0 1 9.2 -1 a4.6 4.6 0 0 1 9.2 1 c0 4.8 -3.6 9.2 -9.2 13.0 z" fill="white"/>
-    <path d="M5.6 10.2 h3.4 l1.4 -2.6 l2.4 5.2 l1.4 -3.2 h5.6" stroke="#E63946" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M5.6 10.2 h3.4 l1.4 -2.6 l2.4 5.2 l1.4 -3.2 h5.6" stroke="${C.dangerFill}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
   </svg>`;
 
   // 1080 × 1350 IG 直式分享卡：全 inline style，方便 html2canvas 正確擷取
@@ -463,10 +459,10 @@ export function mountSalaryCalculator(getRows, getConditions) {
 
     const conds = Array.isArray(conditionsRaw) ? conditionsRaw : [];
     const condChipsHtml = conds.length === 0
-      ? `<span style="display:inline-block;padding:10px 24px;background:rgba(46,134,171,0.10);border:1px solid rgba(46,134,171,0.28);border-radius:999px;font-size:22px;color:#1D3557;white-space:nowrap;">全部 ${sampleN} 筆 · 未套用篩選</span>`
+      ? `<span style="display:inline-block;padding:10px 24px;background:${alpha(C.primaryFill, 0.10)};border:1px solid ${alpha(C.primaryFill, 0.28)};border-radius:999px;font-size:22px;color:${C.ink};white-space:nowrap;">全部 ${sampleN} 筆 · 未套用篩選</span>`
       : conds.map((c) => `
-          <span style="display:inline-block;padding:10px 22px;background:rgba(46,134,171,0.10);border:1px solid rgba(46,134,171,0.28);border-radius:999px;font-size:21px;color:#1D3557;margin:0 10px 10px 0;line-height:1.4;white-space:nowrap;">
-            <span style="font-weight:700;color:#236F8F;">${c.label}</span><span style="margin:0 8px;color:#5F6F85;">·</span>${c.value}
+          <span style="display:inline-block;padding:10px 22px;background:${alpha(C.primaryFill, 0.10)};border:1px solid ${alpha(C.primaryFill, 0.28)};border-radius:999px;font-size:21px;color:${C.ink};margin:0 10px 10px 0;line-height:1.4;white-space:nowrap;">
+            <span style="font-weight:700;color:${C.primary};">${c.label}</span><span style="margin:0 8px;color:${C.mutedLight};">·</span>${c.value}
           </span>
         `).join('');
 
@@ -483,7 +479,7 @@ export function mountSalaryCalculator(getRows, getConditions) {
     ` : `
       <div style="position:relative;height:${barWrapHeight}px;margin:0 16px;">
         <!-- Bar 底色 -->
-        <div style="position:absolute;top:26px;left:0;right:0;height:18px;background:linear-gradient(90deg,#fef2f2 0%,#fffaf0 35%,#ecfdf5 100%);border-radius:999px;border:1px solid rgba(15,23,42,0.08);"></div>
+        <div style="position:absolute;top:26px;left:0;right:0;height:18px;background:linear-gradient(90deg,${C.tintDanger} 0%,${C.tintWarning} 35%,${C.tintSuccess} 100%);border-radius:999px;border:1px solid rgba(15,23,42,0.08);"></div>
         <!-- Ticks -->
         <div style="position:absolute;top:22px;left:${p25Left}%;width:3px;height:26px;background:rgba(15,23,42,0.4);transform:translateX(-50%);"></div>
         <div style="position:absolute;top:16px;left:${p50Left}%;width:3px;height:38px;background:rgba(15,23,42,0.7);transform:translateX(-50%);"></div>
@@ -491,12 +487,12 @@ export function mountSalaryCalculator(getRows, getConditions) {
         <!-- Marker（你的位置） -->
         <div style="position:absolute;top:10px;left:${markerLeft}%;width:26px;height:50px;background:${colorHex};border-radius:7px;border:3px solid #fff;box-shadow:0 4px 14px rgba(0,0,0,0.20);transform:translateX(-50%);"></div>
         <!-- 標籤（P25/P50/P75） -->
-        <div style="position:absolute;top:${labelTop(p25_close)};left:${p25Left}%;transform:translateX(-50%);font-size:19px;color:#4F5D72;white-space:nowrap;">${tickLabel('P25', p25)}</div>
-        <div style="position:absolute;top:58px;left:${p50Left}%;transform:translateX(-50%);font-size:19px;color:#1D3557;font-weight:700;white-space:nowrap;">${tickLabel('P50', p50)}</div>
-        <div style="position:absolute;top:${labelTop(p75_close)};left:${p75Left}%;transform:translateX(-50%);font-size:19px;color:#4F5D72;white-space:nowrap;">${tickLabel('P75', p75)}</div>
+        <div style="position:absolute;top:${labelTop(p25_close)};left:${p25Left}%;transform:translateX(-50%);font-size:19px;color:${C.muted};white-space:nowrap;">${tickLabel('P25', p25)}</div>
+        <div style="position:absolute;top:58px;left:${p50Left}%;transform:translateX(-50%);font-size:19px;color:${C.ink};font-weight:700;white-space:nowrap;">${tickLabel('P50', p50)}</div>
+        <div style="position:absolute;top:${labelTop(p75_close)};left:${p75Left}%;transform:translateX(-50%);font-size:19px;color:${C.muted};white-space:nowrap;">${tickLabel('P75', p75)}</div>
         ${hideNumbers ? '' : `
-          <div style="position:absolute;top:${barWrapHeight - 22}px;left:0;font-size:17px;color:#5F6F85;">${minV} 萬</div>
-          <div style="position:absolute;top:${barWrapHeight - 22}px;right:0;font-size:17px;color:#5F6F85;">${maxV} 萬</div>
+          <div style="position:absolute;top:${barWrapHeight - 22}px;left:0;font-size:17px;color:${C.mutedLight};">${minV} 萬</div>
+          <div style="position:absolute;top:${barWrapHeight - 22}px;right:0;font-size:17px;color:${C.mutedLight};">${maxV} 萬</div>
         `}
       </div>
     `;
@@ -504,27 +500,27 @@ export function mountSalaryCalculator(getRows, getConditions) {
     return `
       <div id="calc-share-root" style="
         width:1080px;height:1350px;
-        background:linear-gradient(180deg,#F8FBFA 0%,#FFFFFF 55%);
+        background:linear-gradient(180deg,${C.tintMint} 0%,${C.surface} 55%);
         padding:64px 72px;
         box-sizing:border-box;
         font-family:'Noto Sans TC','PingFang TC','Microsoft YaHei',sans-serif;
-        color:#1D3557;
+        color:${C.ink};
         position:relative;
         overflow:hidden;
         display:flex;
         flex-direction:column;
       ">
         <!-- 頂部品牌色條 -->
-        <div style="position:absolute;top:0;left:0;right:0;height:10px;background:linear-gradient(90deg,#2E86AB 0%,#A8DADC 50%,#06A77D 100%);"></div>
+        <div style="position:absolute;top:0;left:0;right:0;height:10px;background:linear-gradient(90deg,${C.primaryFill} 0%,${C.accent} 50%,${C.success} 100%);"></div>
 
         <!-- Header -->
         <div style="display:flex;align-items:center;gap:18px;">
-          <div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,#2E86AB,#A8DADC);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,${C.primaryFill},${C.accent});display:flex;align-items:center;justify-content:center;flex-shrink:0;">
             ${HEART_PULSE_SVG}
           </div>
           <div>
-            <div style="font-size:18px;color:#4F5D72;letter-spacing:0.06em;line-height:1.2;">護理職場透明化運動</div>
-            <div style="font-size:34px;font-weight:700;font-family:Lora,'Noto Serif TC',serif;color:#1D3557;margin-top:2px;letter-spacing:0.01em;">薪資百分位試算</div>
+            <div style="font-size:18px;color:${C.muted};letter-spacing:0.06em;line-height:1.2;">護理職場透明化運動</div>
+            <div style="font-size:34px;font-weight:700;font-family:Lora,'Noto Serif TC',serif;color:${C.ink};margin-top:2px;letter-spacing:0.01em;">薪資百分位試算</div>
           </div>
         </div>
 
@@ -532,23 +528,23 @@ export function mountSalaryCalculator(getRows, getConditions) {
         <div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:36px;">
           <!-- Hero -->
           <div style="text-align:center;">
-            <div style="font-size:32px;color:#4F5D72;margin-bottom:10px;letter-spacing:0.06em;">${heroLabel}</div>
+            <div style="font-size:32px;color:${C.muted};margin-bottom:10px;letter-spacing:0.06em;">${heroLabel}</div>
             <div style="font-size:${isEdge ? '108px' : '200px'};font-weight:800;line-height:1;color:${colorHex};font-family:Lora,'Noto Serif TC',serif;letter-spacing:-0.04em;${isEdge ? 'padding:20px 0;' : ''}">
               ${heroBig}
             </div>
             <div style="display:inline-block;margin-top:${isEdge ? '12px' : '20px'};padding:12px 32px;background:${verdictBg};color:${colorHex};border-radius:999px;font-size:28px;font-weight:700;letter-spacing:0.04em;">
               ${verdict}
             </div>
-            <div style="font-size:32px;margin-top:24px;color:#46557A;line-height:1.55;font-weight:500;">${subHeadline}</div>
-            ${diffSummary ? `<div style="font-size:26px;margin-top:8px;color:#4F5D72;">${diffSummary}</div>` : ''}
+            <div style="font-size:32px;margin-top:24px;color:${C.inkSoft};line-height:1.55;font-weight:500;">${subHeadline}</div>
+            ${diffSummary ? `<div style="font-size:26px;margin-top:8px;color:${C.muted};">${diffSummary}</div>` : ''}
           </div>
 
           <!-- Bar / Edge note -->
           ${barHtml}
 
           <!-- Conditions -->
-          <div style="padding-top:24px;border-top:1px dashed #E5E9F0;">
-            <div style="font-size:18px;color:#4F5D72;margin-bottom:14px;letter-spacing:0.08em;font-weight:600;">${icon('map-pin', { size: 18, className: 'ico-inline' })}比較條件</div>
+          <div style="padding-top:24px;border-top:1px dashed ${C.border};">
+            <div style="font-size:18px;color:${C.muted};margin-bottom:14px;letter-spacing:0.08em;font-weight:600;">${icon('map-pin', { size: 18, className: 'ico-inline' })}比較條件</div>
             <div style="display:flex;flex-wrap:wrap;align-items:flex-start;line-height:1.4;">
               ${condChipsHtml}
             </div>
@@ -586,7 +582,7 @@ export function mountSalaryCalculator(getRows, getConditions) {
 
       const canvas = await h2c(node, {
         scale: 2,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: C.surface,
         useCORS: true,
         logging: false,
         width: 1080,
@@ -596,7 +592,7 @@ export function mountSalaryCalculator(getRows, getConditions) {
       });
       const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 0.95));
       const dataUrl = canvas.toDataURL('image/png');
-      const { showSharePreview } = await import('./share-card.js?v=a213c376e1');
+      const { showSharePreview } = await import('./share-card.js?v=477d66648f');
       showSharePreview(blob, dataUrl, `salary-percentile-${Date.now()}.png`);
       // 高意圖時刻：做完薪資試算並產生分享圖 → 當頁嘗試顯示安裝提示
       notePwaIntent('salary_calc', { showNow: true });

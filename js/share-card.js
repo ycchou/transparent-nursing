@@ -1,7 +1,8 @@
 // 一鍵產生單筆資料分享圖片（1080 × 1350，IG 4:5 直式）
-import { getCategory } from './config.js?v=a213c376e1';
-import { icon } from './icons.js?v=a213c376e1';
-import { escapeHtml } from './moderation.js?v=a213c376e1';
+import { C, alpha } from './theme.js?v=477d66648f';
+import { getCategory } from './config.js?v=477d66648f';
+import { icon } from './icons.js?v=477d66648f';
+import { escapeHtml } from './moderation.js?v=477d66648f';
 
 const KEY_LABELS = {
   // ICU
@@ -75,10 +76,10 @@ const SHARE_FIELDS = {
 };
 
 const REC_LABEL = { 5: '非常推薦', 4: '推薦', 3: '保留', 2: '不推薦', 1: '非常不推薦' };
-const REC_COLOR = { 5: '#06A77D', 4: '#2E86AB', 3: '#F4A261', 2: '#E63946', 1: '#991B1B' };
-const REC_BG    = { 5: 'rgba(6,167,125,0.10)', 4: 'rgba(46,134,171,0.10)',
-                    3: 'rgba(244,162,97,0.12)', 2: 'rgba(230,57,70,0.10)',
-                    1: 'rgba(153,27,27,0.12)' };
+const REC_COLOR = { 5: C.success, 4: C.primaryFill, 3: C.warning, 2: C.dangerFill, 1: C.dangerDeep };
+const REC_BG    = { 5: alpha(C.success, 0.10), 4: alpha(C.primaryFill, 0.10),
+                    3: alpha(C.warning, 0.12), 2: alpha(C.dangerFill, 0.10),
+                    1: alpha(C.dangerDeep, 0.12) };
 
 const MAX_COMMENT_LENGTH = 200;
 function truncateComment(text) {
@@ -93,17 +94,17 @@ function buildShareCardHTML(row) {
   const fields = SHARE_FIELDS[row._category] || [];
   const recIdx = Number(row.recommendIndex);
   const recLabel = REC_LABEL[recIdx] || '—';
-  const recColor = REC_COLOR[recIdx] || '#6B7C93';
-  const recBg    = REC_BG[recIdx]    || 'rgba(107,124,147,0.10)';
+  const recColor = REC_COLOR[recIdx] || C.neutralFill;
+  const recBg    = REC_BG[recIdx]    || alpha(C.neutralFill, 0.10);
   // 被 AI 審稿屏蔽的短評不放進分享圖，避免違規內容被截圖擴散
   const shareComment = String(row.modVerdict || '').toLowerCase() === 'block' ? '' : row.comment;
   const commentText = truncateComment(shareComment);
   const commentTruncated = shareComment && shareComment.length > MAX_COMMENT_LENGTH;
 
   const dataRows = fields.map((k, i) => `
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;${i === fields.length - 1 ? '' : 'border-bottom:1px solid #E5E9F0;'}">
-      <span style="color:#4F5D72;font-size:28px;letter-spacing:0.01em;">${KEY_LABELS[k] || k}</span>
-      <span style="color:#1D3557;font-weight:600;font-size:30px;">${escapeHtml(row[k] || '—')}</span>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;${i === fields.length - 1 ? '' : `border-bottom:1px solid ${C.border};`}">
+      <span style="color:${C.muted};font-size:28px;letter-spacing:0.01em;">${KEY_LABELS[k] || k}</span>
+      <span style="color:${C.ink};font-weight:600;font-size:30px;">${escapeHtml(row[k] || '—')}</span>
     </div>
   `).join('');
 
@@ -113,11 +114,11 @@ function buildShareCardHTML(row) {
   return `
     <div id="share-card-root" style="
       width:1080px;height:1350px;
-      background:linear-gradient(180deg, #F1FAEE 0%, #FFFFFF 60%, #F1FAEE 100%);
+      background:linear-gradient(180deg, ${C.warm} 0%, ${C.surface} 60%, ${C.warm} 100%);
       padding:56px 60px 64px;
       box-sizing:border-box;
       font-family:'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
-      color:#1D3557;
+      color:${C.ink};
       position:relative;
       overflow:hidden;
     ">
@@ -128,15 +129,15 @@ function buildShareCardHTML(row) {
       <div style="position:relative;z-index:1;height:100%;display:flex;flex-direction:column;">
         <!-- Header -->
         <div style="display:flex;align-items:center;gap:16px;margin-bottom:24px;">
-          <div style="width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg, #2E86AB 0%, #A8DADC 100%);display:flex;align-items:center;justify-content:center;">
+          <div style="width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg, ${C.primaryFill} 0%, ${C.accent} 100%);display:flex;align-items:center;justify-content:center;">
             <svg width="46" height="46" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path d="M12 20.6 c-5.6 -3.8 -9.2 -8.2 -9.2 -13.0 a4.6 4.6 0 0 1 9.2 -1 a4.6 4.6 0 0 1 9.2 1 c0 4.8 -3.6 9.2 -9.2 13.0 z" fill="white"/>
-              <path d="M5.6 10.2 h3.4 l1.4 -2.6 l2.4 5.2 l1.4 -3.2 h5.6" stroke="#E63946" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+              <path d="M5.6 10.2 h3.4 l1.4 -2.6 l2.4 5.2 l1.4 -3.2 h5.6" stroke="${C.dangerFill}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
             </svg>
           </div>
           <div>
             <div style="font-weight:700;font-size:28px;letter-spacing:0.02em;">護理職場透明化運動</div>
-            <div style="font-size:18px;color:#4F5D72;margin-top:2px;">一筆真實的職場分享</div>
+            <div style="font-size:18px;color:${C.muted};margin-top:2px;">一筆真實的職場分享</div>
           </div>
         </div>
 
@@ -149,19 +150,19 @@ function buildShareCardHTML(row) {
         <h1 style="font-family:'Lora','Noto Serif TC',serif;font-size:56px;font-weight:700;margin:0 0 6px;line-height:1.15;letter-spacing:-0.01em;">
           ${escapeHtml(row.institutionName || '匿名機構')}
         </h1>
-        ${row.unitName ? `<div style="font-size:28px;color:#1D3557;font-weight:600;margin-bottom:8px;line-height:1.3;">${escapeHtml(row.unitName)}</div>` : ''}
-        <div style="font-size:22px;color:#4F5D72;margin-bottom:20px;line-height:1.5;">
+        ${row.unitName ? `<div style="font-size:28px;color:${C.ink};font-weight:600;margin-bottom:8px;line-height:1.3;">${escapeHtml(row.unitName)}</div>` : ''}
+        <div style="font-size:22px;color:${C.muted};margin-bottom:20px;line-height:1.5;">
           ${subtitle || '—'}
         </div>
 
         <!-- Recommend index card -->
         <div style="display:flex;align-items:center;justify-content:space-between;background:${recBg};border:2px solid ${recColor};padding:18px 28px;border-radius:18px;margin-bottom:20px;">
           <div>
-            <div style="font-size:20px;color:#4F5D72;margin-bottom:4px;letter-spacing:0.02em;">整體推薦指數</div>
+            <div style="font-size:20px;color:${C.muted};margin-bottom:4px;letter-spacing:0.02em;">整體推薦指數</div>
             <div style="font-size:38px;font-weight:700;color:${recColor};">${recLabel}</div>
           </div>
           <div style="font-family:'Lora',serif;font-size:68px;font-weight:700;color:${recColor};line-height:1;">
-            ${recIdx ? recIdx + '<span style="font-size:30px;color:#4F5D72;">/5</span>' : '—'}
+            ${recIdx ? recIdx + `<span style="font-size:30px;color:${C.muted};">/5</span>` : '—'}
           </div>
         </div>
 
@@ -174,15 +175,15 @@ function buildShareCardHTML(row) {
         ${commentText ? `
           <div style="background:#A8DADC2e;border-left:6px solid ${cat.color};padding:16px 22px;border-radius:8px;margin-bottom:18px;">
             <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
-              <div style="font-size:18px;color:#4F5D72;letter-spacing:0.02em;">分享者短評</div>
-              ${commentTruncated ? `<div style="font-size:14px;color:#4F5D72;">已顯示前 ${MAX_COMMENT_LENGTH} 字</div>` : ''}
+              <div style="font-size:18px;color:${C.muted};letter-spacing:0.02em;">分享者短評</div>
+              ${commentTruncated ? `<div style="font-size:14px;color:${C.muted};">已顯示前 ${MAX_COMMENT_LENGTH} 字</div>` : ''}
             </div>
-            <div style="font-size:22px;line-height:1.55;color:#1D3557;font-weight:500;">${escapeHtml(commentText)}</div>
+            <div style="font-size:22px;line-height:1.55;color:${C.ink};font-weight:500;">${escapeHtml(commentText)}</div>
           </div>` : ''}
 
         <!-- Footer -->
         <div style="margin-top:auto;padding-top:20px;border-top:1px solid ${cat.color}33;text-align:center;">
-          <div style="font-size:18px;color:#4F5D72;letter-spacing:0.02em;">
+          <div style="font-size:18px;color:${C.muted};letter-spacing:0.02em;">
             ${row.timestamp ? '填寫於 ' + escapeHtml(row.timestamp) : ''}
           </div>
         </div>
@@ -235,7 +236,7 @@ export async function generateShareCard(row) {
     const canvas = await html2canvas(node, {
       scale: 2,             // retina
       useCORS: true,
-      backgroundColor: '#F1FAEE',
+      backgroundColor: C.warm,
       logging: false,
       width: 1080,
       height: 1350,
@@ -272,7 +273,7 @@ export function showSharePreview(blob, dataUrl, filename) {
         </button>
       </div>
       <img src="${dataUrl}" alt="分享圖片預覽"
-        style="width:100%;border-radius:12px;box-shadow:0 8px 32px rgba(29,53,87,0.15);display:block;" />
+        style="width:100%;border-radius:12px;box-shadow:0 8px 32px ${alpha(C.ink, 0.15)};display:block;" />
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px;">
         <button id="share-download" class="btn btn-primary">下載 PNG</button>
         <button id="share-copy" class="btn btn-secondary">複製到剪貼簿</button>

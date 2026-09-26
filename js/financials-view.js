@@ -1,3 +1,4 @@
+import { C, alpha } from './theme.js?v=477d66648f';
 // 醫院財務・共用視圖工具
 //
 // 供「醫院財務」頁（financials.js）與「機構總覽」頁（hospital.js）共用：
@@ -100,21 +101,21 @@ export function formatRocYear(y) {
 }
 
 const SERIES_COLORS = {
-  F1: '#2E86AB', // 醫務本業
-  F2: '#9D4EDD', // 非醫務
-  F3: '#06A77D', // 整體獲利
-  F5: '#E63946', // 醫務利益率
-  F6: '#F4A261', // 醫務收入
-  F7: '#6B7C93', // 醫務成本
-  F8: '#14B8A6', // 護病比
-  DOCTOR: '#2E86AB',  // 醫師數
-  BED: '#F4A261',     // 病床數
-  OPD_CNT: '#06A77D', // 門診件數
-  IPD_CNT: '#9D4EDD', // 住診件數
-  IPD_DAY: '#E63946', // 住院天數
-  PT_ALL: '#6B7C93',  // 門住合計點數
-  OPD_PT: '#14B8A6',  // 門診點數
-  IPD_PT: '#E76F51',  // 住診點數
+  F1: C.primaryFill, // 醫務本業
+  F2: C.purple, // 非醫務
+  F3: C.success, // 整體獲利
+  F5: C.dangerFill, // 醫務利益率
+  F6: C.warning, // 醫務收入
+  F7: C.neutralFill, // 醫務成本
+  F8: C.teal, // 護病比
+  DOCTOR: C.primaryFill,  // 醫師數
+  BED: C.warning,     // 病床數
+  OPD_CNT: C.success, // 門診件數
+  IPD_CNT: C.purple, // 住診件數
+  IPD_DAY: C.dangerFill, // 住院天數
+  PT_ALL: C.neutralFill,  // 門住合計點數
+  OPD_PT: C.teal,  // 門診點數
+  IPD_PT: C.coral,  // 住診點數
 };
 
 /**
@@ -141,8 +142,8 @@ export function renderFinancialTrendChart(canvas, hospital, fields, opts = {}) {
   const datasets = metrics.map((m) => ({
     label: (fields[m] && fields[m].title) || m,
     data: rows.map((r) => parseNum(r[`${m}Val`])),
-    borderColor: SERIES_COLORS[m] || '#2E86AB',
-    backgroundColor: (SERIES_COLORS[m] || '#2E86AB') + '22',
+    borderColor: SERIES_COLORS[m] || C.primaryFill,
+    backgroundColor: (SERIES_COLORS[m] || C.primaryFill) + '22',
     tension: 0.25,
     borderWidth: m === 'F3' ? 2.6 : 2,
     pointRadius: 3,
@@ -165,10 +166,10 @@ export function renderFinancialTrendChart(canvas, hospital, fields, opts = {}) {
       plugins: {
         legend: {
           position: 'bottom',
-          labels: { font: { family: "'Noto Sans TC', sans-serif", size: 12 }, color: '#46557A', usePointStyle: true, padding: 12 },
+          labels: { font: { family: "'Noto Sans TC', sans-serif", size: 12 }, color: C.inkSoft, usePointStyle: true, padding: 12 },
         },
         tooltip: {
-          backgroundColor: '#1D3557', padding: 10, cornerRadius: 8,
+          backgroundColor: C.ink, padding: 10, cornerRadius: 8,
           titleFont: { family: "'Noto Sans TC', sans-serif" }, bodyFont: { family: "'Noto Sans TC', sans-serif" },
           callbacks: {
             label: (ctx) => {
@@ -179,15 +180,15 @@ export function renderFinancialTrendChart(canvas, hospital, fields, opts = {}) {
           },
         },
         annotation: { annotations: {
-          zero: { type: 'line', yMin: 0, yMax: 0, borderColor: 'rgba(107,124,147,0.45)', borderWidth: 1, borderDash: [5, 4] },
+          zero: { type: 'line', yMin: 0, yMax: 0, borderColor: alpha(C.neutralFill, 0.45), borderWidth: 1, borderDash: [5, 4] },
         } },
       },
       scales: {
-        x: { grid: { display: false }, border: { color: '#E5E9F0' }, ticks: { color: '#4F5D72', font: { family: "'Noto Sans TC', sans-serif", size: 11 } } },
+        x: { grid: { display: false }, border: { color: C.border }, ticks: { color: C.muted, font: { family: "'Noto Sans TC', sans-serif", size: 11 } } },
         y: {
-          title: { display: true, text: axisTitle, color: '#46557A', font: { family: "'Noto Sans TC', sans-serif", size: 12 } },
-          grid: { color: '#F1F3F7' }, border: { display: false },
-          ticks: { color: '#4F5D72', font: { family: "'Noto Sans TC', sans-serif", size: 11 } },
+          title: { display: true, text: axisTitle, color: C.inkSoft, font: { family: "'Noto Sans TC', sans-serif", size: 12 } },
+          grid: { color: C.borderSoft }, border: { display: false },
+          ticks: { color: C.muted, font: { family: "'Noto Sans TC', sans-serif", size: 11 } },
         },
       },
     },
