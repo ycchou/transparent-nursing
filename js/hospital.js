@@ -5,9 +5,9 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { icon, renderIcons } from './icons.js?v=79e5ff7661';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=79e5ff7661';
-import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=79e5ff7661';
+import { icon, renderIcons } from './icons.js?v=a213c376e1';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=a213c376e1';
+import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=a213c376e1';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -15,23 +15,23 @@ import {
   shiftStatus,
   classifyHospital,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=79e5ff7661';
-import { loadAll } from './data-loader.js?v=79e5ff7661';
-import { renderKpiStrip } from './stats-kpi.js?v=79e5ff7661';
-import { renderTable, showDetailModal } from './table.js?v=79e5ff7661';
-import { hasContributed } from './contribution-gate.js?v=79e5ff7661';
-import { notePwaIntent } from './pwa-prompt.js?v=79e5ff7661';
+} from './nurse-ratio-view.js?v=a213c376e1';
+import { loadAll } from './data-loader.js?v=a213c376e1';
+import { renderKpiStrip } from './stats-kpi.js?v=a213c376e1';
+import { renderTable, showDetailModal } from './table.js?v=a213c376e1';
+import { hasContributed } from './contribution-gate.js?v=a213c376e1';
+import { notePwaIntent } from './pwa-prompt.js?v=a213c376e1';
 import {
   loadFinancialsHospital, getFinancialFields,
   formatVal as finFormatVal, signClass as finSignClass, formatRocYear as finRocYear,
   renderFinancialTrendChart,
-} from './financials-view.js?v=79e5ff7661';
-import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=79e5ff7661';
+} from './financials-view.js?v=a213c376e1';
+import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=a213c376e1';
 import {
   loadPersonnelHospital, ensurePersonnelIndex,
   renderStaffChart as renderPmStaffChart, renderBedChart as renderPmBedChart,
   latestMonthTable,
-} from './personnel-view.js?v=79e5ff7661';
+} from './personnel-view.js?v=a213c376e1';
 import {
   createCsvLoader,
   parseROCDate,
@@ -39,8 +39,8 @@ import {
   shortenLocation,
   fineToWan,
   formatROCDate,
-} from './records-common.js?v=79e5ff7661';
-import { skeletonRows } from './skeleton.js?v=79e5ff7661';
+} from './records-common.js?v=a213c376e1';
+import { skeletonRows } from './skeleton.js?v=a213c376e1';
 
 const MERGED_URL = 'data/hospitals-merged.json?v=05ee0dcd69';
 const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=bedb0c4373';
