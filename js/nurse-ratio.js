@@ -6,7 +6,7 @@
 //     hospitals: [{ id, name, level, history: { "11207": {day, eve, night} } }]
 //   }
 
-import { renderIcons } from './icons.js?v=e6a94675a3';
+import { renderIcons } from './icons.js?v=ea7daf2bd0';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -14,8 +14,10 @@ import {
   shiftStatus,
   classifyHospital as classifyHospitalView,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=e6a94675a3';
-import { skeletonRows } from './skeleton.js?v=e6a94675a3';
+} from './nurse-ratio-view.js?v=ea7daf2bd0';
+import { skeletonRows } from './skeleton.js?v=ea7daf2bd0';
+import { escapeHtml } from './moderation.js?v=ea7daf2bd0';
+import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=ea7daf2bd0';
 
 const DATA_URL = 'data/nurse-ratio.json?v=5cc1ee8233';
 
@@ -160,15 +162,6 @@ function renderHospitalList() {
   });
 }
 
-function levelSlug(lv) {
-  return { '醫學中心': 'mc', '區域醫院': 'rg', '地區醫院': 'dt' }[lv] || 'other';
-}
-
-function escapeHtml(s) {
-  return String(s == null ? '' : s)
-    .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-}
-
 // ===== 醫院詳情渲染 =====
 
 function selectHospital(id, updateUrl = false) {
@@ -259,57 +252,17 @@ function renderDetail(hosp) {
 
 // ===== 篩選/搜尋事件 =====
 
+// 地點篩選：依醫院數由多到少，(未知) 殿後（共用 js/picker-filters.js）
 function renderCityFilter() {
-  const el = document.getElementById('city-filter');
-  if (!el) return;
-  const counts = {};
-  state.data.hospitals.forEach((h) => {
-    const c = h.city || '(未知)';
-    counts[c] = (counts[c] || 0) + 1;
-  });
-  // 依醫院數 desc 排序，(未知) 排到最後
-  const sorted = Object.entries(counts).sort((a, b) => {
-    if (a[0] === '(未知)') return 1;
-    if (b[0] === '(未知)') return -1;
-    return b[1] - a[1];
-  });
-  el.innerHTML = `
-    <button type="button" class="nurse-city-filter active" data-city="all">全部</button>
-    ${sorted.map(([c, n]) => `
-      <button type="button" class="nurse-city-filter" data-city="${escapeHtml(c)}">${escapeHtml(c)} <span class="chip-count">${n}</span></button>
-    `).join('')}
-  `;
-  el.querySelectorAll('.nurse-city-filter').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.cityFilter = btn.dataset.city;
-      el.querySelectorAll('.nurse-city-filter').forEach((b) => {
-        b.classList.toggle('active', b.dataset.city === state.cityFilter);
-      });
-      renderHospitalList();
-    });
+  mountCityFilter(document.getElementById('city-filter'), state.data.hospitals, (city) => {
+    state.cityFilter = city;
+    renderHospitalList();
   });
 }
 
 function setupFilterControls() {
-  document.querySelectorAll('.nurse-level-filter').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.levelFilter = btn.dataset.level;
-      document.querySelectorAll('.nurse-level-filter').forEach((b) => {
-        b.classList.toggle('active', b.dataset.level === state.levelFilter);
-      });
-      renderHospitalList();
-    });
-  });
-
-  document.querySelectorAll('.nurse-compliance-filter').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.complianceFilter = btn.dataset.compliance;
-      document.querySelectorAll('.nurse-compliance-filter').forEach((b) => {
-        b.classList.toggle('active', b.dataset.compliance === state.complianceFilter);
-      });
-      renderHospitalList();
-    });
-  });
+  bindChipGroup('.nurse-level-filter', 'level', (lv) => { state.levelFilter = lv; renderHospitalList(); });
+  bindChipGroup('.nurse-compliance-filter', 'compliance', (c) => { state.complianceFilter = c; renderHospitalList(); });
 
   const search = document.getElementById('hospital-search');
   if (search) {

@@ -5,9 +5,9 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { icon, renderIcons } from './icons.js?v=e6a94675a3';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=e6a94675a3';
-import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=e6a94675a3';
+import { icon, renderIcons } from './icons.js?v=ea7daf2bd0';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=ea7daf2bd0';
+import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=ea7daf2bd0';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -15,23 +15,23 @@ import {
   shiftStatus,
   classifyHospital,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=e6a94675a3';
-import { loadAll } from './data-loader.js?v=e6a94675a3';
-import { renderKpiStrip } from './stats-kpi.js?v=e6a94675a3';
-import { renderTable, showDetailModal } from './table.js?v=e6a94675a3';
-import { hasContributed } from './contribution-gate.js?v=e6a94675a3';
-import { notePwaIntent } from './pwa-prompt.js?v=e6a94675a3';
+} from './nurse-ratio-view.js?v=ea7daf2bd0';
+import { loadAll } from './data-loader.js?v=ea7daf2bd0';
+import { renderKpiStrip } from './stats-kpi.js?v=ea7daf2bd0';
+import { renderTable, showDetailModal } from './table.js?v=ea7daf2bd0';
+import { hasContributed } from './contribution-gate.js?v=ea7daf2bd0';
+import { notePwaIntent } from './pwa-prompt.js?v=ea7daf2bd0';
 import {
   loadFinancialsHospital, getFinancialFields,
   formatVal as finFormatVal, signClass as finSignClass, formatRocYear as finRocYear,
   renderFinancialTrendChart,
-} from './financials-view.js?v=e6a94675a3';
-import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=e6a94675a3';
+} from './financials-view.js?v=ea7daf2bd0';
+import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=ea7daf2bd0';
 import {
   loadPersonnelHospital, ensurePersonnelIndex,
   renderStaffChart as renderPmStaffChart, renderBedChart as renderPmBedChart,
   latestMonthTable,
-} from './personnel-view.js?v=e6a94675a3';
+} from './personnel-view.js?v=ea7daf2bd0';
 import {
   createCsvLoader,
   parseROCDate,
@@ -39,8 +39,10 @@ import {
   shortenLocation,
   fineToWan,
   formatROCDate,
-} from './records-common.js?v=e6a94675a3';
-import { skeletonRows } from './skeleton.js?v=e6a94675a3';
+} from './records-common.js?v=ea7daf2bd0';
+import { skeletonRows } from './skeleton.js?v=ea7daf2bd0';
+import { escapeHtml } from './moderation.js?v=ea7daf2bd0';
+import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=ea7daf2bd0';
 
 const MERGED_URL = 'data/hospitals-merged.json?v=05ee0dcd69';
 const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=bedb0c4373';
@@ -86,13 +88,6 @@ const state = {
 };
 
 // ---------- utils ----------
-function escapeHtml(s) {
-  return String(s == null ? '' : s)
-    .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-}
-function levelSlug(lv) {
-  return { '醫學中心': 'mc', '區域醫院': 'rg', '地區醫院': 'dt' }[lv] || 'other';
-}
 // 多字串的最長共同前綴（用於多院區取母院名）
 function commonPrefix(strs) {
   if (!strs.length) return '';
@@ -800,42 +795,16 @@ function setupSearch() {
 }
 
 // 地點篩選：依機構數 desc 列出縣市（(未知) 殿後），mirror 護病比頁
+// 地點篩選：依醫院數由多到少，(未知) 殿後（共用 js/picker-filters.js）
 function renderCityFilter() {
-  const el = document.getElementById('city-filter');
-  if (!el) return;
-  const counts = {};
-  state.merged.forEach((h) => {
-    const c = h.city || '(未知)';
-    counts[c] = (counts[c] || 0) + 1;
-  });
-  const sorted = Object.entries(counts).sort((a, b) => {
-    if (a[0] === '(未知)') return 1;
-    if (b[0] === '(未知)') return -1;
-    return b[1] - a[1];
-  });
-  el.innerHTML = `
-    <button type="button" class="nurse-city-filter active" data-city="all">全部</button>
-    ${sorted.map(([c, n]) => `
-      <button type="button" class="nurse-city-filter" data-city="${escapeHtml(c)}">${escapeHtml(c)} <span class="chip-count">${n}</span></button>
-    `).join('')}
-  `;
-  el.querySelectorAll('.nurse-city-filter').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.cityFilter = btn.dataset.city;
-      el.querySelectorAll('.nurse-city-filter').forEach((b) => b.classList.toggle('active', b.dataset.city === state.cityFilter));
-      renderHospitalList();
-    });
+  mountCityFilter(document.getElementById('city-filter'), state.merged, (city) => {
+    state.cityFilter = city;
+    renderHospitalList();
   });
 }
 
 function setupLevelFilter() {
-  document.querySelectorAll('.nurse-level-filter').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.levelFilter = btn.dataset.level;
-      document.querySelectorAll('.nurse-level-filter').forEach((b) => b.classList.toggle('active', b.dataset.level === state.levelFilter));
-      renderHospitalList();
-    });
-  });
+  bindChipGroup('.nurse-level-filter', 'level', (lv) => { state.levelFilter = lv; renderHospitalList(); });
 }
 
 // ---------- init ----------

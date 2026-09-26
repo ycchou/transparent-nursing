@@ -1,8 +1,8 @@
 // 違規紀錄類頁面共用模組：CSV 抓取 / 解析 / cache / 通用工具
 // 給 violations.js (勞檢)、gender.js (性平)、osha.js (職安) 共用。
 
-import { getShort as getHospitalShort } from './hospital-shortname.js?v=e6a94675a3';
-import { normalizeInstitutionName } from './institution-name.js?v=e6a94675a3';
+import { getShort as getHospitalShort } from './hospital-shortname.js?v=ea7daf2bd0';
+import { normalizeInstitutionName } from './institution-name.js?v=ea7daf2bd0';
 
 // ============================================================
 // 通用工具
@@ -107,12 +107,8 @@ export function getCachedCount(storageKey) {
 }
 
 // HTML escape（給 modal 內文字用）
-export function escapeHtml(s) {
-  return String(s == null ? '' : s)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;');
-}
+// 與全站共用同一份（含引號跳脫）；其他模組仍可從這裡 import
+export { escapeHtml } from './moderation.js?v=ea7daf2bd0';
 
 // ============================================================
 // PapaParse 動態載入（讓沒掛 <script> 的頁面也能 preload）
@@ -291,9 +287,10 @@ export function createCsvLoader(cfg) {
 //   records-table-container
 // ============================================================
 
-import { icon, renderIcons } from './icons.js?v=e6a94675a3';
-import { ensureTooltip } from './tooltip.js?v=e6a94675a3';
-import { pageSlice, renderPagination } from './pagination.js?v=e6a94675a3';
+import { icon, renderIcons } from './icons.js?v=ea7daf2bd0';
+import { ensureTooltip } from './tooltip.js?v=ea7daf2bd0';
+import { pageSlice, renderPagination } from './pagination.js?v=ea7daf2bd0';
+import { escapeHtml } from './moderation.js?v=ea7daf2bd0';
 
 // 違規機構名稱 → 機構代號 對照表（離線預建，供機構名稱連到整合檔案頁）
 let _violHospitalMap = null;

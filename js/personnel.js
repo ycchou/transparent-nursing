@@ -2,14 +2,16 @@
 // 資料：data/personnel-index.json（picker 清單）＋ data/personnel/{code}.json（單院時間序列）
 // 來源：衛福部「醫院醫事人力持續性監測結果」。
 
-import { renderIcons, icon } from './icons.js?v=e6a94675a3';
-import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=e6a94675a3';
+import { renderIcons, icon } from './icons.js?v=ea7daf2bd0';
+import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=ea7daf2bd0';
 import {
   CAT_COLORS, BED_COLORS, DEFAULT_ON, mLabel, baseLineCfg,
   renderStaffChart, renderBedChart, loadPersonnelHospital, latestMonthTable,
-} from './personnel-view.js?v=e6a94675a3';
-import { showToast } from './toast.js?v=e6a94675a3';
-import { skeletonRows } from './skeleton.js?v=e6a94675a3';
+} from './personnel-view.js?v=ea7daf2bd0';
+import { showToast } from './toast.js?v=ea7daf2bd0';
+import { skeletonRows } from './skeleton.js?v=ea7daf2bd0';
+import { escapeHtml } from './moderation.js?v=ea7daf2bd0';
+import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=ea7daf2bd0';
 
 const INDEX_URL = 'data/personnel-index.json';
 const AGG_URL = 'data/personnel-aggregate.json';
@@ -26,11 +28,6 @@ const state = {
 function fetchJson(url) {
   return fetch(url).then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status} ${url}`); return r.json(); });
 }
-function escapeHtml(s) {
-  return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
-function levelSlug(lv) { return { '醫學中心': 'mc', '區域醫院': 'rg', '地區醫院': 'dt' }[lv] || 'other'; }
-
 // ---------- picker ----------
 function hasActiveFilter() {
   return state.searchQuery !== '' || state.levelFilter !== 'all' || state.cityFilter !== 'all';
@@ -96,31 +93,16 @@ function renderHospitalList() {
   });
 }
 
+// 地點篩選：依醫院數由多到少，(未知) 殿後（共用 js/picker-filters.js）
 function renderCityFilter() {
-  const el = document.getElementById('city-filter');
-  if (!el) return;
-  const counts = {};
-  state.index.forEach((h) => { const c = h.city || '(未知)'; counts[c] = (counts[c] || 0) + 1; });
-  const sorted = Object.entries(counts).sort((a, b) => (a[0] === '(未知)') ? 1 : (b[0] === '(未知)') ? -1 : b[1] - a[1]);
-  el.innerHTML = `<button type="button" class="nurse-city-filter active" data-city="all">全部</button>
-    ${sorted.map(([c, n]) => `<button type="button" class="nurse-city-filter" data-city="${escapeHtml(c)}">${escapeHtml(c)} <span class="chip-count">${n}</span></button>`).join('')}`;
-  el.querySelectorAll('.nurse-city-filter').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.cityFilter = btn.dataset.city;
-      el.querySelectorAll('.nurse-city-filter').forEach((b) => b.classList.toggle('active', b.dataset.city === state.cityFilter));
-      renderHospitalList();
-    });
+  mountCityFilter(document.getElementById('city-filter'), state.index, (city) => {
+    state.cityFilter = city;
+    renderHospitalList();
   });
 }
 
 function setupLevelFilter() {
-  document.querySelectorAll('.nurse-level-filter').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.levelFilter = btn.dataset.level;
-      document.querySelectorAll('.nurse-level-filter').forEach((b) => b.classList.toggle('active', b.dataset.level === state.levelFilter));
-      renderHospitalList();
-    });
-  });
+  bindChipGroup('.nurse-level-filter', 'level', (lv) => { state.levelFilter = lv; renderHospitalList(); });
 }
 
 function setupSearch() {

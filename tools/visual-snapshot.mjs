@@ -155,7 +155,8 @@ const DETERMINISM = `
   Object.defineProperty(window, 'Chart', { configurable: true,
     get() { return chartRef; },
     set(v) { chartRef = v; try { v.defaults.animation = false; v.defaults.animations = false; v.defaults.transitions = {}; } catch {} } });
-  const css = '*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}';
+  // 關掉平滑捲動：網站設了 html{scroll-behavior:smooth}，否則截圖前的 scrollTo(0,0) 也會慢慢捲、截到一半
+  const css = 'html{scroll-behavior:auto!important}*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}';
   const add = () => { const st = document.createElement('style'); st.textContent = css; document.documentElement.appendChild(st); };
   if (document.documentElement) add(); else document.addEventListener('DOMContentLoaded', add);
 })();`;

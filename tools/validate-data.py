@@ -121,6 +121,9 @@ def validate_css():
     r = subprocess.run([sys.executable, os.path.join(ROOT, 'tools', 'build-css.py'), '--check'],
                        capture_output=True, text=True, encoding='utf-8')
     check(r.returncode == 0, 'css/styles.css 與 css/src/ 不一致（請跑 tools/build-css.py；不要直接改 styles.css）')
+    r = subprocess.run([sys.executable, os.path.join(ROOT, 'tools', 'build-forms.py'), '--check'],
+                       capture_output=True, text=True, encoding='utf-8')
+    check(r.returncode == 0, '表單頁與 templates/ 不一致（請跑 tools/build-forms.py；不要直接改 participate-<slug>.html）')
 
 
 def main():

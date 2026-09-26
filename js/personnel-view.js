@@ -1,4 +1,5 @@
-import { C } from './theme.js?v=e6a94675a3';
+import { C } from './theme.js?v=ea7daf2bd0';
+import { escapeHtml } from './moderation.js?v=ea7daf2bd0';
 // 人力監控共用視圖：職類/病床折線圖與單院資料載入。
 // 供「人力監控」頁(personnel.js)與「機構總覽」頁(hospital.js)共用，單一來源。
 // 資料忠實呈現：未填報(null)不補值，折線圖於該月中斷(spanGaps:false)。
@@ -11,10 +12,6 @@ export const DEFAULT_ON = new Set(['護產']);
 
 // "10807" -> "108/07"
 export function mLabel(m) { return `${parseInt(m.slice(0, 3), 10)}/${m.slice(3)}`; }
-
-function escapeHtml(s) {
-  return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-}
 
 // 最新月一覽表格：各職類實際人數 vs 評鑑基準（達標與否）＋病床數。
 // 供人力監控頁與機構總覽頁共用。回傳 { monthLabel, tableHtml }，無資料時 monthLabel 為 null。

@@ -1,0 +1,45 @@
+{
+  "_說明": "participate-<slug>.html 各表單頁的差異設定；共用骨架在 templates/participate-form.html，由 tools/build-forms.py 產生頁面",
+  "forms": [
+    {
+      "slug": "icu",
+      "title": "加護病房職場資料分享",
+      "metaDescription": "加護病房 (ICU) 護理師專屬表單。匿名分享機構類別、ICU 類型、三班護病比、班別與津貼、教育訓練、薪資、工作氣氛等真實資訊，為下一位求職護理師留下指引。",
+      "ogDescription": "匿名分享 ICU 護理師的真實職場資訊，5-8 分鐘完成。",
+      "eyebrow": "加護病房",
+      "ledeHtml": "<p class=\"page-lede\">\n        以下資料將 <strong class=\"text-ink\">匿名彙整</strong>，作為其他護理師求職與工作評估的真實參考。\n        填寫時請以客觀事實為主，避免情緒性敘述。完成需約 5-8 分鐘。\n      </p>\n      <div class=\"dform-callout\">\n        <span data-icon=\"shield-check\" data-size=\"18\"></span>\n        <span>本表單不會記錄你的 IP 或任何可識別資訊。</span>\n      </div>"
+    },
+    {
+      "slug": "dialysis",
+      "title": "洗腎室職場資料分享",
+      "metaDescription": "洗腎室 HD/PD 護理師專屬表單。匿名分享機構類別、護病比、值班制度、薪資、工作氣氛等真實資訊，為下一位求職護理師留下指引。",
+      "ogDescription": "匿名分享 HD/PD 護理師的真實職場資訊，5-8 分鐘完成。",
+      "eyebrow": "洗腎室",
+      "ledeHtml": "<p class=\"page-lede\">\n        以下資料將 <strong class=\"text-ink\">匿名彙整</strong>，作為其他護理師求職與工作評估的真實參考。\n        填寫時請以客觀事實為主，避免情緒性敘述。完成需約 5-8 分鐘。\n      </p>\n      <div class=\"dform-callout\">\n        <span data-icon=\"shield-check\" data-size=\"18\"></span>\n        <span>本表單不會記錄你的 IP 或任何可識別資訊。</span>\n      </div>"
+    },
+    {
+      "slug": "outpatient",
+      "title": "門診職場資料分享",
+      "metaDescription": "門診護理師專屬表單。匿名分享班別、P 班、一次顧幾個門診、就診人數、門診逾時、休息時間、加班申報、被申訴與暴力風險、薪資與年資等真實資訊，為下一位求職護理師留下指引。",
+      "ogDescription": "匿名分享門診護理師的真實職場資訊，5-8 分鐘完成。",
+      "eyebrow": "門診",
+      "ledeHtml": "<p class=\"page-lede\">\n        以下資料將 <strong class=\"text-ink\">匿名彙整</strong>，作為其他護理師求職與工作評估的真實參考。\n        填寫時請以客觀事實為主，避免情緒性敘述。完成需約 5-8 分鐘。\n      </p>\n      <div class=\"dform-callout\">\n        <span data-icon=\"shield-check\" data-size=\"18\"></span>\n        <span>本表單不會記錄你的 IP 或任何可識別資訊。</span>\n      </div>"
+    },
+    {
+      "slug": "clinic",
+      "title": "診所職場資料分享",
+      "metaDescription": "基層診所護理師專屬表單。匿名分享診所科別、健保/自費、護理人力規模、主要業務、班別、每日看診人次、勞健保投保、國定假日與特休、薪資結構等真實資訊，為下一位求職護理師留下指引。",
+      "ogDescription": "匿名分享基層診所護理師的真實職場資訊，5-8 分鐘完成。",
+      "eyebrow": "診所",
+      "ledeHtml": "<p class=\"page-lede\">\n        以下資料將 <strong class=\"text-ink\">匿名彙整</strong>，作為其他護理師求職與工作評估的真實參考。\n        填寫時請以客觀事實為主，避免情緒性敘述。完成需約 5-8 分鐘。\n      </p>\n      <div class=\"dform-callout\">\n        <span data-icon=\"shield-check\" data-size=\"18\"></span>\n        <span>本表單不會記錄你的 IP 或任何可識別資訊。</span>\n      </div>"
+    },
+    {
+      "slug": "other",
+      "title": "多元護理職場資料分享",
+      "metaDescription": "專科護理師（NP）、職護／廠護、居家護理、長照、學校護理師、月子中心、藥廠醫材（CRA/CRC）、公共衛生等前面 8 類以外的護理職場專屬表單。匿名分享執業登記、證照要求、值班制度、外出值勤、暴力風險、工時與薪資等真實資訊。",
+      "ogDescription": "匿名分享職護、居家、長照、學校、月子、藥廠醫材等非傳統護理職場的真實資訊，5-8 分鐘完成。",
+      "eyebrow": "多元護理職場",
+      "ledeHtml": "<p class=\"page-lede\">\n        這裡收錄<strong class=\"text-ink\">前面 8 類專門場域以外、較少被看見的護理職涯</strong>——包含\n        <strong class=\"text-ink\">專科護理師</strong>、居家／社區護理、長照機構、學校護理師、月子中心、\n        診所／醫美、職護／廠護、臨床研究（CRA／CRC）、藥廠醫材，以及公共衛生／衛生所等。\n        無論你的職務有沒有出現在下方選項，只要不屬於前面 8 類，都歡迎在此匿名分享。\n      </p>\n      <p class=\"page-lede\">\n        <strong class=\"text-ink\">專科護理師（NP）</strong>等院內進階護理職務同樣適用本表單：\n        請在「機構名稱」填寫服務醫院、「職場類型」選「專科護理師」。\n        以下資料將 <strong class=\"text-ink\">匿名彙整</strong>，作為其他護理師求職與轉職的真實參考；\n        填寫時請以客觀事實為主，避免情緒性敘述。完成需約 5-8 分鐘。\n      </p>\n      <div class=\"dform-callout\">\n        <span data-icon=\"shield-check\" data-size=\"18\"></span>\n        <span>本表單不會記錄你的 IP 或任何可識別資訊。</span>\n      </div>"
+    }
+  ]
+}
