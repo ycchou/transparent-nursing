@@ -155,6 +155,16 @@
 - 託管：GitHub Pages（PWA，可加入主畫面）
 - 社群表單：目前用 Google Forms，未來規劃自建（部分已上線）
 
+**視覺回歸檢查**（重構、整理 CSS 時用來確認畫面沒變）：
+
+```bash
+node tools/visual-snapshot.mjs before     # 改之前截圖（.build-cache/visual/before/，約 3 分鐘）
+node tools/visual-snapshot.mjs after      # 改之後
+python tools/visual-diff.py before after  # 完全相同 exit 0；有差異列出頁面並輸出「前｜後｜差異」比對圖
+```
+
+截圖時會固定亂數、時間、測試資料，擋掉線上訪客 API，並關閉所有動畫，所以同一份程式截兩次會得到逐像素相同的圖。
+
 **頁面結構**：多頁（每個資料源一頁）+ `hospital.html` 機構總覽整合頁。共用檢視邏輯抽成 `*-view.js`（如 `nurse-ratio-view.js`、`personnel-view.js`、`financials-view.js`）供各頁與機構總覽共用，單一來源。
 
 **資料前處理**（`tools/`，離線執行，產出 `data/*.json`）：
@@ -164,6 +174,7 @@
 | 工具 | 作用 |
 |---|---|
 | `update-data.py` | 一鍵更新：抓新資料 → 歸檔手動下載的檔案 → 增量建置 → 更新 README 範圍 |
+| `visual-snapshot.mjs`＋`visual-diff.py` | 視覺回歸：全站 21 頁 × 手機／桌機截圖，比對改動前後畫面是否有變（見下方） |
 | `build-all.py` | 依相依順序建置全部資料（增量，輸入沒變的步驟略過） |
 | `fetch-personnel.py` | 衛福部人力監測 PDF 自動下載 |
 | `fetch-nurse-ratio.py` | 政府開放資料平台的三班護病比 ODS 下載 |
