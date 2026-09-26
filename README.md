@@ -55,7 +55,7 @@
 健保署「醫院財務資訊公開」整理，255 家醫院的整體損益、醫務利益率、醫務收入等，可**全院排序比較**，點入單一醫院看**多年趨勢圖**。
 
 ### 👥 [人力監控](https://ycchou.github.io/transparent-nursing/personnel.html)
-衛福部「醫院醫事人力持續性監測結果」整理，472 筆（含院區）、民國 108/07–115/05 逐月。呈現 **13 種醫事職類**（醫師、護產、藥事、放射、檢驗、呼吸治療、物理／職能／語言治療…）的實際人數與各類病床數變化：
+衛福部「醫院醫事人力持續性監測結果」整理，472 筆（含院區）、民國 108/07–115/07 逐月。呈現 **13 種醫事職類**（醫師、護產、藥事、放射、檢驗、呼吸治療、物理／職能／語言治療…）的實際人數與各類病床數變化：
 
 - 單院時間序列 + 全國逐月儀錶板
 - 護產等基數大的職類，Y 軸自動縮放讓月變化清楚可辨
@@ -130,7 +130,7 @@
 |---|---|---|
 | 護理師職場分享 | 本站社群投稿，完全匿名 | 600+ 筆 |
 | 三班護病比 | 健保署 VPN 登錄之各月份三班護病比 | 477 家・112/07–115/07 |
-| 醫事人力監測 | [衛福部醫院醫事人力持續性監測結果](https://openinfo.mohw.gov.tw/) | 472 筆・108/07–115/05・13 職類 |
+| 醫事人力監測 | [衛福部醫院醫事人力持續性監測結果](https://openinfo.mohw.gov.tw/) | 472 筆・108/07–115/07・13 職類 |
 | 醫院財務 | [健保署醫院財務資訊公開](https://med.nhi.gov.tw/) | 255 家 |
 | 醫院評鑑名單 | [衛福部 108-114 年醫院評鑑合格名單](https://www.mohw.gov.tw/) | 482 家 |
 | 勞檢違規 | 勞動部 [公開資料](https://announcement.mol.gov.tw/) | 勞基法 |
@@ -159,8 +159,14 @@
 
 **資料前處理**（`tools/`，離線執行，產出 `data/*.json`）：
 
+每月更新官方資料：`python tools/update-data.py --commit --push`（流程與手動下載說明見 [DATA.md](DATA.md#每月更新官方資料)）。
+
 | 工具 | 作用 |
 |---|---|
+| `update-data.py` | 一鍵更新：抓新資料 → 歸檔手動下載的檔案 → 增量建置 → 更新 README 範圍 |
+| `build-all.py` | 依相依順序建置全部資料（增量，輸入沒變的步驟略過） |
+| `fetch-personnel.py` | 衛福部人力監測 PDF 自動下載 |
+| `fetch-nurse-ratio.py` | 政府開放資料平台的三班護病比 ODS 下載 |
 | `build-nurse-ratio.py` | VPN 三班護病比 ODS → `nurse-ratio.json`、`hospitals-merged.json`（含多院區拆分） |
 | `build-personnel.py` | 醫事人力監測 PDF → `personnel/{id}.json`、`personnel-index.json`、`personnel-aggregate.json`（僅拆護病比認定的真多院區） |
 | `fetch-hospital-financials.py` | 健保署財報 → `hospital-financials.json` |

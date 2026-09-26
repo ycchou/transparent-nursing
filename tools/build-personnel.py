@@ -11,10 +11,18 @@
 以 (code, normalizeBranch(branch)) 為鍵拆分，比照 build-nurse-ratio.py。單院區 id=code，
 多院區 id=code-院區（與護病比一致）。
 
-僅解析文字型 PDF（108/07～115/05，83 個月）；108/03～06 為掃描影像、已排除。
-用法：python tools/build-personnel.py
+僅解析文字型 PDF（108/07 起）；108/03～06 為掃描影像、已排除。
+
+增量快取：每份 PDF 的解析結果存在 .build-cache/personnel/（不進版控），鍵為
+「PDF 內容雜湊＋月份＋層級＋解析程式版本」。之後只解析新增或變動的 PDF，其餘直接
+讀快取；解析相關函式（parse_one 等）或 pdfplumber 版本一改，快取自動全部失效。
+全部解析約 13 分鐘；每月新增 3 份 PDF 的增量建置約 30 秒。
+
+用法：python tools/build-personnel.py              增量建置（預設）
+      python tools/build-personnel.py --no-cache   忽略快取、全部重新解析
+新月份的 PDF 可用 tools/fetch-personnel.py 自動下載；一鍵更新見 tools/update-personnel.py。
 """
-import os, re, sys, json, glob
+import os, re, sys, json, glob, hashlib, inspect
 from collections import defaultdict
 from multiprocessing import Pool, cpu_count
 import pdfplumber
@@ -26,6 +34,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC = os.path.join(ROOT, 'data', '醫院醫事人力持續性監測')
 OUT_INDEX = os.path.join(ROOT, 'data', 'personnel-index.json')
 OUT_DIR = os.path.join(ROOT, 'data', 'personnel')
+CACHE_DIR = os.path.join(ROOT, '.build-cache', 'personnel')
 
 BED_TYPES = ['急性一般病床', '慢性一般病床', '精神急性一般病床', '精神慢性一般病床']
 CATEGORIES = ['醫師', '醫事放射', '醫事檢驗', '護產', '藥事', '營養',
@@ -53,9 +62,13 @@ def month_key(folder):
     return f"{int(m.group(1)):03d}{int(m.group(2)):02d}" if m else None
 
 
+# 官方檔名偶有錯字：110/04 寫成「(區域中心)」「(地區中心)」，過去因此整月漏讀區域／地區醫院
+LEVEL_ALIASES = {'醫學中心': ('醫學中心',), '區域醫院': ('區域醫院', '區域中心'), '地區醫院': ('地區醫院', '地區中心')}
+
+
 def level_of(fname):
-    for lv in ('醫學中心', '區域醫院', '地區醫院'):
-        if lv in fname:
+    for lv, names in LEVEL_ALIASES.items():
+        if any(n in fname for n in names):
             return lv
     return None
 
@@ -253,6 +266,26 @@ def parse_one(task):
     return ('OK', list(out.values()))
 
 
+# ---- 增量快取 ----
+# 只要影響「單份 PDF → 記錄」結果的程式碼都列在這裡；任一支改動 → 版本變 → 快取全部失效
+PARSER_FUNCS = (clean, to_int, normalize_branch, col_bounds, _bucket_row, rows_from_page, norm_code, parse_one)
+
+
+def parser_version():
+    src = ''.join(inspect.getsource(f) for f in PARSER_FUNCS) + json.dumps([ROW_TYPES, pdfplumber.__version__])
+    return hashlib.sha1(src.encode('utf-8')).hexdigest()[:12]
+
+
+def cache_file(task, pv):
+    path, level, mkey = task
+    h = hashlib.sha1()
+    with open(path, 'rb') as fp:
+        for chunk in iter(lambda: fp.read(1 << 20), b''):
+            h.update(chunk)
+    h.update(f'|{mkey}|{level}'.encode('utf-8'))
+    return os.path.join(CACHE_DIR, f'{h.hexdigest()[:24]}-{pv}.json')
+
+
 def build_tasks():
     months = sorted(
         d for d in os.listdir(SRC)
@@ -269,24 +302,47 @@ def build_tasks():
 
 
 def main():
+    use_cache = '--no-cache' not in sys.argv
     months, tasks = build_tasks()
     print(f"月份：{len(months)}（{months[0]} ~ {months[-1]}）；PDF 任務：{len(tasks)}")
 
-    store = {}   # (code, branchKey, mkey) -> rec
+    # 先讀快取：命中的 PDF 不必再解析
+    pv = parser_version()
+    os.makedirs(CACHE_DIR, exist_ok=True)
+    results = {}   # task -> list[rec]
+    todo = []
+    for t in tasks:
+        cf = cache_file(t, pv)
+        if use_cache and os.path.exists(cf):
+            with open(cf, encoding='utf-8') as fp:
+                results[t] = json.load(fp)
+        else:
+            todo.append((t, cf))
+    print(f"快取命中 {len(results)}／{len(tasks)}；需解析 {len(todo)}" + ('' if use_cache else '（--no-cache）'))
+
     errs = []
-    nproc = min(8, cpu_count())
-    done = 0
-    with Pool(nproc) as pool:
-        for status, payload in pool.imap_unordered(parse_one, tasks):
-            done += 1
-            if status == 'ERR':
-                errs.append(payload)
-            else:
-                for rec in payload:
-                    store[(rec['code'], normalize_branch(rec['branch']), rec['mkey'])] = rec
-            if done % 30 == 0:
-                print(f"  ...{done}/{len(tasks)}")
+    if todo:
+        nproc = min(8, cpu_count(), len(todo))
+        cf_of = {t: cf for t, cf in todo}
+        done = 0
+        with Pool(nproc) as pool:
+            for t, (status, payload) in zip([t for t, _ in todo], pool.imap(parse_one, [t for t, _ in todo])):
+                done += 1
+                if status == 'ERR':
+                    errs.append(payload)       # 失敗的不寫快取，下次重試
+                else:
+                    results[t] = payload
+                    with open(cf_of[t], 'w', encoding='utf-8') as fp:
+                        json.dump(payload, fp, ensure_ascii=False, separators=(',', ':'))
+                if done % 30 == 0:
+                    print(f"  ...{done}/{len(todo)}")
     print(f"解析完成；錯誤 {len(errs)}", errs[:5] if errs else '')
+
+    # 依固定順序（月份→檔名）組回 store，確保與全量解析的結果一致、輸出可重現
+    store = {}   # (code, branchKey, mkey) -> rec
+    for t in sorted(results):
+        for rec in results[t]:
+            store[(rec['code'], normalize_branch(rec['branch']), rec['mkey'])] = rec
 
     # 套用人工修正（來源 PDF 異常值，例如數字誤植）。修正表以 code 為鍵，
     # 套用到該 code 同月份的所有院區記錄（現有修正皆單院區，key branchKey='')。

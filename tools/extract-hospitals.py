@@ -12,8 +12,10 @@ from collections import Counter
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
-# PDF 路徑（如有更新請改這裡）
-PDF_PATH = os.path.expanduser("~/Downloads/108-114年醫院評鑑及教學醫院評鑑(含兒醫)合格名單.pdf")
+# PDF 路徑（如有更新請改這裡）：優先用 repo 內已提交的原始檔，找不到才退回 ~/Downloads
+_PDF_NAME = "108-114年醫院評鑑及教學醫院評鑑(含兒醫)合格名單.pdf"
+_REPO_PDF = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", _PDF_NAME)
+PDF_PATH = _REPO_PDF if os.path.exists(_REPO_PDF) else os.path.expanduser(f"~/Downloads/{_PDF_NAME}")
 
 LEVEL_OK = {'醫學中心', '區域醫院', '地區醫院'}
 CODE_RE = re.compile(r'^\d{10}$')

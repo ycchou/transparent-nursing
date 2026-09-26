@@ -28,6 +28,11 @@ package-lock.json
 yarn.lock
 .npm/
 
+# 建置快取（tools/build-*.py 的增量解析結果，可隨時刪除重建）
+.build-cache/
+# tools/update-data.py 的手動下載收件匣（歸檔後即可刪）
+data/_inbox/
+
 # Logs / 暫存
 *.log
 *.tmp
