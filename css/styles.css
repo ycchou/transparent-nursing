@@ -5541,7 +5541,10 @@ body.g2g-modal-open { overflow: hidden; }
    兩側文字被螢幕圓角切掉、中間壓在 Home 指示條上。
    ============================================================ */
 :root {
-  --bn-height: 56px;
+  --bn-height: 60px;
+  /* 懸浮膠囊離螢幕底的距離：有 Home 指示條時稍微壓進 safe area（跟 Facebook／iOS 原生一樣），沒有時留 12px */
+  --bn-gap: max(12px, calc(env(safe-area-inset-bottom, 0px) - 8px));
+  --bn-space: calc(var(--bn-height) + var(--bn-gap));   /* 導覽列實際佔掉的底部高度 */
   --safe-b: env(safe-area-inset-bottom, 0px);
   --safe-l: env(safe-area-inset-left, 0px);
   --safe-r: env(safe-area-inset-right, 0px);
@@ -5557,38 +5560,80 @@ body.g2g-modal-open { overflow: hidden; }
 
 @media (max-width: 768px) {
   /* 預留導覽列高度：有頁尾的頁面墊在頁尾（深色底延伸到底），沒有頁尾的頁面墊在 body */
-  body.has-bottom-nav:not(:has(.site-footer)) { padding-bottom: calc(var(--bn-height) + var(--safe-b)); }
-  body.has-bottom-nav .site-footer { padding-bottom: calc(32px + var(--bn-height) + var(--safe-b)); }
+  body.has-bottom-nav:not(:has(.site-footer)) { padding-bottom: calc(var(--bn-space) + 12px); }
+  body.has-bottom-nav .site-footer { padding-bottom: calc(32px + var(--bn-space)); }
   /* 底部導覽列取代漢堡選單；表單頁沒有底部導覽列，保留漢堡 */
   body.has-bottom-nav .nav-toggle,
   body.has-bottom-nav .site-nav { display: none !important; }
   /* 捐款入口收進「更多 → 支持我們」，不再與導覽列搶右下角 */
   body.has-bottom-nav .donate-fab { display: none; }
   /* 其他固定在底部的元件往上讓出導覽列高度 */
-  body.has-bottom-nav .toast-host { bottom: calc(var(--bn-height) + 16px + var(--safe-b)); }
-  body.has-bottom-nav .pwa-prompt { bottom: calc(var(--bn-height) + 12px + var(--safe-b)); }
-  body.has-bottom-nav .tn-mode-badge { bottom: calc(var(--bn-height) + 8px + var(--safe-b)); }
+  body.has-bottom-nav .toast-host { bottom: calc(var(--bn-space) + 16px); }
+  body.has-bottom-nav .pwa-prompt { bottom: calc(var(--bn-space) + 12px); }
+  body.has-bottom-nav .tn-mode-badge { bottom: calc(var(--bn-space) + 8px); }
+  /* 導覽列收起時，這些元件跟著降下來 */
+  body.has-bottom-nav .toast-host,
+  body.has-bottom-nav .pwa-prompt,
+  body.has-bottom-nav .tn-mode-badge { transition: bottom .3s var(--ease); }
+  body.bn-hidden .toast-host { bottom: calc(16px + var(--safe-b)); }
+  body.bn-hidden .pwa-prompt { bottom: calc(12px + var(--safe-b)); }
+  body.bn-hidden .tn-mode-badge { bottom: calc(8px + var(--safe-b)); }
   /* 表單頁（無導覽列）的固定元件也要避開 Home 指示條 */
   body:not(.has-bottom-nav) .toast-host { bottom: calc(32px + var(--safe-b)); }
   body:not(.has-bottom-nav) .pwa-prompt { bottom: calc(16px + var(--safe-b)); }
 
+  /* 懸浮膠囊＋毛玻璃：不貼邊、四周透出內容，往下捲收起、往上捲出現 */
   .bottom-nav {
     position: fixed;
-    left: 0; right: 0; bottom: 0;
+    left: max(12px, var(--safe-l));
+    right: max(12px, var(--safe-r));
+    bottom: var(--bn-gap);
     z-index: 96;            /* 在所有 modal（≥100）之下 */
     display: flex;
     align-items: stretch;
-    /* 左右留白：避開螢幕圓角／橫向瀏海 */
-    padding: 0 max(8px, var(--safe-l)) var(--safe-b) max(8px, var(--safe-r));
-    background: rgba(255, 255, 255, 0.92);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
-    backdrop-filter: saturate(180%) blur(20px);
-    /* 髮絲線（Retina 上 0.5px） */
-    box-shadow: inset 0 0.5px 0 rgba(29, 53, 87, 0.18);
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 0 6px;
+    border-radius: 30px;
+    /* 毛玻璃：半透明白＋高飽和模糊，外加一圈亮邊與內側高光，做出玻璃厚度 */
+    background: rgba(255, 255, 255, 0.62);
+    -webkit-backdrop-filter: saturate(190%) blur(24px);
+    backdrop-filter: saturate(190%) blur(24px);
+    border: 0.5px solid rgba(255, 255, 255, 0.7);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.75),
+      0 0 0 0.5px rgba(29, 53, 87, 0.08),
+      0 10px 30px rgba(29, 53, 87, 0.16),
+      0 2px 6px rgba(29, 53, 87, 0.06);
+    transition: transform .32s cubic-bezier(0.32, 0.72, 0, 1), opacity .2s ease,
+                background-color .25s ease, border-color .25s ease, box-shadow .25s ease;
+    will-change: transform;
     touch-action: manipulation;
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
+  }
+  .bottom-nav.is-hidden {
+    transform: translateY(calc(100% + var(--bn-gap) + 12px));
+    opacity: 0;
+    pointer-events: none;
+  }
+  /* 深色玻璃：懸浮在深色頁尾上時 */
+  .bottom-nav.on-dark {
+    background: rgba(20, 36, 60, 0.6);
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 10px 30px rgba(0, 0, 0, 0.35);
+  }
+  .bottom-nav.on-dark .bn-item { color: rgba(255, 255, 255, 0.78); }
+  .bottom-nav.on-dark .bn-item.active,
+  .bottom-nav.on-dark .bn-item[aria-expanded="true"] { color: #fff; }
+  .bottom-nav.on-dark .bn-item.active .bn-icon,
+  .bottom-nav.on-dark .bn-item[aria-expanded="true"] .bn-icon { background: rgba(255, 255, 255, 0.16); }
+  .bottom-nav.on-dark .bn-cta { color: #fff; }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .bottom-nav { background: rgba(255, 255, 255, 0.96); }
   }
   .bn-item {
     flex: 1 1 0;
@@ -5625,7 +5670,7 @@ body.g2g-modal-open { overflow: hidden; }
   /* 選中：pill 底色＋icon 半填色＋label 加粗著色 */
   .bn-item.active { color: var(--primary); }
   .bn-item.active .bn-label { font-weight: 700; }
-  .bn-item.active .bn-icon { background: rgba(35, 111, 143, 0.12); }
+  .bn-item.active .bn-icon { background: rgba(35, 111, 143, 0.14); }
   .bn-item.active .bn-icon svg { fill: currentColor; fill-opacity: 0.16; }
   .bn-item[aria-expanded="true"] { color: var(--primary); }
   .bn-item[aria-expanded="true"] .bn-icon { background: rgba(35, 111, 143, 0.12); }
@@ -5709,7 +5754,7 @@ body.g2g-modal-open { overflow: hidden; }
   body.bn-sheet-open { overflow: hidden; }
 }
 @media (max-width: 768px) and (prefers-reduced-motion: reduce) {
-  .bn-sheet-backdrop, .bn-sheet-body, .bn-icon, .bn-icon svg { transition: none; }
+  .bn-sheet-backdrop, .bn-sheet-body, .bn-icon, .bn-icon svg, .bottom-nav { transition: none; }
 }
 
 /* ---- 換頁過場（跨文件 View Transitions；Safari 18.2+／Chrome 126+，不支援的瀏覽器照常換頁） ----
