@@ -1,9 +1,9 @@
 // 共用 header / footer 注入 + 工具函式
-import { SITE, CATEGORIES } from './config.js?v=33720318e3';
-import { icon, renderIcons } from './icons.js?v=33720318e3';
-import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=33720318e3';
-import { initScrollHints } from './scroll-hint.js?v=33720318e3';
-import { mountModeBadge } from './env.js?v=33720318e3';
+import { SITE, CATEGORIES } from './config.js?v=c9403a994c';
+import { icon, renderIcons } from './icons.js?v=c9403a994c';
+import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=c9403a994c';
+import { initScrollHints } from './scroll-hint.js?v=c9403a994c';
+import { mountModeBadge } from './env.js?v=c9403a994c';
 
 // 主辦/協作工會 — 共用資料（footer / hero strip / about 都引用）
 export const ORGS = {
@@ -133,6 +133,138 @@ function headerHTML() {
   `;
 }
 
+// ===== 手機底部導覽列（≤768px） =====
+// 5 格：分享平台／機構總覽／＋填寫（主按鈕）／資料查詢（底部面板）／更多（底部面板）。
+// 手機上取代右上角漢堡選單；表單填寫頁（participate-*.html）不顯示，避免填到一半誤觸離開、
+// 也不跟鍵盤與送出按鈕搶空間。
+const BOTTOM_NAV = {
+  tabs: [
+    { href: 'platform.html', label: '分享平台', icon: 'message-square', match: ['platform.html'] },
+    { href: 'hospital.html', label: '機構總覽', icon: 'building', match: ['hospital.html'] },
+    { href: 'participate.html', label: '填寫', icon: 'plus', match: ['participate.html'], cta: true },
+    { sheet: 'data', label: '資料查詢', icon: 'bar-chart-3' },
+    { sheet: 'more', label: '更多', icon: 'more-horizontal' },
+  ],
+  sheets: {
+    data: {
+      title: '資料查詢',
+      items: [
+        { href: 'nurse-ratio.html', label: '護病比', desc: '全國醫院三班護病比逐月變化', icon: 'activity', match: ['nurse-ratio.html'] },
+        { href: 'financials.html', label: '醫院財務', desc: '營收、利益率與同儕比較', icon: 'pie-chart', match: ['financials.html'] },
+        { href: 'personnel.html', label: '人力監控', desc: '醫事人力逐月增減', icon: 'users', match: ['personnel.html'] },
+        { href: 'records.html', label: '違規紀錄', desc: '勞檢／性平／職安處分', icon: 'shield-check', match: ['records.html', 'violations.html', 'gender.html', 'osha.html'] },
+        { href: 'stats.html', label: '統計摘要', desc: '分享資料的整體分布', icon: 'bar-chart-3', match: ['stats.html'] },
+      ],
+    },
+    more: {
+      title: '更多',
+      items: [
+        { href: 'about.html', label: '關於我們', desc: '運動緣起與常見問題', icon: 'info', match: ['about.html'] },
+        { href: 'support.html', label: '支持我們', desc: '小額捐款，讓平台走得更遠', icon: 'heart', match: ['support.html'] },
+        { href: 'terms.html', label: '服務條款', icon: 'file-text', match: ['terms.html'] },
+        { href: 'https://trtu.org.tw/RT_platform/', label: 'RT 職場', desc: '呼吸治療產業勞動環境公開平台', icon: 'arrow-up-right', external: true },
+      ],
+    },
+  },
+};
+
+function bottomNavEnabled(page) {
+  return !/^participate-.+\.html$/.test(page);
+}
+
+function bottomNavHTML(page) {
+  const sheetOf = (key) => {
+    const sh = BOTTOM_NAV.sheets[key];
+    return { ...sh, items: sh.items.filter((it) => it.external || gateAllowed(it.href)) };
+  };
+  const tabs = BOTTOM_NAV.tabs.filter((t) => t.sheet ? sheetOf(t.sheet).items.length : gateAllowed(t.href));
+  const tabHTML = tabs.map((t) => {
+    if (t.sheet) {
+      const active = sheetOf(t.sheet).items.some((it) => it.match && it.match.includes(page));
+      return `<button type="button" class="bn-item${active ? ' active' : ''}" data-sheet="${t.sheet}"
+                aria-haspopup="dialog" aria-expanded="false" aria-controls="bn-sheet">
+                ${icon(t.icon, { size: 22 })}<span>${t.label}</span></button>`;
+    }
+    const active = t.match.includes(page);
+    const cur = active ? ' aria-current="page"' : '';
+    if (t.cta) {
+      return `<a href="${t.href}" class="bn-item bn-cta${active ? ' active' : ''}"${cur}>
+                <span class="bn-cta-circle">${icon(t.icon, { size: 24 })}</span><span>${t.label}</span></a>`;
+    }
+    return `<a href="${t.href}" class="bn-item${active ? ' active' : ''}"${cur}>${icon(t.icon, { size: 22 })}<span>${t.label}</span></a>`;
+  }).join('');
+
+  const panels = Object.keys(BOTTOM_NAV.sheets).map((key) => {
+    const sh = sheetOf(key);
+    const items = sh.items.map((it) => {
+      const active = it.match && it.match.includes(page);
+      const ext = it.external ? ' target="_blank" rel="noopener"' : '';
+      return `<li><a href="${it.href}" class="bn-sheet-item${active ? ' active' : ''}"${ext}${active ? ' aria-current="page"' : ''}>
+                <span class="bn-sheet-icon">${icon(it.icon, { size: 20 })}</span>
+                <span class="bn-sheet-text"><strong>${it.label}</strong>${it.desc ? `<small>${it.desc}</small>` : ''}</span>
+              </a></li>`;
+    }).join('');
+    return `<div class="bn-sheet-panel" data-panel="${key}" hidden>
+              <div class="bn-sheet-title">${sh.title}</div>
+              <ul>${items}</ul>
+            </div>`;
+  }).join('');
+
+  return `
+    <nav class="bottom-nav" aria-label="主要導覽">${tabHTML}</nav>
+    <div class="bn-sheet" id="bn-sheet" role="dialog" aria-modal="true" aria-label="選單" hidden>
+      <div class="bn-sheet-backdrop" data-close></div>
+      <div class="bn-sheet-body">
+        <div class="bn-sheet-handle" aria-hidden="true"></div>
+        ${panels}
+      </div>
+    </div>`;
+}
+
+function mountBottomNav() {
+  const page = currentPage();
+  if (!bottomNavEnabled(page) || document.querySelector('.bottom-nav')) return;
+  document.body.insertAdjacentHTML('beforeend', bottomNavHTML(page));
+  document.body.classList.add('has-bottom-nav');
+
+  const sheet = document.getElementById('bn-sheet');
+  const triggers = document.querySelectorAll('.bottom-nav [data-sheet]');
+  let openKey = null;
+  let lastTrigger = null;
+
+  const close = () => {
+    if (!openKey) return;
+    sheet.classList.remove('open');
+    triggers.forEach((b) => b.setAttribute('aria-expanded', 'false'));
+    document.body.classList.remove('bn-sheet-open');
+    openKey = null;
+    setTimeout(() => { if (!openKey) sheet.hidden = true; }, 200);
+    lastTrigger?.focus();
+  };
+  const open = (key, trigger) => {
+    if (openKey === key) { close(); return; }
+    sheet.hidden = false;
+    sheet.querySelectorAll('.bn-sheet-panel').forEach((p) => { p.hidden = p.dataset.panel !== key; });
+    triggers.forEach((b) => b.setAttribute('aria-expanded', String(b === trigger)));
+    document.body.classList.add('bn-sheet-open');
+    openKey = key;
+    lastTrigger = trigger;
+    requestAnimationFrame(() => {
+      sheet.classList.add('open');
+      sheet.querySelector(`.bn-sheet-panel[data-panel="${key}"] a`)?.focus({ preventScroll: true });
+    });
+  };
+
+  triggers.forEach((b) => b.addEventListener('click', () => open(b.dataset.sheet, b)));
+  sheet.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) close(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
+  // 視窗放大到桌機寬度時收起面板（底部導覽列只在手機顯示）
+  window.matchMedia('(min-width: 769px)').addEventListener('change', (e) => { if (e.matches) close(); });
+
+  wireNavPrefetch(document.querySelector('.bottom-nav'));
+  wireNavPrefetch(sheet);
+}
+
 function footerHTML() {
   return `
     <footer class="site-footer">
@@ -253,6 +385,8 @@ export function mountLayout() {
       if (e.key === 'Escape') { group.classList.remove('open'); trigger?.setAttribute('aria-expanded', 'false'); }
     });
   }
+  // 手機底部導覽列（表單填寫頁除外）
+  mountBottomNav();
   // render any remaining icons
   renderIcons();
   // PWA「加到主畫面」自動引導（10 秒後行動裝置彈出 banner）
@@ -260,7 +394,7 @@ export function mountLayout() {
 
   // 背景預載 platform 資料 + 樞紐大檔：切到分享平台/機構總覽/護病比/人力監控時即時顯示
   // 動態 import 避免循環依賴與初始 parse 成本
-  import('./data-loader.js?v=33720318e3')
+  import('./data-loader.js?v=c9403a994c')
     .then(({ preloadAll, preloadStaticData }) => {
       preloadAll && preloadAll();
       preloadStaticData && preloadStaticData();
@@ -272,13 +406,13 @@ export function mountLayout() {
   wireNavPrefetch(document.getElementById('app-footer'));
 
   // 背景預載勞檢/性平/職安紀錄資料：同樣讓使用者切過去時即時顯示
-  import('./violations.js?v=33720318e3')
+  import('./violations.js?v=c9403a994c')
     .then(({ preloadViolations }) => preloadViolations && preloadViolations())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./gender.js?v=33720318e3')
+  import('./gender.js?v=c9403a994c')
     .then(({ preloadGender }) => preloadGender && preloadGender())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./osha.js?v=33720318e3')
+  import('./osha.js?v=c9403a994c')
     .then(({ preloadOsha }) => preloadOsha && preloadOsha())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
 }
