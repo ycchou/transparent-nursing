@@ -2,13 +2,13 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=6921db2fae';
-import { renderIcons, icon } from './icons.js?v=6921db2fae';
-import { markContributed } from './contribution-gate.js?v=6921db2fae';
-import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=6921db2fae';
-import { showToast } from './toast.js?v=6921db2fae';
-import { submitEndpoint as envSubmitEndpoint, turnstileSiteKey } from './env.js?v=6921db2fae';
-import { notePwaIntent } from './pwa-prompt.js?v=6921db2fae';
+import { mountLayout } from './components.js?v=33720318e3';
+import { renderIcons, icon } from './icons.js?v=33720318e3';
+import { markContributed } from './contribution-gate.js?v=33720318e3';
+import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=33720318e3';
+import { showToast } from './toast.js?v=33720318e3';
+import { submitEndpoint as envSubmitEndpoint, turnstileSiteKey } from './env.js?v=33720318e3';
+import { notePwaIntent } from './pwa-prompt.js?v=33720318e3';
 
 const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 避開易混字元 0/O/1/I/L
 let currentCaptcha = '';
@@ -122,6 +122,7 @@ function renderForm() {
   let html = '';
   let currentSection = null;
   let sectionBuf = [];
+  let sectionIdx = 0;
 
   const flushSection = () => {
     if (!currentSection && sectionBuf.length === 0) return;
@@ -130,7 +131,9 @@ function renderForm() {
     const title = currentSection
       ? `<h3 class="dform-section-title">${currentSection.section}</h3>${intro}`
       : '';
-    html += `<section class="dform-section">${title}${sectionBuf.join('')}</section>`;
+    const secAttr = currentSection ? ` id="dform-sec-${sectionIdx}" data-sec="${sectionIdx}"` : '';
+    html += `<section class="dform-section"${secAttr}>${title}${sectionBuf.join('')}</section>`;
+    if (currentSection) sectionIdx += 1;
     sectionBuf = [];
   };
 
@@ -264,6 +267,119 @@ function applyDataToForm(data) {
       if (el) el.value = val;
     }
   }
+  updateProgressCounts();
+}
+
+// ===== 填寫進度列 =====
+// 長表單（ICU 約 6000px）在手機上沒有「還剩多少」的感覺。表單頂部放一條 sticky 進度列：
+// 目前區段「3 / 6 加護病房資訊」＋必填完成數＋進度條；點開可跳到任一區段（已填完的打勾）。
+
+let PROGRESS = null;   // { el, sections: [{ title, names: [必填欄位 name] }] }
+
+function buildProgressModel() {
+  const sections = [];
+  let cur = null;
+  for (const item of SCHEMA) {
+    if (item.section) {
+      cur = { title: item.section, names: [] };
+      sections.push(cur);
+    } else if (cur && item.required) {
+      cur.names.push(item.name);
+    }
+  }
+  return sections;
+}
+
+function attachProgress() {
+  const fieldsRoot = document.getElementById('dform-fields');
+  if (!fieldsRoot) return;
+  const sections = buildProgressModel();
+  if (sections.length < 2) return;   // 單一區段的短表單不需要
+
+  const el = document.createElement('div');
+  el.className = 'dform-progress';
+  el.innerHTML = `
+    <button type="button" class="dform-progress-head" aria-expanded="false" aria-controls="dform-progress-menu">
+      <span class="dform-progress-step"></span>
+      <span class="dform-progress-name"></span>
+      <span class="dform-progress-req"></span>
+      <span class="dform-progress-caret" aria-hidden="true">▾</span>
+    </button>
+    <div class="dform-progress-bar" aria-hidden="true"><span></span></div>
+    <ol class="dform-progress-menu" id="dform-progress-menu" hidden>
+      ${sections.map((sec, i) => `
+        <li><button type="button" data-sec="${i}">
+          <span class="dform-progress-check" aria-hidden="true"></span>
+          <span class="dform-progress-menu-name">${sec.title}</span>
+          <span class="dform-progress-menu-req"></span>
+        </button></li>`).join('')}
+    </ol>`;
+  fieldsRoot.before(el);
+  PROGRESS = { el, sections };
+
+  const head = el.querySelector('.dform-progress-head');
+  const menu = el.querySelector('.dform-progress-menu');
+  const setOpen = (open) => {
+    menu.hidden = !open;
+    head.setAttribute('aria-expanded', String(open));
+    el.classList.toggle('is-open', open);
+  };
+  head.addEventListener('click', () => setOpen(menu.hidden));
+  menu.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-sec]');
+    if (!btn) return;
+    setOpen(false);
+    document.getElementById(`dform-sec-${btn.dataset.sec}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  document.addEventListener('click', (e) => { if (!el.contains(e.target)) setOpen(false); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+
+  const onFieldChange = debounce(updateProgressCounts, 120);
+  fieldsRoot.addEventListener('input', onFieldChange);
+  fieldsRoot.addEventListener('change', onFieldChange);
+
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => { ticking = false; updateProgressCurrent(); });
+  }, { passive: true });
+
+  updateProgressCounts();
+  updateProgressCurrent();
+}
+
+function updateProgressCounts() {
+  if (!PROGRESS) return;
+  const { el, sections } = PROGRESS;
+  const missing = new Set(validate(serializeForm()));
+  let total = 0, done = 0;
+  sections.forEach((sec, i) => {
+    const secDone = sec.names.filter((n) => !missing.has(n)).length;
+    total += sec.names.length;
+    done += secDone;
+    const btn = el.querySelector(`.dform-progress-menu button[data-sec="${i}"]`);
+    if (!btn) return;
+    btn.querySelector('.dform-progress-menu-req').textContent = sec.names.length ? `${secDone}/${sec.names.length}` : '選填';
+    btn.classList.toggle('is-done', sec.names.length > 0 && secDone === sec.names.length);
+  });
+  el.querySelector('.dform-progress-req').textContent = total ? `必填 ${done}/${total}` : '';
+  el.querySelector('.dform-progress-bar > span').style.width = `${total ? (100 * done / total) : 0}%`;
+}
+
+function updateProgressCurrent() {
+  if (!PROGRESS) return;
+  const { el, sections } = PROGRESS;
+  // 區段頂端越過「header＋進度列」下緣就算進入該區段
+  const line = el.getBoundingClientRect().bottom + 24;
+  let cur = 0;
+  document.querySelectorAll('.dform-section[data-sec]').forEach((secEl) => {
+    if (secEl.getBoundingClientRect().top <= line) cur = Number(secEl.dataset.sec);
+  });
+  el.querySelector('.dform-progress-step').textContent = `${cur + 1} / ${sections.length}`;
+  el.querySelector('.dform-progress-name').textContent = sections[cur].title;
+  el.querySelectorAll('.dform-progress-menu button').forEach((b) =>
+    b.classList.toggle('is-current', Number(b.dataset.sec) === cur));
 }
 
 // ===== 驗證 =====
@@ -583,6 +699,7 @@ function showThanks(opts = {}) {
       form.reset();
       form.querySelectorAll('.dform-option.checked').forEach((el) => el.classList.remove('checked'));
       form.querySelectorAll('.dform-field.has-error').forEach((el) => el.classList.remove('has-error'));
+      updateProgressCounts();
       const btn = document.querySelector('.dform-submit-btn');
       if (btn) {
         btn.disabled = false;
@@ -1093,6 +1210,7 @@ export function initDepartmentForm({ schema, draftKey, slug = '', submitEndpoint
 
   mountLayout();
   renderForm();
+  attachProgress();
   restoreDraftIfAny();
   attachDraftAutosave();
   attachInstitutionAutocomplete();
