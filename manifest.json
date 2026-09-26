@@ -7,7 +7,7 @@
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#F1FAEE",
-  "theme_color": "#2E86AB",
+  "theme_color": "#FFFFFF",
   "lang": "zh-Hant-TW",
   "categories": ["health", "medical", "social", "education"],
   "icons": [

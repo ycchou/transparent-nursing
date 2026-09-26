@@ -1,9 +1,9 @@
 // 共用 header / footer 注入 + 工具函式
-import { SITE, CATEGORIES } from './config.js?v=c9403a994c';
-import { icon, renderIcons } from './icons.js?v=c9403a994c';
-import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=c9403a994c';
-import { initScrollHints } from './scroll-hint.js?v=c9403a994c';
-import { mountModeBadge } from './env.js?v=c9403a994c';
+import { SITE, CATEGORIES } from './config.js?v=f53bef9036';
+import { icon, renderIcons } from './icons.js?v=f53bef9036';
+import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=f53bef9036';
+import { initScrollHints } from './scroll-hint.js?v=f53bef9036';
+import { mountModeBadge } from './env.js?v=f53bef9036';
 
 // 主辦/協作工會 — 共用資料（footer / hero strip / about 都引用）
 export const ORGS = {
@@ -178,20 +178,16 @@ function bottomNavHTML(page) {
     return { ...sh, items: sh.items.filter((it) => it.external || gateAllowed(it.href)) };
   };
   const tabs = BOTTOM_NAV.tabs.filter((t) => t.sheet ? sheetOf(t.sheet).items.length : gateAllowed(t.href));
+  // 每格：icon 外包一層 .bn-icon（選中時長出 pill 底色），下方 label
+  const inner = (t) => `<span class="bn-icon">${icon(t.icon, { size: 22 })}</span><span class="bn-label">${t.label}</span>`;
   const tabHTML = tabs.map((t) => {
     if (t.sheet) {
       const active = sheetOf(t.sheet).items.some((it) => it.match && it.match.includes(page));
       return `<button type="button" class="bn-item${active ? ' active' : ''}" data-sheet="${t.sheet}"
-                aria-haspopup="dialog" aria-expanded="false" aria-controls="bn-sheet">
-                ${icon(t.icon, { size: 22 })}<span>${t.label}</span></button>`;
+                aria-haspopup="dialog" aria-expanded="false" aria-controls="bn-sheet">${inner(t)}</button>`;
     }
     const active = t.match.includes(page);
-    const cur = active ? ' aria-current="page"' : '';
-    if (t.cta) {
-      return `<a href="${t.href}" class="bn-item bn-cta${active ? ' active' : ''}"${cur}>
-                <span class="bn-cta-circle">${icon(t.icon, { size: 24 })}</span><span>${t.label}</span></a>`;
-    }
-    return `<a href="${t.href}" class="bn-item${active ? ' active' : ''}"${cur}>${icon(t.icon, { size: 22 })}<span>${t.label}</span></a>`;
+    return `<a href="${t.href}" class="bn-item${t.cta ? ' bn-cta' : ''}${active ? ' active' : ''}"${active ? ' aria-current="page"' : ''}>${inner(t)}</a>`;
   }).join('');
 
   const panels = Object.keys(BOTTOM_NAV.sheets).map((key) => {
@@ -202,20 +198,21 @@ function bottomNavHTML(page) {
       return `<li><a href="${it.href}" class="bn-sheet-item${active ? ' active' : ''}"${ext}${active ? ' aria-current="page"' : ''}>
                 <span class="bn-sheet-icon">${icon(it.icon, { size: 20 })}</span>
                 <span class="bn-sheet-text"><strong>${it.label}</strong>${it.desc ? `<small>${it.desc}</small>` : ''}</span>
+                <span class="bn-sheet-chev" aria-hidden="true">${icon(it.external ? 'arrow-up-right' : 'chevron-right', { size: 18 })}</span>
               </a></li>`;
     }).join('');
     return `<div class="bn-sheet-panel" data-panel="${key}" hidden>
-              <div class="bn-sheet-title">${sh.title}</div>
+              <div class="bn-sheet-title" id="bn-sheet-title-${key}">${sh.title}</div>
               <ul>${items}</ul>
             </div>`;
   }).join('');
 
   return `
     <nav class="bottom-nav" aria-label="主要導覽">${tabHTML}</nav>
-    <div class="bn-sheet" id="bn-sheet" role="dialog" aria-modal="true" aria-label="選單" hidden>
+    <div class="bn-sheet" id="bn-sheet" role="dialog" aria-modal="true" hidden>
       <div class="bn-sheet-backdrop" data-close></div>
       <div class="bn-sheet-body">
-        <div class="bn-sheet-handle" aria-hidden="true"></div>
+        <div class="bn-sheet-grab" aria-hidden="true"><span class="bn-sheet-handle"></span></div>
         ${panels}
       </div>
     </div>`;
@@ -228,6 +225,7 @@ function mountBottomNav() {
   document.body.classList.add('has-bottom-nav');
 
   const sheet = document.getElementById('bn-sheet');
+  const body = sheet.querySelector('.bn-sheet-body');
   const triggers = document.querySelectorAll('.bottom-nav [data-sheet]');
   let openKey = null;
   let lastTrigger = null;
@@ -235,24 +233,26 @@ function mountBottomNav() {
   const close = () => {
     if (!openKey) return;
     sheet.classList.remove('open');
+    body.style.transform = '';
     triggers.forEach((b) => b.setAttribute('aria-expanded', 'false'));
     document.body.classList.remove('bn-sheet-open');
     openKey = null;
-    setTimeout(() => { if (!openKey) sheet.hidden = true; }, 200);
-    lastTrigger?.focus();
+    setTimeout(() => { if (!openKey) sheet.hidden = true; }, 260);
+    lastTrigger?.focus({ preventScroll: true });
   };
   const open = (key, trigger) => {
     if (openKey === key) { close(); return; }
     sheet.hidden = false;
     sheet.querySelectorAll('.bn-sheet-panel').forEach((p) => { p.hidden = p.dataset.panel !== key; });
+    sheet.setAttribute('aria-labelledby', `bn-sheet-title-${key}`);
     triggers.forEach((b) => b.setAttribute('aria-expanded', String(b === trigger)));
     document.body.classList.add('bn-sheet-open');
     openKey = key;
     lastTrigger = trigger;
-    requestAnimationFrame(() => {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
       sheet.classList.add('open');
       sheet.querySelector(`.bn-sheet-panel[data-panel="${key}"] a`)?.focus({ preventScroll: true });
-    });
+    }));
   };
 
   triggers.forEach((b) => b.addEventListener('click', () => open(b.dataset.sheet, b)));
@@ -260,6 +260,30 @@ function mountBottomNav() {
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
   // 視窗放大到桌機寬度時收起面板（底部導覽列只在手機顯示）
   window.matchMedia('(min-width: 769px)').addEventListener('change', (e) => { if (e.matches) close(); });
+
+  // 往下拖曳關閉（跟原生 sheet 一樣）：從把手區或列表已捲到頂時往下拉
+  let startY = null, dy = 0, startT = 0;
+  body.addEventListener('touchstart', (e) => {
+    const fromGrab = e.target.closest('.bn-sheet-grab, .bn-sheet-title');
+    if (!fromGrab && body.scrollTop > 0) return;
+    startY = e.touches[0].clientY; dy = 0; startT = Date.now();
+    body.classList.add('dragging');
+  }, { passive: true });
+  body.addEventListener('touchmove', (e) => {
+    if (startY == null) return;
+    dy = Math.max(0, e.touches[0].clientY - startY);
+    if (dy > 0) body.style.transform = `translateY(${dy}px)`;
+  }, { passive: true });
+  const endDrag = () => {
+    if (startY == null) return;
+    body.classList.remove('dragging');
+    const fast = dy > 40 && (Date.now() - startT) < 250;
+    if (dy > body.offsetHeight * 0.3 || fast) close();
+    else body.style.transform = '';
+    startY = null;
+  };
+  body.addEventListener('touchend', endDrag);
+  body.addEventListener('touchcancel', endDrag);
 
   wireNavPrefetch(document.querySelector('.bottom-nav'));
   wireNavPrefetch(sheet);
@@ -394,7 +418,7 @@ export function mountLayout() {
 
   // 背景預載 platform 資料 + 樞紐大檔：切到分享平台/機構總覽/護病比/人力監控時即時顯示
   // 動態 import 避免循環依賴與初始 parse 成本
-  import('./data-loader.js?v=c9403a994c')
+  import('./data-loader.js?v=f53bef9036')
     .then(({ preloadAll, preloadStaticData }) => {
       preloadAll && preloadAll();
       preloadStaticData && preloadStaticData();
@@ -406,13 +430,13 @@ export function mountLayout() {
   wireNavPrefetch(document.getElementById('app-footer'));
 
   // 背景預載勞檢/性平/職安紀錄資料：同樣讓使用者切過去時即時顯示
-  import('./violations.js?v=c9403a994c')
+  import('./violations.js?v=f53bef9036')
     .then(({ preloadViolations }) => preloadViolations && preloadViolations())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./gender.js?v=c9403a994c')
+  import('./gender.js?v=f53bef9036')
     .then(({ preloadGender }) => preloadGender && preloadGender())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./osha.js?v=c9403a994c')
+  import('./osha.js?v=f53bef9036')
     .then(({ preloadOsha }) => preloadOsha && preloadOsha())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
 }

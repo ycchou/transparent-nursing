@@ -2,7 +2,7 @@
 //
 // 資料來源由 js/env.js 的 MODE 決定：mock 讀下面的 csvUrlMock（data/mock/*.csv），
 // live 讀 env.js 的 LIVE.csvUrls（Google Sheet 發布 CSV）。這裡不必再改。
-import { csvUrlFor } from './env.js?v=c9403a994c';
+import { csvUrlFor } from './env.js?v=f53bef9036';
 
 export const SITE = {
   name: '護理職場透明化運動',
