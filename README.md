@@ -174,6 +174,7 @@ python tools/visual-diff.py before after  # 完全相同 exit 0；有差異列�
 | 工具 | 作用 |
 |---|---|
 | `update-data.py` | 一鍵更新：抓新資料 → 歸檔手動下載的檔案 → 增量建置 → 更新 README 範圍 |
+| `build-css.py` | `css/src/*.css`（依區域拆分的樣式原始碼）→ 串接成網站載入的 `css/styles.css`；**改樣式請改 `css/src/`** |
 | `visual-snapshot.mjs`＋`visual-diff.py` | 視覺回歸：全站 21 頁 × 手機／桌機截圖，比對改動前後畫面是否有變（見下方） |
 | `build-all.py` | 依相依順序建置全部資料（增量，輸入沒變的步驟略過） |
 | `fetch-personnel.py` | 衛福部人力監測 PDF 自動下載 |

@@ -1,0 +1,861 @@
+/* ============================================================
+   自建表單頁面 (.dform-*) — participate-dialysis.html etc.
+   ============================================================ */
+.dform { display: flex; flex-direction: column; gap: 0; }
+
+.dform-callout {
+  margin-top: 16px;
+  padding: 10px 14px;
+  background: rgba(6, 167, 125, 0.08);
+  border: 1px solid rgba(6, 167, 125, 0.25);
+  border-radius: var(--radius-md);
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+  display: flex; align-items: center; gap: 10px;
+  line-height: 1.55;
+}
+.dform-callout [data-icon] { color: var(--success-text); flex-shrink: 0; }
+
+.dform-section {
+  border-top: 2px solid var(--border);
+  padding-top: 28px;
+  margin-top: 28px;
+}
+.dform-section:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
+.dform-section-title {
+  font-family: var(--font-serif);
+  font-size: var(--fs-xl);
+  font-weight: 700;
+  color: var(--primary);
+  margin: 0 0 6px;
+  letter-spacing: 0.01em;
+}
+.dform-section-intro {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  margin: 0 0 16px;
+  line-height: 1.6;
+  background: var(--surface-soft);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--accent);
+}
+
+.dform-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 18px;
+}
+.dform-field:first-of-type { margin-top: 0; }
+.dform-label {
+  font-size: var(--fs-body-sm);
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.45;
+}
+.dform-required {
+  color: var(--danger);
+  margin-left: 3px;
+  font-weight: 700;
+}
+.dform-help {
+  font-size: var(--fs-2xs);
+  color: var(--muted);
+  line-height: 1.55;
+}
+.dform-error-msg {
+  font-size: var(--fs-xs);
+  color: var(--danger);
+  margin-top: 2px;
+  display: none;
+}
+.dform-field.has-error .dform-error-msg { display: block; }
+
+/* Cloudflare Turnstile widget（只有 live 模式且填了 Site Key 才會出現） */
+.dform-turnstile-field #dform-turnstile {
+  margin-top: 6px;
+  min-height: 65px;   /* 預留 widget 高度，載入時不跳版 */
+}
+
+/* Text / number / email / textarea */
+.dform-input, .dform-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: var(--fs-body-sm);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+}
+.dform-input:focus, .dform-textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(46, 134, 171, 0.12);
+}
+.dform-textarea {
+  resize: vertical;
+  min-height: 70px;
+  line-height: 1.6;
+}
+.dform-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B7C93' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 14px;
+  padding-right: 40px;
+  cursor: pointer;
+}
+.dform-field.has-error .dform-input,
+.dform-field.has-error .dform-textarea,
+.dform-field.has-error .dform-options {
+  border-color: var(--danger);
+}
+.dform-field.has-error .dform-options { border: none; }
+.dform-field.has-error .dform-option {
+  border-color: rgba(230, 57, 70, 0.4);
+}
+
+/* Radio / Checkbox — 卡片化（手機觸控友善） */
+.dform-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+}
+.dform-option {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  line-height: 1.3;
+}
+.dform-option:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.dform-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+.dform-option.checked {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+.dform-option.checked:hover { color: #fff; }
+
+/* 機構名稱 autocomplete — 提示條 + 建議下拉 */
+.dform-suggest-hint {
+  margin: 4px 0 8px;
+  padding: 10px 14px;
+  background: rgba(46, 134, 171, 0.07);
+  border: 1px solid rgba(46, 134, 171, 0.25);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-xs);
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+.dform-suggest-hint strong { color: var(--primary); font-weight: 600; }
+.dform-suggest-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--primary);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  font-weight: 600;
+  transition: color 0.15s ease;
+}
+.dform-suggest-link:hover { color: var(--primary-dark, #1F5F7A); }
+.dform-suggest-link svg { vertical-align: -1px; }
+
+/* 機構名稱 input 的 anchor：讓建議下拉用 absolute 飄在底下 */
+.dform-input-anchor { position: relative; }
+
+.dform-suggest-host {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 100;
+  max-height: 280px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+}
+.dform-suggest-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+}
+.dform-suggest-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 14px;
+  font-size: var(--fs-sm);
+  color: var(--ink);
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.dform-suggest-item:hover {
+  background: rgba(46, 134, 171, 0.08);
+}
+.suggest-name {
+  flex: 1;
+  min-width: 0;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.5;
+}
+.suggest-name mark {
+  background: rgba(244, 162, 97, 0.35);
+  color: var(--ink);
+  padding: 0 2px;
+  border-radius: var(--radius-xs);
+  font-weight: 600;
+}
+.suggest-meta {
+  flex-shrink: 0;
+  font-size: var(--fs-2xs);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.suggest-short, .picker-short {
+  color: var(--ink-soft);
+}
+.suggest-short mark, .picker-short mark {
+  background: rgba(46, 134, 171, 0.20);
+  color: var(--ink);
+  padding: 0 2px;
+  border-radius: var(--radius-xs);
+}
+
+/* 跨等級備援區塊：橘色 divider + 不同色的等級 badge */
+.dform-suggest-divider {
+  padding: 10px 14px 6px;
+  margin-top: 2px;
+  font-size: var(--fs-2xs);
+  color: var(--warning-text);
+  background: rgba(244, 162, 97, 0.08);
+  border-top: 1px dashed rgba(244, 162, 97, 0.4);
+  font-weight: 600;
+  line-height: 1.45;
+}
+.dform-suggest-item.is-cross .suggest-level {
+  display: inline-block;
+  padding: 1px 7px;
+  margin-right: 2px;
+  background: rgba(244, 162, 97, 0.18);
+  color: var(--warning-text);
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: var(--fs-2xs);
+}
+
+/* 手機：inline dropdown 在條件齊備時改為隱藏（換 bottom sheet 處理） */
+@media (max-width: 640px) {
+  .dform-suggest-host { display: none; }
+}
+
+/* ============================================================
+   機構名稱 Bottom Sheet Picker（手機版）
+   ============================================================ */
+.dform-picker-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.dform-picker-sheet[hidden] { display: none; }
+.dform-picker-sheet.open { opacity: 1; }
+.dform-picker-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+}
+.dform-picker-panel {
+  position: relative;
+  background: #fff;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  max-height: 92vh;
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom, 0px);   /* 避開 iPhone Home 指示條 */
+  transform: translateY(100%);
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: 0 -10px 32px rgba(0, 0, 0, 0.18);
+}
+.dform-picker-sheet.open .dform-picker-panel { transform: translateY(0); }
+
+.dform-picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border-soft);
+  flex-shrink: 0;
+}
+.dform-picker-header h3 {
+  margin: 0;
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0.01em;
+}
+.dform-picker-close {
+  background: transparent;
+  border: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: var(--fs-2xl);
+  line-height: 1;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.dform-picker-close:hover { background: var(--border-soft); color: var(--ink); }
+
+.dform-picker-search-wrap {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-soft);
+  flex-shrink: 0;
+  background: var(--surface-soft);
+}
+.dform-picker-search {
+  width: 100%;
+  padding: 11px 14px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: var(--fs-body);
+  color: var(--ink);
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.dform-picker-search:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(46, 134, 171, 0.14);
+}
+
+.dform-picker-content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+}
+.dform-picker-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.dform-picker-item {
+  padding: 14px 18px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-bottom: 1px solid var(--border-soft);
+  transition: background 0.12s ease;
+}
+.dform-picker-item:active,
+.dform-picker-item:hover {
+  background: rgba(46, 134, 171, 0.10);
+}
+.picker-name {
+  font-size: var(--fs-body-sm);
+  color: var(--ink);
+  line-height: 1.55;
+  word-break: break-word;
+}
+.picker-name mark {
+  background: rgba(244, 162, 97, 0.35);
+  color: var(--ink);
+  padding: 0 2px;
+  border-radius: var(--radius-xs);
+  font-weight: 600;
+}
+.picker-meta {
+  font-size: var(--fs-2xs);
+  color: var(--muted);
+}
+.picker-level {
+  display: inline-block;
+  padding: 1px 8px;
+  background: rgba(244, 162, 97, 0.18);
+  color: var(--warning-text);
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: var(--fs-2xs);
+  margin-right: 2px;
+}
+.dform-picker-item.is-cross {
+  background: rgba(244, 162, 97, 0.04);
+}
+
+.dform-picker-divider {
+  padding: 10px 18px 6px;
+  font-size: var(--fs-2xs);
+  color: var(--warning-text);
+  background: rgba(244, 162, 97, 0.10);
+  border-top: 1px dashed rgba(244, 162, 97, 0.4);
+  border-bottom: 1px dashed rgba(244, 162, 97, 0.4);
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.dform-picker-empty {
+  padding: 60px 24px;
+  text-align: center;
+  color: var(--muted);
+  font-size: var(--fs-body-sm);
+  line-height: 1.7;
+}
+.dform-picker-empty small {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: var(--fs-xs);
+  color: var(--muted-light);
+}
+
+.dform-picker-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-soft);
+  flex-shrink: 0;
+  background: var(--surface-soft);
+}
+.dform-picker-freetext {
+  width: 100%;
+  justify-content: center;
+}
+
+/* 開啟時鎖背景捲動（不用 position:fixed 避免捲動位置歸零） */
+body.dform-picker-open {
+  overflow: hidden;
+  touch-action: none;
+}
+
+@media (min-width: 641px) {
+  /* 桌機完全不使用 sheet（即使被 ensureSheet 建出來也不顯示） */
+  .dform-picker-sheet { display: none !important; }
+}
+
+/* 「其他」自填文字框（radio/checkbox 選到「其他」時才顯示） */
+.dform-other-input {
+  margin-top: 10px;
+  width: 100%;
+  max-width: 420px;
+  padding: 9px 14px;
+  background: var(--surface);
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: var(--fs-body-sm);
+  color: var(--ink);
+  box-shadow: 0 0 0 3px rgba(46, 134, 171, 0.08);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+}
+.dform-other-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(46, 134, 171, 0.16);
+}
+.dform-other-input::placeholder { color: var(--muted-light); }
+
+/* Submit 區塊 */
+.dform-submit-bar {
+  margin-top: 32px;
+  padding: 24px 0 8px;
+  border-top: 1px dashed var(--border);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.dform-submit-btn { min-width: 160px; }
+.dform-submit-btn[disabled] { opacity: 0.6; cursor: not-allowed; }
+/* （舊基底 .dform-required-note 已棄用，統一用 .dform-required-note-top） */
+.dform-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+/* 送出前警語（橘色 callout） */
+.dform-warning-card {
+  margin-top: 36px;
+  padding: 20px 24px;
+  background: rgba(244, 162, 97, 0.10);
+  border: 2px solid rgba(244, 162, 97, 0.45);
+  border-radius: var(--radius-md);
+}
+.dform-warning-title {
+  font-weight: 700;
+  font-size: var(--fs-body);
+  color: var(--warning-text);
+  letter-spacing: 0.01em;
+  margin-bottom: 10px;
+}
+.dform-warning-list {
+  margin: 0;
+  padding-left: 20px;
+  color: var(--ink-soft);
+  font-size: var(--fs-sm);
+  line-height: 1.85;
+}
+.dform-warning-list li { margin-bottom: 4px; }
+.dform-warning-list strong { color: var(--ink); font-weight: 600; }
+.dform-warning-danger { color: var(--danger) !important; }
+
+/* 法律同意條款卡（藍色 callout，比 warning 更正式）*/
+.dform-consent-card {
+  margin-top: 24px;
+  padding: 22px 24px;
+  background: rgba(46, 134, 171, 0.06);
+  border: 2px solid rgba(46, 134, 171, 0.30);
+  border-radius: var(--radius-md);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.dform-consent-card.has-error {
+  border-color: var(--danger);
+  background: rgba(230, 57, 70, 0.06);
+}
+.dform-consent-title {
+  font-weight: 700;
+  font-size: var(--fs-body);
+  color: var(--primary);
+  letter-spacing: 0.01em;
+  margin-bottom: 6px;
+}
+.dform-consent-hint {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  margin-bottom: 14px;
+  line-height: 1.6;
+}
+.dform-consent-hint a { color: var(--primary); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+.dform-consent-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.dform-consent-list li { margin-bottom: 10px; }
+.dform-consent-list li:last-child { margin-bottom: 0; }
+.dform-consent-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 14px;
+  background: transparent;
+  border: 1px solid rgba(46, 134, 171, 0.18);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.dform-consent-item:hover {
+  border-color: var(--primary);
+  background: rgba(46, 134, 171, 0.06);
+}
+.dform-consent-item:has(input:checked) {
+  background: rgba(46, 134, 171, 0.10);
+  border-color: rgba(46, 134, 171, 0.45);
+}
+.dform-consent-item input[type="checkbox"] {
+  margin: 4px 0 0;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+.dform-consent-item input[type="checkbox"]:checked + .dform-consent-text { color: var(--ink); }
+.dform-consent-text {
+  flex: 1;
+  font-size: var(--fs-body-sm);
+  line-height: 1.65;
+  color: var(--ink-soft);
+}
+.dform-consent-text strong { color: var(--ink); font-weight: 700; }
+.dform-consent-card .dform-error-msg {
+  display: none;
+  margin-top: 10px;
+  color: var(--danger);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.dform-consent-card.has-error .dform-error-msg { display: block; }
+
+/* 「標 * 為必填」放在表單最上方（簡潔小字、右對齊） */
+.dform-required-note-top {
+  margin: 0 0 8px;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  text-align: right;
+  padding: 0;
+  background: transparent;
+}
+.dform-required-note-top .dform-required {
+  font-weight: 700;
+  margin: 0 1px;
+}
+
+/* 驗證碼欄位 */
+.dform-captcha-field { margin-top: 24px; }
+.dform-captcha-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.dform-captcha-display {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 220px;
+  height: 56px;
+  padding: 0 14px;
+  background: linear-gradient(135deg, #F0F7FA 0%, #E8F1F5 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  user-select: none;
+  font-family: 'Lora', 'Noto Serif TC', Georgia, serif;
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: 0;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+/* 干擾條紋（CSS-only 噪點） */
+.dform-captcha-display::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(46,134,171,0.15) 1px, transparent 2px),
+    radial-gradient(circle at 70% 60%, rgba(46,134,171,0.18) 1px, transparent 2px),
+    radial-gradient(circle at 45% 80%, rgba(46,134,171,0.12) 1px, transparent 2px),
+    radial-gradient(circle at 85% 20%, rgba(46,134,171,0.16) 1px, transparent 2px),
+    radial-gradient(circle at 10% 70%, rgba(46,134,171,0.14) 1px, transparent 2px);
+  pointer-events: none;
+}
+.dform-captcha-char {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.4);
+}
+.dform-captcha-refresh {
+  width: 44px;
+  height: 44px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--fs-xl);
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.2s ease;
+}
+.dform-captcha-refresh:hover {
+  background: rgba(46, 134, 171, 0.06);
+  border-color: var(--primary);
+  color: var(--primary-dark, #1F5F7A);
+}
+.dform-captcha-refresh:active { transform: rotate(180deg); }
+
+.dform-captcha-input {
+  flex: 1;
+  min-width: 160px;
+  font-family: 'Lora', 'Noto Serif TC', serif;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: var(--fs-body);
+}
+
+@media (max-width: 480px) {
+  .dform-captcha-row { gap: 8px; }
+  .dform-captcha-display { width: 190px; height: 48px; font-size: 20px; padding: 0 10px; }
+  .dform-captcha-input { min-width: 0; flex: 1 1 100%; order: 3; }
+}
+
+/* 草稿提示條 */
+.dform-draft-banner {
+  margin-bottom: 20px;
+  padding: 12px 16px;
+  background: rgba(244, 162, 97, 0.12);
+  border: 1px solid rgba(244, 162, 97, 0.35);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+.dform-draft-banner button {
+  padding: 5px 12px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--fs-xs);
+  color: var(--ink);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.dform-draft-banner button:hover {
+  background: var(--border-soft);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* 感謝畫面 — 彈出視窗 */
+.dform-thanks-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+.dform-thanks-modal.open { opacity: 1; pointer-events: auto; }
+.dform-thanks-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+}
+.dform-thanks-panel {
+  position: relative;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  padding: 40px 32px 32px;
+  max-width: 480px;
+  width: 100%;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+  text-align: center;
+  transform: translateY(16px) scale(0.96);
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  box-sizing: border-box;
+}
+.dform-thanks-modal.open .dform-thanks-panel {
+  transform: translateY(0) scale(1);
+}
+.dform-thanks-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  background: rgba(6, 167, 125, 0.12);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--success-text);
+  animation: thanks-pop 0.45s cubic-bezier(0.22, 1.4, 0.36, 1) 0.1s both;
+}
+@keyframes thanks-pop {
+  0%   { transform: scale(0.4); opacity: 0; }
+  60%  { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.dform-thanks-panel h2 {
+  font-family: var(--font-serif);
+  font-size: var(--fs-2xl);
+  color: var(--ink);
+  margin: 0 0 12px;
+}
+.dform-thanks-panel p {
+  color: var(--muted);
+  line-height: 1.75;
+  margin: 0 0 14px;
+  font-size: var(--fs-body-sm);
+}
+.dform-thanks-countdown {
+  font-size: var(--fs-sm) !important;
+  color: var(--primary) !important;
+  background: rgba(46, 134, 171, 0.08);
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  display: inline-block;
+  margin: 0 auto 22px !important;
+  font-weight: 500;
+}
+.dform-thanks-countdown #thanks-countdown-num {
+  font-weight: 700;
+  font-size: var(--fs-body);
+  font-variant-numeric: tabular-nums;
+  margin-right: 2px;
+}
+.dform-thanks-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+body.dform-thanks-open { overflow: hidden; }
+
+@media (max-width: 480px) {
+  .dform-thanks-panel { padding: 32px 24px 24px; }
+  .dform-thanks-panel h2 { font-size: var(--fs-xl); }
+  .dform-thanks-actions { flex-direction: column; }
+  .dform-thanks-actions .btn { width: 100%; justify-content: center; }
+}
+
+/* 手機 */
+@media (max-width: 640px) {
+  .dform-section { padding-top: 22px; margin-top: 22px; }
+  .dform-section-title { font-size: var(--fs-lg); }
+  .dform-option { padding: 10px 14px; font-size: var(--fs-body-sm); }
+  .dform-submit-bar { flex-direction: column; align-items: stretch; gap: 12px; }
+  .dform-submit-btn { width: 100%; min-width: 0; }
+}
+

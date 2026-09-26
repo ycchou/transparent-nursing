@@ -1,0 +1,592 @@
+/* ============================================================
+   三班護病比頁面 (nurse-ratio.html)
+   ============================================================ */
+
+/* 醫院層級 badge：綠/藍/橙 三色區分 */
+.nurse-level-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+/* 層級 badge：紫/藍/灰藍三色，跟合規三色（綠/橙/紅）錯開避免誤讀 */
+.nurse-level-badge.nurse-level-mc { background: rgba(124, 58, 237, 0.13); color: #7C3AED; }
+.nurse-level-badge.nurse-level-rg { background: rgba(46, 134, 171, 0.13); color: var(--primary); }
+.nurse-level-badge.nurse-level-dt { background: rgba(100, 116, 139, 0.13); color: #52607A; }
+
+/* 標準參考卡（頁面上方，摘要 3 級標準）*/
+.nurse-std-card {
+  background: rgba(168, 218, 220, 0.15);
+  border: 1px solid rgba(46, 134, 171, 0.20);
+  border-radius: var(--radius-md);
+  padding: 16px 22px;
+}
+.nurse-std-title {
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+/* details 版本：預設收起，summary 可點展開 */
+.nurse-std-details > summary {
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  margin-bottom: 0;
+}
+.nurse-std-details > summary::-webkit-details-marker { display: none; }
+.nurse-std-details[open] > summary { margin-bottom: 12px; }
+.nurse-std-caret {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  transition: transform .2s ease;
+}
+.nurse-std-details[open] .nurse-std-caret { transform: rotate(90deg); }
+
+/* 合規總覽儀表板 */
+.nurse-overview {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+}
+.nurse-overview-title {
+  font-size: var(--fs-body-sm);
+  font-weight: 700;
+  color: var(--ink);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.nurse-overview-sub {
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  color: var(--muted);
+}
+.nurse-overview-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.nurse-overview-kpi {
+  background: var(--bg);
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  text-align: left;
+}
+.nurse-overview-kpi-label {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 6px;
+}
+.nurse-overview-kpi-num {
+  font-size: var(--fs-3xl);
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.nurse-overview-kpi-pct {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+.nurse-overview-matrix {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.nurse-overview-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.nurse-overview-row-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: var(--fs-sm);
+}
+.nurse-overview-row-total {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.nurse-overview-bar {
+  display: flex;
+  height: 14px;
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+  background: var(--border-soft);
+}
+.nurse-overview-seg {
+  display: block;
+  height: 100%;
+  transition: opacity .15s ease;
+}
+.nurse-overview-seg:hover { opacity: 0.8; }
+.nurse-overview-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: var(--fs-xs);
+  color: var(--ink-soft);
+}
+.nurse-overview-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.nurse-overview-legend-item strong {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.nurse-overview-legend-pct {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .nurse-overview { padding: 16px 18px; }
+  .nurse-overview-kpis { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .nurse-overview-kpi-num { font-size: var(--fs-2xl); }
+}
+.nurse-std-table {
+  display: grid;
+  gap: 0;
+}
+.nurse-std-row {
+  display: grid;
+  grid-template-columns: 100px 1fr 1fr 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 6px 0;
+  font-size: var(--fs-body-sm);
+  color: var(--ink);
+  border-bottom: 1px solid rgba(46, 134, 171, 0.10);
+}
+.nurse-std-row:last-child { border-bottom: 0; }
+.nurse-std-row.nurse-std-head {
+  color: var(--muted);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  padding-bottom: 8px;
+}
+
+/* 醫院選擇區 */
+.nurse-picker {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+}
+.nurse-picker-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.nurse-picker-title {
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--ink);
+}
+.nurse-picker-count {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+}
+.nurse-picker-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.nurse-picker-search {
+  flex: 1;
+  min-width: 220px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-body-sm);
+  font-family: inherit;
+  color: var(--ink);
+}
+.nurse-picker-search:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(46, 134, 171, 0.10);
+}
+.nurse-picker-filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.nurse-level-filter {
+  padding: 6px 14px;
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  background: var(--border-soft);
+  color: var(--ink-soft);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+.nurse-level-filter:hover { border-color: var(--primary); }
+.nurse-level-filter.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+/* 醫院清單（按層級分組） */
+.nurse-hospital-list {
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 4px;
+  margin: 0 -4px;
+}
+.nurse-level-group {
+  margin-bottom: 16px;
+}
+.nurse-level-group:last-child { margin-bottom: 0; }
+.nurse-level-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 4px 0;
+}
+.nurse-level-count {
+  font-size: var(--fs-2xs);
+  color: var(--muted);
+}
+.nurse-hospital-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 6px;
+}
+.nurse-hospital-chip {
+  padding: 8px 12px;
+  font-size: var(--fs-sm);
+  background: #fff;
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nurse-hospital-chip:hover {
+  border-color: var(--primary);
+  background: rgba(46, 134, 171, 0.04);
+}
+.nurse-hospital-chip.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+  font-weight: 600;
+}
+
+/* 醫院詳情標頭 */
+.nurse-hosp-header {
+  padding: 20px 24px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+/* KPI 3 級狀態顏色（safe/watch/danger） */
+.kpi-num .status-safe   { color: var(--success-text); }
+.kpi-num .status-watch  { color: var(--warning-text); }
+.kpi-num .status-danger { color: var(--danger); }
+
+/* 醫院財務表格 */
+.fin-table .status-safe   { color: var(--success-text); font-weight: 600; }
+.fin-table .status-danger { color: var(--danger); font-weight: 600; }
+.fin-table th.fin-sort:hover { color: var(--primary); }
+.fin-table .fin-hosp-name { font-weight: 500; }
+.fin-table .fin-short { color: var(--muted); font-size: var(--fs-xs); margin-left: 6px; }
+.fin-table .fin-rank { color: var(--muted-light); font-size: var(--fs-2xs); margin-left: 5px; }
+@media (max-width: 640px) { .fin-table .fin-lv-col { display: none; } }
+
+/* 合併申報／合併提報標註 */
+.fin-merge-tag {
+  display: inline-block; margin-left: 6px; padding: 1px 6px;
+  font-size: var(--fs-2xs); font-weight: 600; line-height: 1.5;
+  color: #B45309; background: #FEF3C7; border-radius: var(--radius-xs); white-space: nowrap;
+}
+.fin-merge-note {
+  margin-bottom: 12px; padding: 8px 12px;
+  font-size: var(--fs-xs); line-height: 1.6; color: var(--ink-soft);
+  background: #FEF3C7; border-left: 3px solid #F59E0B; border-radius: var(--radius-sm);
+}
+
+/* 財務規模對照卡 */
+.fin-benchmark {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  box-shadow: var(--shadow-soft);
+}
+.fin-benchmark-summary {
+  cursor: pointer; list-style: none;
+  font-weight: 600; color: var(--ink-soft); font-size: var(--fs-body-sm);
+  display: flex; align-items: baseline; gap: 10px;
+}
+.fin-benchmark-summary::-webkit-details-marker { display: none; }
+.fin-benchmark-title { flex: 1; line-height: 1.6; }
+.fin-benchmark-caret { flex: 0 0 auto; color: var(--muted); transition: transform .2s; }
+.fin-benchmark[open] .fin-benchmark-caret { transform: rotate(90deg); }
+.fin-benchmark-baseline td { background: var(--surface-soft); color: var(--muted); font-style: italic; }
+.fin-benchmark-note { margin-top: 12px; font-size: var(--fs-xs); color: var(--muted); line-height: 1.75; }
+.fin-benchmark-note p { margin: 4px 0; }
+.fin-benchmark-note em { font-style: normal; color: var(--ink-soft); font-weight: 500; }
+/* backward compat：舊 CSS class 保留 */
+.kpi-num .over-std { color: var(--danger); }
+
+/* 永遠展開的分類邏輯說明（在頁面下方） */
+.nurse-compliance-explain-static {
+  padding: 14px 18px;
+  background: rgba(46, 134, 171, 0.05);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius-sm);
+  line-height: 1.75;
+  color: var(--ink-soft);
+  font-size: var(--fs-sm);
+}
+.nurse-compliance-explain-title {
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 8px;
+  font-size: var(--fs-body-sm);
+}
+.nurse-compliance-explain-body p { margin: 0 0 8px; }
+.nurse-compliance-explain-body p:last-child { margin-bottom: 0; }
+.nurse-compliance-explain-body ul { margin: 6px 0 8px; padding-left: 1.2rem; }
+.nurse-compliance-explain-body ul li { margin-bottom: 4px; }
+.nurse-compliance-explain-body .status-safe-txt   { color: var(--success-text); }
+.nurse-compliance-explain-body .status-watch-txt  { color: var(--warning-text); }
+.nurse-compliance-explain-body .status-danger-txt { color: var(--danger); }
+
+/* 「為什麼這樣分類？」展開式說明（保留但不再使用） */
+.nurse-compliance-explain {
+  margin-top: 12px;
+  font-size: var(--fs-sm);
+  width: 100%;
+}
+.nurse-compliance-explain summary {
+  cursor: pointer;
+  color: var(--primary);
+  font-weight: 600;
+  padding: 4px 0;
+  list-style: none;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.nurse-compliance-explain summary::-webkit-details-marker { display: none; }
+.nurse-compliance-explain summary::before {
+  content: '▸';
+  display: inline-block;
+  transition: transform .2s ease;
+}
+.nurse-compliance-explain[open] summary::before { transform: rotate(90deg); }
+.nurse-compliance-explain summary:hover { color: var(--primary-dark, #1F5F7A); }
+.nurse-compliance-explain > div {
+  margin-top: 10px;
+  padding: 14px 18px;
+  background: rgba(46, 134, 171, 0.05);
+  border-left: 3px solid var(--primary);
+  border-radius: var(--radius-sm);
+  line-height: 1.75;
+  color: var(--ink-soft);
+}
+.nurse-compliance-explain > div p { margin: 0 0 8px; }
+.nurse-compliance-explain > div p:last-child { margin-bottom: 0; }
+.nurse-compliance-explain ul { margin: 6px 0 8px; padding-left: 1.2rem; }
+.nurse-compliance-explain ul li { margin-bottom: 4px; }
+.nurse-compliance-explain .status-safe-txt   { color: var(--success-text); }
+.nurse-compliance-explain .status-watch-txt  { color: var(--warning-text); }
+.nurse-compliance-explain .status-danger-txt { color: var(--danger); }
+
+/* 地點篩選：跟合規按鈕同款樣式（不同 data attribute） */
+.nurse-city-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 12px;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  background: var(--border-soft);
+  color: var(--ink-soft);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+.nurse-city-filter:hover { border-color: var(--primary); }
+.nurse-city-filter.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+.nurse-city-filter.active span { color: rgba(255,255,255,0.85) !important; }
+
+/* 合規篩選按鈕列（多列時排版） */
+.nurse-picker-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.nurse-filter-label {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.nurse-compliance-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  background: var(--border-soft);
+  color: var(--ink-soft);
+  border: 1px solid transparent;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+.nurse-compliance-filter:hover { border-color: var(--primary); }
+.nurse-compliance-filter.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+.nurse-compliance-filter.active .nurse-filter-count { color: rgba(255,255,255,0.85); }
+.nurse-filter-count {
+  color: var(--muted);
+  font-size: var(--fs-2xs);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 合規狀態 dot (chip 上的小點) + badge (詳情頁的標籤) */
+.nurse-compliance-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.nurse-compliance-dot.nurse-compliance-A { background: #06A77D; }
+.nurse-compliance-dot.nurse-compliance-B { background: #F4A261; }
+.nurse-compliance-dot.nurse-compliance-C { background: #E63946; }
+.nurse-compliance-dot.nurse-compliance-N { background: #6B7C93; }
+
+.nurse-compliance-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  margin-left: 6px;
+}
+.nurse-compliance-badge.nurse-compliance-A { background: rgba(6,167,125,0.13); color: var(--success-text); }
+.nurse-compliance-badge.nurse-compliance-B { background: rgba(244,162,97,0.15); color: var(--warning-text); }
+.nurse-compliance-badge.nurse-compliance-C { background: rgba(230,57,70,0.13); color: var(--danger); }
+.nurse-compliance-badge.nurse-compliance-N { background: rgba(107,124,147,0.10); color: var(--muted); }
+
+/* hospital chip：dot + 名稱（代號僅在 hover tooltip 顯示） */
+.nurse-hospital-chip {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+}
+.nurse-hospital-chip-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  flex: 1;
+}
+
+/* 縣市 badge（詳情標頭；跟三個 level 色 [深紫/藍/灰藍] 再區隔，用淺青色） */
+.nurse-city-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 12px;
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  background: rgba(168, 218, 220, 0.30);
+  color: #14545E;
+  margin-right: 6px;
+}
+.nurse-city-badge.unknown {
+  background: rgba(107, 124, 147, 0.10);
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* 共用機構代號多院區的提示 */
+.nurse-shared-hint {
+  color: var(--warning-text);
+  font-size: var(--fs-2xs);
+  margin-left: 4px;
+}
+.nurse-shared-banner {
+  margin-top: 12px;
+  padding: 10px 14px;
+  background: rgba(244, 162, 97, 0.10);
+  border-left: 3px solid #F4A261;
+  border-radius: var(--radius-sm);
+  color: #814d17;
+  font-size: var(--fs-sm);
+  line-height: 1.55;
+}
+
+@media (max-width: 640px) {
+  .nurse-std-row {
+    grid-template-columns: 80px 1fr 1fr 1fr;
+    gap: 8px;
+    font-size: var(--fs-sm);
+  }
+  .nurse-std-card { padding: 14px 16px; }
+  .nurse-picker { padding: 16px 18px; }
+  .nurse-picker-controls { flex-direction: column; align-items: stretch; }
+  .nurse-hospital-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+  .nurse-hospital-list { max-height: 320px; }
+}
+

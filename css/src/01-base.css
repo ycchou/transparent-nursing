@@ -1,0 +1,71 @@
+/* ---------- Reset / Base ---------- */
+* {
+  box-sizing: border-box;
+}
+
+/* 任何元件設了 display 都會蓋過 UA 的 [hidden]，統一在這裡擋掉（已踩過兩次：數學題、「已套用」badge） */
+[hidden] { display: none !important; }
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  color: var(--ink);
+  background: var(--warm);
+  line-height: 1.65;
+  font-feature-settings: 'palt';
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+h1 { font-size: clamp(2rem, 4vw, 3rem); }
+h2 { font-size: clamp(1.5rem, 3vw, 2rem); }
+h3 { font-size: var(--fs-xl); }
+
+a { color: var(--primary); text-decoration: none; transition: color .15s ease; }
+a:hover { color: var(--primary-dark); }
+
+p { margin: 0 0 1em; }
+
+/* ---------- Layout ---------- */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.container-narrow {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+section { padding: 64px 0; }
+@media (max-width: 768px) { section { padding: 44px 0; } }
+@media (max-width: 480px) {
+  section { padding: 32px 0; }
+}
+
+/* hide hardcoded <br> on small screens (let text wrap naturally) */
+.md-only { display: inline; }
+@media (max-width: 768px) {
+  .md-only { display: none; }
+}
+
+/* prevent awkward overflow & ensure text wraps */
+h1, h2, h3, p, span, a {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+

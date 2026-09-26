@@ -1,0 +1,149 @@
+/* ---------- Tabs ---------- */
+.tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  background: var(--surface);
+  padding: 6px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-soft);
+}
+.tab {
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
+  font-size: var(--fs-body-sm);
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: background .2s, color .2s;
+  white-space: nowrap;
+}
+.tab:hover { color: var(--ink); background: var(--border-soft); }
+.tab.active { background: var(--primary); color: white; }
+.tab.active .badge { background: rgba(255,255,255,0.25); color: white; }
+
+/* Horizontal scroll for tabs on small screens */
+@media (max-width: 640px) {
+  .tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { padding: 9px 14px; font-size: var(--fs-sm); }
+}
+
+/* ---------- Filter Panel ---------- */
+.filter-panel {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-soft);
+}
+
+/* ---------- Stats 篩選條件折疊 ---------- */
+.stat-filter-panel {
+  padding: 0;
+  overflow: hidden;
+}
+.stat-filter-panel > summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  user-select: none;
+  transition: background .15s ease;
+}
+.stat-filter-panel > summary::-webkit-details-marker { display: none; }
+.stat-filter-panel > summary::marker { display: none; }
+.stat-filter-panel > summary:hover { background: var(--surface-soft); }
+.stat-filter-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  color: var(--ink);
+}
+.stat-filter-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  color: white;
+  background: var(--primary);
+  border-radius: var(--radius-pill);
+  letter-spacing: 0.02em;
+}
+.stat-filter-chev {
+  display: inline-flex;
+  color: var(--muted);
+  transition: transform .25s var(--ease);
+}
+.stat-filter-panel[open] > summary .stat-filter-chev {
+  transform: rotate(180deg);
+}
+.stat-filter-body {
+  padding: 4px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-top: 1px solid var(--border-soft);
+  padding-top: 16px;
+}
+/* platform.html：收折面板裡塞 renderFilters() 的輸出，移除二重卡片邊框/底色 */
+.stat-filter-panel .stat-filter-body > #filter-panel > .filter-panel {
+  background: none;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+}
+.stat-filter-panel .stat-filter-body .filter-section { margin-bottom: 16px; }
+.stat-filter-panel .stat-filter-body .filter-section:last-of-type { margin-bottom: 12px; }
+.filter-section {
+  margin-bottom: 20px;
+}
+.filter-section h4 {
+  margin: 0 0 10px;
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  font-weight: 600;
+}
+.filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.filter-chip {
+  padding: 6px 12px;
+  font-size: var(--fs-sm);
+  border-radius: var(--radius-tag);
+  background: var(--border-soft);
+  color: var(--ink-soft);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all .15s ease;
+  user-select: none;
+}
+.filter-chip:hover { border-color: var(--primary); }
+.filter-chip.active {
+  background: var(--primary);
+  color: white;
+}
+

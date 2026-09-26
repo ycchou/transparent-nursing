@@ -1,0 +1,229 @@
+/* ============================================================
+   手機底部導覽列（≤768px；表單填寫頁不掛）
+   仿原生 tab bar：半透明材質＋髮絲線、選中格 icon 長出 pill 底色、按壓縮放回饋。
+   iOS 需搭配 viewport-fit=cover 才拿得到 safe-area inset——否則導覽列會貼到螢幕最底，
+   兩側文字被螢幕圓角切掉、中間壓在 Home 指示條上。
+   ============================================================ */
+:root {
+  --bn-height: 60px;
+  /* 懸浮膠囊離螢幕底的距離：有 Home 指示條時稍微壓進 safe area（跟 Facebook／iOS 原生一樣），沒有時留 12px */
+  --bn-gap: max(12px, calc(env(safe-area-inset-bottom, 0px) - 8px));
+  --bn-space: calc(var(--bn-height) + var(--bn-gap));   /* 導覽列實際佔掉的底部高度 */
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+}
+.bottom-nav, .bn-sheet { display: none; }
+
+/* 橫向時瀏海／圓角在左右：內容區、header 讓出 safe area */
+.container, .container-narrow {
+  padding-left: max(var(--container-pad, 24px), var(--safe-l));
+  padding-right: max(var(--container-pad, 24px), var(--safe-r));
+}
+@media (max-width: 480px) { :root { --container-pad: 16px; } }
+
+@media (max-width: 768px) {
+  /* 預留導覽列高度：有頁尾的頁面墊在頁尾（深色底延伸到底），沒有頁尾的頁面墊在 body */
+  body.has-bottom-nav:not(:has(.site-footer)) { padding-bottom: calc(var(--bn-space) + 12px); }
+  body.has-bottom-nav .site-footer { padding-bottom: calc(32px + var(--bn-space)); }
+  /* 底部導覽列取代漢堡選單；表單頁沒有底部導覽列，保留漢堡 */
+  body.has-bottom-nav .nav-toggle,
+  body.has-bottom-nav .site-nav { display: none !important; }
+  /* 捐款入口收進「更多 → 支持我們」，不再與導覽列搶右下角 */
+  body.has-bottom-nav .donate-fab { display: none; }
+  /* 其他固定在底部的元件往上讓出導覽列高度 */
+  body.has-bottom-nav .toast-host { bottom: calc(var(--bn-space) + 16px); }
+  body.has-bottom-nav .pwa-prompt { bottom: calc(var(--bn-space) + 12px); }
+  body.has-bottom-nav .tn-mode-badge { bottom: calc(var(--bn-space) + 8px); }
+  /* 導覽列收起時，這些元件跟著降下來 */
+  body.has-bottom-nav .toast-host,
+  body.has-bottom-nav .pwa-prompt,
+  body.has-bottom-nav .tn-mode-badge { transition: bottom .5s cubic-bezier(0.32, 0.72, 0, 1); }
+  body.bn-hidden .toast-host { bottom: calc(16px + var(--safe-b)); }
+  body.bn-hidden .pwa-prompt { bottom: calc(12px + var(--safe-b)); }
+  body.bn-hidden .tn-mode-badge { bottom: calc(8px + var(--safe-b)); }
+  /* 表單頁（無導覽列）的固定元件也要避開 Home 指示條 */
+  body:not(.has-bottom-nav) .toast-host { bottom: calc(32px + var(--safe-b)); }
+  body:not(.has-bottom-nav) .pwa-prompt { bottom: calc(16px + var(--safe-b)); }
+
+  /* 懸浮膠囊＋毛玻璃：不貼邊、四周透出內容，往下捲收起、往上捲出現 */
+  .bottom-nav {
+    position: fixed;
+    left: max(12px, var(--safe-l));
+    right: max(12px, var(--safe-r));
+    bottom: var(--bn-gap);
+    z-index: 96;            /* 在所有 modal（≥100）之下 */
+    display: flex;
+    align-items: stretch;
+    max-width: 520px;
+    margin: 0 auto;
+    padding: 0 6px;
+    border-radius: 30px;
+    /* 毛玻璃：半透明白＋高飽和模糊，外加一圈亮邊與內側高光，做出玻璃厚度 */
+    background: rgba(255, 255, 255, 0.62);
+    -webkit-backdrop-filter: saturate(190%) blur(24px);
+    backdrop-filter: saturate(190%) blur(24px);
+    border: 0.5px solid rgba(255, 255, 255, 0.7);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.75),
+      0 0 0 0.5px rgba(29, 53, 87, 0.08),
+      0 10px 30px rgba(29, 53, 87, 0.16),
+      0 2px 6px rgba(29, 53, 87, 0.06);
+    transition: transform .5s cubic-bezier(0.32, 0.72, 0, 1), opacity .35s ease,
+                background-color .3s ease, border-color .3s ease, box-shadow .3s ease;
+    will-change: transform;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .bottom-nav.is-hidden {
+    transform: translateY(calc(100% + var(--bn-gap) + 12px));
+    opacity: 0;
+    pointer-events: none;
+  }
+  /* 深色玻璃：懸浮在深色頁尾上時 */
+  .bottom-nav.on-dark {
+    background: rgba(20, 36, 60, 0.6);
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 10px 30px rgba(0, 0, 0, 0.35);
+  }
+  .bottom-nav.on-dark .bn-item { color: rgba(255, 255, 255, 0.78); }
+  .bottom-nav.on-dark .bn-item.active,
+  .bottom-nav.on-dark .bn-item[aria-expanded="true"] { color: #fff; }
+  .bottom-nav.on-dark .bn-item.active .bn-icon,
+  .bottom-nav.on-dark .bn-item[aria-expanded="true"] .bn-icon { background: rgba(255, 255, 255, 0.16); }
+  .bottom-nav.on-dark .bn-cta { color: #fff; }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .bottom-nav { background: rgba(255, 255, 255, 0.96); }
+  }
+  .bn-item {
+    flex: 1 1 0;
+    min-width: 0;
+    height: var(--bn-height);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
+    font-size: var(--fs-2xs);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    line-height: 1;
+    color: var(--muted);
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .bn-label { white-space: nowrap; transition: color .2s ease, opacity .15s ease; }
+  .bn-icon {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 30px;
+    border-radius: var(--radius-pill);
+    transition: background-color .25s var(--ease), transform .15s ease;
+  }
+  .bn-icon svg { transition: transform .25s var(--ease); }
+  /* 選中：pill 底色＋icon 半填色＋label 加粗著色 */
+  .bn-item.active { color: var(--primary); }
+  .bn-item.active .bn-label { font-weight: 700; }
+  .bn-item.active .bn-icon { background: rgba(35, 111, 143, 0.14); }
+  .bn-item.active .bn-icon svg { fill: currentColor; fill-opacity: 0.16; }
+  .bn-item[aria-expanded="true"] { color: var(--primary); }
+  .bn-item[aria-expanded="true"] .bn-icon { background: rgba(35, 111, 143, 0.12); }
+  /* 按壓回饋 */
+  /* 按壓回饋用 .is-pressed（JS 管理），不用 :active——iOS 觸控後 :active 常會卡住 */
+  .bn-item.is-pressed .bn-icon { transform: scale(0.88); }
+  .bn-item.is-pressed .bn-label { opacity: 0.7; }
+  .bn-item:focus { outline: none; }
+  .bn-item:focus:not(:focus-visible) .bn-icon { box-shadow: none; }
+  .bn-item:focus-visible .bn-icon { box-shadow: 0 0 0 2px var(--primary); }
+
+  /* 「填寫」：主要動作用實心 pill，但維持在導覽列內、不凸出 */
+  .bn-cta { color: var(--ink); }
+  .bn-cta .bn-icon { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(35, 111, 143, 0.3); }
+  .bn-cta.active .bn-icon { background: var(--primary-dark); }
+  .bn-cta.active .bn-icon svg { fill: none; }
+  .bn-cta .bn-label { font-weight: 700; }
+
+  /* ---- 底部面板（蓋過導覽列，跟原生 sheet 一樣） ---- */
+  .bn-sheet { display: block; position: fixed; inset: 0; z-index: 97; }
+  .bn-sheet[hidden] { display: none !important; }
+  .bn-sheet-backdrop {
+    position: absolute; inset: 0;
+    background: rgba(15, 30, 50, 0.38);
+    opacity: 0;
+    transition: opacity .25s ease;
+  }
+  .bn-sheet-body {
+    position: absolute;
+    left: max(8px, var(--safe-l));
+    right: max(8px, var(--safe-r));
+    bottom: max(8px, var(--safe-b));
+    max-height: min(72vh, 560px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0 8px 8px;
+    background: var(--surface);
+    border-radius: 24px;
+    box-shadow: 0 12px 40px rgba(15, 30, 50, 0.25);
+    transform: translateY(calc(100% + 24px));
+    transition: transform .32s cubic-bezier(0.32, 0.72, 0, 1);
+  }
+  .bn-sheet-body.dragging { transition: none; }
+  .bn-sheet.open .bn-sheet-backdrop { opacity: 1; }
+  .bn-sheet.open .bn-sheet-body { transform: translateY(0); }
+  .bn-sheet-grab { display: flex; justify-content: center; padding: 10px 0 6px; cursor: grab; touch-action: none; }
+  .bn-sheet-handle { width: 36px; height: 5px; border-radius: var(--radius-pill); background: rgba(29, 53, 87, 0.18); }
+  .bn-sheet-title { font-size: var(--fs-lg); font-weight: 700; color: var(--ink); padding: 4px 12px 10px; touch-action: none; }
+  .bn-sheet ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-radius: var(--radius-lg);
+    background: var(--surface-soft);
+    border: 1px solid var(--border-soft);
+    overflow: hidden;
+  }
+  .bn-sheet li + li .bn-sheet-item { box-shadow: inset 0 0.5px 0 var(--border); }
+  .bn-sheet-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 60px;
+    padding: 10px 12px;
+    color: var(--ink);
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color .15s ease;
+  }
+  .bn-sheet-item.is-pressed { background: var(--border-soft); }
+  .bn-sheet-item:focus { outline: none; }
+  .bn-sheet-item:focus-visible { box-shadow: inset 0 0 0 2px var(--primary); }
+  .bn-sheet-item.active strong { color: var(--primary); }
+  .bn-sheet-icon {
+    flex-shrink: 0;
+    display: grid; place-items: center;
+    width: 36px; height: 36px;
+    border-radius: var(--radius-md);
+    background: rgba(35, 111, 143, 0.1);
+    color: var(--primary);
+  }
+  .bn-sheet-text { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .bn-sheet-text strong { font-size: var(--fs-body); font-weight: 600; }
+  .bn-sheet-text small { font-size: var(--fs-xs); color: var(--muted); }
+  .bn-sheet-chev { flex-shrink: 0; color: var(--muted-light); display: grid; }
+  body.bn-sheet-open { overflow: hidden; }
+}
+@media (max-width: 768px) and (prefers-reduced-motion: reduce) {
+  .bn-sheet-backdrop, .bn-sheet-body, .bn-icon, .bn-icon svg, .bottom-nav { transition: none; }
+}
+
+

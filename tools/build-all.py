@@ -56,6 +56,7 @@ STEPS = [
      ['data/hospitals-merged.json', 'data/manual/violations-hospital-overrides.json']),
     ('local', ['python', 'tools/split-hospital-data.py'],        '拆 per-code 小檔',
      ['data/hospital-financials.json', 'data/nurse-ratio.json']),
+    ('final', ['python', 'tools/build-css.py'],                 'css/src/*.css → css/styles.css', []),
     ('final', ['python', 'tools/stamp-assets.py'],               '破快取：內容雜湊 ?v=', []),
     ('final', ['python', 'tools/validate-data.py'],              '資料結構驗證', []),
 ]

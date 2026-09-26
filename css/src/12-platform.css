@@ -1,0 +1,591 @@
+/* ---------- Form card (participate page) ---------- */
+.form-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.form-card .form-status {
+  align-self: flex-start;
+  margin-bottom: 12px;
+  padding: 3px 10px;
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  border-radius: var(--radius-tag);
+  letter-spacing: 0.05em;
+}
+.form-status-live   { background: rgba(6,167,125,0.15); color: var(--success-text); }
+.form-status-soon   { background: var(--border-soft);   color: var(--muted); }
+
+.form-card .form-cta {
+  margin-top: auto;
+  padding-top: 20px;
+}
+
+/* ============================================================
+   薪資百分位 KPI 條 (platform.html, top of table)
+   ============================================================ */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1px;
+  background: var(--border-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+.kpi-strip-item {
+  background: #fff;
+  padding: 14px 12px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 78px;
+}
+.kpi-strip-item-hi {
+  background: linear-gradient(180deg, #FFF8EF 0%, #FFFFFF 100%);
+}
+.kpi-strip-num {
+  font-family: var(--font-serif);
+  font-size: var(--fs-2xl);
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.05;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+}
+.kpi-strip-item-hi .kpi-strip-num { color: var(--primary); }
+.kpi-strip-unit {
+  font-family: var(--font-sans);
+  font-size: var(--fs-2xs);
+  font-weight: 500;
+  color: var(--muted);
+}
+.kpi-strip-label {
+  font-size: var(--fs-2xs);
+  color: var(--muted);
+  line-height: 1.25;
+}
+@media (max-width: 980px) {
+  .kpi-strip { grid-template-columns: repeat(3, 1fr); }
+  .kpi-strip-item { min-height: 70px; padding: 12px 8px; }
+  .kpi-strip-num { font-size: var(--fs-xl); }
+  .kpi-strip-label { font-size: var(--fs-2xs); }
+}
+@media (max-width: 480px) {
+  .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+  .kpi-strip-item { min-height: 64px; padding: 10px 8px; }
+  .kpi-strip-num { font-size: var(--fs-xl); }
+}
+
+/* ============================================================
+   薪資試算工具 — Modal (platform.html)
+   ============================================================ */
+.calc-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 150;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+}
+.calc-modal[hidden] { display: none !important; }
+.calc-modal.open { opacity: 1; }
+.calc-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+}
+.calc-modal-panel {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100vh - 48px);
+  background: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: translateY(12px) scale(0.98);
+  transition: transform 0.18s ease;
+}
+.calc-modal.open .calc-modal-panel { transform: translateY(0) scale(1); }
+.calc-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border-soft);
+  gap: 12px;
+}
+.calc-modal-header h3 {
+  margin: 0;
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0.01em;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.calc-modal-title-icon {
+  display: inline-flex;
+  align-items: center;
+  color: var(--primary);
+}
+.calc-modal-title-icon svg { display: block; }
+.calc-modal-close {
+  background: transparent;
+  border: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: var(--fs-2xl);
+  line-height: 1;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.calc-modal-close:hover { background: var(--border-soft); color: var(--ink); }
+.calc-modal-body {
+  padding: 18px 20px 20px;
+  overflow-y: auto;
+}
+
+.calc-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+.calc-field { flex: 1 1 220px; display: flex; flex-direction: column; gap: 6px; }
+.calc-field-label { font-size: var(--fs-sm); color: var(--muted); font-weight: 500; }
+.calc-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.calc-input-wrap:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(46, 134, 171, 0.12);
+}
+.calc-input-wrap input {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  padding: 10px 12px;
+  font-size: var(--fs-body);
+  font-family: inherit;
+  color: var(--ink);
+  outline: none;
+  font-variant-numeric: tabular-nums;
+}
+.calc-suffix {
+  padding-right: 12px;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+}
+.calc-go { flex: 0 0 auto; min-width: 96px; }
+
+.calc-result { margin-top: 14px; }
+.calc-empty {
+  padding: 14px 16px;
+  background: var(--border-soft);
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+.calc-result-card {
+  padding: 18px;
+  background: #fff;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--calc-accent, var(--primary));
+}
+/* 比較條件區塊（在結果卡片頂端） */
+.calc-conditions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--border-soft);
+}
+.calc-conditions-label {
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  margin-right: 4px;
+}
+.calc-conditions-tag {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 3px 10px;
+  background: rgba(46, 134, 171, 0.08);
+  border: 1px solid rgba(46, 134, 171, 0.18);
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-xs);
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.calc-conditions-key {
+  font-weight: 600;
+  color: var(--primary);
+  font-size: var(--fs-2xs);
+}
+.calc-conditions-key::after { content: '：'; color: var(--muted-light); }
+.calc-conditions-all {
+  font-size: var(--fs-xs);
+  color: var(--ink-soft);
+  /* 不用 italic — html2canvas 對合成斜體的中文字寬量測會錯，導致截圖重疊 */
+}
+
+/* 分享 / 隱藏數字 工具列（位於結果卡底部） */
+.calc-share-bar {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border-soft);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.calc-privacy-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+  user-select: none;
+}
+.calc-privacy-toggle input { accent-color: var(--primary); cursor: pointer; }
+.calc-privacy-icon { font-size: var(--fs-body); }
+.calc-share-btn {
+  padding: 8px 14px !important;
+  font-size: var(--fs-sm) !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.calc-share-btn[disabled] { opacity: 0.6; cursor: not-allowed; }
+.calc-share-icon { font-size: var(--fs-body); }
+
+/* 截圖時暫時隱藏分享列 */
+.calc-result-card.capturing .calc-share-bar { display: none; }
+/* 隱私模式：marker tooltip 不重要、視覺微調可在這加 */
+.calc-result-card.is-private .calc-bar-marker { /* 保持可見 */ }
+
+@media (max-width: 480px) {
+  .calc-share-bar { gap: 10px; }
+  .calc-share-btn { width: 100%; justify-content: center; }
+  .calc-privacy-toggle { width: 100%; justify-content: flex-start; }
+}
+.calc-rank-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.calc-rank-num {
+  font-family: var(--font-serif);
+  font-size: var(--fs-6xl);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--calc-accent, var(--primary));
+  font-variant-numeric: tabular-nums;
+}
+.calc-rank-pct {
+  font-size: var(--fs-2xl);
+  font-weight: 600;
+  margin-left: 2px;
+}
+.calc-rank-text {
+  flex: 1;
+  font-size: var(--fs-body);
+  line-height: 1.5;
+  color: var(--ink);
+}
+.calc-rank-text strong { font-weight: 700; }
+.calc-verdict {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 3px 10px;
+  background: var(--calc-verdict-bg, rgba(46, 134, 171, 0.12));
+  color: var(--calc-accent, var(--primary));
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.calc-bar-wrap { margin-top: 22px; }
+.calc-bar {
+  position: relative;
+  height: 12px;
+  background: linear-gradient(90deg, #fef2f2 0%, #fffaf0 35%, #ecfdf5 100%);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-soft);
+}
+.calc-bar-tick {
+  position: absolute;
+  top: -2px;
+  width: 2px;
+  height: 16px;
+  background: rgba(15, 23, 42, 0.4);
+  transform: translateX(-50%);
+}
+.calc-bar-tick-mid { background: rgba(15, 23, 42, 0.7); }
+.calc-bar-tick span {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: var(--fs-2xs);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+/* P25/P50/P75 標籤水平距離過近時，靠 P50 的那邊改放到下排避免重疊 */
+.calc-bar-tick span.tick-stagger { top: 34px; }
+.calc-bar-wrap.has-stagger .calc-bar-axis { margin-top: 56px; }
+.calc-bar-marker {
+  position: absolute;
+  top: -8px;
+  width: 14px;
+  height: 28px;
+  border-radius: var(--radius-xs);
+  transform: translateX(-50%);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.25);
+  border: 2px solid #fff;
+}
+.calc-bar-axis {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 38px;
+  font-size: var(--fs-2xs);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.calc-summary {
+  margin-top: 16px;
+  padding: 10px 14px;
+  background: var(--border-soft);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  color: var(--ink);
+  line-height: 1.6;
+}
+.calc-edge-note {
+  margin-top: 10px;
+  padding: 10px 14px;
+  background: var(--calc-edge-bg, rgba(46, 134, 171, 0.08));
+  border-left: 3px solid var(--calc-accent, var(--primary));
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  color: var(--ink);
+  line-height: 1.55;
+}
+.calc-hint {
+  margin-top: 12px;
+  font-size: var(--fs-2xs);
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+@media (max-width: 640px) {
+  /* 手機：modal 改為從底部滑上的 bottom-sheet */
+  .calc-modal { padding: 0; align-items: flex-end; }
+  .calc-modal-panel {
+    max-width: 100%;
+    /* dvh = dynamic viewport height，會隨行動瀏覽器 UI chrome + 軟鍵盤動態縮小 */
+    max-height: 86dvh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    transform: translateY(100%);
+  }
+  .calc-modal.open .calc-modal-panel { transform: translateY(0); }
+  .calc-modal-body { padding: 16px; }
+  .calc-rank-num { font-size: var(--fs-5xl); }
+  .calc-rank-text { font-size: var(--fs-body-sm); }
+  .calc-go { width: 100%; }
+  /* tick label 在窄螢幕字體再縮小 + 錯位樣式多留下方空間避免碰 axis */
+  .calc-bar-tick span { font-size: var(--fs-2xs); }
+  .calc-bar-wrap.has-stagger { padding-bottom: 26px; }
+}
+
+/* modal 開啟時鎖住 body 滾動，避免 iOS 手機 modal 內滾動穿透 */
+body.calc-modal-open { overflow: hidden; }
+
+/* ============================================================
+   分享平台底部 CTA 卡片（倒流到 participate.html）
+   ============================================================ */
+/* 桌機：兩張卡並排（分享 + 諮詢）*/
+.platform-cta-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 880px) {
+  /* 中等以下螢幕：兩卡疊成單欄 */
+  .platform-cta-row { grid-template-columns: 1fr; }
+}
+
+.platform-cta-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 24px 26px;
+  background: linear-gradient(135deg, rgba(46, 134, 171, 0.08) 0%, rgba(168, 218, 220, 0.20) 100%);
+  border: 1px solid rgba(46, 134, 171, 0.22);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: var(--ink);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  height: 100%; /* 兩卡同高 */
+}
+.platform-cta-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(46, 134, 171, 0.14);
+  border-color: var(--primary);
+  color: var(--ink);
+}
+.platform-cta-icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-soft) 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.platform-cta-body { width: 100%; min-width: 0; flex: 1; }
+.platform-cta-body h3 {
+  margin: 0 0 6px;
+  font-size: var(--fs-lg);
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+}
+.platform-cta-body p {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.65;
+  font-size: var(--fs-body-sm);
+}
+.platform-cta-body strong { color: var(--ink); font-weight: 600; }
+
+.platform-cta-action {
+  flex-shrink: 0;
+  margin-top: auto; /* 按鈕釘在卡底，兩卡視覺對齊 */
+}
+.platform-cta-action .btn {
+  pointer-events: none; /* 整片 <a> 已可點，按鈕只當視覺 */
+}
+
+/* 諮詢卡：暖色調區分（橙），跟「分享」(藍) 視覺上有明顯差異 */
+.platform-cta-card-consult {
+  background: linear-gradient(135deg, rgba(244, 162, 97, 0.08) 0%, rgba(244, 162, 97, 0.18) 100%);
+  border-color: rgba(244, 162, 97, 0.30);
+}
+.platform-cta-card-consult:hover {
+  border-color: #E76F51;
+  box-shadow: 0 10px 28px rgba(244, 162, 97, 0.20);
+}
+.platform-cta-card-consult .platform-cta-icon {
+  background: linear-gradient(135deg, #F4A261 0%, #E76F51 100%);
+}
+
+/* 薪資百分位試算入口卡（KPI strip 下方）*/
+.calc-trigger-card {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 22px;
+  background: linear-gradient(135deg, rgba(46, 134, 171, 0.06) 0%, rgba(168, 218, 220, 0.18) 100%);
+  border: 1px solid rgba(46, 134, 171, 0.22);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  color: var(--ink);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.calc-trigger-card:hover {
+  transform: translateY(-1px);
+  border-color: var(--primary);
+  box-shadow: 0 6px 18px rgba(46, 134, 171, 0.14);
+}
+.calc-trigger-icon {
+  flex-shrink: 0;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  color: var(--primary);
+}
+.calc-trigger-body { flex: 1; min-width: 0; }
+.calc-trigger-title {
+  font-weight: 700;
+  font-size: var(--fs-body);
+  margin-bottom: 2px;
+  color: var(--ink);
+}
+.calc-trigger-sub {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  line-height: 1.5;
+}
+.calc-trigger-arrow {
+  font-size: 22px;
+  color: var(--primary);
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+.calc-trigger-card:hover .calc-trigger-arrow { transform: translateX(3px); }
+@media (max-width: 640px) {
+  .calc-trigger-card { padding: 14px 18px; gap: 12px; }
+  .calc-trigger-icon { font-size: 24px; }
+  .calc-trigger-title { font-size: var(--fs-body-sm); }
+  .calc-trigger-sub { font-size: var(--fs-xs); }
+}
+
+@media (max-width: 640px) {
+  .platform-cta-card {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 22px;
+    gap: 16px;
+    text-align: center;
+  }
+  .platform-cta-icon { margin: 0 auto; }
+  .platform-cta-action .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+

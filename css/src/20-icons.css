@@ -1,0 +1,20 @@
+/* ---------- 取代 emoji 的內嵌 SVG 圖示 ---------- */
+/* 文字前的小圖示：跟字同色、對齊字的 x-height */
+.ico-inline {
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: -0.15em;
+  margin-right: 0.3em;
+}
+/* 空狀態的大圖示：淡色圓底 */
+.empty-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 10px;
+  border-radius: 50%;
+  background: rgba(35, 111, 143, 0.1);
+  color: var(--primary);
+}
+.calc-privacy-icon svg, .calc-share-icon svg, .modal-share-blocked svg { display: block; }

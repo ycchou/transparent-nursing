@@ -1,0 +1,160 @@
+/* ============================================================
+   觸控目標 — 觸控裝置上所有可點元素至少 44×44（WCAG 2.5.5 / Apple HIG）
+   外觀尺寸盡量不變，靠 min-height 或 ::after 擴大可點範圍
+   ============================================================ */
+@media (pointer: coarse) {
+  .nav-toggle { width: 44px; height: 44px; }
+  .nurse-city-filter,
+  .nurse-level-filter,
+  .nurse-compliance-filter,
+  .pg-btn,
+  .tab,
+  .dform-option,
+  .org-chip,
+  .filter-chip,
+  .nurse-hospital-chip,
+  .nurse-picker-search,
+  #records-search,
+  #filter-q,
+  .donate-tier,
+  .site-logo { min-height: 44px; }
+  .filter-chip { display: inline-flex; align-items: center; }
+  /* 捐款浮標的 × 外觀 20px，點擊範圍擴到 44px */
+  .donate-fab-close::before { content: ''; position: absolute; inset: -12px; }
+  .comment-unlock-toggle { position: relative; }
+  .comment-unlock-toggle::before { content: ''; position: absolute; inset: -12px; }
+  .nurse-level-filter { display: inline-flex; align-items: center; }
+  .dform-option { min-width: 44px; justify-content: center; }
+  .faq summary,
+  .nurse-std-details > summary,
+  .dform details > summary { min-height: 44px; display: flex; align-items: center; }
+  .donate-custom-wrap { padding-top: 0; padding-bottom: 0; }
+  .donate-custom-input { min-height: 44px; }
+  /* ⓘ 圖示外觀維持 18px，點擊範圍往外擴到 44px */
+  .kpi-info::before {
+    content: '';
+    position: absolute;
+    inset: -13px;
+  }
+}
+
+/* KPI 字卡：手機維持 2×2，不要四張疊成一長串把主內容推到第二屏以下 */
+@media (max-width: 600px) {
+  .grid-4:has(> .stat-card) { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .grid-4 > .stat-card { padding: 16px 8px; }
+  .grid-4 > .stat-card .stat-num { font-size: var(--fs-2xl); }
+  .grid-4 > .stat-card .stat-num.stat-num-date { font-size: var(--fs-body); line-height: 1.35; padding-top: 4px; }
+  .grid-4 > .stat-card .kpi-num { font-size: var(--fs-2xl); min-height: 36px; }
+  .grid-4 > .stat-card .kpi-num.is-text { font-size: var(--fs-lg); }
+  .grid-4 > .stat-card .stat-label { font-size: var(--fs-xs); margin-top: 4px; }
+  .grid-4 > .stat-card .visits-split { gap: 8px; }
+}
+
+/* 勞檢／性平／職安紀錄：手機改卡片列表。
+   表格在窄螢幕只能左右滑，首屏被 #／日期／地點佔滿、機構名稱只露兩個字。
+   卡片版排法：機構名稱（主）→ 日期・地點・罰鍰 → 違反法條；# 隱藏。 */
+@media (max-width: 640px) {
+  .data-table-wrap:has(> .viol-table) {
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+  }
+  .viol-table, .viol-table tbody { display: block; }
+  .viol-table thead { display: none; }
+  .viol-table tbody tr.viol-row {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    grid-template-areas:
+      "inst inst inst"
+      "date loc  fine"
+      "law  law  law";
+    align-items: center;
+    gap: 8px 10px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-soft);
+  }
+  .viol-table tbody tr.viol-row td {
+    display: block;
+    padding: 0;
+    border: none;
+    max-width: none;
+    min-width: 0;
+  }
+  .viol-table td.seq-col { display: none !important; }
+  .viol-table .viol-inst-cell { grid-area: inst; font-size: var(--fs-body); font-weight: 600; }
+  .viol-table .viol-date-cell { grid-area: date; }
+  .viol-table .viol-loc-cell  { grid-area: loc; }
+  .viol-table .viol-fine      { grid-area: fine; text-align: right; }
+  .viol-table .viol-law-cell  { grid-area: law; line-height: 1.7; }
+  .viol-table .viol-law-cell:empty { display: none; }
+  .viol-table .viol-fine:empty { display: none; }
+}
+
+/* 篩選 chip 內的計數：原本是 inline 的 0.78em＋opacity .6（約 10px、對比不足） */
+.chip-count { font-size: var(--fs-2xs); color: var(--muted); font-variant-numeric: tabular-nums; }
+.nurse-city-filter.active .chip-count,
+.filter-chip.active .chip-count { color: rgba(255,255,255,0.9) !important; }
+
+/* 縣市篩選：手機改單列橫向捲動。22 顆 chip 折成 8 行會把結果區推到一屏半之後 */
+@media (max-width: 640px) {
+  #city-filter {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+    flex: 1 1 100%;
+    min-width: 0;
+    padding-right: 24px;
+    mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+  }
+  #city-filter::-webkit-scrollbar { display: none; }
+  #city-filter .nurse-city-filter { flex-shrink: 0; white-space: nowrap; }
+  .nurse-picker-filter-row { min-width: 0; width: 100%; }
+}
+
+/* 標題斷行：中文沒有詞界，text-wrap: balance 會把「職場」「樣貌」拆開，不能全域開。
+   需要控制斷點的標題改用 .keep-words＋<wbr>：只在 <wbr> 處斷行 */
+.keep-words { word-break: keep-all; overflow-wrap: anywhere; }
+
+/* 捐款金額：手機改等寬 2 欄（5 檔＋其他金額＝3 列） */
+@media (max-width: 480px) {
+  .donate-tiers { display: grid; grid-template-columns: repeat(2, 1fr); }
+  .donate-tier { min-width: 0; }
+}
+
+/* 捐款浮標固定在右下角：頁尾預留空間，捲到底時不會蓋住最後一行內容／頁尾連結
+   （手機有底部導覽列時浮標改收進「更多 → 支持我們」，見下方 bottom-nav 區塊） */
+@media (max-width: 768px) {
+  body:not(.has-bottom-nav):has(.donate-fab) .site-footer { padding-bottom: 88px; }
+}
+
+/* 護病比頁：總覽在前、選醫院在後，手機首屏給一顆直達按鈕 */
+.jump-to-picker { display: none; margin-top: 16px; }
+@media (max-width: 640px) {
+  .jump-to-picker { display: inline-flex; width: 100%; justify-content: center; }
+}
+#hospital-picker { scroll-margin-top: calc(var(--header-h) + 16px); }
+
+/* KPI 數字載入骨架：跟「沒有資料」的「—」區分開 */
+.kpi-skel { display: inline-block; width: 3.2em; height: 0.9em; vertical-align: middle; border-radius: var(--radius-sm); }
+
+/* KPI 2×2 時，ⓘ 提示框改靠卡片外側對齊，避免右欄的提示框超出螢幕撐出水平捲動 */
+@media (max-width: 600px) {
+  .grid-4 > .stat-card:nth-child(odd) .kpi-info-tip { left: -24px; transform: translateY(4px); }
+  .grid-4 > .stat-card:nth-child(even) .kpi-info-tip { left: auto; right: -24px; transform: translateY(4px); }
+  .grid-4 > .stat-card:nth-child(odd) .kpi-info-tip::after { left: 32px; }
+  .grid-4 > .stat-card:nth-child(even) .kpi-info-tip::after { left: auto; right: 26px; transform: none; }
+  .grid-4 > .stat-card .kpi-info:hover .kpi-info-tip,
+  .grid-4 > .stat-card .kpi-info:focus-visible .kpi-info-tip { transform: translateY(0); }
+  .grid-4 > .stat-card .kpi-info-tip { max-width: calc(100vw - 48px); }
+}
+
+

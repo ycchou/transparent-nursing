@@ -1,0 +1,142 @@
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 22px;
+  font-family: var(--font-sans);
+  font-size: var(--fs-body-sm);
+  font-weight: 500;
+  border-radius: var(--radius-btn);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all .2s var(--ease);
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 4px 12px rgba(46, 134, 171, 0.25);
+}
+.btn-primary:hover {
+  background: var(--primary-dark);
+  color: white;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(46, 134, 171, 0.32);
+}
+
+.btn-secondary {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--border);
+}
+.btn-secondary:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* 「複製連結」按鈕成功狀態 — 給 platform 詳情 modal + violations 詳情 modal 共用 */
+#modal-copylink-btn.copied,
+#viol-modal-copylink.copied {
+  background: var(--success);
+  color: white;
+  border-color: var(--success);
+  transition: background .2s ease, color .2s ease, border-color .2s ease;
+}
+#modal-copylink-btn.copied:hover,
+#viol-modal-copylink.copied:hover {
+  background: var(--success);
+  color: white;
+  border-color: var(--success);
+}
+
+/* Toast 容器 + 樣式 */
+.toast-host {
+  position: fixed;
+  left: 50%;
+  bottom: 32px;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  pointer-events: auto;
+  padding: 12px 18px;
+  background: var(--ink);
+  color: white;
+  border-radius: var(--radius-pill);
+  font-size: var(--fs-sm);
+  box-shadow: 0 10px 30px rgba(29, 53, 87, 0.3);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity .25s ease, transform .25s ease;
+  max-width: 90vw;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast-warn { background: var(--warning); color: var(--ink); }
+.toast-error { background: var(--danger); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--ink-soft);
+}
+.btn-ghost:hover { color: var(--primary); background: var(--accent-soft); }
+
+.btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.btn[disabled]:hover { transform: none; box-shadow: none; }
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 24px;
+  transition: transform .25s var(--ease), box-shadow .25s var(--ease);
+  border: 1px solid var(--border-soft);
+}
+@media (max-width: 480px) {
+  .card, .card-flat { padding: 20px 18px; }
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+.card-flat {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 24px;
+  border: 1px solid var(--border);
+}
+
+/* ---------- Tags / Badges ---------- */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  font-size: var(--fs-xs);
+  font-weight: 500;
+  border-radius: var(--radius-tag);
+  background: var(--accent-soft);
+  color: var(--primary-dark);
+}
+
+.tag-icu       { background: rgba(46, 134, 171, 0.12); color: var(--primary); }
+.tag-dialysis  { background: rgba(6, 167, 125, 0.12);  color: var(--success-text); }
+.tag-er        { background: rgba(230, 57, 70, 0.12);  color: var(--danger); }
+.tag-ward      { background: rgba(244, 162, 97, 0.16); color: var(--warning-text); }
+.tag-outpatient{ background: rgba(157, 78, 221, 0.12); color: var(--cat-outpatient); }
+.tag-or        { background: rgba(255, 107, 157, 0.14); color: #BE185D; }
+.tag-special   { background: rgba(20, 184, 166, 0.14);  color: #0F766E; }
+.tag-other     { background: rgba(100, 116, 139, 0.16); color: #475569; }
+.tag-psych     { background: rgba(79, 70, 229, 0.12);  color: #4338CA; }
+.tag-clinic    { background: rgba(8, 145, 178, 0.12);  color: #0E7490; }
+

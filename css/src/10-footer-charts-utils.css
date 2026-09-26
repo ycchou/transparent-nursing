@@ -1,0 +1,181 @@
+/* ---------- Footer ---------- */
+.site-footer {
+  background: var(--ink);
+  color: rgba(255,255,255,0.75);
+  padding: 56px 0 32px;
+  margin-top: 80px;
+}
+.site-footer h4 {
+  color: white;
+  font-family: var(--font-sans);
+  font-size: var(--fs-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 16px;
+}
+.site-footer a { color: rgba(255,255,255,0.75); }
+.site-footer a:hover { color: white; }
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  gap: 48px;
+  margin-bottom: 40px;
+}
+.footer-grid ul { list-style: none; padding: 0; margin: 0; }
+.footer-grid li { margin-bottom: 8px; font-size: var(--fs-body-sm); }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding-top: 24px;
+  font-size: var(--fs-sm);
+  color: rgba(255,255,255,0.5);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+@media (max-width: 768px) {
+  .footer-grid { grid-template-columns: 1fr 1fr; gap: 28px; }
+  .site-footer { padding: 44px 0 28px; }
+}
+@media (max-width: 480px) {
+  .footer-grid { grid-template-columns: 1fr; gap: 24px; }
+}
+
+/* ---------- Chart card ---------- */
+.chart-card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-soft);
+}
+.chart-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.chart-card h3 {
+  margin: 0;
+  font-size: var(--fs-body);
+  font-family: var(--font-sans);
+  font-weight: 600;
+}
+.chart-card .chart-sub {
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  margin-top: 2px;
+}
+.chart-canvas-wrap {
+  position: relative;
+  height: 280px;
+}
+@media (max-width: 600px) {
+  .chart-canvas-wrap { height: 240px; }
+  .chart-card { padding: 18px; }
+}
+
+/* ---------- Salary stats panel（年薪四分位摘要） ---------- */
+.salary-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 16px;
+  padding: 14px 12px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+}
+.salary-stats > div {
+  text-align: center;
+  padding: 4px 2px;
+}
+.salary-stats .ss-label {
+  font-size: var(--fs-2xs);
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+.salary-stats .ss-value {
+  font-family: var(--font-serif);
+  font-size: var(--fs-xl);
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.2;
+}
+.salary-stats .ss-unit {
+  font-family: var(--font-sans);
+  font-size: var(--fs-2xs);
+  color: var(--muted);
+  margin-left: 2px;
+  font-weight: 500;
+}
+.salary-stats .ss-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  padding: 8px 0;
+}
+.salary-stats.empty {
+  grid-template-columns: 1fr;
+}
+@media (max-width: 480px) {
+  .salary-stats {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 12px;
+  }
+  .salary-stats .ss-value { font-size: var(--fs-lg); }
+}
+
+select.chart-select {
+  padding: 6px 28px 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: var(--fs-sm);
+  color: var(--ink-soft);
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7C93' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+/* ---------- Misc utility ---------- */
+.text-muted { color: var(--muted); }
+.text-center { text-align: center; }
+.divider {
+  border: none;
+  border-top: 1px solid var(--border-soft);
+  margin: 32px 0;
+}
+
+.eyebrow {
+  display: inline-block;
+  color: var(--primary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: var(--fs-2xs);
+  margin-bottom: 10px;
+}
+
+.grid {
+  display: grid;
+  gap: 20px;
+}
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+.grid-5 { grid-template-columns: repeat(5, 1fr); }
+@media (max-width: 980px) {
+  .grid-3, .grid-4, .grid-5 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr; }
+}
+

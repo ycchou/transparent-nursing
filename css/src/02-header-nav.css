@@ -1,0 +1,206 @@
+/* ---------- Header / Nav ---------- */
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  border-bottom: 1px solid var(--border-soft);
+  box-shadow: 0 1px 0 rgba(29, 53, 87, 0.04);
+}
+
+/* header 高度：桌機 64px、手機 52px（接近 iOS 導覽列的 44pt，把空間讓給內容） */
+:root { --header-h: 64px; }
+@media (max-width: 768px) { :root { --header-h: 52px; } }
+
+/* 給內容留出 header 高度，避免被遮住 */
+body {
+  padding-top: var(--header-h);
+}
+
+/* 錨點跳轉時不讓 header 蓋住目標 */
+:target,
+section[id],
+h1[id], h2[id], h3[id] {
+  scroll-margin-top: calc(var(--header-h) + 16px);
+}
+
+.site-header .nav-wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: var(--header-h);
+}
+
+.site-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: var(--fs-lg);
+  color: var(--ink);
+}
+
+.site-logo-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  display: grid;
+  place-items: center;
+  color: white;
+}
+/* 手機：logo 跟著 header 縮小 */
+@media (max-width: 768px) {
+  .site-logo { gap: 8px; font-size: var(--fs-body); }
+  .site-logo-mark { width: 28px; height: 28px; }
+  .site-logo-mark svg { width: 22px; height: 22px; }
+}
+
+.site-nav {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+}
+
+.site-nav a {
+  color: var(--ink-soft);
+  font-size: var(--fs-body-sm);
+  font-weight: 500;
+  position: relative;
+}
+
+.site-nav a.active {
+  color: var(--primary);
+}
+/* 外部連結頁簽（RT 姊妹站）：比其他頁簽更淡、更細、略小，退為次要 */
+.site-nav a.nav-external {
+  color: var(--muted-light);
+  font-weight: 400;
+  font-size: var(--fs-xs);
+}
+.site-nav a.nav-external:hover { color: var(--muted); }
+.nav-external-arrow { font-size: 0.78em; opacity: 0.55; }
+
+/* 橫向可捲動列的「左右滑動」提示（由 js/scroll-hint.js 動態插入） */
+.scroll-hint {
+  text-align: center;
+  font-size: var(--fs-2xs);
+  color: var(--muted-light);
+  margin-top: 6px;
+  transition: opacity .35s ease;
+  user-select: none;
+}
+.scroll-hint--done { opacity: 0; }
+.scroll-hint-arrow {
+  display: inline-block;
+  font-weight: 700;
+  color: var(--primary);
+  animation: scroll-hint-nudge 1.4s ease-in-out infinite;
+}
+.scroll-hint-arrow:last-child { animation-delay: .2s; }
+@keyframes scroll-hint-nudge {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(3px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-hint-arrow { animation: none; }
+}
+
+.site-nav a.active::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -22px;
+  height: 2px;
+  background: var(--primary);
+  border-radius: var(--radius-xs);
+}
+
+/* 導覽下拉群組（資料查詢） */
+.nav-group { position: relative; display: inline-flex; align-items: center; }
+.nav-group-trigger {
+  background: none; border: none; padding: 0; cursor: pointer;
+  font: inherit; font-size: var(--fs-body-sm); font-weight: 500;
+  color: var(--ink-soft); display: inline-flex; align-items: center; gap: 4px;
+}
+.nav-group-trigger.active { color: var(--primary); }
+.nav-group-caret { font-size: 0.7em; transition: transform .2s; }
+.nav-group:hover .nav-group-caret,
+.nav-group.open .nav-group-caret { transform: rotate(180deg); }
+/* 透明橋接：補 trigger 與下拉之間的空隙，避免 hover 中斷 */
+.nav-group::after { content: ''; position: absolute; top: 100%; left: 0; right: 0; height: 16px; }
+.nav-submenu {
+  position: absolute; top: calc(100% + 12px); left: 50%;
+  transform: translateX(-50%) translateY(-6px);
+  min-width: 170px; background: var(--surface);
+  border: 1px solid var(--border-soft); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft); padding: 8px;
+  display: flex; flex-direction: column; gap: 2px;
+  opacity: 0; visibility: hidden; transition: opacity .18s, transform .18s; z-index: 60;
+}
+.nav-group:hover .nav-submenu,
+.nav-group:focus-within .nav-submenu,
+.nav-group.open .nav-submenu {
+  opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0);
+}
+.nav-submenu a {
+  padding: 9px 12px; border-radius: var(--radius-sm); white-space: nowrap;
+  color: var(--ink-soft); font-size: var(--fs-body-sm); font-weight: 500;
+}
+.nav-submenu a:hover { background: var(--border-soft); color: var(--ink); }
+.nav-submenu a.active { color: var(--primary); background: rgba(46,134,171,0.08); }
+.nav-submenu a.active::after { display: none; }
+
+.nav-toggle {
+  display: none;
+  width: 40px; height: 40px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .site-nav {
+    display: none;
+    position: absolute;
+    top: var(--header-h); left: 0; right: 0;
+    background: var(--surface);
+    flex-direction: column;
+    align-items: stretch;   /* 手機：改左對齊全寬，與「資料查詢」群組一致 */
+    padding: 16px 24px 24px;
+    gap: 12px;
+    border-bottom: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-soft);
+  }
+  .site-nav > a { padding: 2px 0; }
+  .site-nav.open { display: flex; }
+  .site-nav a.active::after { display: none; }
+  .nav-toggle { display: grid; place-items: center; }
+  /* 手機：資料查詢群組直接展開，trigger 當小標題、子項縮排 */
+  .nav-group { display: flex; flex-direction: column; gap: 10px; width: 100%; align-items: stretch; }
+  .nav-group::after { display: none; }
+  .nav-group-trigger {
+    pointer-events: none; cursor: default;
+    color: var(--muted); font-size: var(--fs-xs); font-weight: 600; letter-spacing: .04em;
+    padding: 2px 0;
+  }
+  .nav-group-caret { display: none; }
+  .nav-submenu {
+    position: static; transform: none; opacity: 1; visibility: visible;
+    box-shadow: none; border: none; background: none;
+    padding: 0 0 0 12px; margin-left: 2px; gap: 12px;
+    border-left: 2px solid var(--border-soft); border-radius: 0;
+    transition: none;   /* 手機為靜態展開，關掉桌機下拉的滑動動畫 */
+  }
+  /* 手機點子項時避免 focus-within/open 觸發桌機的位移動畫 */
+  .nav-group.open .nav-submenu,
+  .nav-group:hover .nav-submenu,
+  .nav-group:focus-within .nav-submenu { transform: none; }
+  .nav-submenu a { padding: 0; }
+}
+

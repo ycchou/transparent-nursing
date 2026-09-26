@@ -1,0 +1,91 @@
+/* ============================================================
+   stats.html · 官方參考數據分頁 — 行動裝置版面收斂
+   ============================================================ */
+@media (max-width: 640px) {
+  /* 1. Sub-tabs 改為單行緊湊 + 橫向可滾，省去 3 張全寬卡片的高度 */
+  #stats-tab-official .off-subtabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    gap: 4px;
+    padding: 4px;
+  }
+  #stats-tab-official .off-subtabs::-webkit-scrollbar { height: 4px; }
+  #stats-tab-official .off-subtab {
+    min-width: auto;
+    flex: 0 0 auto;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    white-space: nowrap;
+  }
+  #stats-tab-official .off-subtab > span:last-child {
+    font-size: var(--fs-xs);
+    font-weight: 600;
+  }
+  #stats-tab-official .off-subtab-pill {
+    font-size: var(--fs-2xs);
+    padding: 1px 6px;
+    letter-spacing: 0.02em;
+  }
+
+  /* 2. KPI 4 卡 → 2 欄（避免全寬大磚塊一張接一張） */
+  #stats-tab-official .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  #stats-tab-official .stat-card { padding: 18px 12px; }
+  #stats-tab-official .stat-card .kpi-num {
+    font-size: var(--fs-2xl);
+    min-height: 36px;
+  }
+  #stats-tab-official .stat-card .stat-label {
+    font-size: var(--fs-2xs);
+    line-height: 1.4;
+    margin-top: 4px;
+  }
+
+  /* 3. 簡介卡縮小（圖示更小、文字更密） */
+  #stats-tab-official .card-flat {
+    padding: 14px;
+    font-size: var(--fs-sm);
+  }
+  #stats-tab-official .card-flat strong { font-size: var(--fs-sm); }
+
+  /* 4. tag-line / meta 字體與行高收緊 */
+  #stats-tab-official .official-tag-line {
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  #stats-tab-official .official-tag-line h2 {
+    font-size: var(--fs-lg);
+  }
+  #stats-tab-official .off-source-pill {
+    font-size: var(--fs-2xs);
+    padding: 3px 10px;
+  }
+  #stats-tab-official .official-meta {
+    font-size: var(--fs-xs);
+    line-height: 1.65;
+  }
+  #stats-tab-official .off-pdf-link { font-size: var(--fs-xs); }
+
+  /* 5. Chart card 內距與字體收緊 */
+  #stats-tab-official .chart-card { padding: 14px; }
+  #stats-tab-official .chart-card h3 { font-size: var(--fs-body-sm); }
+  #stats-tab-official .chart-card .chart-sub { font-size: var(--fs-2xs); line-height: 1.45; }
+  #stats-tab-official .grid-2 { gap: 14px; }
+
+  /* 6. Section 上下空隙收緊（inline style 有 padding，需 !important 覆寫） */
+  #stats-tab-official > section { padding-top: 0 !important; padding-bottom: 14px !important; }
+  #stats-tab-official > div > section { padding-top: 0 !important; padding-bottom: 18px !important; }
+}
+
+/* 更窄螢幕（< 380px）KPI 仍維持 2 欄但更壓縮 */
+@media (max-width: 380px) {
+  #stats-tab-official .stat-card .kpi-num { font-size: var(--fs-xl); }
+  #stats-tab-official .stat-card .stat-label { font-size: var(--fs-2xs); }
+}
+

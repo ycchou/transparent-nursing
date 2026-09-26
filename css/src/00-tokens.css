@@ -1,0 +1,105 @@
+/* ============================================================
+   護理職場透明化運動 — Global Styles
+   風格：溫暖人文 + 醫療專業感
+   ============================================================ */
+
+:root {
+  /* 主色票 */
+  --primary: #236F8F;       /* 白字對比 5.6:1（原 #2E86AB 僅 4.1，不過 AA） */
+  --primary-dark: #184E66;
+  --primary-soft: #5BA8C6;
+  --accent: #A8DADC;
+  --accent-soft: #C7E6E8;
+  --warm: #F1FAEE;
+
+  /* 文字 */
+  --ink: #1D3557;
+  --ink-soft: #46557A;
+  --muted: #4F5D72;         /* 各底色皆 ≥ 6:1 */
+  --muted-light: #5F6F85;   /* 各底色皆 ≥ 4.6:1；原 #9AA5B8 僅 2.3 */
+
+  /* 狀態色 */
+  --danger: #C62B37;        /* 可直接當文字色（≥ 5:1） */
+  --warning: #F4A261;       /* 僅限色塊／圓點／色條；文字請用 --warning-text */
+  --success: #06A77D;       /* 僅限色塊／圓點／色條；文字請用 --success-text */
+  --warning-text: #B45309;
+  --success-text: #05805F;
+
+  /* 結構 */
+  --surface: #FFFFFF;
+  --surface-soft: #FBFCFD;
+  --border: #E5E9F0;
+  --border-soft: #F1F3F7;
+
+  /* 圖形填色：長條、線條、圓點、色塊用（圖形只需 3:1 對比）。不可當文字色——文字請用上面的文字色 */
+  --primary-fill: #2E86AB;
+  --danger-fill: #E63946;   /* 也是 logo 心電圖線的紅 */
+  --danger-deep: #991B1B;
+  --neutral-fill: #6B7C93;
+  --gray-fill: #9AA5B8;
+  --navy-deep: #0F2541;
+  --standard-line: #B22234; /* 護病比圖的「公告標準」虛線 */
+
+  /* 類別色：10 大工作場域（js/config.js 的 CATEGORIES 由此取色），-soft 為淡色底 */
+  --cat-ward: #F4A261;        --cat-ward-soft: #FCE2C8;
+  --cat-icu: #2E86AB;         --cat-icu-soft: #A8DADC;
+  --cat-er: #E63946;          --cat-er-soft: #FAD2CF;
+  --cat-or: #FF6B9D;          --cat-or-soft: #FDD5E2;
+  --cat-outpatient: #9D4EDD;  --cat-outpatient-soft: #E0CFF7;
+  --cat-clinic: #0891B2;      --cat-clinic-soft: #CBEEF6;
+  --cat-dialysis: #06A77D;    --cat-dialysis-soft: #C6E8DC;
+  --cat-psych: #4F46E5;       --cat-psych-soft: #C7D2FE;
+  --cat-special: #14B8A6;     --cat-special-soft: #B7E9E1;
+  --cat-other: #64748B;       --cat-other-soft: #D1D9E2;
+
+  /* 延伸序列色：圖表需要超過類別色的數量時（人力 13 職類、財務指標序列） */
+  --viz-coral: #E76F51;
+  --viz-amber: #F59E0B;
+  --viz-yellow: #F4C84C;
+  --viz-sky: #0EA5E9;
+  --viz-lime: #84CC16;
+  --viz-violet: #A855F7;
+
+  /* 淡色底：分享圖、試算結果的漸層背景 */
+  --tint-danger: #FEF2F2;
+  --tint-warning: #FFFAF0;
+  --tint-success: #ECFDF5;
+  --tint-mint: #F8FBFA;
+
+  /* 設計 token */
+  /* 圓角：只用這 5 階（＋圓形用 50%） */
+  --radius-xs: 4px;     /* 細條、小標記 */
+  --radius-sm: 8px;     /* 小按鈕、tag、輸入框內元件 */
+  --radius-md: 12px;    /* 按鈕、輸入框、內嵌卡片 */
+  --radius-lg: 16px;    /* 卡片、面板 */
+  --radius-pill: 999px; /* chip、badge */
+  --radius-card: var(--radius-lg);
+  --radius-btn: var(--radius-md);
+  --radius-tag: var(--radius-pill);
+
+  /* 字級：只用這 12 階（px 為 16px 基準）。資料密集的表格／chip 需要 13、15 兩階，
+     標題級距則以 4px 遞增。新增樣式請挑最接近的一階，不要再寫裸 rem 值。 */
+  --fs-2xs: 0.75rem;     /* 12 — 最小字級：badge、計數、註腳 */
+  --fs-xs: 0.8125rem;    /* 13 — 表頭、chip、次要說明 */
+  --fs-sm: 0.875rem;     /* 14 — 表格內文、按鈕 */
+  --fs-body-sm: 0.9375rem; /* 15 — 手機內文、卡片描述 */
+  --fs-body: 1rem;       /* 16 — 內文 */
+  --fs-lg: 1.125rem;     /* 18 */
+  --fs-xl: 1.25rem;      /* 20 — 小標 */
+  --fs-2xl: 1.5rem;      /* 24 */
+  --fs-3xl: 1.75rem;     /* 28 */
+  --fs-4xl: 2rem;        /* 32 — KPI 數字 */
+  --fs-5xl: 2.5rem;      /* 40 */
+  --fs-6xl: 3rem;        /* 48 — hero */
+  --shadow-card: 0 4px 20px rgba(29, 53, 87, 0.06);
+  --shadow-card-hover: 0 10px 30px rgba(29, 53, 87, 0.12);
+  --shadow-soft: 0 2px 8px rgba(29, 53, 87, 0.04);
+
+  /* 字型 */
+  --font-serif: 'Lora', 'Noto Serif TC', Georgia, serif;
+  --font-sans: 'Noto Sans TC', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* 動畫 */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+

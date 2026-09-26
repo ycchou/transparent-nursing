@@ -115,8 +115,17 @@ def validate():
         check(got == want, f'personnel/：{got} 檔 vs index {want} 家')
 
 
+def validate_css():
+    """css/styles.css 必須是 css/src/*.css 的串接結果（有人直接改 styles.css 或改了 src 忘了建置時擋下）。"""
+    import subprocess
+    r = subprocess.run([sys.executable, os.path.join(ROOT, 'tools', 'build-css.py'), '--check'],
+                       capture_output=True, text=True, encoding='utf-8')
+    check(r.returncode == 0, 'css/styles.css 與 css/src/ 不一致（請跑 tools/build-css.py；不要直接改 styles.css）')
+
+
 def main():
     validate()
+    validate_css()
     if errors:
         print(f'驗證失敗（{len(errors)} 項）：')
         for e in errors:

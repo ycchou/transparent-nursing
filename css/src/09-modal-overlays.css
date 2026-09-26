@@ -1,0 +1,268 @@
+/* ---------- Recommend pill ---------- */
+.pill {
+  display: inline-flex;
+  padding: 3px 10px;
+  border-radius: var(--radius-tag);
+  font-size: var(--fs-2xs);
+  font-weight: 600;
+}
+.pill-rec-5 { background: rgba(6,167,125,0.15);  color: var(--success-text); }
+.pill-rec-4 { background: rgba(46,134,171,0.12); color: var(--primary); }
+.pill-rec-3 { background: rgba(244,162,97,0.16); color: #B36A2C; }
+.pill-rec-2 { background: rgba(230,57,70,0.12);  color: var(--danger); }
+.pill-rec-1 { background: rgba(153,27,27,0.15);  color: #7F1D1D; }
+
+/* ---------- Modal ---------- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(29, 53, 87, 0.55);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.modal-backdrop.open { display: flex; }
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  max-width: 720px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 32px;
+  box-shadow: 0 30px 80px rgba(29, 53, 87, 0.25);
+  animation: modalIn .3s var(--ease);
+}
+@media (max-width: 600px) {
+  .modal-backdrop { padding: 0; align-items: stretch; }
+  .modal {
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    max-height: 92vh;
+    margin-top: auto;
+    padding: 24px 20px calc(32px + env(safe-area-inset-bottom, 0px));
+  }
+}
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-soft);
+}
+@media (max-width: 480px) {
+  #modal-share-btn { padding: 7px 10px !important; font-size: var(--fs-2xs) !important; }
+  #modal-share-btn span:last-child { display: none; }
+}
+/* 手機：標頭改直向堆疊，動作鈕列移到上方靠右，標題取得整行寬度
+   （避免長按鈕把標題擠成一行一字） */
+@media (max-width: 600px) {
+  .modal-header { flex-direction: column; align-items: stretch; }
+  .modal-header > :last-child { order: -1; justify-content: flex-end; flex-wrap: wrap; }
+}
+.modal-close {
+  background: var(--border-soft);
+  border: none;
+  width: 36px; height: 36px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+}
+.modal-close:hover { background: var(--border); color: var(--ink); }
+/* 統一所有關閉鈕的 ×／圖示置中（含只靠 line-height 未置中的幾個） */
+.modal-close,
+.pwa-prompt-close,
+.donate-fab-close,
+.calc-modal-close,
+.dform-picker-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  text-align: center;
+}
+
+.modal-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 24px;
+}
+.modal-grid .key {
+  color: var(--muted);
+  font-size: var(--fs-sm);
+  margin-bottom: 2px;
+}
+.modal-grid .val {
+  color: var(--ink);
+  font-weight: 500;
+}
+@media (max-width: 600px) { .modal-grid { grid-template-columns: 1fr; } }
+
+/* 明細彈窗：機構/類別資訊列固定釘頂，其餘內容用內部捲軸；不撐滿螢幕 */
+.detail-modal {
+  display: flex;
+  flex-direction: column;
+  padding: 0;          /* padding 移到 header / body，讓 header 固定、body 獨立捲動 */
+  overflow: hidden;    /* 卡片本身不捲，交給 .modal-body */
+}
+.detail-modal .modal-header {
+  margin: 0;
+  padding: 20px 24px;
+  background: var(--surface);
+  flex-shrink: 0;      /* 固定在頂端、不隨內容捲動 */
+}
+.detail-modal .modal-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 20px 24px 28px;
+}
+@media (max-width: 600px) {
+  /* 手機：改置中固定卡片（取代整頁 bottom sheet），一開始就是固定版面 + 側邊捲軸 */
+  #detail-modal { padding: 16px; align-items: center; }
+  #detail-modal .detail-modal { border-radius: var(--radius-lg); max-height: 82vh; margin-top: 0; }
+  .detail-modal .modal-header { padding: 16px 18px; }
+  .detail-modal .modal-body { padding: 16px 18px 22px; }
+}
+
+/* ---------- Spinner ---------- */
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- PWA Install Prompt ---------- */
+.pwa-prompt {
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 36px rgba(29, 53, 87, 0.22);
+  border: 1px solid var(--border-soft);
+  padding: 14px 14px 14px 16px;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transform: translateY(140%);
+  opacity: 0;
+  transition: transform .35s var(--ease), opacity .25s ease;
+}
+.pwa-prompt.show {
+  transform: translateY(0);
+  opacity: 1;
+}
+.pwa-prompt-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--primary), var(--primary-soft));
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pwa-prompt-body {
+  flex: 1;
+  min-width: 0;
+}
+.pwa-prompt-title {
+  font-weight: 600;
+  font-size: var(--fs-body-sm);
+  color: var(--ink);
+  margin-bottom: 2px;
+  line-height: 1.3;
+}
+.pwa-prompt-text {
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  line-height: 1.45;
+}
+.pwa-prompt-text strong { color: var(--ink); font-weight: 600; }
+.pwa-prompt-link {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--primary);
+  font-size: var(--fs-xs);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.pwa-prompt-link:hover { background: var(--accent-soft); }
+.pwa-prompt-install {
+  background: var(--primary);
+  border: 1px solid var(--primary);
+  color: #fff;
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.pwa-prompt-install:hover { filter: brightness(1.05); }
+.pwa-prompt-close {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: var(--fs-2xl);
+  line-height: 1;
+  padding: 0;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+}
+.pwa-prompt-close:hover { background: var(--border-soft); }
+@media (max-width: 400px) {
+  .pwa-prompt { padding: 12px; gap: 8px; }
+  .pwa-prompt-icon { width: 36px; height: 36px; }
+  .pwa-prompt-title { font-size: var(--fs-sm); }
+  .pwa-prompt-text { font-size: var(--fs-2xs); }
+  .pwa-prompt-link { font-size: var(--fs-2xs); padding: 5px 10px; }
+  .pwa-prompt-install { font-size: var(--fs-2xs); padding: 6px 12px; }
+}
+
+/* Install Guide modal — current platform highlight */
+.install-section-current {
+  background: var(--accent-soft);
+  border-radius: var(--radius-md);
+  padding: 4px 14px 12px;
+  margin: 8px -8px 0;
+}
+.install-section-current h4::before {
+  content: '→ ';
+  color: var(--primary);
+}
+
+/* ---------- Loading skeleton ---------- */
+.skeleton {
+  background: linear-gradient(90deg, var(--border-soft) 25%, #ECF0F4 50%, var(--border-soft) 75%);
+  background-size: 200% 100%;
+  animation: skel 1.4s infinite;
+  border-radius: var(--radius-sm);
+}
+@keyframes skel {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
