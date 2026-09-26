@@ -5432,112 +5432,6 @@ body.g2g-modal-open { overflow: hidden; }
   .grid-4 > .stat-card .kpi-info-tip { max-width: calc(100vw - 48px); }
 }
 
-/* ---------- 表單填寫進度列（sticky，貼在固定 header 下方） ---------- */
-.dform-progress {
-  position: sticky;
-  top: 64px;                       /* .site-header 高度 */
-  z-index: 40;
-  margin: 0 -8px 20px;
-  background: rgba(255, 255, 255, 0.96);
-  -webkit-backdrop-filter: saturate(160%) blur(8px);
-  backdrop-filter: saturate(160%) blur(8px);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-soft);
-}
-.dform-progress-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  min-height: 44px;
-  padding: 8px 12px;
-  border: 0;
-  background: transparent;
-  font: inherit;
-  color: var(--ink);
-  text-align: left;
-  cursor: pointer;
-}
-.dform-progress-step {
-  flex-shrink: 0;
-  font-size: var(--fs-2xs);
-  font-weight: 700;
-  color: var(--primary);
-  font-variant-numeric: tabular-nums;
-}
-.dform-progress-name {
-  flex: 1;
-  min-width: 0;
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.dform-progress-req {
-  flex-shrink: 0;
-  font-size: var(--fs-2xs);
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
-}
-.dform-progress-caret { flex-shrink: 0; color: var(--muted); transition: transform .2s; }
-.dform-progress.is-open .dform-progress-caret { transform: rotate(180deg); }
-.dform-progress-bar {
-  height: 3px;
-  margin: 0 12px 8px;
-  border-radius: var(--radius-pill);
-  background: var(--border-soft);
-  overflow: hidden;
-}
-.dform-progress-bar > span {
-  display: block;
-  height: 100%;
-  width: 0;
-  background: var(--success);
-  transition: width .3s var(--ease);
-}
-.dform-progress-menu {
-  list-style: none;
-  margin: 0;
-  padding: 4px 4px 8px;
-  border-top: 1px solid var(--border-soft);
-  max-height: 60vh;
-  overflow-y: auto;
-}
-.dform-progress-menu button {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  min-height: 44px;
-  padding: 8px 10px;
-  border: 0;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  font: inherit;
-  font-size: var(--fs-sm);
-  color: var(--ink-soft);
-  text-align: left;
-  cursor: pointer;
-}
-.dform-progress-menu button:hover,
-.dform-progress-menu button.is-current { background: var(--border-soft); color: var(--ink); }
-.dform-progress-menu button.is-current .dform-progress-menu-name { font-weight: 600; }
-.dform-progress-menu-name { flex: 1; min-width: 0; }
-.dform-progress-menu-req { font-size: var(--fs-2xs); color: var(--muted); font-variant-numeric: tabular-nums; }
-.dform-progress-check {
-  flex-shrink: 0;
-  width: 18px; height: 18px;
-  border-radius: 50%;
-  border: 1.5px solid var(--border);
-}
-.dform-progress-menu button.is-done .dform-progress-check {
-  border-color: var(--success);
-  background: var(--success) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E") center / 12px no-repeat;
-}
-/* 跳到區段時，標題不要被 header＋進度列蓋住 */
-.dform-section[data-sec] { scroll-margin-top: 140px; }
 
 /* ============================================================
    手機底部導覽列（≤768px；表單填寫頁不掛）
@@ -5662,7 +5556,7 @@ body.g2g-modal-open { overflow: hidden; }
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
   }
-  .bn-label { white-space: nowrap; transition: color .2s ease; }
+  .bn-label { white-space: nowrap; transition: color .2s ease, opacity .15s ease; }
   .bn-icon {
     display: grid;
     place-items: center;
@@ -5680,8 +5574,11 @@ body.g2g-modal-open { overflow: hidden; }
   .bn-item[aria-expanded="true"] { color: var(--primary); }
   .bn-item[aria-expanded="true"] .bn-icon { background: rgba(35, 111, 143, 0.12); }
   /* 按壓回饋 */
-  .bn-item:active .bn-icon { transform: scale(0.9); }
-  .bn-item:focus-visible { outline: none; }
+  /* 按壓回饋用 .is-pressed（JS 管理），不用 :active——iOS 觸控後 :active 常會卡住 */
+  .bn-item.is-pressed .bn-icon { transform: scale(0.88); }
+  .bn-item.is-pressed .bn-label { opacity: 0.7; }
+  .bn-item:focus { outline: none; }
+  .bn-item:focus:not(:focus-visible) .bn-icon { box-shadow: none; }
   .bn-item:focus-visible .bn-icon { box-shadow: 0 0 0 2px var(--primary); }
 
   /* 「填寫」：主要動作用實心 pill，但維持在導覽列內、不凸出 */
@@ -5742,7 +5639,9 @@ body.g2g-modal-open { overflow: hidden; }
     -webkit-tap-highlight-color: transparent;
     transition: background-color .15s ease;
   }
-  .bn-sheet-item:active { background: var(--border-soft); }
+  .bn-sheet-item.is-pressed { background: var(--border-soft); }
+  .bn-sheet-item:focus { outline: none; }
+  .bn-sheet-item:focus-visible { box-shadow: inset 0 0 0 2px var(--primary); }
   .bn-sheet-item.active strong { color: var(--primary); }
   .bn-sheet-icon {
     flex-shrink: 0;

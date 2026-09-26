@@ -1,9 +1,9 @@
 // 共用 header / footer 注入 + 工具函式
-import { SITE, CATEGORIES } from './config.js?v=cfa4c65344';
-import { icon, renderIcons } from './icons.js?v=cfa4c65344';
-import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=cfa4c65344';
-import { initScrollHints } from './scroll-hint.js?v=cfa4c65344';
-import { mountModeBadge } from './env.js?v=cfa4c65344';
+import { SITE, CATEGORIES } from './config.js?v=0fcb9d0372';
+import { icon, renderIcons } from './icons.js?v=0fcb9d0372';
+import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=0fcb9d0372';
+import { initScrollHints } from './scroll-hint.js?v=0fcb9d0372';
+import { mountModeBadge } from './env.js?v=0fcb9d0372';
 
 // 主辦/協作工會 — 共用資料（footer / hero strip / about 都引用）
 export const ORGS = {
@@ -39,159 +39,14 @@ export function orgStripHTML(opts = {}) {
   `;
 }
 
-const NAV_ITEMS = [
-  // 首頁改用點左上 logo 回去（網站慣例），頂層不再放「首頁」以精簡導覽
-  { href: 'platform.html',    label: '分享平台', match: ['platform.html'] },
-  { href: 'hospital.html',    label: '機構總覽', match: ['hospital.html'] },
-  // 「資料查詢」下拉群組：把瀏覽資料的頁面收在一起，精簡頂層數量
-  { label: '資料查詢', children: [
-    { href: 'nurse-ratio.html', label: '護病比', match: ['nurse-ratio.html'] },
-    { href: 'financials.html',  label: '醫院財務', match: ['financials.html'] },
-    { href: 'personnel.html',   label: '人力監控', match: ['personnel.html'] },
-    // 3 個違規紀錄合併進 records.html，match 陣列同時涵蓋舊 URL 讓 nav highlight 保留
-    { href: 'records.html',     label: '違規紀錄', match: ['records.html', 'violations.html', 'gender.html', 'osha.html'] },
-    { href: 'stats.html',       label: '統計摘要', match: ['stats.html'] },
-  ] },
-  { href: 'participate.html', label: '填寫表單', match: ['participate.html'] },
-  { href: 'about.html',       label: '關於我們', match: ['about.html'] },
-  { href: 'support.html',     label: '支持我們', match: ['support.html'] },
-  // 外部連結：RT 姊妹站（呼吸治療產業勞動環境公開平台）
-  { href: 'https://trtu.org.tw/RT_platform/', label: 'RT 職場', external: true, title: '呼吸治療產業勞動環境公開平台' },
-];
+// 外框資料與 header／導覽列本體由 js/shell.js（同步 script）先行渲染，這裡只取用、綁互動。
+const SHELL = window.TNShell;
+const { gateAllowed, HEART_PULSE_SVG, currentPage } = SHELL;
 
-// 軟鎖：鎖定期只顯示公開頁的選單/頁尾連結（總開關與白名單在 js/gate.js）
-function gatePageOf(href) {
-  return (href || '').split('#')[0].split('?')[0].split('/').pop() || 'index.html';
-}
-function gateAllowed(href) {
-  if (typeof window === 'undefined' || !window.__SITE_LOCKED__) return true;
-  return (window.__GATE_PUBLIC__ || []).indexOf(gatePageOf(href)) !== -1;
-}
-function visibleNav() {
-  if (typeof window === 'undefined' || !window.__SITE_LOCKED__) return NAV_ITEMS;
-  return NAV_ITEMS.map((it) => {
-    if (it.children) {
-      const kids = it.children.filter((c) => gateAllowed(c.href));
-      return kids.length ? { ...it, children: kids } : null;
-    }
-    return (it.external || gateAllowed(it.href)) ? it : null;
-  }).filter(Boolean);
-}
-
-// Logo 標誌：白色心型 + 紅色 ECG 線（以 apple-touch-icon 為基準 1.5× 等比放大，
-// 顯示尺寸 26px 在 32px 色塊內 → 心型佔 32px 方塊約 62% 寬度）
-const HEART_PULSE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" aria-hidden="true" style="display:block;">
-  <path d="M12 20.6 c-5.6 -3.8 -9.2 -8.2 -9.2 -13.0 a4.6 4.6 0 0 1 9.2 -1 a4.6 4.6 0 0 1 9.2 1 c0 4.8 -3.6 9.2 -9.2 13.0 z" fill="white"/>
-  <path d="M5.6 10.2 h3.4 l1.4 -2.6 l2.4 5.2 l1.4 -3.2 h5.6" stroke="#E63946" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-</svg>`;
-
-function currentPage() {
-  const path = location.pathname.split('/').pop() || 'index.html';
-  return path;
-}
-
-// 單一導覽項目 → HTML（一般連結，或含子選單的下拉群組）
-function navItemHTML(it, page) {
-  if (it.external) {
-    return `<a href="${it.href}" class="nav-external" target="_blank" rel="noopener"${it.title ? ` title="${it.title}"` : ''}>${it.label} <span class="nav-external-arrow" aria-hidden="true">↗</span></a>`;
-  }
-  if (!it.children) {
-    return `<a href="${it.href}" class="${it.match.includes(page) ? 'active' : ''}">${it.label}</a>`;
-  }
-  const groupActive = it.children.some((c) => c.match.includes(page));
-  const links = it.children
-    .map((c) => `<a href="${c.href}" class="${c.match.includes(page) ? 'active' : ''}">${c.label}</a>`)
-    .join('');
-  return `
-    <div class="nav-group${groupActive ? ' active' : ''}">
-      <button type="button" class="nav-group-trigger${groupActive ? ' active' : ''}" aria-expanded="false" aria-haspopup="true">
-        ${it.label}<span class="nav-group-caret" aria-hidden="true">▾</span>
-      </button>
-      <div class="nav-submenu">${links}</div>
-    </div>`;
-}
-
-function headerHTML() {
-  const page = currentPage();
-  return `
-    <header class="site-header">
-      <div class="container">
-        <div class="nav-wrap">
-          <a href="index.html" class="site-logo">
-            <span class="site-logo-mark">${HEART_PULSE_SVG}</span>
-            <span>護理職場透明化</span>
-          </a>
-          <nav class="site-nav" id="site-nav">
-            ${visibleNav().map((it) => navItemHTML(it, page)).join('')}
-          </nav>
-          <button class="nav-toggle" id="nav-toggle" aria-label="開啟選單">
-            ${icon('menu')}
-          </button>
-        </div>
-      </div>
-    </header>
-  `;
-}
-
-// ===== 手機底部導覽列（≤768px） =====
-// 5 格：分享平台／機構總覽／＋填寫（主按鈕）／資料查詢（底部面板）／更多（底部面板）。
-// 手機上取代右上角漢堡選單；表單填寫頁（participate-*.html）不顯示，避免填到一半誤觸離開、
-// 也不跟鍵盤與送出按鈕搶空間。
-const BOTTOM_NAV = {
-  tabs: [
-    { href: 'platform.html', label: '分享平台', icon: 'message-square', match: ['platform.html'] },
-    { href: 'hospital.html', label: '機構總覽', icon: 'building', match: ['hospital.html'] },
-    { href: 'participate.html', label: '填寫', icon: 'plus', match: ['participate.html'], cta: true },
-    { sheet: 'data', label: '資料查詢', icon: 'bar-chart-3' },
-    { sheet: 'more', label: '更多', icon: 'more-horizontal' },
-  ],
-  sheets: {
-    data: {
-      title: '資料查詢',
-      items: [
-        { href: 'nurse-ratio.html', label: '護病比', desc: '全國醫院三班護病比逐月變化', icon: 'activity', match: ['nurse-ratio.html'] },
-        { href: 'financials.html', label: '醫院財務', desc: '營收、利益率與同儕比較', icon: 'pie-chart', match: ['financials.html'] },
-        { href: 'personnel.html', label: '人力監控', desc: '醫事人力逐月增減', icon: 'users', match: ['personnel.html'] },
-        { href: 'records.html', label: '違規紀錄', desc: '勞檢／性平／職安處分', icon: 'shield-check', match: ['records.html', 'violations.html', 'gender.html', 'osha.html'] },
-        { href: 'stats.html', label: '統計摘要', desc: '分享資料的整體分布', icon: 'bar-chart-3', match: ['stats.html'] },
-      ],
-    },
-    more: {
-      title: '更多',
-      items: [
-        { href: 'about.html', label: '關於我們', desc: '運動緣起與常見問題', icon: 'info', match: ['about.html'] },
-        { href: 'support.html', label: '支持我們', desc: '小額捐款，讓平台走得更遠', icon: 'heart', match: ['support.html'] },
-        { href: 'terms.html', label: '服務條款', icon: 'file-text', match: ['terms.html'] },
-        { href: 'https://trtu.org.tw/RT_platform/', label: 'RT 職場', desc: '呼吸治療產業勞動環境公開平台', icon: 'arrow-up-right', external: true },
-      ],
-    },
-  },
-};
-
-function bottomNavEnabled(page) {
-  return !/^participate-.+\.html$/.test(page);
-}
-
-function bottomNavHTML(page) {
-  const sheetOf = (key) => {
-    const sh = BOTTOM_NAV.sheets[key];
-    return { ...sh, items: sh.items.filter((it) => it.external || gateAllowed(it.href)) };
-  };
-  const tabs = BOTTOM_NAV.tabs.filter((t) => t.sheet ? sheetOf(t.sheet).items.length : gateAllowed(t.href));
-  // 每格：icon 外包一層 .bn-icon（選中時長出 pill 底色），下方 label
-  const inner = (t) => `<span class="bn-icon">${icon(t.icon, { size: 22 })}</span><span class="bn-label">${t.label}</span>`;
-  const tabHTML = tabs.map((t) => {
-    if (t.sheet) {
-      const active = sheetOf(t.sheet).items.some((it) => it.match && it.match.includes(page));
-      return `<button type="button" class="bn-item${active ? ' active' : ''}" data-sheet="${t.sheet}"
-                aria-haspopup="dialog" aria-expanded="false" aria-controls="bn-sheet">${inner(t)}</button>`;
-    }
-    const active = t.match.includes(page);
-    return `<a href="${t.href}" class="bn-item${t.cta ? ' bn-cta' : ''}${active ? ' active' : ''}"${active ? ' aria-current="page"' : ''}>${inner(t)}</a>`;
-  }).join('');
-
-  const panels = Object.keys(BOTTOM_NAV.sheets).map((key) => {
-    const sh = sheetOf(key);
+// 底部面板（資料查詢／更多）：預設隱藏，不影響第一格畫面，module 載入後再補上
+function bottomSheetHTML(page) {
+  const panels = Object.keys(SHELL.BOTTOM_NAV.sheets).map((key) => {
+    const sh = SHELL.sheetOf(key);
     const items = sh.items.map((it) => {
       const active = it.match && it.match.includes(page);
       const ext = it.external ? ' target="_blank" rel="noopener"' : '';
@@ -206,9 +61,7 @@ function bottomNavHTML(page) {
               <ul>${items}</ul>
             </div>`;
   }).join('');
-
   return `
-    <nav class="bottom-nav" aria-label="主要導覽">${tabHTML}</nav>
     <div class="bn-sheet" id="bn-sheet" role="dialog" aria-modal="true" hidden>
       <div class="bn-sheet-backdrop" data-close></div>
       <div class="bn-sheet-body">
@@ -220,28 +73,38 @@ function bottomNavHTML(page) {
 
 function mountBottomNav() {
   const page = currentPage();
-  if (!bottomNavEnabled(page) || document.querySelector('.bottom-nav')) return;
-  document.body.insertAdjacentHTML('beforeend', bottomNavHTML(page));
-  document.body.classList.add('has-bottom-nav');
+  if (!SHELL.bottomNavEnabled(page) || document.getElementById('bn-sheet')) return;
+  // 導覽列本體正常由 shell.js 先畫好；萬一沒有（例如頁面漏載 shell.js）才在這裡補
+  if (!document.querySelector('.bottom-nav')) {
+    document.body.insertAdjacentHTML('beforeend', SHELL.bottomBarHTML(page));
+    document.body.classList.add('has-bottom-nav');
+  }
+  document.body.insertAdjacentHTML('beforeend', bottomSheetHTML(page));
 
+  const nav = document.querySelector('.bottom-nav');
   const sheet = document.getElementById('bn-sheet');
   const body = sheet.querySelector('.bn-sheet-body');
   const triggers = document.querySelectorAll('.bottom-nav [data-sheet]');
   let openKey = null;
   let lastTrigger = null;
+  let openedByKeyboard = false;   // 只有鍵盤操作才搬移焦點；觸控時搬焦點會在 iOS 留下選取框
+  // 記下這一頁「應該」亮的格子，之後任何暫時狀態都能還原回來
+  const homeActive = [...nav.querySelectorAll('.bn-item.active')];
 
-  const close = () => {
+  const close = ({ instant = false } = {}) => {
     if (!openKey) return;
     sheet.classList.remove('open');
     body.style.transform = '';
     triggers.forEach((b) => b.setAttribute('aria-expanded', 'false'));
     document.body.classList.remove('bn-sheet-open');
     openKey = null;
-    setTimeout(() => { if (!openKey) sheet.hidden = true; }, 260);
-    lastTrigger?.focus({ preventScroll: true });
+    if (instant) sheet.hidden = true;
+    else setTimeout(() => { if (!openKey) sheet.hidden = true; }, 260);
+    if (openedByKeyboard) lastTrigger?.focus({ preventScroll: true });
   };
-  const open = (key, trigger) => {
+  const open = (key, trigger, byKeyboard) => {
     if (openKey === key) { close(); return; }
+    openedByKeyboard = byKeyboard;
     sheet.hidden = false;
     sheet.querySelectorAll('.bn-sheet-panel').forEach((p) => { p.hidden = p.dataset.panel !== key; });
     sheet.setAttribute('aria-labelledby', `bn-sheet-title-${key}`);
@@ -251,11 +114,63 @@ function mountBottomNav() {
     lastTrigger = trigger;
     requestAnimationFrame(() => requestAnimationFrame(() => {
       sheet.classList.add('open');
-      sheet.querySelector(`.bn-sheet-panel[data-panel="${key}"] a`)?.focus({ preventScroll: true });
+      if (byKeyboard) sheet.querySelector(`.bn-sheet-panel[data-panel="${key}"] a`)?.focus({ preventScroll: true });
     }));
   };
 
-  triggers.forEach((b) => b.addEventListener('click', () => open(b.dataset.sheet, b)));
+  // click 的 detail 為 0 代表是鍵盤（Enter／Space）觸發
+  triggers.forEach((b) => b.addEventListener('click', (e) => open(b.dataset.sheet, b, e.detail === 0)));
+
+  // ---- 像 App 一樣的選取回饋 ----
+  // 1) 按壓狀態自己管：iOS 的 :active／:hover 在觸控後常會卡住不放，改用 class 並在放開時確實移除
+  const pressables = '.bn-item, .bn-sheet-item';
+  const clearPressed = () => document.querySelectorAll('.is-pressed').forEach((el) => el.classList.remove('is-pressed'));
+  document.addEventListener('pointerdown', (e) => {
+    const el = e.target.closest(pressables);
+    if (el) el.classList.add('is-pressed');
+  }, { passive: true });
+  ['pointerup', 'pointercancel', 'dragstart'].forEach((t) => document.addEventListener(t, clearPressed, { passive: true }));
+  window.addEventListener('scroll', clearPressed, { passive: true });
+
+  // 2) 點下去立刻換亮（不等新頁面載完），舊格子不再殘留高亮
+  const selectTab = (tab) => {
+    nav.querySelectorAll('.bn-item.active').forEach((el) => { el.classList.remove('active'); el.removeAttribute('aria-current'); });
+    tab?.classList.add('active');
+  };
+  const isPlainClick = (e) => !(e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey);
+  nav.addEventListener('click', (e) => {
+    const a = e.target.closest('a.bn-item');
+    if (!a || !isPlainClick(e)) return;
+    // 點目前這一頁的格子：跟 App 一樣捲回頂端，而不是重新載入
+    if (a.getAttribute('href') === page) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    selectTab(a);
+  });
+  sheet.addEventListener('click', (e) => {
+    const a = e.target.closest('a.bn-sheet-item');
+    if (!a || !isPlainClick(e) || a.target === '_blank') return;
+    if (a.getAttribute('href') === page) { e.preventDefault(); close(); return; }
+    sheet.querySelectorAll('.bn-sheet-item.active').forEach((el) => el.classList.remove('active'));
+    a.classList.add('active');
+    selectTab(nav.querySelector(`[data-sheet="${openKey}"]`));
+  });
+
+  // 3) 按「上一頁」時 iOS 會從快取（bfcache）原封不動還原頁面：面板開著、按壓中、
+  //    剛點過的格子亮著……全部還原成這一頁的初始狀態
+  window.addEventListener('pageshow', (e) => {
+    if (!e.persisted) return;
+    clearPressed();
+    close({ instant: true });
+    selectTab(null);
+    homeActive.forEach((el) => el.classList.add('active'));
+    sheet.querySelectorAll('.bn-sheet-item').forEach((a) => a.classList.toggle('active', a.getAttribute('href') === page));
+    nav.classList.remove('is-hidden');
+    document.body.classList.remove('bn-hidden');
+    document.activeElement?.blur?.();
+  });
   sheet.addEventListener('click', (e) => { if (e.target.closest('[data-close]')) close(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') close(); });
   // 視窗放大到桌機寬度時收起面板（底部導覽列只在手機顯示）
@@ -429,7 +344,7 @@ export function mountLayout() {
   mountModeBadge();   // 只有用 ?data= 臨時切換資料來源時才會出現的小標記
   // header
   const headerSlot = document.getElementById('app-header');
-  if (headerSlot) headerSlot.innerHTML = headerHTML();
+  if (headerSlot && !headerSlot.firstElementChild) headerSlot.innerHTML = SHELL.headerHTML();  // 正常已由 shell.js 畫好
   // footer
   const footerSlot = document.getElementById('app-footer');
   if (footerSlot) footerSlot.innerHTML = footerHTML();
@@ -467,7 +382,7 @@ export function mountLayout() {
 
   // 背景預載 platform 資料 + 樞紐大檔：切到分享平台/機構總覽/護病比/人力監控時即時顯示
   // 動態 import 避免循環依賴與初始 parse 成本
-  import('./data-loader.js?v=cfa4c65344')
+  import('./data-loader.js?v=0fcb9d0372')
     .then(({ preloadAll, preloadStaticData }) => {
       preloadAll && preloadAll();
       preloadStaticData && preloadStaticData();
@@ -479,13 +394,13 @@ export function mountLayout() {
   wireNavPrefetch(document.getElementById('app-footer'));
 
   // 背景預載勞檢/性平/職安紀錄資料：同樣讓使用者切過去時即時顯示
-  import('./violations.js?v=cfa4c65344')
+  import('./violations.js?v=0fcb9d0372')
     .then(({ preloadViolations }) => preloadViolations && preloadViolations())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./gender.js?v=cfa4c65344')
+  import('./gender.js?v=0fcb9d0372')
     .then(({ preloadGender }) => preloadGender && preloadGender())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./osha.js?v=cfa4c65344')
+  import('./osha.js?v=0fcb9d0372')
     .then(({ preloadOsha }) => preloadOsha && preloadOsha())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
 }
