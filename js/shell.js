@@ -46,7 +46,7 @@
       data: {
         title: '資料查詢',
         items: [
-          { href: 'nurse-ratio.html', label: '護病比', desc: '全國醫院三班護病比逐月變化', icon: 'activity', match: ['nurse-ratio.html'] },
+          { href: 'nurse-ratio.html', label: '護病比', desc: '全國醫院三班護病比逐月變化', icon: 'bed-double', match: ['nurse-ratio.html'] },
           { href: 'financials.html', label: '醫院財務', desc: '營收、利益率與同儕比較', icon: 'pie-chart', match: ['financials.html'] },
           { href: 'personnel.html', label: '人力監控', desc: '醫事人力逐月增減', icon: 'users', match: ['personnel.html'] },
           { href: 'records.html', label: '違規紀錄', desc: '勞檢／性平／職安處分', icon: 'shield-check', match: ['records.html', 'violations.html', 'gender.html', 'osha.html'] },
