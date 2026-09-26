@@ -1,0 +1,35 @@
+/* ============================================================
+   共用 class：取代散落在 HTML／JS 的重複 inline style
+   新寫的標記請用這些 class，不要再寫 style=""。
+   單一用途的 utility（.text-ink／.text-right）加 !important：它們取代的是 inline style，必須和 inline 一樣
+   壓過元件規則（例如 .data-table thead th 的 text-align:left），否則換成 class 後會被蓋掉。
+   ============================================================ */
+
+/* 灰字段落裡的強調字 */
+.text-ink { color: var(--ink) !important; }
+
+/* 表格數字欄靠右 */
+.text-right { text-align: right !important; }
+
+/* 標題旁的主色圖示 */
+.ico-primary { color: var(--primary); vertical-align: middle; }
+
+/* 篩選列：「標籤：」＋選項（違規紀錄等頁的篩選面板） */
+.filter-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.filter-row-label { color: var(--ink) !important; min-width: 84px; }
+.filter-search {
+  flex: 1;
+  min-width: 200px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.92rem;
+  font-family: inherit;
+  color: var(--ink);
+}
+
+/* 說明文字裡的小型換算表（統計頁官方分頁） */
+.mini-table { margin-top: 6px; font-size: 0.88rem; border-collapse: collapse; }
+.mini-table thead tr { background: rgba(255, 255, 255, 0.5); }
+.mini-table th { padding: 4px 10px; text-align: left; }
+.mini-table td { padding: 3px 10px; }

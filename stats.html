@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#FFFFFF" />
   <!-- 軟鎖總開關（js/gate.js）：鎖定期非公開頁導向 coming-soon -->
-  <script src="./js/gate.js?v=477d66648f"></script>
-  <script src="./js/shell.js?v=477d66648f"></script>
+  <script src="./js/gate.js?v=324848e4a5"></script>
+  <script src="./js/shell.js?v=324848e4a5"></script>
 
   <!-- SEO -->
   <title>統計摘要 — 護理職場透明化運動</title>
@@ -49,20 +49,20 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=ab5cea91f6" />
+  <link rel="stylesheet" href="css/styles.css?v=39843ece8f" />
 
     <!-- modulepreload：平行載入 ES module 鏈（首次造訪快 30-50%） -->
-  <link rel="modulepreload" href="./js/charts.js?v=477d66648f" />
-  <link rel="modulepreload" href="./js/components.js?v=477d66648f" />
-  <link rel="modulepreload" href="./js/config.js?v=477d66648f" />
-  <link rel="modulepreload" href="./js/data-loader.js?v=477d66648f" />
-  <link rel="modulepreload" href="./js/env.js?v=477d66648f" />
-  <link rel="modulepreload" href="./js/icons.js?v=477d66648f" />
-  <link rel="modulepreload" href="./js/official-stats.js?v=477d66648f" />
-  <link rel="modulepreload" href="./js/pwa-prompt.js?v=477d66648f" />
-  <link rel="modulepreload" href="./js/scroll-hint.js?v=477d66648f" />
-  <link rel="modulepreload" href="./js/theme.js?v=477d66648f" />
-  <link rel="modulepreload" href="./js/toast.js?v=477d66648f" />
+  <link rel="modulepreload" href="./js/charts.js?v=324848e4a5" />
+  <link rel="modulepreload" href="./js/components.js?v=324848e4a5" />
+  <link rel="modulepreload" href="./js/config.js?v=324848e4a5" />
+  <link rel="modulepreload" href="./js/data-loader.js?v=324848e4a5" />
+  <link rel="modulepreload" href="./js/env.js?v=324848e4a5" />
+  <link rel="modulepreload" href="./js/icons.js?v=324848e4a5" />
+  <link rel="modulepreload" href="./js/official-stats.js?v=324848e4a5" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=324848e4a5" />
+  <link rel="modulepreload" href="./js/scroll-hint.js?v=324848e4a5" />
+  <link rel="modulepreload" href="./js/theme.js?v=324848e4a5" />
+  <link rel="modulepreload" href="./js/toast.js?v=324848e4a5" />
 
   <!-- JSON-LD Structured Data：官方參考數據四份資料集 -->
   <script type="application/ld+json">
@@ -223,15 +223,15 @@
         </summary>
         <div class="stat-filter-body">
           <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-            <strong style="color:var(--ink);min-width:84px;">單位類型：</strong>
+            <strong class="filter-row-label">單位類型：</strong>
             <div class="filter-options" id="stat-cat-filter"></div>
           </div>
           <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-            <strong style="color:var(--ink);min-width:84px;">機構類別：</strong>
+            <strong class="filter-row-label">機構類別：</strong>
             <div class="filter-options" id="stat-inst-filter"></div>
           </div>
           <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-            <strong style="color:var(--ink);min-width:84px;">地點：</strong>
+            <strong class="filter-row-label">地點：</strong>
             <div class="filter-options" id="stat-loc-filter"></div>
           </div>
         </div>
@@ -367,7 +367,7 @@
               <span data-icon="info" data-size="22"></span>
             </div>
             <div style="color:var(--ink-soft);font-size:0.95rem;line-height:1.8;">
-              <strong style="color:var(--ink);">資料來源：政府與護理全聯會公開報告</strong>
+              <strong class="text-ink">資料來源：政府與護理全聯會公開報告</strong>
               <br/>
               本頁為政府與全國性公會公開報告的整理，與「使用者分享」是兩個獨立來源。
               所有資料均為原報告引用、未經本站修改；如需引用請以原報告為準。
@@ -653,33 +653,33 @@
             <span data-icon="info" data-size="16"></span>　資料定義與換算方法
           </h3>
           <div style="color:var(--ink-soft);font-size:0.92rem;line-height:1.85;">
-            <p style="margin:0 0 10px;"><strong style="color:var(--ink);">① 統計範圍變更（影響三條線的 102-110 段）</strong></p>
+            <p style="margin:0 0 10px;"><strong class="text-ink">① 統計範圍變更（影響三條線的 102-110 段）</strong></p>
             <ul style="margin:0 0 14px 1.2rem;padding:0;">
               <li><strong>102~110 年</strong>：「各業<strong>受僱員工</strong>」— 含部分工時</li>
               <li><strong>111 年起</strong>：「各業<strong>全時</strong>受僱員工」— 僅計算全時員工</li>
               <li>因此 110 → 111 之間出現的跳升，<strong>不全是真實漲薪</strong>，部分反映「不再納入較低薪的部分工時樣本」。圖中 102-110 段以虛線標示。</li>
             </ul>
-            <p style="margin:0 0 10px;"><strong style="color:var(--ink);">② 全年薪資所得（年薪）的換算 — 三段定義不同</strong></p>
+            <p style="margin:0 0 10px;"><strong class="text-ink">② 全年薪資所得（年薪）的換算 — 三段定義不同</strong></p>
             <ul style="margin:0 0 14px 1.2rem;padding:0;">
               <li><strong>102~110 年</strong>：勞動部原始資料只公布<strong>月總薪資</strong>（不含「過去一年全年薪資」欄位），本站以
                 <strong>月總薪資 × 12</strong> 推估全年所得。換算原始值如下表：
-                <table style="margin-top:6px;font-size:0.88rem;border-collapse:collapse;">
-                  <thead><tr style="background:rgba(255,255,255,0.5);">
-                    <th style="padding:4px 10px;text-align:left;">年</th>
-                    <th style="padding:4px 10px;text-align:right;">月總薪資</th>
-                    <th style="padding:4px 10px;text-align:right;">× 12 =</th>
-                    <th style="padding:4px 10px;text-align:right;">推估全年</th>
+                <table class="mini-table">
+                  <thead><tr>
+                    <th>年</th>
+                    <th class="text-right">月總薪資</th>
+                    <th class="text-right">× 12 =</th>
+                    <th class="text-right">推估全年</th>
                   </tr></thead>
                   <tbody>
-                    <tr><td style="padding:3px 10px;">102</td><td style="padding:3px 10px;text-align:right;">43,296</td><td style="padding:3px 10px;text-align:right;">×12</td><td style="padding:3px 10px;text-align:right;">519,552 元 ≈ 52.0 萬</td></tr>
-                    <tr><td style="padding:3px 10px;">103</td><td style="padding:3px 10px;text-align:right;">41,903</td><td style="padding:3px 10px;text-align:right;">×12</td><td style="padding:3px 10px;text-align:right;">502,836 元 ≈ 50.3 萬</td></tr>
-                    <tr><td style="padding:3px 10px;">104</td><td style="padding:3px 10px;text-align:right;">44,565</td><td style="padding:3px 10px;text-align:right;">×12</td><td style="padding:3px 10px;text-align:right;">534,780 元 ≈ 53.5 萬</td></tr>
-                    <tr><td style="padding:3px 10px;">105</td><td style="padding:3px 10px;text-align:right;">44,826</td><td style="padding:3px 10px;text-align:right;">×12</td><td style="padding:3px 10px;text-align:right;">537,912 元 ≈ 53.8 萬</td></tr>
-                    <tr><td style="padding:3px 10px;">106</td><td style="padding:3px 10px;text-align:right;">44,494</td><td style="padding:3px 10px;text-align:right;">×12</td><td style="padding:3px 10px;text-align:right;">533,928 元 ≈ 53.4 萬</td></tr>
-                    <tr><td style="padding:3px 10px;">107</td><td style="padding:3px 10px;text-align:right;">46,770</td><td style="padding:3px 10px;text-align:right;">×12</td><td style="padding:3px 10px;text-align:right;">561,240 元 ≈ 56.1 萬</td></tr>
-                    <tr><td style="padding:3px 10px;">108</td><td style="padding:3px 10px;text-align:right;">48,131</td><td style="padding:3px 10px;text-align:right;">×12</td><td style="padding:3px 10px;text-align:right;">577,572 元 ≈ 57.8 萬</td></tr>
-                    <tr><td style="padding:3px 10px;">109</td><td style="padding:3px 10px;text-align:right;">48,072</td><td style="padding:3px 10px;text-align:right;">×12</td><td style="padding:3px 10px;text-align:right;">576,864 元 ≈ 57.7 萬</td></tr>
-                    <tr><td style="padding:3px 10px;">110</td><td style="padding:3px 10px;text-align:right;">46,752</td><td style="padding:3px 10px;text-align:right;">×12</td><td style="padding:3px 10px;text-align:right;">561,024 元 ≈ 56.1 萬</td></tr>
+                    <tr><td>102</td><td class="text-right">43,296</td><td class="text-right">×12</td><td class="text-right">519,552 元 ≈ 52.0 萬</td></tr>
+                    <tr><td>103</td><td class="text-right">41,903</td><td class="text-right">×12</td><td class="text-right">502,836 元 ≈ 50.3 萬</td></tr>
+                    <tr><td>104</td><td class="text-right">44,565</td><td class="text-right">×12</td><td class="text-right">534,780 元 ≈ 53.5 萬</td></tr>
+                    <tr><td>105</td><td class="text-right">44,826</td><td class="text-right">×12</td><td class="text-right">537,912 元 ≈ 53.8 萬</td></tr>
+                    <tr><td>106</td><td class="text-right">44,494</td><td class="text-right">×12</td><td class="text-right">533,928 元 ≈ 53.4 萬</td></tr>
+                    <tr><td>107</td><td class="text-right">46,770</td><td class="text-right">×12</td><td class="text-right">561,240 元 ≈ 56.1 萬</td></tr>
+                    <tr><td>108</td><td class="text-right">48,131</td><td class="text-right">×12</td><td class="text-right">577,572 元 ≈ 57.8 萬</td></tr>
+                    <tr><td>109</td><td class="text-right">48,072</td><td class="text-right">×12</td><td class="text-right">576,864 元 ≈ 57.7 萬</td></tr>
+                    <tr><td>110</td><td class="text-right">46,752</td><td class="text-right">×12</td><td class="text-right">561,024 元 ≈ 56.1 萬</td></tr>
                   </tbody>
                 </table>
               </li>
@@ -704,18 +704,18 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
   <script type="module">
-    import { CATEGORIES } from './js/config.js?v=477d66648f';
-    import { mountLayout } from './js/components.js?v=477d66648f';
-    import { renderIcons } from './js/icons.js?v=477d66648f';
-    import { loadAll, startAutoRefresh } from './js/data-loader.js?v=477d66648f';
+    import { CATEGORIES } from './js/config.js?v=324848e4a5';
+    import { mountLayout } from './js/components.js?v=324848e4a5';
+    import { renderIcons } from './js/icons.js?v=324848e4a5';
+    import { loadAll, startAutoRefresh } from './js/data-loader.js?v=324848e4a5';
     import {
       chartCategoryDistribution, chartInstitutionStacked, chartHoursHistogram,
       chartOvertimePolicy, chartRecommend, chartAtmosphereByCategory,
       chartLocationDistribution, chartSalaryDistribution,
-    } from './js/charts.js?v=477d66648f';
+    } from './js/charts.js?v=324848e4a5';
     import {
       renderOfficialSourceA, renderOfficialSourceB, renderOfficialSourceC, renderOfficialSourceD,
-    } from './js/official-stats.js?v=477d66648f';
+    } from './js/official-stats.js?v=324848e4a5';
 
     mountLayout();
     renderIcons();

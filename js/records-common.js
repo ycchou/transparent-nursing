@@ -1,8 +1,8 @@
 // 違規紀錄類頁面共用模組：CSV 抓取 / 解析 / cache / 通用工具
 // 給 violations.js (勞檢)、gender.js (性平)、osha.js (職安) 共用。
 
-import { getShort as getHospitalShort } from './hospital-shortname.js?v=477d66648f';
-import { normalizeInstitutionName } from './institution-name.js?v=477d66648f';
+import { getShort as getHospitalShort } from './hospital-shortname.js?v=324848e4a5';
+import { normalizeInstitutionName } from './institution-name.js?v=324848e4a5';
 
 // ============================================================
 // 通用工具
@@ -291,9 +291,9 @@ export function createCsvLoader(cfg) {
 //   records-table-container
 // ============================================================
 
-import { icon, renderIcons } from './icons.js?v=477d66648f';
-import { ensureTooltip } from './tooltip.js?v=477d66648f';
-import { pageSlice, renderPagination } from './pagination.js?v=477d66648f';
+import { icon, renderIcons } from './icons.js?v=324848e4a5';
+import { ensureTooltip } from './tooltip.js?v=324848e4a5';
+import { pageSlice, renderPagination } from './pagination.js?v=324848e4a5';
 
 // 違規機構名稱 → 機構代號 對照表（離線預建，供機構名稱連到整合檔案頁）
 let _violHospitalMap = null;
@@ -486,7 +486,7 @@ export function initRecordsPage(cfg) {
               <th>地點</th>
               <th class="viol-inst-col">機構名稱</th>
               <th>違反法條</th>
-              <th style="text-align:right;">罰鍰 (元)</th>
+              <th class="text-right">罰鍰 (元)</th>
             </tr>
           </thead>
           <tbody>

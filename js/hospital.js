@@ -5,9 +5,9 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { icon, renderIcons } from './icons.js?v=477d66648f';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=477d66648f';
-import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=477d66648f';
+import { icon, renderIcons } from './icons.js?v=324848e4a5';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=324848e4a5';
+import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=324848e4a5';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -15,23 +15,23 @@ import {
   shiftStatus,
   classifyHospital,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=477d66648f';
-import { loadAll } from './data-loader.js?v=477d66648f';
-import { renderKpiStrip } from './stats-kpi.js?v=477d66648f';
-import { renderTable, showDetailModal } from './table.js?v=477d66648f';
-import { hasContributed } from './contribution-gate.js?v=477d66648f';
-import { notePwaIntent } from './pwa-prompt.js?v=477d66648f';
+} from './nurse-ratio-view.js?v=324848e4a5';
+import { loadAll } from './data-loader.js?v=324848e4a5';
+import { renderKpiStrip } from './stats-kpi.js?v=324848e4a5';
+import { renderTable, showDetailModal } from './table.js?v=324848e4a5';
+import { hasContributed } from './contribution-gate.js?v=324848e4a5';
+import { notePwaIntent } from './pwa-prompt.js?v=324848e4a5';
 import {
   loadFinancialsHospital, getFinancialFields,
   formatVal as finFormatVal, signClass as finSignClass, formatRocYear as finRocYear,
   renderFinancialTrendChart,
-} from './financials-view.js?v=477d66648f';
-import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=477d66648f';
+} from './financials-view.js?v=324848e4a5';
+import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=324848e4a5';
 import {
   loadPersonnelHospital, ensurePersonnelIndex,
   renderStaffChart as renderPmStaffChart, renderBedChart as renderPmBedChart,
   latestMonthTable,
-} from './personnel-view.js?v=477d66648f';
+} from './personnel-view.js?v=324848e4a5';
 import {
   createCsvLoader,
   parseROCDate,
@@ -39,8 +39,8 @@ import {
   shortenLocation,
   fineToWan,
   formatROCDate,
-} from './records-common.js?v=477d66648f';
-import { skeletonRows } from './skeleton.js?v=477d66648f';
+} from './records-common.js?v=324848e4a5';
+import { skeletonRows } from './skeleton.js?v=324848e4a5';
 
 const MERGED_URL = 'data/hospitals-merged.json?v=05ee0dcd69';
 const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=bedb0c4373';
@@ -674,7 +674,7 @@ function renderViolationsSection(code, hosp) {
     matched.forEach((r) => { byTag[r.feedTag] = (byTag[r.feedTag] || 0) + 1; });
     sum.innerHTML = `
       <span class="nurse-compliance-badge nurse-compliance-C">${matched.length} 筆違規</span>
-      <span style="color:var(--muted);font-size:0.85rem;">累計罰鍰 <strong style="color:var(--ink);">${fineToWan(totalFine) || 0}</strong> 萬元
+      <span style="color:var(--muted);font-size:0.85rem;">累計罰鍰 <strong class="text-ink">${fineToWan(totalFine) || 0}</strong> 萬元
       · ${Object.entries(byTag).map(([t, n]) => `${t} ${n}`).join(' / ')}</span>`;
 
     body.innerHTML = `
