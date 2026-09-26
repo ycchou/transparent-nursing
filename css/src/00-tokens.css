@@ -99,6 +99,11 @@
   --font-serif: 'Lora', 'Noto Serif TC', Georgia, serif;
   --font-sans: 'Noto Sans TC', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
+  /* iPhone 安全區（需 viewport-fit=cover 才有值；瀏海、圓角、Home 指示條） */
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+
   /* 動畫 */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }

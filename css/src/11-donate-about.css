@@ -181,14 +181,6 @@ body.donate-modal-open .donate-fab { display: none; }  /* 開捐款彈窗時隱�
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
 }
-.manifesto-item .num {
-  font-family: var(--font-serif);
-  font-size: var(--fs-4xl);
-  font-weight: 700;
-  color: var(--primary);
-  margin-bottom: 8px;
-  line-height: 1;
-}
 @media (max-width: 768px) { .manifesto-grid { grid-template-columns: 1fr; } }
 
 /* ---------- FAQ ---------- */
@@ -365,3 +357,14 @@ body.donate-modal-open .donate-fab { display: none; }  /* 開捐款彈窗時隱�
   box-shadow: var(--shadow-soft);
 }
 
+/* 捐款金額：手機改等寬 2 欄（5 檔＋其他金額＝3 列） */
+@media (max-width: 480px) {
+  .donate-tiers { display: grid; grid-template-columns: repeat(2, 1fr); }
+  .donate-tier { min-width: 0; }
+}
+
+/* 捐款浮標固定在右下角：頁尾預留空間，捲到底時不會蓋住最後一行內容／頁尾連結
+   （手機有底部導覽列時浮標改收進「更多 → 支持我們」，見下方 bottom-nav 區塊） */
+@media (max-width: 768px) {
+  body:not(.has-bottom-nav):has(.donate-fab) .site-footer { padding-bottom: 88px; }
+}

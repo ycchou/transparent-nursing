@@ -51,6 +51,13 @@ p { margin: 0 0 1em; }
   padding: 0 24px;
 }
 
+/* 橫向時瀏海／圓角在左右：內容區、header 讓出 safe area */
+.container, .container-narrow {
+  padding-left: max(var(--container-pad, 24px), var(--safe-l));
+  padding-right: max(var(--container-pad, 24px), var(--safe-r));
+}
+@media (max-width: 480px) { :root { --container-pad: 16px; } }
+
 section { padding: 64px 0; }
 @media (max-width: 768px) { section { padding: 44px 0; } }
 @media (max-width: 480px) {
@@ -69,3 +76,7 @@ h1, h2, h3, p, span, a {
   word-break: break-word;
 }
 
+
+/* 標題斷行：中文沒有詞界，text-wrap: balance 會把「職場」「樣貌」拆開，不能全域開。
+   需要控制斷點的標題改用 .keep-words＋<wbr>：只在 <wbr> 處斷行 */
+.keep-words { word-break: keep-all; overflow-wrap: anywhere; }

@@ -1,0 +1,39 @@
+/* ============================================================
+   觸控目標 — 觸控裝置上所有可點元素至少 44×44（WCAG 2.5.5 / Apple HIG）
+   外觀尺寸盡量不變，靠 min-height 或 ::after 擴大可點範圍
+   ============================================================ */
+@media (pointer: coarse) {
+  .nav-toggle { width: 44px; height: 44px; }
+  .nurse-city-filter,
+  .nurse-level-filter,
+  .nurse-compliance-filter,
+  .pg-btn,
+  .tab,
+  .dform-option,
+  .org-chip,
+  .filter-chip,
+  .nurse-hospital-chip,
+  .nurse-picker-search,
+  #records-search,
+  #filter-q,
+  .donate-tier,
+  .site-logo { min-height: 44px; }
+  .filter-chip { display: inline-flex; align-items: center; }
+  /* 捐款浮標的 × 外觀 20px，點擊範圍擴到 44px */
+  .donate-fab-close::before { content: ''; position: absolute; inset: -12px; }
+  .comment-unlock-toggle { position: relative; }
+  .comment-unlock-toggle::before { content: ''; position: absolute; inset: -12px; }
+  .nurse-level-filter { display: inline-flex; align-items: center; }
+  .dform-option { min-width: 44px; justify-content: center; }
+  .faq summary,
+  .nurse-std-details > summary,
+  .dform details > summary { min-height: 44px; display: flex; align-items: center; }
+  .donate-custom-wrap { padding-top: 0; padding-bottom: 0; }
+  .donate-custom-input { min-height: 44px; }
+  /* ⓘ 圖示外觀維持 18px，點擊範圍往外擴到 44px */
+  .kpi-info::before {
+    content: '';
+    position: absolute;
+    inset: -13px;
+  }
+}

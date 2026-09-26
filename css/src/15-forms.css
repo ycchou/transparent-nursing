@@ -518,32 +518,6 @@ body.dform-picker-open {
   vertical-align: middle;
 }
 
-/* 送出前警語（橘色 callout） */
-.dform-warning-card {
-  margin-top: 36px;
-  padding: 20px 24px;
-  background: rgba(244, 162, 97, 0.10);
-  border: 2px solid rgba(244, 162, 97, 0.45);
-  border-radius: var(--radius-md);
-}
-.dform-warning-title {
-  font-weight: 700;
-  font-size: var(--fs-body);
-  color: var(--warning-text);
-  letter-spacing: 0.01em;
-  margin-bottom: 10px;
-}
-.dform-warning-list {
-  margin: 0;
-  padding-left: 20px;
-  color: var(--ink-soft);
-  font-size: var(--fs-sm);
-  line-height: 1.85;
-}
-.dform-warning-list li { margin-bottom: 4px; }
-.dform-warning-list strong { color: var(--ink); font-weight: 600; }
-.dform-warning-danger { color: var(--danger) !important; }
-
 /* 法律同意條款卡（藍色 callout，比 warning 更正式）*/
 .dform-consent-card {
   margin-top: 24px;

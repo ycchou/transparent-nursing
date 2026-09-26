@@ -132,9 +132,11 @@ ws.onmessage = (e) => {
     inflight.delete(m.params.requestId); lastNet = Date.now();
   }
 };
-const send = (method, params = {}) => new Promise((resolve, reject) => {
+// 每個 CDP 指令最多等 30 秒：Chrome 偶爾不回應時不要整批卡死（逾時會讓該頁重試一次）
+const send = (method, params = {}, timeoutMs = 30000) => new Promise((resolve, reject) => {
   const id = ++seq;
-  pending.set(id, (m) => (m.error ? reject(new Error(`${method}: ${m.error.message}`)) : resolve(m.result)));
+  const timer = setTimeout(() => { pending.delete(id); reject(new Error(`${method} 逾時`)); }, timeoutMs);
+  pending.set(id, (m) => { clearTimeout(timer); m.error ? reject(new Error(`${method}: ${m.error.message}`)) : resolve(m.result); });
   ws.send(JSON.stringify({ id, method, params }));
 });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -181,6 +183,8 @@ try {
     await send('Emulation.setDeviceMetricsOverride', { width: vp.width, height: vp.height, deviceScaleFactor: vp.dpr, mobile: vp.mobile });
     await send('Emulation.setTouchEmulationEnabled', { enabled: vp.mobile });
     for (const t of PAGES) {
+     for (let attempt = 1; ; attempt++) {
+     try {
       inflight.clear();
       await send('Page.navigate', { url: `${BASE}/${withMock(t.url)}` });
       await waitQuiet();
@@ -193,12 +197,21 @@ try {
       if (t.viewport) {
         shot = await send('Page.captureScreenshot', { format: 'png' });
       } else {
+        // 全頁截圖前捲回頂端：用網址打開醫院等情境會自動捲動，固定定位的 header 位置會隨捲動時間點而不同
+        await send('Runtime.evaluate', { expression: 'window.scrollTo(0, 0); new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))', awaitPromise: true });
         const { result } = await send('Runtime.evaluate', { expression: 'Math.ceil(document.documentElement.scrollHeight)', returnByValue: true });
         const h = Math.min(result.value, MAX_HEIGHT);
         shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true,
           clip: { x: 0, y: 0, width: vp.width, height: h, scale: 1 } });
       }
       fs.writeFileSync(path.join(OUT, `${t.name}@${vp.name}.png`), Buffer.from(shot.data, 'base64'));
+      break;
+     } catch (e) {
+      if (attempt >= 2) throw new Error(`${t.name}@${vp.name}：${e.message}`);
+      console.warn(`\n⚠ ${t.name}@${vp.name}：${e.message}，重試`);
+      await send('Page.navigate', { url: 'about:blank' }).catch(() => {});
+     }
+     }
       n++;
       process.stdout.write(`\r截圖 ${n}/${PAGES.length * VIEWPORTS.length}  ${t.name}@${vp.name}        `);
     }

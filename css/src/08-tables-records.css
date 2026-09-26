@@ -69,10 +69,6 @@
 .data-table tbody tr:hover { background: var(--surface-soft); cursor: pointer; }
 .data-table tbody tr:last-child td { border-bottom: none; }
 
-.data-table .recommend-cell {
-  font-weight: 600;
-}
-
 .data-table .truncate {
   max-width: 200px;
   overflow: hidden;
@@ -341,7 +337,7 @@ body.viol-modal-open { overflow: hidden; }
   line-height: 1.7;
 }
 @media (max-width: 900px) {
-  .viol-table .viol-desc { max-width: 180px; }
+
   .viol-table th, .viol-table td { padding-left: 10px; padding-right: 10px; }
   .viol-table td:nth-child(5),
   .viol-table th:nth-child(5) { max-width: 180px; }
@@ -633,3 +629,48 @@ body.viol-modal-open { overflow: hidden; }
   white-space: nowrap;
 }
 
+/* 勞檢／性平／職安紀錄：手機改卡片列表。
+   表格在窄螢幕只能左右滑，首屏被 #／日期／地點佔滿、機構名稱只露兩個字。
+   卡片版排法：機構名稱（主）→ 日期・地點・罰鍰 → 違反法條；# 隱藏。 */
+@media (max-width: 640px) {
+  .data-table-wrap:has(> .viol-table) {
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+  }
+  .viol-table, .viol-table tbody { display: block; }
+  .viol-table thead { display: none; }
+  .viol-table tbody tr.viol-row {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    grid-template-areas:
+      "inst inst inst"
+      "date loc  fine"
+      "law  law  law";
+    align-items: center;
+    gap: 8px 10px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-soft);
+  }
+  .viol-table tbody tr.viol-row td {
+    display: block;
+    padding: 0;
+    border: none;
+    max-width: none;
+    min-width: 0;
+  }
+  .viol-table td.seq-col { display: none !important; }
+  .viol-table .viol-inst-cell { grid-area: inst; font-size: var(--fs-body); font-weight: 600; }
+  .viol-table .viol-date-cell { grid-area: date; }
+  .viol-table .viol-loc-cell  { grid-area: loc; }
+  .viol-table .viol-fine      { grid-area: fine; text-align: right; }
+  .viol-table .viol-law-cell  { grid-area: law; line-height: 1.7; }
+  .viol-table .viol-law-cell:empty { display: none; }
+  .viol-table .viol-fine:empty { display: none; }
+}

@@ -100,6 +100,11 @@
   --font-serif: 'Lora', 'Noto Serif TC', Georgia, serif;
   --font-sans: 'Noto Sans TC', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
+  /* iPhone 安全區（需 viewport-fit=cover 才有值；瀏海、圓角、Home 指示條） */
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+
   /* 動畫 */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
@@ -157,6 +162,13 @@ p { margin: 0 0 1em; }
   padding: 0 24px;
 }
 
+/* 橫向時瀏海／圓角在左右：內容區、header 讓出 safe area */
+.container, .container-narrow {
+  padding-left: max(var(--container-pad, 24px), var(--safe-l));
+  padding-right: max(var(--container-pad, 24px), var(--safe-r));
+}
+@media (max-width: 480px) { :root { --container-pad: 16px; } }
+
 section { padding: 64px 0; }
 @media (max-width: 768px) { section { padding: 44px 0; } }
 @media (max-width: 480px) {
@@ -175,6 +187,10 @@ h1, h2, h3, p, span, a {
   word-break: break-word;
 }
 
+
+/* 標題斷行：中文沒有詞界，text-wrap: balance 會把「職場」「樣貌」拆開，不能全域開。
+   需要控制斷點的標題改用 .keep-words＋<wbr>：只在 <wbr> 處斷行 */
+.keep-words { word-break: keep-all; overflow-wrap: anywhere; }
 /* ---------- Header / Nav ---------- */
 .site-header {
   position: fixed;
@@ -1026,6 +1042,32 @@ h1[id], h2[id], h3[id] {
   }
 }
 
+
+/* KPI 字卡：手機維持 2×2，不要四張疊成一長串把主內容推到第二屏以下 */
+@media (max-width: 600px) {
+  .grid-4:has(> .stat-card) { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .grid-4 > .stat-card { padding: 16px 8px; }
+  .grid-4 > .stat-card .stat-num { font-size: var(--fs-2xl); }
+  .grid-4 > .stat-card .stat-num.stat-num-date { font-size: var(--fs-body); line-height: 1.35; padding-top: 4px; }
+  .grid-4 > .stat-card .kpi-num { font-size: var(--fs-2xl); min-height: 36px; }
+  .grid-4 > .stat-card .kpi-num.is-text { font-size: var(--fs-lg); }
+  .grid-4 > .stat-card .stat-label { font-size: var(--fs-xs); margin-top: 4px; }
+  .grid-4 > .stat-card .visits-split { gap: 8px; }
+}
+
+/* KPI 數字載入骨架：跟「沒有資料」的「—」區分開 */
+.kpi-skel { display: inline-block; width: 3.2em; height: 0.9em; vertical-align: middle; border-radius: var(--radius-sm); }
+
+/* KPI 2×2 時，ⓘ 提示框改靠卡片外側對齊，避免右欄的提示框超出螢幕撐出水平捲動 */
+@media (max-width: 600px) {
+  .grid-4 > .stat-card:nth-child(odd) .kpi-info-tip { left: -24px; transform: translateY(4px); }
+  .grid-4 > .stat-card:nth-child(even) .kpi-info-tip { left: auto; right: -24px; transform: translateY(4px); }
+  .grid-4 > .stat-card:nth-child(odd) .kpi-info-tip::after { left: 32px; }
+  .grid-4 > .stat-card:nth-child(even) .kpi-info-tip::after { left: auto; right: 26px; transform: none; }
+  .grid-4 > .stat-card .kpi-info:hover .kpi-info-tip,
+  .grid-4 > .stat-card .kpi-info:focus-visible .kpi-info-tip { transform: translateY(0); }
+  .grid-4 > .stat-card .kpi-info-tip { max-width: calc(100vw - 48px); }
+}
 /* ---------- Category Card ---------- */
 .cat-card {
   position: relative;
@@ -1085,16 +1127,7 @@ h1[id], h2[id], h3[id] {
   gap: 48px;
   align-items: center;
 }
-.hero-eyebrow {
-  display: inline-block;
-  padding: 6px 14px;
-  background: var(--accent-soft);
-  color: var(--primary-dark);
-  border-radius: var(--radius-tag);
-  font-size: var(--fs-sm);
-  font-weight: 500;
-  margin-bottom: 20px;
-}
+
 .hero-title {
   font-size: clamp(1.85rem, 4.5vw, 3.4rem);
   margin: 0 0 20px;
@@ -1373,10 +1406,6 @@ h1[id], h2[id], h3[id] {
 .data-table tbody tr:hover { background: var(--surface-soft); cursor: pointer; }
 .data-table tbody tr:last-child td { border-bottom: none; }
 
-.data-table .recommend-cell {
-  font-weight: 600;
-}
-
 .data-table .truncate {
   max-width: 200px;
   overflow: hidden;
@@ -1645,7 +1674,7 @@ body.viol-modal-open { overflow: hidden; }
   line-height: 1.7;
 }
 @media (max-width: 900px) {
-  .viol-table .viol-desc { max-width: 180px; }
+
   .viol-table th, .viol-table td { padding-left: 10px; padding-right: 10px; }
   .viol-table td:nth-child(5),
   .viol-table th:nth-child(5) { max-width: 180px; }
@@ -1937,6 +1966,51 @@ body.viol-modal-open { overflow: hidden; }
   white-space: nowrap;
 }
 
+/* 勞檢／性平／職安紀錄：手機改卡片列表。
+   表格在窄螢幕只能左右滑，首屏被 #／日期／地點佔滿、機構名稱只露兩個字。
+   卡片版排法：機構名稱（主）→ 日期・地點・罰鍰 → 違反法條；# 隱藏。 */
+@media (max-width: 640px) {
+  .data-table-wrap:has(> .viol-table) {
+    background: transparent;
+    box-shadow: none;
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+  }
+  .viol-table, .viol-table tbody { display: block; }
+  .viol-table thead { display: none; }
+  .viol-table tbody tr.viol-row {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    grid-template-areas:
+      "inst inst inst"
+      "date loc  fine"
+      "law  law  law";
+    align-items: center;
+    gap: 8px 10px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border-soft);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-soft);
+  }
+  .viol-table tbody tr.viol-row td {
+    display: block;
+    padding: 0;
+    border: none;
+    max-width: none;
+    min-width: 0;
+  }
+  .viol-table td.seq-col { display: none !important; }
+  .viol-table .viol-inst-cell { grid-area: inst; font-size: var(--fs-body); font-weight: 600; }
+  .viol-table .viol-date-cell { grid-area: date; }
+  .viol-table .viol-loc-cell  { grid-area: loc; }
+  .viol-table .viol-fine      { grid-area: fine; text-align: right; }
+  .viol-table .viol-law-cell  { grid-area: law; line-height: 1.7; }
+  .viol-table .viol-law-cell:empty { display: none; }
+  .viol-table .viol-fine:empty { display: none; }
+}
 /* ---------- Recommend pill ---------- */
 .pill {
   display: inline-flex;
@@ -2338,23 +2412,8 @@ body.viol-modal-open { overflow: hidden; }
   .salary-stats .ss-value { font-size: var(--fs-lg); }
 }
 
-select.chart-select {
-  padding: 6px 28px 6px 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  font-size: var(--fs-sm);
-  color: var(--ink-soft);
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236B7C93' stroke-width='2.5'><polyline points='6 9 12 15 18 9'/></svg>");
-  background-repeat: no-repeat;
-  background-position: right 8px center;
-}
-
 /* ---------- Misc utility ---------- */
 .text-muted { color: var(--muted); }
-.text-center { text-align: center; }
 .divider {
   border: none;
   border-top: 1px solid var(--border-soft);
@@ -2378,12 +2437,11 @@ select.chart-select {
 .grid-2 { grid-template-columns: repeat(2, 1fr); }
 .grid-3 { grid-template-columns: repeat(3, 1fr); }
 .grid-4 { grid-template-columns: repeat(4, 1fr); }
-.grid-5 { grid-template-columns: repeat(5, 1fr); }
 @media (max-width: 980px) {
-  .grid-3, .grid-4, .grid-5 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 600px) {
-  .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
 }
 
 /* ---------- 捐款 widget（js/donate.js） ---------- */
@@ -2569,14 +2627,6 @@ body.donate-modal-open .donate-fab { display: none; }  /* 開捐款彈窗時隱�
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
 }
-.manifesto-item .num {
-  font-family: var(--font-serif);
-  font-size: var(--fs-4xl);
-  font-weight: 700;
-  color: var(--primary);
-  margin-bottom: 8px;
-  line-height: 1;
-}
 @media (max-width: 768px) { .manifesto-grid { grid-template-columns: 1fr; } }
 
 /* ---------- FAQ ---------- */
@@ -2753,6 +2803,17 @@ body.donate-modal-open .donate-fab { display: none; }  /* 開捐款彈窗時隱�
   box-shadow: var(--shadow-soft);
 }
 
+/* 捐款金額：手機改等寬 2 欄（5 檔＋其他金額＝3 列） */
+@media (max-width: 480px) {
+  .donate-tiers { display: grid; grid-template-columns: repeat(2, 1fr); }
+  .donate-tier { min-width: 0; }
+}
+
+/* 捐款浮標固定在右下角：頁尾預留空間，捲到底時不會蓋住最後一行內容／頁尾連結
+   （手機有底部導覽列時浮標改收進「更多 → 支持我們」，見下方 bottom-nav 區塊） */
+@media (max-width: 768px) {
+  body:not(.has-bottom-nav):has(.donate-fab) .site-footer { padding-bottom: 88px; }
+}
 /* ---------- Form card (participate page) ---------- */
 .form-card {
   display: flex;
@@ -3046,10 +3107,6 @@ body.donate-modal-open .donate-fab { display: none; }  /* 開捐款彈窗時隱�
 .calc-share-btn[disabled] { opacity: 0.6; cursor: not-allowed; }
 .calc-share-icon { font-size: var(--fs-body); }
 
-/* 截圖時暫時隱藏分享列 */
-.calc-result-card.capturing .calc-share-bar { display: none; }
-/* 隱私模式：marker tooltip 不重要、視覺微調可在這加 */
-.calc-result-card.is-private .calc-bar-marker { /* 保持可見 */ }
 
 @media (max-width: 480px) {
   .calc-share-bar { gap: 10px; }
@@ -4018,32 +4075,6 @@ body.dform-picker-open {
   margin-right: 6px;
   vertical-align: middle;
 }
-
-/* 送出前警語（橘色 callout） */
-.dform-warning-card {
-  margin-top: 36px;
-  padding: 20px 24px;
-  background: rgba(244, 162, 97, 0.10);
-  border: 2px solid rgba(244, 162, 97, 0.45);
-  border-radius: var(--radius-md);
-}
-.dform-warning-title {
-  font-weight: 700;
-  font-size: var(--fs-body);
-  color: var(--warning-text);
-  letter-spacing: 0.01em;
-  margin-bottom: 10px;
-}
-.dform-warning-list {
-  margin: 0;
-  padding-left: 20px;
-  color: var(--ink-soft);
-  font-size: var(--fs-sm);
-  line-height: 1.85;
-}
-.dform-warning-list li { margin-bottom: 4px; }
-.dform-warning-list strong { color: var(--ink); font-weight: 600; }
-.dform-warning-danger { color: var(--danger) !important; }
 
 /* 法律同意條款卡（藍色 callout，比 warning 更正式）*/
 .dform-consent-card {
@@ -5085,9 +5116,6 @@ body.g2g-modal-open { overflow: hidden; }
 .fin-benchmark-note { margin-top: 12px; font-size: var(--fs-xs); color: var(--muted); line-height: 1.75; }
 .fin-benchmark-note p { margin: 4px 0; }
 .fin-benchmark-note em { font-style: normal; color: var(--ink-soft); font-weight: 500; }
-/* backward compat：舊 CSS class 保留 */
-.kpi-num .over-std { color: var(--danger); }
-
 /* 永遠展開的分類邏輯說明（在頁面下方） */
 .nurse-compliance-explain-static {
   padding: 14px 18px;
@@ -5288,16 +5316,6 @@ body.g2g-modal-open { overflow: hidden; }
   font-size: var(--fs-2xs);
   margin-left: 4px;
 }
-.nurse-shared-banner {
-  margin-top: 12px;
-  padding: 10px 14px;
-  background: rgba(244, 162, 97, 0.10);
-  border-left: 3px solid #F4A261;
-  border-radius: var(--radius-sm);
-  color: #814d17;
-  font-size: var(--fs-sm);
-  line-height: 1.55;
-}
 
 @media (max-width: 640px) {
   .nurse-std-row {
@@ -5312,6 +5330,36 @@ body.g2g-modal-open { overflow: hidden; }
   .nurse-hospital-list { max-height: 320px; }
 }
 
+/* 篩選 chip 內的計數：原本是 inline 的 0.78em＋opacity .6（約 10px、對比不足） */
+.chip-count { font-size: var(--fs-2xs); color: var(--muted); font-variant-numeric: tabular-nums; }
+.nurse-city-filter.active .chip-count,
+.filter-chip.active .chip-count { color: rgba(255,255,255,0.9) !important; }
+
+/* 縣市篩選：手機改單列橫向捲動。22 顆 chip 折成 8 行會把結果區推到一屏半之後 */
+@media (max-width: 640px) {
+  #city-filter {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+    flex: 1 1 100%;
+    min-width: 0;
+    padding-right: 24px;
+    mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+  }
+  #city-filter::-webkit-scrollbar { display: none; }
+  #city-filter .nurse-city-filter { flex-shrink: 0; white-space: nowrap; }
+  .nurse-picker-filter-row { min-width: 0; width: 100%; }
+}
+
+/* 護病比頁：總覽在前、選醫院在後，手機首屏給一顆直達按鈕 */
+.jump-to-picker { display: none; margin-top: 16px; }
+@media (max-width: 640px) {
+  .jump-to-picker { display: inline-flex; width: 100%; justify-content: center; }
+}
+#hospital-picker { scroll-margin-top: calc(var(--header-h) + 16px); }
 /* ============================================================
    觸控目標 — 觸控裝置上所有可點元素至少 44×44（WCAG 2.5.5 / Apple HIG）
    外觀尺寸盡量不變，靠 min-height 或 ::after 擴大可點範圍
@@ -5351,127 +5399,6 @@ body.g2g-modal-open { overflow: hidden; }
     inset: -13px;
   }
 }
-
-/* KPI 字卡：手機維持 2×2，不要四張疊成一長串把主內容推到第二屏以下 */
-@media (max-width: 600px) {
-  .grid-4:has(> .stat-card) { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .grid-4 > .stat-card { padding: 16px 8px; }
-  .grid-4 > .stat-card .stat-num { font-size: var(--fs-2xl); }
-  .grid-4 > .stat-card .stat-num.stat-num-date { font-size: var(--fs-body); line-height: 1.35; padding-top: 4px; }
-  .grid-4 > .stat-card .kpi-num { font-size: var(--fs-2xl); min-height: 36px; }
-  .grid-4 > .stat-card .kpi-num.is-text { font-size: var(--fs-lg); }
-  .grid-4 > .stat-card .stat-label { font-size: var(--fs-xs); margin-top: 4px; }
-  .grid-4 > .stat-card .visits-split { gap: 8px; }
-}
-
-/* 勞檢／性平／職安紀錄：手機改卡片列表。
-   表格在窄螢幕只能左右滑，首屏被 #／日期／地點佔滿、機構名稱只露兩個字。
-   卡片版排法：機構名稱（主）→ 日期・地點・罰鍰 → 違反法條；# 隱藏。 */
-@media (max-width: 640px) {
-  .data-table-wrap:has(> .viol-table) {
-    background: transparent;
-    box-shadow: none;
-    border: none;
-    border-radius: 0;
-    overflow: visible;
-  }
-  .viol-table, .viol-table tbody { display: block; }
-  .viol-table thead { display: none; }
-  .viol-table tbody tr.viol-row {
-    display: grid;
-    grid-template-columns: auto auto 1fr;
-    grid-template-areas:
-      "inst inst inst"
-      "date loc  fine"
-      "law  law  law";
-    align-items: center;
-    gap: 8px 10px;
-    padding: 14px 16px;
-    margin-bottom: 12px;
-    background: var(--surface);
-    border: 1px solid var(--border-soft);
-    border-radius: var(--radius-card);
-    box-shadow: var(--shadow-soft);
-  }
-  .viol-table tbody tr.viol-row td {
-    display: block;
-    padding: 0;
-    border: none;
-    max-width: none;
-    min-width: 0;
-  }
-  .viol-table td.seq-col { display: none !important; }
-  .viol-table .viol-inst-cell { grid-area: inst; font-size: var(--fs-body); font-weight: 600; }
-  .viol-table .viol-date-cell { grid-area: date; }
-  .viol-table .viol-loc-cell  { grid-area: loc; }
-  .viol-table .viol-fine      { grid-area: fine; text-align: right; }
-  .viol-table .viol-law-cell  { grid-area: law; line-height: 1.7; }
-  .viol-table .viol-law-cell:empty { display: none; }
-  .viol-table .viol-fine:empty { display: none; }
-}
-
-/* 篩選 chip 內的計數：原本是 inline 的 0.78em＋opacity .6（約 10px、對比不足） */
-.chip-count { font-size: var(--fs-2xs); color: var(--muted); font-variant-numeric: tabular-nums; }
-.nurse-city-filter.active .chip-count,
-.filter-chip.active .chip-count { color: rgba(255,255,255,0.9) !important; }
-
-/* 縣市篩選：手機改單列橫向捲動。22 顆 chip 折成 8 行會把結果區推到一屏半之後 */
-@media (max-width: 640px) {
-  #city-filter {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    overscroll-behavior-x: contain;
-    flex: 1 1 100%;
-    min-width: 0;
-    padding-right: 24px;
-    mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
-    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
-  }
-  #city-filter::-webkit-scrollbar { display: none; }
-  #city-filter .nurse-city-filter { flex-shrink: 0; white-space: nowrap; }
-  .nurse-picker-filter-row { min-width: 0; width: 100%; }
-}
-
-/* 標題斷行：中文沒有詞界，text-wrap: balance 會把「職場」「樣貌」拆開，不能全域開。
-   需要控制斷點的標題改用 .keep-words＋<wbr>：只在 <wbr> 處斷行 */
-.keep-words { word-break: keep-all; overflow-wrap: anywhere; }
-
-/* 捐款金額：手機改等寬 2 欄（5 檔＋其他金額＝3 列） */
-@media (max-width: 480px) {
-  .donate-tiers { display: grid; grid-template-columns: repeat(2, 1fr); }
-  .donate-tier { min-width: 0; }
-}
-
-/* 捐款浮標固定在右下角：頁尾預留空間，捲到底時不會蓋住最後一行內容／頁尾連結
-   （手機有底部導覽列時浮標改收進「更多 → 支持我們」，見下方 bottom-nav 區塊） */
-@media (max-width: 768px) {
-  body:not(.has-bottom-nav):has(.donate-fab) .site-footer { padding-bottom: 88px; }
-}
-
-/* 護病比頁：總覽在前、選醫院在後，手機首屏給一顆直達按鈕 */
-.jump-to-picker { display: none; margin-top: 16px; }
-@media (max-width: 640px) {
-  .jump-to-picker { display: inline-flex; width: 100%; justify-content: center; }
-}
-#hospital-picker { scroll-margin-top: calc(var(--header-h) + 16px); }
-
-/* KPI 數字載入骨架：跟「沒有資料」的「—」區分開 */
-.kpi-skel { display: inline-block; width: 3.2em; height: 0.9em; vertical-align: middle; border-radius: var(--radius-sm); }
-
-/* KPI 2×2 時，ⓘ 提示框改靠卡片外側對齊，避免右欄的提示框超出螢幕撐出水平捲動 */
-@media (max-width: 600px) {
-  .grid-4 > .stat-card:nth-child(odd) .kpi-info-tip { left: -24px; transform: translateY(4px); }
-  .grid-4 > .stat-card:nth-child(even) .kpi-info-tip { left: auto; right: -24px; transform: translateY(4px); }
-  .grid-4 > .stat-card:nth-child(odd) .kpi-info-tip::after { left: 32px; }
-  .grid-4 > .stat-card:nth-child(even) .kpi-info-tip::after { left: auto; right: 26px; transform: none; }
-  .grid-4 > .stat-card .kpi-info:hover .kpi-info-tip,
-  .grid-4 > .stat-card .kpi-info:focus-visible .kpi-info-tip { transform: translateY(0); }
-  .grid-4 > .stat-card .kpi-info-tip { max-width: calc(100vw - 48px); }
-}
-
-
 /* ============================================================
    手機底部導覽列（≤768px；表單填寫頁不掛）
    仿原生 tab bar：半透明材質＋髮絲線、選中格 icon 長出 pill 底色、按壓縮放回饋。
@@ -5483,18 +5410,8 @@ body.g2g-modal-open { overflow: hidden; }
   /* 懸浮膠囊離螢幕底的距離：有 Home 指示條時稍微壓進 safe area（跟 Facebook／iOS 原生一樣），沒有時留 12px */
   --bn-gap: max(12px, calc(env(safe-area-inset-bottom, 0px) - 8px));
   --bn-space: calc(var(--bn-height) + var(--bn-gap));   /* 導覽列實際佔掉的底部高度 */
-  --safe-b: env(safe-area-inset-bottom, 0px);
-  --safe-l: env(safe-area-inset-left, 0px);
-  --safe-r: env(safe-area-inset-right, 0px);
 }
 .bottom-nav, .bn-sheet { display: none; }
-
-/* 橫向時瀏海／圓角在左右：內容區、header 讓出 safe area */
-.container, .container-narrow {
-  padding-left: max(var(--container-pad, 24px), var(--safe-l));
-  padding-right: max(var(--container-pad, 24px), var(--safe-r));
-}
-@media (max-width: 480px) { :root { --container-pad: 16px; } }
 
 @media (max-width: 768px) {
   /* 預留導覽列高度：有頁尾的頁面墊在頁尾（深色底延伸到底），沒有頁尾的頁面墊在 body */

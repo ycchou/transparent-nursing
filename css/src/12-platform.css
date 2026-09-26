@@ -291,10 +291,6 @@
 .calc-share-btn[disabled] { opacity: 0.6; cursor: not-allowed; }
 .calc-share-icon { font-size: var(--fs-body); }
 
-/* 截圖時暫時隱藏分享列 */
-.calc-result-card.capturing .calc-share-bar { display: none; }
-/* 隱私模式：marker tooltip 不重要、視覺微調可在這加 */
-.calc-result-card.is-private .calc-bar-marker { /* 保持可見 */ }
 
 @media (max-width: 480px) {
   .calc-share-bar { gap: 10px; }

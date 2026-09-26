@@ -9,18 +9,8 @@
   /* 懸浮膠囊離螢幕底的距離：有 Home 指示條時稍微壓進 safe area（跟 Facebook／iOS 原生一樣），沒有時留 12px */
   --bn-gap: max(12px, calc(env(safe-area-inset-bottom, 0px) - 8px));
   --bn-space: calc(var(--bn-height) + var(--bn-gap));   /* 導覽列實際佔掉的底部高度 */
-  --safe-b: env(safe-area-inset-bottom, 0px);
-  --safe-l: env(safe-area-inset-left, 0px);
-  --safe-r: env(safe-area-inset-right, 0px);
 }
 .bottom-nav, .bn-sheet { display: none; }
-
-/* 橫向時瀏海／圓角在左右：內容區、header 讓出 safe area */
-.container, .container-narrow {
-  padding-left: max(var(--container-pad, 24px), var(--safe-l));
-  padding-right: max(var(--container-pad, 24px), var(--safe-r));
-}
-@media (max-width: 480px) { :root { --container-pad: 16px; } }
 
 @media (max-width: 768px) {
   /* 預留導覽列高度：有頁尾的頁面墊在頁尾（深色底延伸到底），沒有頁尾的頁面墊在 body */

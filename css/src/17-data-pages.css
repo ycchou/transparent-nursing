@@ -363,9 +363,6 @@
 .fin-benchmark-note { margin-top: 12px; font-size: var(--fs-xs); color: var(--muted); line-height: 1.75; }
 .fin-benchmark-note p { margin: 4px 0; }
 .fin-benchmark-note em { font-style: normal; color: var(--ink-soft); font-weight: 500; }
-/* backward compat：舊 CSS class 保留 */
-.kpi-num .over-std { color: var(--danger); }
-
 /* 永遠展開的分類邏輯說明（在頁面下方） */
 .nurse-compliance-explain-static {
   padding: 14px 18px;
@@ -566,16 +563,6 @@
   font-size: var(--fs-2xs);
   margin-left: 4px;
 }
-.nurse-shared-banner {
-  margin-top: 12px;
-  padding: 10px 14px;
-  background: rgba(244, 162, 97, 0.10);
-  border-left: 3px solid #F4A261;
-  border-radius: var(--radius-sm);
-  color: #814d17;
-  font-size: var(--fs-sm);
-  line-height: 1.55;
-}
 
 @media (max-width: 640px) {
   .nurse-std-row {
@@ -590,3 +577,33 @@
   .nurse-hospital-list { max-height: 320px; }
 }
 
+/* 篩選 chip 內的計數：原本是 inline 的 0.78em＋opacity .6（約 10px、對比不足） */
+.chip-count { font-size: var(--fs-2xs); color: var(--muted); font-variant-numeric: tabular-nums; }
+.nurse-city-filter.active .chip-count,
+.filter-chip.active .chip-count { color: rgba(255,255,255,0.9) !important; }
+
+/* 縣市篩選：手機改單列橫向捲動。22 顆 chip 折成 8 行會把結果區推到一屏半之後 */
+@media (max-width: 640px) {
+  #city-filter {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+    flex: 1 1 100%;
+    min-width: 0;
+    padding-right: 24px;
+    mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+  }
+  #city-filter::-webkit-scrollbar { display: none; }
+  #city-filter .nurse-city-filter { flex-shrink: 0; white-space: nowrap; }
+  .nurse-picker-filter-row { min-width: 0; width: 100%; }
+}
+
+/* 護病比頁：總覽在前、選醫院在後，手機首屏給一顆直達按鈕 */
+.jump-to-picker { display: none; margin-top: 16px; }
+@media (max-width: 640px) {
+  .jump-to-picker { display: inline-flex; width: 100%; justify-content: center; }
+}
+#hospital-picker { scroll-margin-top: calc(var(--header-h) + 16px); }
