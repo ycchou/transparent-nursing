@@ -1,6 +1,6 @@
 // 一鍵產生單筆資料分享圖片（1080 × 1350，IG 4:5 直式）
-import { getCategory } from './config.js?v=0509cd84fb';
-import { escapeHtml } from './moderation.js?v=0509cd84fb';
+import { getCategory } from './config.js?v=6921db2fae';
+import { escapeHtml } from './moderation.js?v=6921db2fae';
 
 const KEY_LABELS = {
   // ICU
@@ -101,7 +101,7 @@ function buildShareCardHTML(row) {
 
   const dataRows = fields.map((k, i) => `
     <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 0;${i === fields.length - 1 ? '' : 'border-bottom:1px solid #E5E9F0;'}">
-      <span style="color:#6B7C93;font-size:28px;letter-spacing:0.01em;">${KEY_LABELS[k] || k}</span>
+      <span style="color:#4F5D72;font-size:28px;letter-spacing:0.01em;">${KEY_LABELS[k] || k}</span>
       <span style="color:#1D3557;font-weight:600;font-size:30px;">${escapeHtml(row[k] || '—')}</span>
     </div>
   `).join('');
@@ -135,7 +135,7 @@ function buildShareCardHTML(row) {
           </div>
           <div>
             <div style="font-weight:700;font-size:28px;letter-spacing:0.02em;">護理職場透明化運動</div>
-            <div style="font-size:18px;color:#6B7C93;margin-top:2px;">一筆真實的職場分享</div>
+            <div style="font-size:18px;color:#4F5D72;margin-top:2px;">一筆真實的職場分享</div>
           </div>
         </div>
 
@@ -149,18 +149,18 @@ function buildShareCardHTML(row) {
           ${escapeHtml(row.institutionName || '匿名機構')}
         </h1>
         ${row.unitName ? `<div style="font-size:28px;color:#1D3557;font-weight:600;margin-bottom:8px;line-height:1.3;">${escapeHtml(row.unitName)}</div>` : ''}
-        <div style="font-size:22px;color:#6B7C93;margin-bottom:20px;line-height:1.5;">
+        <div style="font-size:22px;color:#4F5D72;margin-bottom:20px;line-height:1.5;">
           ${subtitle || '—'}
         </div>
 
         <!-- Recommend index card -->
         <div style="display:flex;align-items:center;justify-content:space-between;background:${recBg};border:2px solid ${recColor};padding:18px 28px;border-radius:18px;margin-bottom:20px;">
           <div>
-            <div style="font-size:20px;color:#6B7C93;margin-bottom:4px;letter-spacing:0.02em;">整體推薦指數</div>
+            <div style="font-size:20px;color:#4F5D72;margin-bottom:4px;letter-spacing:0.02em;">整體推薦指數</div>
             <div style="font-size:38px;font-weight:700;color:${recColor};">${recLabel}</div>
           </div>
           <div style="font-family:'Lora',serif;font-size:68px;font-weight:700;color:${recColor};line-height:1;">
-            ${recIdx ? recIdx + '<span style="font-size:30px;color:#6B7C93;">/5</span>' : '—'}
+            ${recIdx ? recIdx + '<span style="font-size:30px;color:#4F5D72;">/5</span>' : '—'}
           </div>
         </div>
 
@@ -173,15 +173,15 @@ function buildShareCardHTML(row) {
         ${commentText ? `
           <div style="background:#A8DADC2e;border-left:6px solid ${cat.color};padding:16px 22px;border-radius:8px;margin-bottom:18px;">
             <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;">
-              <div style="font-size:18px;color:#6B7C93;letter-spacing:0.02em;">分享者短評</div>
-              ${commentTruncated ? `<div style="font-size:14px;color:#6B7C93;">已顯示前 ${MAX_COMMENT_LENGTH} 字</div>` : ''}
+              <div style="font-size:18px;color:#4F5D72;letter-spacing:0.02em;">分享者短評</div>
+              ${commentTruncated ? `<div style="font-size:14px;color:#4F5D72;">已顯示前 ${MAX_COMMENT_LENGTH} 字</div>` : ''}
             </div>
             <div style="font-size:22px;line-height:1.55;color:#1D3557;font-weight:500;">${escapeHtml(commentText)}</div>
           </div>` : ''}
 
         <!-- Footer -->
         <div style="margin-top:auto;padding-top:20px;border-top:1px solid ${cat.color}33;text-align:center;">
-          <div style="font-size:18px;color:#6B7C93;letter-spacing:0.02em;">
+          <div style="font-size:18px;color:#4F5D72;letter-spacing:0.02em;">
             ${row.timestamp ? '填寫於 ' + escapeHtml(row.timestamp) : ''}
           </div>
         </div>

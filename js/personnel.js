@@ -2,14 +2,14 @@
 // 資料：data/personnel-index.json（picker 清單）＋ data/personnel/{code}.json（單院時間序列）
 // 來源：衛福部「醫院醫事人力持續性監測結果」。
 
-import { renderIcons, icon } from './icons.js?v=0509cd84fb';
-import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=0509cd84fb';
+import { renderIcons, icon } from './icons.js?v=6921db2fae';
+import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=6921db2fae';
 import {
   CAT_COLORS, BED_COLORS, DEFAULT_ON, mLabel, baseLineCfg,
   renderStaffChart, renderBedChart, loadPersonnelHospital, latestMonthTable,
-} from './personnel-view.js?v=0509cd84fb';
-import { showToast } from './toast.js?v=0509cd84fb';
-import { skeletonRows } from './skeleton.js?v=0509cd84fb';
+} from './personnel-view.js?v=6921db2fae';
+import { showToast } from './toast.js?v=6921db2fae';
+import { skeletonRows } from './skeleton.js?v=6921db2fae';
 
 const INDEX_URL = 'data/personnel-index.json';
 const AGG_URL = 'data/personnel-aggregate.json';
@@ -103,7 +103,7 @@ function renderCityFilter() {
   state.index.forEach((h) => { const c = h.city || '(未知)'; counts[c] = (counts[c] || 0) + 1; });
   const sorted = Object.entries(counts).sort((a, b) => (a[0] === '(未知)') ? 1 : (b[0] === '(未知)') ? -1 : b[1] - a[1]);
   el.innerHTML = `<button type="button" class="nurse-city-filter active" data-city="all">全部</button>
-    ${sorted.map(([c, n]) => `<button type="button" class="nurse-city-filter" data-city="${escapeHtml(c)}">${escapeHtml(c)} <span style="opacity:.6;font-size:0.78em;">${n}</span></button>`).join('')}`;
+    ${sorted.map(([c, n]) => `<button type="button" class="nurse-city-filter" data-city="${escapeHtml(c)}">${escapeHtml(c)} <span class="chip-count">${n}</span></button>`).join('')}`;
   el.querySelectorAll('.nurse-city-filter').forEach((btn) => {
     btn.addEventListener('click', () => {
       state.cityFilter = btn.dataset.city;

@@ -6,7 +6,7 @@
 //     hospitals: [{ id, name, level, history: { "11207": {day, eve, night} } }]
 //   }
 
-import { renderIcons } from './icons.js?v=0509cd84fb';
+import { renderIcons } from './icons.js?v=6921db2fae';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -14,8 +14,8 @@ import {
   shiftStatus,
   classifyHospital as classifyHospitalView,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=0509cd84fb';
-import { skeletonRows } from './skeleton.js?v=0509cd84fb';
+} from './nurse-ratio-view.js?v=6921db2fae';
+import { skeletonRows } from './skeleton.js?v=6921db2fae';
 
 const DATA_URL = 'data/nurse-ratio.json?v=5cc1ee8233';
 
@@ -276,7 +276,7 @@ function renderCityFilter() {
   el.innerHTML = `
     <button type="button" class="nurse-city-filter active" data-city="all">全部</button>
     ${sorted.map(([c, n]) => `
-      <button type="button" class="nurse-city-filter" data-city="${escapeHtml(c)}">${escapeHtml(c)} <span style="opacity:.6;font-size:0.78em;">${n}</span></button>
+      <button type="button" class="nurse-city-filter" data-city="${escapeHtml(c)}">${escapeHtml(c)} <span class="chip-count">${n}</span></button>
     `).join('')}
   `;
   el.querySelectorAll('.nurse-city-filter').forEach((btn) => {
@@ -378,11 +378,11 @@ function renderOverview() {
       const meta = COMPLIANCE_CLASSES[k];
       return `
         <div class="nurse-overview-kpi" style="border-color:${meta.color};">
-          <div class="nurse-overview-kpi-label" style="color:${meta.color};">
+          <div class="nurse-overview-kpi-label" style="color:${meta.text};">
             <span class="nurse-compliance-dot nurse-compliance-${k}"></span>
             ${meta.label}
           </div>
-          <div class="nurse-overview-kpi-num" style="color:${meta.color};">${n.toLocaleString()}</div>
+          <div class="nurse-overview-kpi-num" style="color:${meta.text};">${n.toLocaleString()}</div>
           <div class="nurse-overview-kpi-pct">${pct.toFixed(1)}%</div>
         </div>
       `;

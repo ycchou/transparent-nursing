@@ -1,8 +1,8 @@
 // 違規紀錄類頁面共用模組：CSV 抓取 / 解析 / cache / 通用工具
 // 給 violations.js (勞檢)、gender.js (性平)、osha.js (職安) 共用。
 
-import { getShort as getHospitalShort } from './hospital-shortname.js?v=0509cd84fb';
-import { normalizeInstitutionName } from './institution-name.js?v=0509cd84fb';
+import { getShort as getHospitalShort } from './hospital-shortname.js?v=6921db2fae';
+import { normalizeInstitutionName } from './institution-name.js?v=6921db2fae';
 
 // ============================================================
 // 通用工具
@@ -291,9 +291,9 @@ export function createCsvLoader(cfg) {
 //   records-table-container
 // ============================================================
 
-import { icon, renderIcons } from './icons.js?v=0509cd84fb';
-import { ensureTooltip } from './tooltip.js?v=0509cd84fb';
-import { pageSlice, renderPagination } from './pagination.js?v=0509cd84fb';
+import { icon, renderIcons } from './icons.js?v=6921db2fae';
+import { ensureTooltip } from './tooltip.js?v=6921db2fae';
+import { pageSlice, renderPagination } from './pagination.js?v=6921db2fae';
 
 // 違規機構名稱 → 機構代號 對照表（離線預建，供機構名稱連到整合檔案頁）
 let _violHospitalMap = null;
@@ -394,7 +394,7 @@ export function initRecordsPage(cfg) {
     if (!el) return;
     el.innerHTML = items.map((it) => {
       const tipAttr = it.tip ? `data-tip="${it.tip.replaceAll('"', '&quot;')}"` : '';
-      return `<span class="filter-chip ${state.location === it.slug ? 'active' : ''}" data-slug="${it.slug}" ${tipAttr}>${it.name} <span style="opacity:.6;font-size:0.78em;">${it.n}</span></span>`;
+      return `<span class="filter-chip ${state.location === it.slug ? 'active' : ''}" data-slug="${it.slug}" ${tipAttr}>${it.name} <span class="chip-count">${it.n}</span></span>`;
     }).join('');
     el.querySelectorAll('.filter-chip').forEach((chip) => {
       chip.addEventListener('click', () => {
@@ -418,7 +418,7 @@ export function initRecordsPage(cfg) {
     if (!el) return;
     el.innerHTML = items.map((it) => {
       const tipAttr = it.tip ? `data-tip="${it.tip}"` : '';
-      return `<span class="filter-chip ${state.article === it.slug ? 'active' : ''}" data-slug="${it.slug}" ${tipAttr}>${it.name} <span style="opacity:.6;font-size:0.78em;">${it.n}</span></span>`;
+      return `<span class="filter-chip ${state.article === it.slug ? 'active' : ''}" data-slug="${it.slug}" ${tipAttr}>${it.name} <span class="chip-count">${it.n}</span></span>`;
     }).join('');
     el.querySelectorAll('.filter-chip').forEach((chip) => {
       chip.addEventListener('click', () => {
@@ -493,10 +493,10 @@ export function initRecordsPage(cfg) {
             ${pageRows.map((r) => `
               <tr class="viol-row" data-id="${r.id}">
                 <td class="seq-col">#${r.id}</td>
-                <td><span class="viol-date">${r.penaltyDate ? formatROCDate(r.penaltyDate) : r.penaltyDateRaw || '—'}</span></td>
-                <td>${renderLocCell(r)}</td>
+                <td class="viol-date-cell"><span class="viol-date">${r.penaltyDate ? formatROCDate(r.penaltyDate) : r.penaltyDateRaw || '—'}</span></td>
+                <td class="viol-loc-cell">${renderLocCell(r)}</td>
                 <td class="viol-inst-cell">${instCell(r)}</td>
-                <td>${renderLawChips(r.articles, r.lawArticle)}</td>
+                <td class="viol-law-cell">${renderLawChips(r.articles, r.lawArticle)}</td>
                 <td class="viol-fine">${fmtFine(r.fine)}</td>
               </tr>
             `).join('')}
@@ -721,6 +721,7 @@ export function initRecordsPage(cfg) {
       if (cont) cont.innerHTML = `<div class="card" style="text-align:center;color:var(--danger);padding:40px 24px;">資料載入失敗：${e.message}</div>`;
       const cnt = document.getElementById('records-count');
       if (cnt) cnt.textContent = '載入失敗';
+      document.querySelectorAll('.kpi-skel').forEach((el) => { el.replaceWith('—'); });
     }
   };
 }

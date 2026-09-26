@@ -183,11 +183,11 @@ export function renderFinancialTrendChart(canvas, hospital, fields, opts = {}) {
         } },
       },
       scales: {
-        x: { grid: { display: false }, border: { color: '#E5E9F0' }, ticks: { color: '#6B7C93', font: { family: "'Noto Sans TC', sans-serif", size: 11 } } },
+        x: { grid: { display: false }, border: { color: '#E5E9F0' }, ticks: { color: '#4F5D72', font: { family: "'Noto Sans TC', sans-serif", size: 11 } } },
         y: {
           title: { display: true, text: axisTitle, color: '#46557A', font: { family: "'Noto Sans TC', sans-serif", size: 12 } },
           grid: { color: '#F1F3F7' }, border: { display: false },
-          ticks: { color: '#6B7C93', font: { family: "'Noto Sans TC', sans-serif", size: 11 } },
+          ticks: { color: '#4F5D72', font: { family: "'Noto Sans TC', sans-serif", size: 11 } },
         },
       },
     },

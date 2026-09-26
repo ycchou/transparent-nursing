@@ -298,9 +298,9 @@ const baseOpts = {
   },
   scales: {
     x: { grid: { display: false }, border: { color: '#E5E9F0' },
-         ticks: { color: '#6B7C93', font: { family: FONT_FAMILY, size: 11 } } },
+         ticks: { color: '#4F5D72', font: { family: FONT_FAMILY, size: 11 } } },
     y: { grid: { color: '#F1F3F7' }, border: { display: false },
-         ticks: { color: '#6B7C93', font: { family: FONT_FAMILY, size: 11 } } },
+         ticks: { color: '#4F5D72', font: { family: FONT_FAMILY, size: 11 } } },
   },
 };
 
@@ -674,7 +674,7 @@ export function chartWorkplaceRatio(canvas) {
                            font: { family: FONT_FAMILY, size: 11 } },
                   beginAtZero: false, suggestedMin: 8, suggestedMax: 20,
                   grid: { color: '#F1F3F7' }, border: { display: false },
-                  ticks: { color: '#6B7C93', font: { family: FONT_FAMILY, size: 11 },
+                  ticks: { color: '#4F5D72', font: { family: FONT_FAMILY, size: 11 },
                            callback: (v) => v + '%' } },
         yRight: { type: 'linear', position: 'right',
                   title: { display: true, text: '醫院 (%)', color: '#1D3557',
@@ -786,7 +786,7 @@ export function chartNetGrowth(canvas) {
         x: baseOpts.scales.x,
         y:  { type: 'linear', position: 'left', beginAtZero: true,
               grid: { color: '#F1F3F7' }, border: { display: false },
-              ticks: { color: '#6B7C93', font: { family: FONT_FAMILY, size: 11 },
+              ticks: { color: '#4F5D72', font: { family: FONT_FAMILY, size: 11 },
                        callback: (v) => v.toLocaleString() } },
         y1: { type: 'linear', position: 'right', beginAtZero: true, suggestedMax: 4,
               grid: { drawOnChartArea: false }, border: { display: false },
@@ -849,7 +849,7 @@ export function renderRegionalSalary(chipContainer, tableContainer) {
   const renderChips = () => {
     chipContainer.innerHTML = regions.map(([key, r]) => `
       <span class="filter-chip ${key === activeKey ? 'active' : ''}" data-key="${key}">
-        ${r.name} <span style="opacity:.6;font-size:0.78em;">${r.totalHospitals}</span>
+        ${r.name} <span class="chip-count">${r.totalHospitals}</span>
       </span>
     `).join('');
     chipContainer.querySelectorAll('.filter-chip').forEach((chip) => {

@@ -25,10 +25,10 @@ export const COLORS = {
 // 合規分類容差 ±5% 與四類標籤/顏色
 export const COMPLIANCE_TOLERANCE = 0.05;
 export const COMPLIANCE_CLASSES = {
-  A: { key: 'A', label: '達標', color: '#06A77D', bg: 'rgba(6,167,125,0.13)' },
-  B: { key: 'B', label: '觀察', color: '#F4A261', bg: 'rgba(244,162,97,0.15)' },
-  C: { key: 'C', label: '警戒', color: '#E63946', bg: 'rgba(230,57,70,0.13)' },
-  N: { key: 'N', label: '未報', color: '#6B7C93', bg: 'rgba(107,124,147,0.10)' },
+  A: { key: 'A', label: '達標', color: '#06A77D', text: '#05805F', bg: 'rgba(6,167,125,0.13)' },
+  B: { key: 'B', label: '觀察', color: '#F4A261', text: '#B45309', bg: 'rgba(244,162,97,0.15)' },
+  C: { key: 'C', label: '警戒', color: '#E63946', text: '#C62B37', bg: 'rgba(230,57,70,0.13)' },
+  N: { key: 'N', label: '未報', color: '#6B7C93', text: '#4F5D72', bg: 'rgba(107,124,147,0.10)' },
 };
 
 // ROC yyyymm → 顯示字串
@@ -176,7 +176,7 @@ export function renderNurseChart(canvas, hosp, months) {
           grid: { display: false },
           border: { color: '#E5E9F0' },
           ticks: {
-            color: '#6B7C93',
+            color: '#4F5D72',
             font: { family: "'Noto Sans TC', sans-serif", size: 10 },
             maxRotation: 45,
             minRotation: 0,
@@ -196,7 +196,7 @@ export function renderNurseChart(canvas, hosp, months) {
           beginAtZero: false,
           suggestedMin: 4,
           ticks: {
-            color: '#6B7C93',
+            color: '#4F5D72',
             font: { family: "'Noto Sans TC', sans-serif", size: 11 },
           },
         },

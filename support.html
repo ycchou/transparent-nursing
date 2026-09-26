@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#2E86AB" />
   <!-- 軟鎖總開關（js/gate.js）：鎖定期非公開頁導向 coming-soon -->
-  <script src="./js/gate.js?v=0509cd84fb"></script>
+  <script src="./js/gate.js?v=6921db2fae"></script>
 
   <title>支持我們 — 護理職場透明化運動</title>
   <meta name="description" content="這是一個不放廣告、不賣資料、不營利的平台，靠工會志工與小額捐款維持。了解捐款用途、為什麼由台灣呼吸治療產業工會代收，以及我們對中立性的承諾。" />
@@ -29,16 +29,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=148c7cc621" />
+  <link rel="stylesheet" href="css/styles.css?v=18404535ff" />
 
-  <link rel="modulepreload" href="./js/components.js?v=0509cd84fb" />
-  <link rel="modulepreload" href="./js/config.js?v=0509cd84fb" />
-  <link rel="modulepreload" href="./js/donate.js?v=0509cd84fb" />
-  <link rel="modulepreload" href="./js/env.js?v=0509cd84fb" />
-  <link rel="modulepreload" href="./js/icons.js?v=0509cd84fb" />
-  <link rel="modulepreload" href="./js/pwa-prompt.js?v=0509cd84fb" />
-  <link rel="modulepreload" href="./js/scroll-hint.js?v=0509cd84fb" />
-  <link rel="modulepreload" href="./js/toast.js?v=0509cd84fb" />
+  <link rel="modulepreload" href="./js/components.js?v=6921db2fae" />
+  <link rel="modulepreload" href="./js/config.js?v=6921db2fae" />
+  <link rel="modulepreload" href="./js/donate.js?v=6921db2fae" />
+  <link rel="modulepreload" href="./js/env.js?v=6921db2fae" />
+  <link rel="modulepreload" href="./js/icons.js?v=6921db2fae" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=6921db2fae" />
+  <link rel="modulepreload" href="./js/scroll-hint.js?v=6921db2fae" />
+  <link rel="modulepreload" href="./js/toast.js?v=6921db2fae" />
 </head>
 <body>
   <div id="app-header"></div>
@@ -47,7 +47,7 @@
   <div id="donate-thanks" style="display:none;">
     <div class="container container-narrow" style="padding-top:24px;">
       <div class="card card-flat" style="background:rgba(6,167,125,0.12);border:1px solid #06A77D;padding:16px 20px;">
-        <strong style="color:#06A77D;">💚 感謝你的支持！</strong>
+        <strong style="color:var(--success-text);">💚 感謝你的支持！</strong>
         你的捐款將協助這個平台持續運作下去。
       </div>
     </div>
@@ -57,7 +57,7 @@
   <section style="padding-top:48px;padding-bottom:8px;">
     <div class="container container-narrow">
       <span class="eyebrow">Support Us</span>
-      <h1 style="margin:4px 0 12px;">支持護理職場透明化平台</h1>
+      <h1 class="keep-words" style="margin:4px 0 12px;">支持<wbr>護理職場<wbr>透明化平台</h1>
       <p style="color:var(--ink-soft);line-height:1.85;font-size:1.05rem;">
         這個平台<strong style="color:var(--ink);">不放廣告、不賣資料、不營利</strong>。
         它靠工會志工的時間，和像你一樣的人的小額捐款，才得以持續運作。
@@ -187,9 +187,9 @@
   <div id="app-footer"></div>
 
   <script type="module">
-    import { mountLayout, ORGS } from './js/components.js?v=0509cd84fb';
-    import { renderIcons } from './js/icons.js?v=0509cd84fb';
-    import { mountDonate } from './js/donate.js?v=0509cd84fb';
+    import { mountLayout, ORGS } from './js/components.js?v=6921db2fae';
+    import { renderIcons } from './js/icons.js?v=6921db2fae';
+    import { mountDonate } from './js/donate.js?v=6921db2fae';
     mountLayout();
 
     // 捐款 widget（金額檔位 + 自訂 → 綠界）
