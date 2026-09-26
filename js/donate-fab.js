@@ -1,9 +1,10 @@
 // donate-fab.js — 右下角固定的浮動贊助入口（分享平台、機構總覽等頁共用）。
-// 重用捐款鈕同款白愛心（.donate-heart：emoji 🤍 + heartbeat 跳動）。
+// 重用捐款鈕同款白愛心（.donate-heart：SVG 實心愛心 + heartbeat 跳動）。
 // 固定右下角、不可拖曳；點擊 → 開內建捐款彈窗（重用 mountDonate widget）。
 // 可按關閉鍵：當天不再出現，隔天再跳出（localStorage，各頁共用同一 key）。
 
-import { mountDonate } from './donate.js?v=9ae01939b6';
+import { mountDonate } from './donate.js?v=cfa4c65344';
+import { icon } from './icons.js?v=cfa4c65344';
 
 const DEFAULT_LINK = 'support.html';
 const CLOSED_KEY = 'tn_fab_closed';
@@ -23,7 +24,7 @@ function ensureDonateModal() {
   backdrop.id = 'donate-modal';
   backdrop.innerHTML = `
     <div class="modal donate-modal-card" role="dialog" aria-modal="true" aria-label="支持我們">
-      <button type="button" class="modal-close donate-modal-close-btn" aria-label="關閉">✕</button>
+      <button type="button" class="modal-close donate-modal-close-btn" aria-label="關閉">${icon('x', { size: 18 })}</button>
       <h3 style="margin:0 0 6px;padding-right:40px;">支持平台走得更遠</h3>
       <p style="color:var(--muted);margin:0 0 18px;line-height:1.7;">選擇一個金額，用信用卡安全完成單筆捐款。</p>
       <div id="donate-widget-modal"></div>
@@ -67,7 +68,7 @@ export function mountDonateFab({ link = DEFAULT_LINK, onActivate } = {}) {
   fab.className = 'donate-fab';
   fab.innerHTML = `
     <button type="button" class="donate-fab-btn" aria-label="支持我們（前往捐款）">
-      <span class="donate-heart" aria-hidden="true">🤍</span>
+      <span class="donate-heart" aria-hidden="true">${icon('heart-full', { size: 20 })}</span>
     </button>
     <button type="button" class="donate-fab-close" aria-label="關閉">×</button>
   `;

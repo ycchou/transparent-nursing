@@ -1,13 +1,13 @@
 // 加護病房（ICU）自建表單：只定義 ICU 專屬區塊，其餘（機構基本資料 /
 // 業務與工時共用欄 / 薪資與年資 / 整體評價）沿用 form-sections.js 的共用正本。
 
-import { initDepartmentForm } from './form-engine.js?v=9ae01939b6';
+import { initDepartmentForm } from './form-engine.js?v=cfa4c65344';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
   SALARY_SECTION,
   EVALUATION_SECTION,
-} from './form-sections.js?v=9ae01939b6';
+} from './form-sections.js?v=cfa4c65344';
 
 // 護病比刻度：把「常態」與「最忙時」拆成兩個純數字維度，直觀且可統計。
 // （第一線值班護理人員：照顧病人床數，例：1:2 ＝ 1 名護理師顧 2 床）
@@ -18,7 +18,7 @@ const ICU_RATIO_PEAK = ['1:1', '1:2', '1:3', '1:4', '1:5 以上', '其他'];
 const RATIO_INTRO = `<strong>ICU 護病比設置標準與評鑑基準</strong><br><br>
 重點：加護病房<strong>每床應有 1.5 人以上</strong>（設置標準）；醫院評鑑必要條文對<strong>區域醫院要求每床 ≧ 2.0 人</strong>、地區醫院 1.5 人；健保「加護病床病房費及護理費」則依<strong>「加護病房評定」等級分級給付</strong>。
 <details style="margin-top:12px;">
-  <summary style="cursor:pointer;color:var(--primary);font-weight:600;">📖 點此查看完整法規／評鑑條文全文</summary>
+  <summary style="cursor:pointer;color:var(--primary);font-weight:600;"><span data-icon="book-open" data-size="16" class="ico-inline"></span>點此查看完整法規／評鑑條文全文</summary>
   <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.1);">
     <strong>1.《醫療機構設置標準》</strong><br>
     此為醫院設立特殊病床的基本法律底線，採「總床數配置比」而非日常三班護病比。<br>

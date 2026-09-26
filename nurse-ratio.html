@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#FFFFFF" />
   <!-- 軟鎖總開關（js/gate.js）：鎖定期非公開頁導向 coming-soon -->
-  <script src="./js/gate.js?v=9ae01939b6"></script>
+  <script src="./js/gate.js?v=cfa4c65344"></script>
 
   <!-- SEO -->
   <title>護病比 — 護理職場透明化運動</title>
@@ -44,18 +44,18 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=41269c68a1" />
+  <link rel="stylesheet" href="css/styles.css?v=8d6085b645" />
 
-  <link rel="modulepreload" href="./js/components.js?v=9ae01939b6" />
-  <link rel="modulepreload" href="./js/config.js?v=9ae01939b6" />
-  <link rel="modulepreload" href="./js/env.js?v=9ae01939b6" />
-  <link rel="modulepreload" href="./js/icons.js?v=9ae01939b6" />
-  <link rel="modulepreload" href="./js/nurse-ratio-view.js?v=9ae01939b6" />
-  <link rel="modulepreload" href="./js/nurse-ratio.js?v=9ae01939b6" />
-  <link rel="modulepreload" href="./js/pwa-prompt.js?v=9ae01939b6" />
-  <link rel="modulepreload" href="./js/scroll-hint.js?v=9ae01939b6" />
-  <link rel="modulepreload" href="./js/skeleton.js?v=9ae01939b6" />
-  <link rel="modulepreload" href="./js/toast.js?v=9ae01939b6" />
+  <link rel="modulepreload" href="./js/components.js?v=cfa4c65344" />
+  <link rel="modulepreload" href="./js/config.js?v=cfa4c65344" />
+  <link rel="modulepreload" href="./js/env.js?v=cfa4c65344" />
+  <link rel="modulepreload" href="./js/icons.js?v=cfa4c65344" />
+  <link rel="modulepreload" href="./js/nurse-ratio-view.js?v=cfa4c65344" />
+  <link rel="modulepreload" href="./js/nurse-ratio.js?v=cfa4c65344" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=cfa4c65344" />
+  <link rel="modulepreload" href="./js/scroll-hint.js?v=cfa4c65344" />
+  <link rel="modulepreload" href="./js/skeleton.js?v=cfa4c65344" />
+  <link rel="modulepreload" href="./js/toast.js?v=cfa4c65344" />
 
   <!-- JSON-LD Structured Data：Dataset -->
   <script type="application/ld+json">
@@ -218,7 +218,7 @@
   <section style="padding:0 0 56px;">
     <div class="container">
       <div id="hospital-placeholder" class="card card-flat" style="text-align:center;padding:48px 24px;color:var(--muted);">
-        <div style="font-size:2rem;margin-bottom:8px;">📊</div>
+        <div class="empty-icon"><span data-icon="bar-chart-3" data-size="26"></span></div>
         <div>從上方清單選擇一家醫院查看其三班護病比趨勢</div>
       </div>
 
@@ -282,9 +282,9 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js" defer></script>
   <script type="module">
-    import { mountLayout } from './js/components.js?v=9ae01939b6';
-    import { renderIcons } from './js/icons.js?v=9ae01939b6';
-    import { initNurseRatio } from './js/nurse-ratio.js?v=9ae01939b6';
+    import { mountLayout } from './js/components.js?v=cfa4c65344';
+    import { renderIcons } from './js/icons.js?v=cfa4c65344';
+    import { initNurseRatio } from './js/nurse-ratio.js?v=cfa4c65344';
 
     mountLayout();
     renderIcons();

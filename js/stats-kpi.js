@@ -1,7 +1,7 @@
 // 薪資百分位數 KPI 條 + 可拖曳浮動氣泡式薪資試算工具
 // 給 platform.html 使用：依目前篩選後的資料即時計算
-import { icon } from './icons.js?v=9ae01939b6';
-import { notePwaIntent } from './pwa-prompt.js?v=9ae01939b6';
+import { icon } from './icons.js?v=cfa4c65344';
+import { notePwaIntent } from './pwa-prompt.js?v=cfa4c65344';
 
 /** 線性插值法百分位數（標準 type-7） */
 export function percentile(sortedValues, p) {
@@ -252,11 +252,11 @@ export function mountSalaryCalculator(getRows, getConditions) {
 
     const edgeNote = belowMin
       ? `<div class="calc-edge-note">
-           ⚠️ 你輸入的數字低於目前篩選後的所有 ${salaries.length} 筆樣本（最低 ${minV} 萬）。可能原因：你的薪資真的偏低，建議查證合規；或目前樣本量還不夠涵蓋低薪段。
+           ${icon('alert-triangle', { size: 14, className: 'ico-inline' })}你輸入的數字低於目前篩選後的所有 ${salaries.length} 筆樣本（最低 ${minV} 萬）。可能原因：你的薪資真的偏低，建議查證合規；或目前樣本量還不夠涵蓋低薪段。
          </div>`
       : aboveMax
       ? `<div class="calc-edge-note">
-           ✨ 你輸入的數字高於目前篩選後的所有 ${salaries.length} 筆樣本（最高 ${maxV} 萬）。可能屬於高階／罕見職位，或樣本量還未涵蓋該段。
+           ${icon('sparkles', { size: 14, className: 'ico-inline' })}你輸入的數字高於目前篩選後的所有 ${salaries.length} 筆樣本（最高 ${maxV} 萬）。可能屬於高階／罕見職位，或樣本量還未涵蓋該段。
          </div>`
       : '';
 
@@ -314,12 +314,12 @@ export function mountSalaryCalculator(getRows, getConditions) {
     // edge note：隱私模式簡化
     const edgeNote = belowMin
       ? hideNumbers
-        ? `<div class="calc-edge-note">⚠️ 輸入值低於目前樣本範圍</div>`
-        : `<div class="calc-edge-note">⚠️ 你輸入的數字低於目前篩選後的所有 ${sampleN} 筆樣本（最低 ${minV} 萬）。可能原因：你的薪資真的偏低，建議查證合規；或目前樣本量還不夠涵蓋低薪段。</div>`
+        ? `<div class="calc-edge-note">${icon('alert-triangle', { size: 14, className: 'ico-inline' })}輸入值低於目前樣本範圍</div>`
+        : `<div class="calc-edge-note">${icon('alert-triangle', { size: 14, className: 'ico-inline' })}你輸入的數字低於目前篩選後的所有 ${sampleN} 筆樣本（最低 ${minV} 萬）。可能原因：你的薪資真的偏低，建議查證合規；或目前樣本量還不夠涵蓋低薪段。</div>`
       : aboveMax
       ? hideNumbers
-        ? `<div class="calc-edge-note">✨ 輸入值高於目前樣本範圍</div>`
-        : `<div class="calc-edge-note">✨ 你輸入的數字高於目前篩選後的所有 ${sampleN} 筆樣本（最高 ${maxV} 萬）。可能屬於高階／罕見職位，或樣本量還未涵蓋該段。</div>`
+        ? `<div class="calc-edge-note">${icon('sparkles', { size: 14, className: 'ico-inline' })}輸入值高於目前樣本範圍</div>`
+        : `<div class="calc-edge-note">${icon('sparkles', { size: 14, className: 'ico-inline' })}你輸入的數字高於目前篩選後的所有 ${sampleN} 筆樣本（最高 ${maxV} 萬）。可能屬於高階／罕見職位，或樣本量還未涵蓋該段。</div>`
       : '';
 
     // diffLine：隱私模式只留 %
@@ -374,11 +374,11 @@ export function mountSalaryCalculator(getRows, getConditions) {
         <div class="calc-share-bar">
           <label class="calc-privacy-toggle">
             <input type="checkbox" id="calc-privacy" ${hideNumbers ? 'checked' : ''} />
-            <span class="calc-privacy-icon">🔒</span>
+            <span class="calc-privacy-icon">${icon('lock', { size: 16 })}</span>
             <span>隱藏具體數字</span>
           </label>
           <button type="button" class="btn btn-primary calc-share-btn">
-            <span class="calc-share-icon">📷</span>
+            <span class="calc-share-icon">${icon('camera', { size: 16 })}</span>
             <span class="calc-share-label">產生分享圖</span>
           </button>
         </div>
@@ -477,7 +477,7 @@ export function mountSalaryCalculator(getRows, getConditions) {
     const barHtml = isEdge ? `
       <div style="padding:32px 28px;background:${verdictBg};border-radius:14px;text-align:center;">
         <div style="font-size:22px;color:${colorHex};font-weight:600;line-height:1.55;">
-          ${belowMin ? '⚠️ 輸入值低於目前樣本，可能薪資偏低或樣本量不足' : '✨ 輸入值高於目前樣本，可能為高階／罕見職位'}
+          ${belowMin ? `${icon('alert-triangle', { size: 22, className: 'ico-inline' })}輸入值低於目前樣本，可能薪資偏低或樣本量不足` : `${icon('sparkles', { size: 22, className: 'ico-inline' })}輸入值高於目前樣本，可能為高階／罕見職位`}
         </div>
       </div>
     ` : `
@@ -548,7 +548,7 @@ export function mountSalaryCalculator(getRows, getConditions) {
 
           <!-- Conditions -->
           <div style="padding-top:24px;border-top:1px dashed #E5E9F0;">
-            <div style="font-size:18px;color:#4F5D72;margin-bottom:14px;letter-spacing:0.08em;font-weight:600;">📍 比較條件</div>
+            <div style="font-size:18px;color:#4F5D72;margin-bottom:14px;letter-spacing:0.08em;font-weight:600;">${icon('map-pin', { size: 18, className: 'ico-inline' })}比較條件</div>
             <div style="display:flex;flex-wrap:wrap;align-items:flex-start;line-height:1.4;">
               ${condChipsHtml}
             </div>
@@ -596,7 +596,7 @@ export function mountSalaryCalculator(getRows, getConditions) {
       });
       const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 0.95));
       const dataUrl = canvas.toDataURL('image/png');
-      const { showSharePreview } = await import('./share-card.js?v=9ae01939b6');
+      const { showSharePreview } = await import('./share-card.js?v=cfa4c65344');
       showSharePreview(blob, dataUrl, `salary-percentile-${Date.now()}.png`);
       // 高意圖時刻：做完薪資試算並產生分享圖 → 當頁嘗試顯示安裝提示
       notePwaIntent('salary_calc', { showNow: true });

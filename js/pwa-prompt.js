@@ -5,7 +5,7 @@
 // - 本地埋點（trackPwa）：dispatch CustomEvent + localStorage 累計（未接外部服務）
 // import { initPWAPrompt, showInstallGuide, notePwaIntent, isAppInstalled } from './pwa-prompt.js?v=...';
 
-import { showToast } from './toast.js?v=9ae01939b6';
+import { showToast } from './toast.js?v=cfa4c65344';
 
 const DISMISS_KEY = '__nursing_pwa_dismissed';          // 最近一次關閉/延後的時間戳
 const DISMISS_COUNT_KEY = '__nursing_pwa_dismiss_count'; // 累計「主動關閉」次數
@@ -287,7 +287,7 @@ async function triggerNativeInstall() {
 export function showInstallGuide() {
   const platform = detectPlatform();
   if (platform === 'installed') {
-    showToast('你已經把這個網站加到主畫面囉 🎉', 'info');
+    showToast('你已經把這個網站加到主畫面囉', 'info');
     return;
   }
 

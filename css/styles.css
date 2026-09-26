@@ -2150,7 +2150,8 @@ body.viol-modal-open { overflow: hidden; }
   margin: 8px -8px 0;
 }
 .install-section-current h4::before {
-  content: '👉 ';
+  content: '→ ';
+  color: var(--primary);
 }
 
 /* ---------- Loading skeleton ---------- */
@@ -2413,6 +2414,7 @@ select.chart-select {
   transform-origin: center;
   animation: heartbeat 1.1s ease-in-out infinite;
 }
+.donate-heart svg { display: block; fill: currentColor; stroke: none; }
 .donate-submit:disabled .donate-heart { animation: none; }
 @keyframes heartbeat {
   0%, 100% { transform: scale(1); }
@@ -4614,6 +4616,9 @@ body.g2g-modal-open { overflow: hidden; }
 }
 .g2g-modal-backdrop.open .g2g-modal { transform: translateY(0) scale(1); }
 .g2g-modal-icon {
+  display: flex;
+  justify-content: center;
+  color: var(--warning-text);
   text-align: center;
   font-size: var(--fs-6xl);
   margin-bottom: 8px;
@@ -5574,7 +5579,7 @@ body.g2g-modal-open { overflow: hidden; }
   /* 導覽列收起時，這些元件跟著降下來 */
   body.has-bottom-nav .toast-host,
   body.has-bottom-nav .pwa-prompt,
-  body.has-bottom-nav .tn-mode-badge { transition: bottom .3s var(--ease); }
+  body.has-bottom-nav .tn-mode-badge { transition: bottom .5s cubic-bezier(0.32, 0.72, 0, 1); }
   body.bn-hidden .toast-host { bottom: calc(16px + var(--safe-b)); }
   body.bn-hidden .pwa-prompt { bottom: calc(12px + var(--safe-b)); }
   body.bn-hidden .tn-mode-badge { bottom: calc(8px + var(--safe-b)); }
@@ -5605,8 +5610,8 @@ body.g2g-modal-open { overflow: hidden; }
       0 0 0 0.5px rgba(29, 53, 87, 0.08),
       0 10px 30px rgba(29, 53, 87, 0.16),
       0 2px 6px rgba(29, 53, 87, 0.06);
-    transition: transform .32s cubic-bezier(0.32, 0.72, 0, 1), opacity .2s ease,
-                background-color .25s ease, border-color .25s ease, box-shadow .25s ease;
+    transition: transform .5s cubic-bezier(0.32, 0.72, 0, 1), opacity .35s ease,
+                background-color .3s ease, border-color .3s ease, box-shadow .3s ease;
     will-change: transform;
     touch-action: manipulation;
     user-select: none;
@@ -5757,16 +5762,24 @@ body.g2g-modal-open { overflow: hidden; }
   .bn-sheet-backdrop, .bn-sheet-body, .bn-icon, .bn-icon svg, .bottom-nav { transition: none; }
 }
 
-/* ---- 換頁過場（跨文件 View Transitions；Safari 18.2+／Chrome 126+，不支援的瀏覽器照常換頁） ----
-   header 與底部導覽列不參與淡入淡出，換頁時固定不動，內容區淡入——像 App 切分頁，而不是整頁白閃 */
-@media (prefers-reduced-motion: no-preference) {
-  @view-transition { navigation: auto; }
+
+/* ---------- 取代 emoji 的內嵌 SVG 圖示 ---------- */
+/* 文字前的小圖示：跟字同色、對齊字的 x-height */
+.ico-inline {
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: -0.15em;
+  margin-right: 0.3em;
 }
-.site-header { view-transition-name: site-header; }
-.bottom-nav { view-transition-name: bottom-nav; }
-::view-transition-old(site-header), ::view-transition-old(bottom-nav) { display: none; }
-::view-transition-new(site-header), ::view-transition-new(bottom-nav) { animation: none; }
-::view-transition-old(root) { animation: 120ms ease-out both vt-fade-out; }
-::view-transition-new(root) { animation: 200ms ease-out both vt-fade-in; }
-@keyframes vt-fade-out { to { opacity: 0; } }
-@keyframes vt-fade-in { from { opacity: 0; transform: translateY(6px); } }
+/* 空狀態的大圖示：淡色圓底 */
+.empty-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 10px;
+  border-radius: 50%;
+  background: rgba(35, 111, 143, 0.1);
+  color: var(--primary);
+}
+.calc-privacy-icon svg, .calc-share-icon svg, .modal-share-blocked svg { display: block; }

@@ -1,7 +1,8 @@
 // visits-chart.js — 近 30 天每日訪客折線圖彈窗（低調、點「累積人次」才開）。
 // 純內嵌 SVG，無外部依賴；重用站上既有 .modal-backdrop / .modal 樣式。
 
-import { getVisitHistory } from './visits.js?v=9ae01939b6';
+import { getVisitHistory } from './visits.js?v=cfa4c65344';
+import { icon } from './icons.js?v=cfa4c65344';
 
 // 依日期補齊近 n 天（缺的日補 0），回傳 [{ day:'MM/DD', full:'YYYY-MM-DD', count }]
 function fillDays(history, n) {
@@ -131,7 +132,7 @@ async function openModal() {
   const m = ensureModal();
   m.innerHTML = `
     <div class="modal vc-modal" role="dialog" aria-modal="true" aria-label="近 30 天訪客趨勢">
-      <button type="button" class="modal-close vc-close" aria-label="關閉">✕</button>
+      <button type="button" class="modal-close vc-close" aria-label="關閉">${icon('x', { size: 18 })}</button>
       <h3 style="margin:0 0 2px;">近 30 天訪客趨勢</h3>
       <p style="color:var(--muted);font-size:0.85rem;margin:0 0 14px;">每日不重複訪客（依裝置去重）</p>
       <div class="vc-body"><div class="vc-loading" style="color:var(--muted);text-align:center;padding:40px 0;">載入中…</div></div>

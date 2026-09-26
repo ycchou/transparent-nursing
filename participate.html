@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#FFFFFF" />
   <!-- 軟鎖總開關（js/gate.js）：鎖定期非公開頁導向 coming-soon -->
-  <script src="./js/gate.js?v=9ae01939b6"></script>
+  <script src="./js/gate.js?v=cfa4c65344"></script>
 
   <!-- SEO -->
   <title>填寫表單 — 護理職場透明化運動</title>
@@ -48,17 +48,17 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=41269c68a1" />
+  <link rel="stylesheet" href="css/styles.css?v=8d6085b645" />
 
     <!-- modulepreload：平行載入 ES module 鏈（首次造訪快 30-50%） -->
-  <link rel="modulepreload" href="./js/components.js?v=9ae01939b6" />
-  <link rel="modulepreload" href="./js/config.js?v=9ae01939b6" />
-  <link rel="modulepreload" href="./js/contribution-gate.js?v=9ae01939b6" />
-  <link rel="modulepreload" href="./js/env.js?v=9ae01939b6" />
-  <link rel="modulepreload" href="./js/icons.js?v=9ae01939b6" />
-  <link rel="modulepreload" href="./js/pwa-prompt.js?v=9ae01939b6" />
-  <link rel="modulepreload" href="./js/scroll-hint.js?v=9ae01939b6" />
-  <link rel="modulepreload" href="./js/toast.js?v=9ae01939b6" />
+  <link rel="modulepreload" href="./js/components.js?v=cfa4c65344" />
+  <link rel="modulepreload" href="./js/config.js?v=cfa4c65344" />
+  <link rel="modulepreload" href="./js/contribution-gate.js?v=cfa4c65344" />
+  <link rel="modulepreload" href="./js/env.js?v=cfa4c65344" />
+  <link rel="modulepreload" href="./js/icons.js?v=cfa4c65344" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=cfa4c65344" />
+  <link rel="modulepreload" href="./js/scroll-hint.js?v=cfa4c65344" />
+  <link rel="modulepreload" href="./js/toast.js?v=cfa4c65344" />
 
   <!-- 強制清除舊版 cache -->
   <script>
@@ -108,7 +108,7 @@
           <p>如果你已經透過表單分享過你的職場資訊，可以在這裡標記，解鎖分享平台的完整內容。</p>
         </div>
         <button type="button" id="g2g-claim-btn" class="btn btn-primary g2g-claim-btn">
-          ✓ 我已完成分享，解鎖分享平台
+          <span data-icon="check" data-size="16" class="ico-inline"></span>我已完成分享，解鎖分享平台
         </button>
       </div>
     </div>
@@ -251,10 +251,10 @@
   <div id="app-footer"></div>
 
   <script type="module">
-    import { CATEGORIES } from './js/config.js?v=9ae01939b6';
-    import { mountLayout } from './js/components.js?v=9ae01939b6';
-    import { icon, renderIcons } from './js/icons.js?v=9ae01939b6';
-    import { hasContributed, markContributed } from './js/contribution-gate.js?v=9ae01939b6';
+    import { CATEGORIES } from './js/config.js?v=cfa4c65344';
+    import { mountLayout } from './js/components.js?v=cfa4c65344';
+    import { icon, renderIcons } from './js/icons.js?v=cfa4c65344';
+    import { hasContributed, markContributed } from './js/contribution-gate.js?v=cfa4c65344';
 
     mountLayout();
 
@@ -300,7 +300,7 @@
           <p>如果你已經透過表單分享過你的職場資訊，可以在這裡標記，解鎖分享平台的完整內容。</p>
         </div>
         <button type="button" id="g2g-claim-btn" class="btn btn-primary g2g-claim-btn">
-          ✓ 我已完成分享，解鎖分享平台
+          ${icon('check', { size: 16, className: 'ico-inline' })}我已完成分享，解鎖分享平台
         </button>
       `;
       claimWrap.querySelector('#g2g-claim-btn').addEventListener('click', openConfirmModal);
@@ -319,7 +319,7 @@
       modal.setAttribute('aria-labelledby', 'g2g-modal-title');
       modal.innerHTML = `
         <div class="g2g-modal">
-          <div class="g2g-modal-icon">⚠️</div>
+          <div class="g2g-modal-icon">${icon('alert-triangle', { size: 44 })}</div>
           <h2 id="g2g-modal-title">真的要按下去嗎？</h2>
           <p>你正在看的每一筆薪資、護病比、夜班費、工時 — 都是另一位護理師在下班疲憊的時候，花了 3-5 分鐘真心打字填出來的。</p>
           <p><strong>他們填的當下沒有任何回報、沒有人看得到他們是誰，純粹是想著「至少讓下一個求職的同行不要再被騙」就送出了。</strong></p>
@@ -411,7 +411,7 @@
       claimWrap.classList.add('g2g-claimed');
       claimWrap.innerHTML = `
         <div class="g2g-self-claim-body">
-          <h3>✓ 已解鎖完整資料</h3>
+          <h3>${icon('check', { size: 18, className: 'ico-inline' })}已解鎖完整資料</h3>
           <p>感謝你的分享。<a href="platform.html">前往分享平台 →</a></p>
         </div>
       `;

@@ -1,12 +1,12 @@
 // 表格 / 卡片 渲染、排序、Modal
-import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=9ae01939b6';
-import { fmt, recommendPill, categoryTag } from './components.js?v=9ae01939b6';
-import { icon } from './icons.js?v=9ae01939b6';
-import { generateShareCard, showSharePreview } from './share-card.js?v=9ae01939b6';
-import { ensureTooltip } from './tooltip.js?v=9ae01939b6';
-import { pageSlice, renderPagination } from './pagination.js?v=9ae01939b6';
-import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=9ae01939b6';
-import { commentHtml, commentCellHtml, initCommentUnlock, isBlocked, escapeHtml } from './moderation.js?v=9ae01939b6';
+import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=cfa4c65344';
+import { fmt, recommendPill, categoryTag } from './components.js?v=cfa4c65344';
+import { icon } from './icons.js?v=cfa4c65344';
+import { generateShareCard, showSharePreview } from './share-card.js?v=cfa4c65344';
+import { ensureTooltip } from './tooltip.js?v=cfa4c65344';
+import { pageSlice, renderPagination } from './pagination.js?v=cfa4c65344';
+import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=cfa4c65344';
+import { commentHtml, commentCellHtml, initCommentUnlock, isBlocked, escapeHtml } from './moderation.js?v=cfa4c65344';
 
 // 顯示用機構名稱：對得上評鑑醫院時改用 VPN 簡稱，否則沿用原填寫名稱。
 function displayInstitutionName(name) {
@@ -30,7 +30,7 @@ function gateCtaHtml(shownCount, fullCount, isFilteredView) {
         目前顯示前 <strong>${shownCount}</strong> 筆 · 共 <strong>${fullCount}</strong> 筆${reasonText}
       </div>
       <a href="participate.html" class="btn btn-primary g2g-cta-btn">
-        📝 分享你的職場資訊，解鎖完整資料 →
+        ${icon('pencil-line', { size: 16, className: 'ico-inline' })}分享你的職場資訊，解鎖完整資料 →
       </a>
       <div class="g2g-cta-sub">完全匿名、3-5 分鐘填完。分享後即解鎖。</div>
     </div>
@@ -400,7 +400,7 @@ export function showDetailModal(row, opts = {}) {
         <div style="display:flex;gap:8px;align-items:flex-start;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end;">
           ${blocked ? `
             <div class="modal-share-blocked" title="短評經自動檢查判定可能違反使用規範，暫停對外分享">
-              <span aria-hidden="true">🔒</span>
+              <span aria-hidden="true">${icon('lock', { size: 14 })}</span>
               <span>此筆暫停分享</span>
             </div>` : `
           <button id="modal-copylink-btn" class="btn btn-secondary" style="padding:8px 14px;font-size:0.85rem;gap:6px;" title="複製這筆的永久連結">

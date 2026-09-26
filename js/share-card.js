@@ -1,6 +1,7 @@
 // 一鍵產生單筆資料分享圖片（1080 × 1350，IG 4:5 直式）
-import { getCategory } from './config.js?v=9ae01939b6';
-import { escapeHtml } from './moderation.js?v=9ae01939b6';
+import { getCategory } from './config.js?v=cfa4c65344';
+import { icon } from './icons.js?v=cfa4c65344';
+import { escapeHtml } from './moderation.js?v=cfa4c65344';
 
 const KEY_LABELS = {
   // ICU
@@ -296,8 +297,8 @@ export function showSharePreview(blob, dataUrl, filename) {
     a.href = url; a.download = filename;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-    status.style.color = 'var(--success)';
-    status.textContent = '✓ 圖片已下載到「下載」資料夾';
+    status.style.color = 'var(--success-text)';
+    status.innerHTML = `${icon('check', { size: 14, className: 'ico-inline' })}圖片已下載到「下載」資料夾`;
   });
 
   modal.querySelector('#share-copy').addEventListener('click', async () => {
@@ -305,7 +306,7 @@ export function showSharePreview(blob, dataUrl, filename) {
       if (!navigator.clipboard || !window.ClipboardItem) throw new Error('不支援');
       await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
       status.style.color = 'var(--success)';
-      status.textContent = '✓ 已複製，可直接貼到 LINE / FB / IG DM';
+      status.innerHTML = `${icon('check', { size: 14, className: 'ico-inline' })}已複製，可直接貼到 LINE / FB / IG DM`;
     } catch (e) {
       status.style.color = 'var(--danger)';
       status.textContent = '此瀏覽器不支援複製圖片，請改用下載';

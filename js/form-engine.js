@@ -2,13 +2,13 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=9ae01939b6';
-import { renderIcons, icon } from './icons.js?v=9ae01939b6';
-import { markContributed } from './contribution-gate.js?v=9ae01939b6';
-import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=9ae01939b6';
-import { showToast } from './toast.js?v=9ae01939b6';
-import { submitEndpoint as envSubmitEndpoint, turnstileSiteKey } from './env.js?v=9ae01939b6';
-import { notePwaIntent } from './pwa-prompt.js?v=9ae01939b6';
+import { mountLayout } from './components.js?v=cfa4c65344';
+import { renderIcons, icon } from './icons.js?v=cfa4c65344';
+import { markContributed } from './contribution-gate.js?v=cfa4c65344';
+import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=cfa4c65344';
+import { showToast } from './toast.js?v=cfa4c65344';
+import { submitEndpoint as envSubmitEndpoint, turnstileSiteKey } from './env.js?v=cfa4c65344';
+import { notePwaIntent } from './pwa-prompt.js?v=cfa4c65344';
 
 const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 避開易混字元 0/O/1/I/L
 let currentCaptcha = '';
@@ -462,7 +462,7 @@ function restoreDraftIfAny() {
 
   bannerHost.innerHTML = `
     <div class="dform-draft-banner" role="status">
-      <span>📝 偵測到 <strong>${ageText}</strong> 的未送出草稿，要繼續嗎？</span>
+      <span>${icon('pencil-line', { size: 16, className: 'ico-inline' })}偵測到 <strong>${ageText}</strong> 的未送出草稿，要繼續嗎？</span>
       <span style="display:inline-flex;gap:8px;">
         <button type="button" id="draft-restore">繼續</button>
         <button type="button" id="draft-discard">捨棄</button>
@@ -654,7 +654,7 @@ function showThanks(opts = {}) {
       </p>
       ${opts.blocked ? `
         <p class="dform-thanks-blocked">
-          🔒 你填寫的短評經自動檢查後判定可能違反平台使用規範，
+          ${icon('lock', { size: 16, className: 'ico-inline' })}你填寫的短評經自動檢查後判定可能違反平台使用規範，
           在分享平台上會先以模糊方式呈現；其餘欄位照常公開。
           若你認為判定有誤，可來信平台說明。
         </p>` : ''}
@@ -753,7 +753,7 @@ function attachInstitutionAutocomplete() {
   const hint = document.createElement('div');
   hint.className = 'dform-suggest-hint';
   hint.hidden = true;
-  hint.innerHTML = `💡 偵測到您選擇了 <strong>醫學中心 / 區域醫院 / 地區醫院</strong>，請優先從下拉建議中選取<strong>系統列出的完整名稱</strong>（依<a href="https://www.mohw.gov.tw/dl-99552-9299c250-c16f-4227-b655-506ad172b598.html" target="_blank" rel="noopener" class="dform-suggest-link">衛福部 108–114 年評鑑名單<span data-icon="arrow-up-right" data-size="11"></span></a>）；統一名稱可大幅提升資料統計與圖表的精準度。`;
+  hint.innerHTML = `${icon('lightbulb', { size: 16, className: 'ico-inline' })}偵測到您選擇了 <strong>醫學中心 / 區域醫院 / 地區醫院</strong>，請優先從下拉建議中選取<strong>系統列出的完整名稱</strong>（依<a href="https://www.mohw.gov.tw/dl-99552-9299c250-c16f-4227-b655-506ad172b598.html" target="_blank" rel="noopener" class="dform-suggest-link">衛福部 108–114 年評鑑名單<span data-icon="arrow-up-right" data-size="11"></span></a>）；統一名稱可大幅提升資料統計與圖表的精準度。`;
   nameField.insertBefore(hint, nameInput);
 
   // 把 input 包進 anchor 容器，讓建議下拉可以用 absolute 飄在底下不擠掉下方欄位
@@ -870,7 +870,7 @@ function attachInstitutionAutocomplete() {
     }
     if (crossLevel.length > 0) {
       html += `<div class="dform-suggest-divider">
-        ⚠️ 其他類別的同縣市醫院（您可能選錯機構類別）
+        ${icon('alert-triangle', { size: 14, className: 'ico-inline' })}其他類別的同縣市醫院（您可能選錯機構類別）
       </div>`;
       html += `<ul class="dform-suggest-list" role="listbox">${crossLevel.map((h) => itemHtml(h, true)).join('')}</ul>`;
     }
@@ -983,13 +983,13 @@ function attachInstitutionAutocomplete() {
     };
     let html = '';
     if (primary.length === 0 && crossLevel.length === 0) {
-      html = `<div class="dform-picker-empty">🔍 找不到符合的醫院<br><small>可調整關鍵字或點下方「找不到？自行輸入」</small></div>`;
+      html = `<div class="dform-picker-empty">${icon('search', { size: 16, className: 'ico-inline' })}找不到符合的醫院<br><small>可調整關鍵字或點下方「找不到？自行輸入」</small></div>`;
     } else {
       if (primary.length > 0) {
         html += `<ul class="dform-picker-list">${primary.map((h) => itemHtml(h, false)).join('')}</ul>`;
       }
       if (crossLevel.length > 0) {
-        html += `<div class="dform-picker-divider">⚠️ 其他類別的同縣市醫院（可能類別選錯）</div>`;
+        html += `<div class="dform-picker-divider">${icon('alert-triangle', { size: 14, className: 'ico-inline' })}其他類別的同縣市醫院（可能類別選錯）</div>`;
         html += `<ul class="dform-picker-list">${crossLevel.map((h) => itemHtml(h, true)).join('')}</ul>`;
       }
     }
