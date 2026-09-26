@@ -2,14 +2,14 @@
 //
 // 資料/圖表共用 js/financials-view.js；名稱↔代碼/簡稱重用 js/hospital-shortname.js
 
-import { renderIcons, icon } from './icons.js?v=324848e4a5';
-import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=324848e4a5';
+import { renderIcons, icon } from './icons.js?v=e6a94675a3';
+import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=e6a94675a3';
 import {
   ensureFinancialsLoaded, getAllFinancials, getFinancials, getFinancialFields,
   parseNum, formatVal, signClass, formatRocYear, renderFinancialTrendChart,
-} from './financials-view.js?v=324848e4a5';
-import { reportMergedInfo } from './hospital-merges.js?v=324848e4a5';
-import { skeletonRows } from './skeleton.js?v=324848e4a5';
+} from './financials-view.js?v=e6a94675a3';
+import { reportMergedInfo } from './hospital-merges.js?v=e6a94675a3';
+import { skeletonRows } from './skeleton.js?v=e6a94675a3';
 
 const LEVEL_ORDER = ['醫學中心', '區域醫院', '地區醫院', '精神科醫院', '精神科教學醫院', '診所', '其他'];
 const REGION_ORDER = ['臺北', '北區', '中區', '南區', '高屏', '東區'];
@@ -303,7 +303,7 @@ function modalHtml(h) {
             ${latest ? `<span class="nurse-level-badge nurse-level-${levelSlug(latest.HOSP_CNT_TYPNAM)}">${escapeHtml(latest.HOSP_CNT_TYPNAM)}</span>` : ''}
             ${latest && latest.REGION ? `<span class="nurse-level-badge nurse-level-other">${escapeHtml(latest.REGION)}</span>` : ''}
             <span style="color:var(--muted);font-size:0.85rem;">代號 ${escapeHtml(h.code)}${short && short !== h.name ? ' · ' + escapeHtml(short) : ''}
-            · <a href="hospital.html?code=${encodeURIComponent(h.code)}" style="color:var(--primary);text-decoration:underline;">機構總覽 →</a></span>
+            · <a href="hospital.html?code=${encodeURIComponent(h.code)}" class="link">機構總覽 →</a></span>
           </div>
         </div>
         <button class="modal-close" aria-label="關閉" style="flex:0 0 auto;order:0;">${icon('x', { size: 16 })}</button>

@@ -2,14 +2,14 @@
 // 資料：data/personnel-index.json（picker 清單）＋ data/personnel/{code}.json（單院時間序列）
 // 來源：衛福部「醫院醫事人力持續性監測結果」。
 
-import { renderIcons, icon } from './icons.js?v=324848e4a5';
-import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=324848e4a5';
+import { renderIcons, icon } from './icons.js?v=e6a94675a3';
+import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=e6a94675a3';
 import {
   CAT_COLORS, BED_COLORS, DEFAULT_ON, mLabel, baseLineCfg,
   renderStaffChart, renderBedChart, loadPersonnelHospital, latestMonthTable,
-} from './personnel-view.js?v=324848e4a5';
-import { showToast } from './toast.js?v=324848e4a5';
-import { skeletonRows } from './skeleton.js?v=324848e4a5';
+} from './personnel-view.js?v=e6a94675a3';
+import { showToast } from './toast.js?v=e6a94675a3';
+import { skeletonRows } from './skeleton.js?v=e6a94675a3';
 
 const INDEX_URL = 'data/personnel-index.json';
 const AGG_URL = 'data/personnel-aggregate.json';
@@ -158,7 +158,7 @@ async function selectHospital(id, updateUrl = false) {
   const branchNote = h.branch ? ` ｜ 院區：${escapeHtml(h.branch)}` : '';
   const profileCode = h.code || h.id;
   const profileLink = profileCode
-    ? `<div style="margin-top:4px;"><a href="hospital.html?code=${encodeURIComponent(profileCode)}" style="color:var(--primary);text-decoration:underline;text-underline-offset:2px;">查看機構總覽 →</a></div>`
+    ? `<div style="margin-top:4px;"><a href="hospital.html?code=${encodeURIComponent(profileCode)}" class="link">查看機構總覽 →</a></div>`
     : '';
   document.getElementById('pm-meta').innerHTML =
     `機構代號：${escapeHtml(h.code)}${branchNote} ｜ 資料期間：${mLabel(first)}–${mLabel(last)}（${h.months.length} 個月）${profileLink}`;
@@ -195,7 +195,7 @@ function renderBedWithEmpty(h) {
 function renderLatestTable(h) {
   const { monthLabel, tableHtml } = latestMonthTable(h);
   document.getElementById('pm-latest-title').innerHTML =
-    `<span data-icon="layout" data-size="16" style="color:var(--primary);vertical-align:middle;"></span> 最新月一覽（民國 ${monthLabel}）`;
+    `<span data-icon="layout" data-size="16" class="ico-primary"></span> 最新月一覽（民國 ${monthLabel}）`;
   document.getElementById('pm-latest').innerHTML = tableHtml;
 }
 

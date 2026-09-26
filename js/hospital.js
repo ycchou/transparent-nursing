@@ -5,9 +5,9 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { icon, renderIcons } from './icons.js?v=324848e4a5';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=324848e4a5';
-import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=324848e4a5';
+import { icon, renderIcons } from './icons.js?v=e6a94675a3';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=e6a94675a3';
+import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=e6a94675a3';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -15,23 +15,23 @@ import {
   shiftStatus,
   classifyHospital,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=324848e4a5';
-import { loadAll } from './data-loader.js?v=324848e4a5';
-import { renderKpiStrip } from './stats-kpi.js?v=324848e4a5';
-import { renderTable, showDetailModal } from './table.js?v=324848e4a5';
-import { hasContributed } from './contribution-gate.js?v=324848e4a5';
-import { notePwaIntent } from './pwa-prompt.js?v=324848e4a5';
+} from './nurse-ratio-view.js?v=e6a94675a3';
+import { loadAll } from './data-loader.js?v=e6a94675a3';
+import { renderKpiStrip } from './stats-kpi.js?v=e6a94675a3';
+import { renderTable, showDetailModal } from './table.js?v=e6a94675a3';
+import { hasContributed } from './contribution-gate.js?v=e6a94675a3';
+import { notePwaIntent } from './pwa-prompt.js?v=e6a94675a3';
 import {
   loadFinancialsHospital, getFinancialFields,
   formatVal as finFormatVal, signClass as finSignClass, formatRocYear as finRocYear,
   renderFinancialTrendChart,
-} from './financials-view.js?v=324848e4a5';
-import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=324848e4a5';
+} from './financials-view.js?v=e6a94675a3';
+import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=e6a94675a3';
 import {
   loadPersonnelHospital, ensurePersonnelIndex,
   renderStaffChart as renderPmStaffChart, renderBedChart as renderPmBedChart,
   latestMonthTable,
-} from './personnel-view.js?v=324848e4a5';
+} from './personnel-view.js?v=e6a94675a3';
 import {
   createCsvLoader,
   parseROCDate,
@@ -39,8 +39,8 @@ import {
   shortenLocation,
   fineToWan,
   formatROCDate,
-} from './records-common.js?v=324848e4a5';
-import { skeletonRows } from './skeleton.js?v=324848e4a5';
+} from './records-common.js?v=e6a94675a3';
+import { skeletonRows } from './skeleton.js?v=e6a94675a3';
 
 const MERGED_URL = 'data/hospitals-merged.json?v=05ee0dcd69';
 const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=bedb0c4373';
@@ -513,7 +513,7 @@ function renderFinancialsSection(code) {
     // 有本院財報（含財報合併提報之兩碼）：直接顯示，合併提報者加提示
     if (h && h.rows && h.rows.length) {
       const rm = reportMergedInfo(code);
-      const rmLink = rm ? ` <a href="hospital.html?code=${encodeURIComponent(rm.partner)}" style="color:var(--primary);text-decoration:underline;">查看 ${rm.partnerName} →</a>` : '';
+      const rmLink = rm ? ` <a href="hospital.html?code=${encodeURIComponent(rm.partner)}" class="link">查看 ${rm.partnerName} →</a>` : '';
       const note = rm
         ? (rm.main
           ? `本院財報與 <strong>${rm.partnerName}</strong> 合併提報，下列數字為兩院合計。${rmLink}`
@@ -529,7 +529,7 @@ function renderFinancialsSection(code) {
       loadFinancialsHospital(fm.parent).then((ph) => {
         if (state.currentCode !== code) return;
         if (ph && ph.rows && ph.rows.length) {
-          renderFinData(ph, `本院醫療費用併入 <strong>${fm.parentName}</strong> 合併申報，以下為 <strong>${fm.parentName}</strong> 之合併財報數據。 <a href="hospital.html?code=${encodeURIComponent(fm.parent)}" style="color:var(--primary);text-decoration:underline;">查看 ${fm.parentName} →</a>`, fm.parent);
+          renderFinData(ph, `本院醫療費用併入 <strong>${fm.parentName}</strong> 合併申報，以下為 <strong>${fm.parentName}</strong> 之合併財報數據。 <a href="hospital.html?code=${encodeURIComponent(fm.parent)}" class="link">查看 ${fm.parentName} →</a>`, fm.parent);
         } else {
           empty.innerHTML = `本院醫療費用併入 <strong>${fm.parentName}</strong> 合併申報，健保署未單獨公開本院財務。`;
           empty.hidden = false;
@@ -549,7 +549,7 @@ function renderPersonnelPanel(h, panel) {
   const latest = latestMonthTable(h);
   const latestBlock = latest.monthLabel ? `
     <h4 style="margin:24px 4px 4px;font-size:0.95rem;">
-      <span data-icon="layout" data-size="16" style="color:var(--primary);vertical-align:middle;"></span>
+      <span data-icon="layout" data-size="16" class="ico-primary"></span>
       最新月一覽（民國 ${latest.monthLabel}）
     </h4>
     <div class="data-table-wrap">${latest.tableHtml}</div>` : '';

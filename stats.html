@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#FFFFFF" />
   <!-- 軟鎖總開關（js/gate.js）：鎖定期非公開頁導向 coming-soon -->
-  <script src="./js/gate.js?v=324848e4a5"></script>
-  <script src="./js/shell.js?v=324848e4a5"></script>
+  <script src="./js/gate.js?v=e6a94675a3"></script>
+  <script src="./js/shell.js?v=e6a94675a3"></script>
 
   <!-- SEO -->
   <title>統計摘要 — 護理職場透明化運動</title>
@@ -49,20 +49,20 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=39843ece8f" />
+  <link rel="stylesheet" href="css/styles.css?v=39056b8763" />
 
     <!-- modulepreload：平行載入 ES module 鏈（首次造訪快 30-50%） -->
-  <link rel="modulepreload" href="./js/charts.js?v=324848e4a5" />
-  <link rel="modulepreload" href="./js/components.js?v=324848e4a5" />
-  <link rel="modulepreload" href="./js/config.js?v=324848e4a5" />
-  <link rel="modulepreload" href="./js/data-loader.js?v=324848e4a5" />
-  <link rel="modulepreload" href="./js/env.js?v=324848e4a5" />
-  <link rel="modulepreload" href="./js/icons.js?v=324848e4a5" />
-  <link rel="modulepreload" href="./js/official-stats.js?v=324848e4a5" />
-  <link rel="modulepreload" href="./js/pwa-prompt.js?v=324848e4a5" />
-  <link rel="modulepreload" href="./js/scroll-hint.js?v=324848e4a5" />
-  <link rel="modulepreload" href="./js/theme.js?v=324848e4a5" />
-  <link rel="modulepreload" href="./js/toast.js?v=324848e4a5" />
+  <link rel="modulepreload" href="./js/charts.js?v=e6a94675a3" />
+  <link rel="modulepreload" href="./js/components.js?v=e6a94675a3" />
+  <link rel="modulepreload" href="./js/config.js?v=e6a94675a3" />
+  <link rel="modulepreload" href="./js/data-loader.js?v=e6a94675a3" />
+  <link rel="modulepreload" href="./js/env.js?v=e6a94675a3" />
+  <link rel="modulepreload" href="./js/icons.js?v=e6a94675a3" />
+  <link rel="modulepreload" href="./js/official-stats.js?v=e6a94675a3" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=e6a94675a3" />
+  <link rel="modulepreload" href="./js/scroll-hint.js?v=e6a94675a3" />
+  <link rel="modulepreload" href="./js/theme.js?v=e6a94675a3" />
+  <link rel="modulepreload" href="./js/toast.js?v=e6a94675a3" />
 
   <!-- JSON-LD Structured Data：官方參考數據四份資料集 -->
   <script type="application/ld+json">
@@ -143,11 +143,11 @@
   <div id="app-header"></div>
   <script>TNShell.mount()</script>
 
-  <section style="padding-top:48px;padding-bottom:16px;">
+  <section class="page-head">
     <div class="container">
       <span class="eyebrow">Statistics</span>
-      <h1 style="margin:4px 0 8px;">統計摘要</h1>
-      <p style="color:var(--muted);max-width:680px;">
+      <h1 class="page-title">統計摘要</h1>
+      <p class="page-lede">
         以下圖表呈現所有分享資料的整體分布。可使用篩選器只看特定類別。
       </p>
     </div>
@@ -704,18 +704,18 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js" defer></script>
   <script type="module">
-    import { CATEGORIES } from './js/config.js?v=324848e4a5';
-    import { mountLayout } from './js/components.js?v=324848e4a5';
-    import { renderIcons } from './js/icons.js?v=324848e4a5';
-    import { loadAll, startAutoRefresh } from './js/data-loader.js?v=324848e4a5';
+    import { CATEGORIES } from './js/config.js?v=e6a94675a3';
+    import { mountLayout } from './js/components.js?v=e6a94675a3';
+    import { renderIcons } from './js/icons.js?v=e6a94675a3';
+    import { loadAll, startAutoRefresh } from './js/data-loader.js?v=e6a94675a3';
     import {
       chartCategoryDistribution, chartInstitutionStacked, chartHoursHistogram,
       chartOvertimePolicy, chartRecommend, chartAtmosphereByCategory,
       chartLocationDistribution, chartSalaryDistribution,
-    } from './js/charts.js?v=324848e4a5';
+    } from './js/charts.js?v=e6a94675a3';
     import {
       renderOfficialSourceA, renderOfficialSourceB, renderOfficialSourceC, renderOfficialSourceD,
-    } from './js/official-stats.js?v=324848e4a5';
+    } from './js/official-stats.js?v=e6a94675a3';
 
     mountLayout();
     renderIcons();

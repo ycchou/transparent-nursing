@@ -1,0 +1,24 @@
+/* ============================================================
+   頁首區塊：eyebrow ＋ h1 ＋ 導言 ＋ 資料來源說明（資料頁、表單頁、分享平台…共用）
+   <section class="page-head">
+     <div class="container">
+       <span class="eyebrow">…</span>
+       <h1 class="page-title">…</h1>
+       <p class="page-lede">…</p>
+       <p class="page-source">資料來源：<a class="link" …>…</a></p>
+   ============================================================ */
+.page-head { padding-top: 48px; padding-bottom: 16px; }
+.page-head--roomy { padding-bottom: 24px; }   /* 下方緊接分頁列／表單卡片時 */
+.page-head--tight { padding-bottom: 8px; }
+
+.page-title { margin: 4px 0 8px; }
+.page-title--spaced { margin-bottom: 12px; }
+
+.page-lede { color: var(--muted); line-height: 1.75; max-width: 760px; }
+.page-lede + .page-lede { margin-top: 10px; }
+
+.page-source { color: var(--muted-light); font-size: var(--fs-sm); line-height: 1.7; margin-top: 10px; }
+.page-source + .page-source { margin-top: 6px; }
+
+/* 內文裡的文字連結 */
+.link { color: var(--primary); text-decoration: underline; text-underline-offset: 2px; }

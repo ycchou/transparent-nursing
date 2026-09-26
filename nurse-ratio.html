@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#FFFFFF" />
   <!-- 軟鎖總開關（js/gate.js）：鎖定期非公開頁導向 coming-soon -->
-  <script src="./js/gate.js?v=324848e4a5"></script>
-  <script src="./js/shell.js?v=324848e4a5"></script>
+  <script src="./js/gate.js?v=e6a94675a3"></script>
+  <script src="./js/shell.js?v=e6a94675a3"></script>
 
   <!-- SEO -->
   <title>護病比 — 護理職場透明化運動</title>
@@ -45,19 +45,19 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=39843ece8f" />
+  <link rel="stylesheet" href="css/styles.css?v=39056b8763" />
 
-  <link rel="modulepreload" href="./js/components.js?v=324848e4a5" />
-  <link rel="modulepreload" href="./js/config.js?v=324848e4a5" />
-  <link rel="modulepreload" href="./js/env.js?v=324848e4a5" />
-  <link rel="modulepreload" href="./js/icons.js?v=324848e4a5" />
-  <link rel="modulepreload" href="./js/nurse-ratio-view.js?v=324848e4a5" />
-  <link rel="modulepreload" href="./js/nurse-ratio.js?v=324848e4a5" />
-  <link rel="modulepreload" href="./js/pwa-prompt.js?v=324848e4a5" />
-  <link rel="modulepreload" href="./js/scroll-hint.js?v=324848e4a5" />
-  <link rel="modulepreload" href="./js/skeleton.js?v=324848e4a5" />
-  <link rel="modulepreload" href="./js/theme.js?v=324848e4a5" />
-  <link rel="modulepreload" href="./js/toast.js?v=324848e4a5" />
+  <link rel="modulepreload" href="./js/components.js?v=e6a94675a3" />
+  <link rel="modulepreload" href="./js/config.js?v=e6a94675a3" />
+  <link rel="modulepreload" href="./js/env.js?v=e6a94675a3" />
+  <link rel="modulepreload" href="./js/icons.js?v=e6a94675a3" />
+  <link rel="modulepreload" href="./js/nurse-ratio-view.js?v=e6a94675a3" />
+  <link rel="modulepreload" href="./js/nurse-ratio.js?v=e6a94675a3" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=e6a94675a3" />
+  <link rel="modulepreload" href="./js/scroll-hint.js?v=e6a94675a3" />
+  <link rel="modulepreload" href="./js/skeleton.js?v=e6a94675a3" />
+  <link rel="modulepreload" href="./js/theme.js?v=e6a94675a3" />
+  <link rel="modulepreload" href="./js/toast.js?v=e6a94675a3" />
 
   <!-- JSON-LD Structured Data：Dataset -->
   <script type="application/ld+json">
@@ -102,16 +102,16 @@
   <div id="app-header"></div>
   <script>TNShell.mount()</script>
 
-  <section style="padding-top:48px;padding-bottom:16px;">
+  <section class="page-head">
     <div class="container">
       <span class="eyebrow">Nurse-to-Patient Ratio</span>
-      <h1 style="margin:4px 0 8px;">護病比</h1>
-      <p style="color:var(--muted);max-width:760px;line-height:1.75;">
+      <h1 class="page-title">護病比</h1>
+      <p class="page-lede">
         全國醫院<strong class="text-ink">白班 / 小夜班 / 大夜班</strong>三班護病比逐月變化，
         虛線標示<strong class="text-ink">衛福部公告護病比標準</strong>（依醫院層級不同）。
       </p>
-      <p style="color:var(--muted-light);font-size:0.85rem;margin-top:10px;">
-        資料來源：<a href="https://www.nhi.gov.tw/ch/cp-15138-b2fee-3669-1.html" target="_blank" rel="noopener" style="color:var(--primary);text-decoration:underline;text-underline-offset:2px;">衛生福利部・健保署公開資料</a>
+      <p class="page-source">
+        資料來源：<a href="https://www.nhi.gov.tw/ch/cp-15138-b2fee-3669-1.html" target="_blank" rel="noopener" class="link">衛生福利部・健保署公開資料</a>
         （全民健保特約醫院於 VPN 登錄之各月份急性一般病床三班護病比）
         <span id="nurse-data-updated"></span>
       </p>
@@ -126,7 +126,7 @@
     <div class="container">
       <div class="nurse-overview" id="nurse-overview">
         <div class="nurse-overview-title">
-          <span data-icon="info" data-size="14" style="color:var(--primary);vertical-align:middle;"></span>
+          <span data-icon="info" data-size="14" class="ico-primary"></span>
           全國護病比合規總覽
           <span class="nurse-overview-sub" id="nurse-overview-sub">—</span>
         </div>
@@ -143,7 +143,7 @@
     <div class="container">
       <details class="nurse-std-card nurse-std-details">
         <summary class="nurse-std-title">
-          <span data-icon="info" data-size="14" style="color:var(--primary);vertical-align:middle;"></span>
+          <span data-icon="info" data-size="14" class="ico-primary"></span>
           各級醫院三班護病比行政公告標準
           <span class="nurse-std-caret">▸</span>
         </summary>
@@ -285,9 +285,9 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js" defer></script>
   <script type="module">
-    import { mountLayout } from './js/components.js?v=324848e4a5';
-    import { renderIcons } from './js/icons.js?v=324848e4a5';
-    import { initNurseRatio } from './js/nurse-ratio.js?v=324848e4a5';
+    import { mountLayout } from './js/components.js?v=e6a94675a3';
+    import { renderIcons } from './js/icons.js?v=e6a94675a3';
+    import { initNurseRatio } from './js/nurse-ratio.js?v=e6a94675a3';
 
     mountLayout();
     renderIcons();

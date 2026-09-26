@@ -2,14 +2,14 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { C } from './theme.js?v=324848e4a5';
-import { mountLayout } from './components.js?v=324848e4a5';
-import { renderIcons, icon } from './icons.js?v=324848e4a5';
-import { markContributed } from './contribution-gate.js?v=324848e4a5';
-import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=324848e4a5';
-import { showToast } from './toast.js?v=324848e4a5';
-import { submitEndpoint as envSubmitEndpoint, turnstileSiteKey } from './env.js?v=324848e4a5';
-import { notePwaIntent } from './pwa-prompt.js?v=324848e4a5';
+import { C } from './theme.js?v=e6a94675a3';
+import { mountLayout } from './components.js?v=e6a94675a3';
+import { renderIcons, icon } from './icons.js?v=e6a94675a3';
+import { markContributed } from './contribution-gate.js?v=e6a94675a3';
+import { getShort as getHospitalShort, HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=e6a94675a3';
+import { showToast } from './toast.js?v=e6a94675a3';
+import { submitEndpoint as envSubmitEndpoint, turnstileSiteKey } from './env.js?v=e6a94675a3';
+import { notePwaIntent } from './pwa-prompt.js?v=e6a94675a3';
 
 const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 避開易混字元 0/O/1/I/L
 let currentCaptcha = '';

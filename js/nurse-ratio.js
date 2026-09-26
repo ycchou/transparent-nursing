@@ -6,7 +6,7 @@
 //     hospitals: [{ id, name, level, history: { "11207": {day, eve, night} } }]
 //   }
 
-import { renderIcons } from './icons.js?v=324848e4a5';
+import { renderIcons } from './icons.js?v=e6a94675a3';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -14,8 +14,8 @@ import {
   shiftStatus,
   classifyHospital as classifyHospitalView,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=324848e4a5';
-import { skeletonRows } from './skeleton.js?v=324848e4a5';
+} from './nurse-ratio-view.js?v=e6a94675a3';
+import { skeletonRows } from './skeleton.js?v=e6a94675a3';
 
 const DATA_URL = 'data/nurse-ratio.json?v=5cc1ee8233';
 
@@ -223,7 +223,7 @@ function renderDetail(hosp) {
   if (hosp.address) lines.push(`地址：${escapeHtml(hosp.address)}`);
   const profileCode = hosp.code || hosp.id;
   if (profileCode) {
-    lines.push(`<a href="hospital.html?code=${encodeURIComponent(profileCode)}" style="color:var(--primary);text-decoration:underline;text-underline-offset:2px;">查看機構總覽 →</a>`);
+    lines.push(`<a href="hospital.html?code=${encodeURIComponent(profileCode)}" class="link">查看機構總覽 →</a>`);
   }
   document.getElementById('hosp-code').innerHTML = lines.map((l) => `<div>${l}</div>`).join('');
 
