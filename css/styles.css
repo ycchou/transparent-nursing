@@ -160,23 +160,27 @@ h1, h2, h3, p, span, a {
   box-shadow: 0 1px 0 rgba(29, 53, 87, 0.04);
 }
 
+/* header 高度：桌機 64px、手機 52px（接近 iOS 導覽列的 44pt，把空間讓給內容） */
+:root { --header-h: 64px; }
+@media (max-width: 768px) { :root { --header-h: 52px; } }
+
 /* 給內容留出 header 高度，避免被遮住 */
 body {
-  padding-top: 64px;
+  padding-top: var(--header-h);
 }
 
 /* 錨點跳轉時不讓 header 蓋住目標 */
 :target,
 section[id],
 h1[id], h2[id], h3[id] {
-  scroll-margin-top: 80px;
+  scroll-margin-top: calc(var(--header-h) + 16px);
 }
 
 .site-header .nav-wrap {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 64px;
+  height: var(--header-h);
 }
 
 .site-logo {
@@ -197,6 +201,12 @@ h1[id], h2[id], h3[id] {
   display: grid;
   place-items: center;
   color: white;
+}
+/* 手機：logo 跟著 header 縮小 */
+@media (max-width: 768px) {
+  .site-logo { gap: 8px; font-size: var(--fs-body); }
+  .site-logo-mark { width: 28px; height: 28px; }
+  .site-logo-mark svg { width: 22px; height: 22px; }
 }
 
 .site-nav {
@@ -306,7 +316,7 @@ h1[id], h2[id], h3[id] {
   .site-nav {
     display: none;
     position: absolute;
-    top: 64px; left: 0; right: 0;
+    top: var(--header-h); left: 0; right: 0;
     background: var(--surface);
     flex-direction: column;
     align-items: stretch;   /* 手機：改左對齊全寬，與「資料查詢」群組一致 */
@@ -5416,7 +5426,7 @@ body.g2g-modal-open { overflow: hidden; }
 @media (max-width: 640px) {
   .jump-to-picker { display: inline-flex; width: 100%; justify-content: center; }
 }
-#hospital-picker { scroll-margin-top: 80px; }
+#hospital-picker { scroll-margin-top: calc(var(--header-h) + 16px); }
 
 /* KPI 數字載入骨架：跟「沒有資料」的「—」區分開 */
 .kpi-skel { display: inline-block; width: 3.2em; height: 0.9em; vertical-align: middle; border-radius: var(--radius-sm); }
