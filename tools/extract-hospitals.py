@@ -22,6 +22,11 @@ CODE_RE = re.compile(r'^\d{10}$')
 END_RE = re.compile(r'(?:醫院|中心|分院)(?:\s*[(（][^)）]*[)）])?\s*$|[)）]\s*$')
 PAREN_LIMIT_RE = re.compile(r'\s*[(（]\s*僅[^)）]*[)）]\s*$')
 
+# PDF 中錯列的（代號, 層級）組合，萃取時略過。
+# 汐止國泰（1131110516）是區域醫院；名單「醫學中心」那列把它跟臺北國泰總院的聯合評鑑列在一起
+# （地址、電話都是總院的），照抄會讓汐止國泰同時出現醫學中心與區域醫院兩筆。
+LEVEL_EXCLUDE = {('1131110516', '醫學中心')}
+
 
 def clean_name(name):
     return PAREN_LIMIT_RE.sub('', (name or '').strip()).strip()
@@ -95,6 +100,8 @@ def extract():
                         city = city_lines[i] if i < len(city_lines) else (city_lines[0] if city_lines else '')
                         addr = addresses[i] if i < len(addresses) else (addr_cell or '')
 
+                        if (code, level) in LEVEL_EXCLUDE:
+                            continue
                         key = (code, nm, city, level)
                         if key in seen:
                             continue
@@ -147,7 +154,7 @@ def write_outputs(records):
         json.dump(out, f, ensure_ascii=False, indent=2)
 
     with open('data/hospitals.csv', 'w', encoding='utf-8-sig', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=list(out['fields'].keys()))
+        writer = csv.DictWriter(f, fieldnames=list(out['fields'].keys()), lineterminator='\n')
         writer.writeheader()
         for r in records:
             writer.writerow(r)

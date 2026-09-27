@@ -2,7 +2,7 @@
   "source": "108-114年醫院評鑑及教學醫院評鑑(含兒醫)合格名單.pdf",
   "publisher": "衛生福利部",
   "extractedAt": "2026-06-19",
-  "total": 409,
+  "total": 408,
   "fields": {
     "code": "機構代碼（10 碼）",
     "name": "機構名稱",
@@ -1151,20 +1151,6 @@
       "teachingAccredPeriod": "113/1/1-118/12/31",
       "phone": "02-25433535、；02-28094661",
       "address": "臺北市中山區中山北路二段92號、新北市淡水 區民生路四十五號、民權路47號B1~11樓"
-    },
-    {
-      "code": "1131110516",
-      "name": "國泰醫療財團法人汐止國泰綜合醫院",
-      "city": "新北市",
-      "level": "醫學中心",
-      "hospitalAccredResult": "醫院評鑑優等（醫學中心）",
-      "teachingAccredResult": "醫師及醫事人員類教學醫院評鑑合格（醫學中心）",
-      "hospitalAccredYear": "112",
-      "teachingAccredYear": "112",
-      "hospitalAccredPeriod": "113/1/1-118/12/31",
-      "teachingAccredPeriod": "113/1/1-118/12/31",
-      "phone": "02-27082121、；02-26482121",
-      "address": "臺北市大安區仁愛路四段266巷6號、280號、 新北市汐止區建成路59巷2號地下4樓至地上12 樓"
     },
     {
       "code": "1331040513",

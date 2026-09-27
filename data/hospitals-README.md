@@ -29,7 +29,7 @@
 ## 與 `js/hospitals.js` 的差異
 
 - `js/hospitals.js` 是給前端 autocomplete 用的輕量版，只有 `{ name, city, level }`
-- 本目錄是完整版，保留全部 PDF 欄位（共 409 家）
+- 本目錄是完整版，保留全部 PDF 欄位（共 408 家）
 - 兩者醫院總數應一致，可用 `code` 互相對應
 
 ## 更新方式
