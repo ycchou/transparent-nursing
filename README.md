@@ -155,6 +155,14 @@
 - 託管：GitHub Pages（PWA，可加入主畫面）
 - 社群表單：目前用 Google Forms，未來規劃自建（部分已上線）
 
+**自動檢查**（push 到 main 時 GitHub Actions 會先跑，全部通過才部署；PR 也會跑）：
+
+| 檢查 | 指令 | 內容 |
+|---|---|---|
+| 產物一致性 | `build-css.py --check`、`build-forms.py --check`、`stamp-assets.py --check`、`validate-data.py` | 產生的檔案與原始碼一致、版本號最新、資料結構正確 |
+| 解析器測試 | `python -m unittest discover tests` | 固定的原始 PDF／ODS 解析結果須與 `tests/expected/` 相同；確認是應有的改變時跑 `python tests/test_parsers.py --update` |
+| 冒煙測試 | `node tools/smoke-test.mjs _site` | 開部署內容的每一頁（手機＋桌機）：無 JS 錯誤、無 404、外框與主要內容都在 |
+
 **視覺回歸檢查**（重構、整理 CSS 時用來確認畫面沒變）：
 
 ```bash

@@ -11,228 +11,65 @@
  *   node tools/visual-snapshot.mjs before index,stats   # 只截指定頁（也可指定情境名，如 hospital~chart）
  *   VISUAL_ROOT=/path/to/舊版 node tools/visual-snapshot.mjs before   # 對另一份程式截圖（例如 git worktree 的舊 commit）
  *
- * 除了每頁預設畫面，還有 SCENARIOS：用網址參數或點擊打開「互動後才出現」的畫面
- * （單一醫院的圖表、統計頁官方分頁、薪資試算、分享圖），整理圖表／分享圖程式時也能比對到。
- *
- * 為了讓「同一份程式截兩次得到完全相同的圖」，截圖時固定所有不穩定來源：
- *   · 測試資料（?data=mock）、每頁載入前清空 localStorage／sessionStorage
- *   · Math.random 改為固定種子、Date 固定在 2026-01-15 12:00（台北）
- *   · 擋掉線上訪客計數 API（workers.dev）
- *   · 關閉所有 CSS 動畫／過場、Chart.js 動畫，等字型與網路請求都靜止後才截
- *
- * 需要：Node 18+（內建 WebSocket／fetch）、Google Chrome（可用 CHROME_PATH 指定路徑）。
+ * 除了每頁預設畫面，還有互動情境（tools/lib/headless.mjs 的 SCENARIOS）：單一醫院的圖表、
+ * 統計頁官方分頁、薪資試算、分享圖。可重現性的處理（固定亂數／時間、關動畫…）也在該模組。
+ * 本站資源回應 4xx／5xx 時會列出並 exit 2（例如 build-site.py 的白名單漏了檔案）。
  */
-import { spawn } from 'node:child_process';
 import fs from 'node:fs';
-import http from 'node:http';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { REPO, VIEWPORTS, openSession, targets } from './lib/headless.mjs';
 
-const REPO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const ROOT = process.env.VISUAL_ROOT ? path.resolve(process.env.VISUAL_ROOT) : REPO;   // 要截圖的網站根目錄
+const ROOT = process.env.VISUAL_ROOT ? path.resolve(process.env.VISUAL_ROOT) : REPO;
 const label = process.argv[2];
 if (!label) {
   console.error('用法：node tools/visual-snapshot.mjs <標籤> [頁面,頁面…]');
   process.exit(1);
 }
 const OUT = path.join(REPO, '.build-cache', 'visual', label);
-const ALL_PAGES = fs.readdirSync(ROOT)
-  .filter((f) => f.endsWith('.html') && !/^platform-full-/.test(f))
-  .map((f) => f.replace(/\.html$/, ''))
-  .sort();
-// 互動情境：url 為相對路徑（會自動加 data=mock）；run 在頁面載入後執行（可 await），viewport 表示只截可視區（彈窗）
-const HOSP = '1132070011';   // 林口長庚：護病比、人力、財務資料都齊全
-const SCENARIOS = [
-  { name: 'hospital~chart', url: `hospital.html?code=${HOSP}` },
-  { name: 'nurse-ratio~chart', url: `nurse-ratio.html?id=${HOSP}` },
-  { name: 'personnel~chart', url: `personnel.html?code=${HOSP}` },
-  { name: 'financials~chart', url: `financials.html?code=${HOSP}` },
-  { name: 'stats~official', url: 'stats.html#official' },
-  { name: 'platform~calc', url: 'platform.html', viewport: true,
-    run: `click('#calc-trigger'); await wait(300); type('#calc-salary', '80'); click('#calc-go');` },
-  { name: 'platform~calc-share', url: 'platform.html', viewport: true,
-    run: `click('#calc-trigger'); await wait(300); type('#calc-salary', '80'); click('#calc-go'); await wait(500); click('.calc-share-btn'); await waitFor('img[alt*="預覽"]');` },
-  { name: 'platform~share', url: 'platform.html?id=1', viewport: true, run: `await wait(500); click('#modal-share-btn'); await waitFor('img[alt="分享圖片預覽"]');` },
-];
-const SCENARIO_HELPERS = `
-  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-  const click = (sel) => { const el = document.querySelector(sel); if (!el) throw new Error('找不到 ' + sel); el.click(); };
-  const type = (sel, v) => { const el = document.querySelector(sel); el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); };
-  // 等元素出現（圖片則等到載入完成）；html2canvas 產圖這類非網路的非同步工作要靠它
-  const waitFor = async (sel, ms = 20000) => {
-    const t0 = performance.now();
-    while (performance.now() - t0 < ms) {
-      const el = document.querySelector(sel);
-      if (el && (el.tagName !== 'IMG' || (el.complete && el.naturalWidth))) return el;
-      await wait(100);
-    }
-    throw new Error('等不到 ' + sel);
-  };`;
-const withMock = (u) => { const [base, hash] = u.split('#'); return `${base}${base.includes('?') ? '&' : '?'}data=mock${hash ? '#' + hash : ''}`; };
-const TARGETS = [
-  ...ALL_PAGES.map((p) => ({ name: p, url: `${p}.html` })),
-  ...SCENARIOS,
-];
-const PAGES = process.argv[3]
-  ? TARGETS.filter((t) => process.argv[3].split(',').includes(t.name))
-  : TARGETS;
-const VIEWPORTS = [
-  { name: 'm', width: 390, height: 844, mobile: true, dpr: 1 },
-  { name: 'd', width: 1280, height: 800, mobile: false, dpr: 1 },
-];
+const PAGES = targets(ROOT, process.argv[3]);
 const MAX_HEIGHT = 9000;   // 超長頁只截前段，避免單張圖過大
-
-// ---- 靜態伺服器（只讀 repo，綁 127.0.0.1）----
-const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css',
-  '.json': 'application/json', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.csv': 'text/csv',
-  '.webmanifest': 'application/manifest+json', '.ico': 'image/x-icon', '.pdf': 'application/pdf' };
-const server = http.createServer((req, res) => {
-  const p = decodeURIComponent(new URL(req.url, 'http://x').pathname);
-  const file = path.join(ROOT, p === '/' ? 'index.html' : p);
-  if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); res.end(); return; }
-  res.writeHead(200, { 'Content-Type': MIME[path.extname(file)] || 'application/octet-stream', 'Cache-Control': 'no-store' });
-  fs.createReadStream(file).pipe(res);
-});
-await new Promise((r) => server.listen(0, '127.0.0.1', r));
-const BASE = `http://127.0.0.1:${server.address().port}`;
-
-// ---- 啟動 headless Chrome ----
-const CHROME = process.env.CHROME_PATH || ['/usr/bin/google-chrome', '/usr/bin/chromium', '/usr/bin/chromium-browser',
-  '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', 'C:/Program Files/Google/Chrome/Application/chrome.exe']
-  .find((p) => fs.existsSync(p));
-if (!CHROME) { console.error('找不到 Chrome，請用 CHROME_PATH 指定'); process.exit(1); }
-fs.mkdirSync(path.join(REPO, '.build-cache'), { recursive: true });
-const profile = fs.mkdtempSync(path.join(REPO, '.build-cache', 'chrome-'));
-const chrome = spawn(CHROME, ['--headless=new', '--no-sandbox', '--hide-scrollbars', '--remote-debugging-port=0',
-  '--font-render-hinting=none', '--disable-gpu', '--no-first-run', `--user-data-dir=${profile}`, 'about:blank'],
-  { stdio: ['ignore', 'ignore', 'pipe'] });
-const wsUrl = await new Promise((resolve, reject) => {
-  let buf = '';
-  chrome.stderr.on('data', (d) => { buf += d; const m = buf.match(/DevTools listening on (ws:\/\/\S+)/); if (m) resolve(m[1]); });
-  setTimeout(() => reject(new Error('Chrome 啟動逾時')), 15000);
-});
-const cleanup = () => { try { chrome.kill(); } catch {} server.close(); fs.rmSync(profile, { recursive: true, force: true }); };
-
-// ---- CDP ----
-const browserPort = new URL(wsUrl).port;
-const tab = await (await fetch(`http://127.0.0.1:${browserPort}/json/new?about:blank`, { method: 'PUT' })).json();
-const ws = new WebSocket(tab.webSocketDebuggerUrl);
-await new Promise((r) => { ws.onopen = r; });
-let seq = 0;
-const pending = new Map();
-const missing = new Map();   // 本站資源回應 ≥ 400（例如 build-site.py 的白名單漏了檔案）：url → 出現頁面
-let currentTarget = '';
-const inflight = new Set();   // 以 requestId 追蹤；換頁時清空，被取消的舊請求不會卡住等待
-let lastNet = Date.now();
-ws.onmessage = (e) => {
-  const m = JSON.parse(e.data);
-  if (m.id && pending.has(m.id)) { pending.get(m.id)(m); pending.delete(m.id); return; }
-  if (m.method === 'Network.requestWillBeSent') { inflight.add(m.params.requestId); lastNet = Date.now(); }
-  // 收到回應標頭就算結束：背景預熱快取的 fetch() 不讀 body，永遠等不到 loadingFinished；
-  // 本機伺服器傳 body 幾乎不花時間，後面還有 800ms 靜止期，不影響截圖時機
-  if (m.method === 'Network.responseReceived' && m.params.response.status >= 400 && m.params.response.url.startsWith(BASE)) {
-    const u = m.params.response.url.slice(BASE.length).split('?')[0];
-    if (!missing.has(u)) missing.set(u, currentTarget);
-  }
-  if (['Network.responseReceived', 'Network.loadingFinished', 'Network.loadingFailed'].includes(m.method)) {
-    inflight.delete(m.params.requestId); lastNet = Date.now();
-  }
-};
-// 每個 CDP 指令最多等 30 秒：Chrome 偶爾不回應時不要整批卡死（逾時會讓該頁重試一次）
-const send = (method, params = {}, timeoutMs = 30000) => new Promise((resolve, reject) => {
-  const id = ++seq;
-  const timer = setTimeout(() => { pending.delete(id); reject(new Error(`${method} 逾時`)); }, timeoutMs);
-  pending.set(id, (m) => { clearTimeout(timer); m.error ? reject(new Error(`${method}: ${m.error.message}`)) : resolve(m.result); });
-  ws.send(JSON.stringify({ id, method, params }));
-});
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-
-// 每個新文件載入前注入：固定亂數與時間、關動畫
-const DETERMINISM = `
-(() => {
-  try { localStorage.clear(); sessionStorage.clear(); } catch {}   // 每頁都當第一次造訪（資料快取、已關閉的提示等全部歸零）
-  let s = 20260115;
-  Math.random = () => { s = (s * 1664525 + 1013904223) % 4294967296; return s / 4294967296; };
-  const FIXED = Date.UTC(2026, 0, 15, 4, 0, 0);
-  const RealDate = Date;
-  class FixedDate extends RealDate { constructor(...a) { super(...(a.length ? a : [FIXED])); } static now() { return FIXED; } }
-  window.Date = FixedDate;
-  let chartRef;
-  Object.defineProperty(window, 'Chart', { configurable: true,
-    get() { return chartRef; },
-    set(v) { chartRef = v; try { v.defaults.animation = false; v.defaults.animations = false; v.defaults.transitions = {}; } catch {} } });
-  // 關掉平滑捲動：網站設了 html{scroll-behavior:smooth}，否則截圖前的 scrollTo(0,0) 也會慢慢捲、截到一半
-  // 圖片改最近鄰縮放：縮小顯示的 logo 用平滑縮放時，headless Chrome 每次取樣結果略有不同（純雜訊）
-  const css = 'html{scroll-behavior:auto!important}img{image-rendering:pixelated!important}*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}';
-  const add = () => { const st = document.createElement('style'); st.textContent = css; document.documentElement.appendChild(st); };
-  if (document.documentElement) add(); else document.addEventListener('DOMContentLoaded', add);
-})();`;
-
-await send('Page.enable');
-await send('Network.enable');
-await send('Network.setBlockedURLs', { urls: ['*workers.dev*', '*googletagmanager*', '*google-analytics*'] });
-await send('Page.addScriptToEvaluateOnNewDocument', { source: DETERMINISM });
-
-async function waitQuiet(maxMs = 15000) {
-  const start = Date.now();
-  while (Date.now() - start < maxMs) {
-    if (inflight.size === 0 && Date.now() - lastNet > 800) break;
-    await sleep(100);
-  }
-  // 字型載完、所有圖片解碼完才截（否則縮小顯示的 logo 偶爾截到尚未完成高品質解碼的版本，像素每次略有不同）
-  await send('Runtime.evaluate', { expression: 'document.fonts.ready.then(() => Promise.all([...document.images].map((i) => i.decode().catch(() => {}))))', awaitPromise: true });
-  await sleep(400);
-}
 
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(OUT, { recursive: true });
+const s = await openSession({ root: ROOT });
 let n = 0;
 try {
   for (const vp of VIEWPORTS) {
-    await send('Emulation.setDeviceMetricsOverride', { width: vp.width, height: vp.height, deviceScaleFactor: vp.dpr, mobile: vp.mobile });
-    await send('Emulation.setTouchEmulationEnabled', { enabled: vp.mobile });
+    await s.setViewport(vp);
     for (const t of PAGES) {
-     for (let attempt = 1; ; attempt++) {
-     try {
-      currentTarget = t.name;
-      inflight.clear();
-      await send('Page.navigate', { url: `${BASE}/${withMock(t.url)}` });
-      await waitQuiet();
-      if (t.run) {
-        const r = await send('Runtime.evaluate', { expression: `(async () => { ${SCENARIO_HELPERS} ${t.run} })()`, awaitPromise: true });
-        if (r.exceptionDetails) console.warn(`\n⚠ ${t.name}：${r.exceptionDetails.exception?.description || r.exceptionDetails.text}`);
-        await waitQuiet();
+      for (let attempt = 1; ; attempt++) {
+        try {
+          const page = await s.load(t);
+          for (const e of page.errors.filter((x) => x.startsWith('情境步驟失敗'))) console.warn(`\n⚠ ${t.name}：${e}`);
+          let shot;
+          if (t.viewport) {
+            shot = await s.send('Page.captureScreenshot', { format: 'png' });
+          } else {
+            // 全頁截圖前捲回頂端：用網址打開醫院等情境會自動捲動，固定定位的 header 位置會隨捲動時間點而不同
+            await s.evaluate('window.scrollTo(0, 0); new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))');
+            const h = Math.min(await s.evaluate('Math.ceil(document.documentElement.scrollHeight)'), MAX_HEIGHT);
+            shot = await s.send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true,
+              clip: { x: 0, y: 0, width: vp.width, height: h, scale: 1 } });
+          }
+          fs.writeFileSync(path.join(OUT, `${t.name}@${vp.name}.png`), Buffer.from(shot.data, 'base64'));
+          break;
+        } catch (e) {
+          if (attempt >= 2) throw new Error(`${t.name}@${vp.name}：${e.message}`);
+          console.warn(`\n⚠ ${t.name}@${vp.name}：${e.message}，重試`);
+          await s.send('Page.navigate', { url: 'about:blank' }).catch(() => {});
+        }
       }
-      let shot;
-      if (t.viewport) {
-        shot = await send('Page.captureScreenshot', { format: 'png' });
-      } else {
-        // 全頁截圖前捲回頂端：用網址打開醫院等情境會自動捲動，固定定位的 header 位置會隨捲動時間點而不同
-        await send('Runtime.evaluate', { expression: 'window.scrollTo(0, 0); new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))', awaitPromise: true });
-        const { result } = await send('Runtime.evaluate', { expression: 'Math.ceil(document.documentElement.scrollHeight)', returnByValue: true });
-        const h = Math.min(result.value, MAX_HEIGHT);
-        shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true,
-          clip: { x: 0, y: 0, width: vp.width, height: h, scale: 1 } });
-      }
-      fs.writeFileSync(path.join(OUT, `${t.name}@${vp.name}.png`), Buffer.from(shot.data, 'base64'));
-      break;
-     } catch (e) {
-      if (attempt >= 2) throw new Error(`${t.name}@${vp.name}：${e.message}`);
-      console.warn(`\n⚠ ${t.name}@${vp.name}：${e.message}，重試`);
-      await send('Page.navigate', { url: 'about:blank' }).catch(() => {});
-     }
-     }
       n++;
       process.stdout.write(`\r截圖 ${n}/${PAGES.length * VIEWPORTS.length}  ${t.name}@${vp.name}        `);
     }
   }
   console.log(`\n✔ 已存到 ${path.relative(REPO, OUT)}/`);
-  if (missing.size) {
-    console.log(`⚠ 本站資源找不到（${missing.size}）：`);
-    for (const [u, where] of missing) console.log(`   ${u}  （${where}）`);
+  if (s.missing.size) {
+    console.log(`⚠ 本站資源找不到（${s.missing.size}）：`);
+    for (const [u, where] of s.missing) console.log(`   ${u}  （${where}）`);
     process.exitCode = 2;
   }
 } finally {
-  cleanup();
+  s.close();
 }
 process.exit(process.exitCode || 0);

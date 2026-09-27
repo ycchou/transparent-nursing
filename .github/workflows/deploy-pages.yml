@@ -45,8 +45,52 @@ jobs:
       - name: 資料結構驗證
         run: python tools/validate-data.py
 
+  # 資料解析器測試：固定的原始 PDF／ODS 解析結果必須與 tests/expected/ 相同
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: tests/requirements.txt
+
+      - name: 安裝解析器相依套件
+        run: pip install -r tests/requirements.txt
+
+      - name: 解析器測試
+        run: python -m unittest discover tests -v
+
+  # 冒煙測試：用 headless Chrome 開「實際要部署的內容」的每一頁（手機＋桌機），
+  # 確認沒有 JS 錯誤、沒有 404、外框與主要內容都有畫出來
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Setup Node（需 22+：內建 WebSocket）
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: 組出部署內容
+        run: python tools/build-site.py _site
+
+      - name: 冒煙測試
+        run: node tools/smoke-test.mjs _site
+
   deploy:
-    needs: check
+    needs: [check, test, smoke]
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
