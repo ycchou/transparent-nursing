@@ -1,5 +1,5 @@
 # 疑似醫院但未命中的違規機構名稱（189 筆）
-# 若確為評鑑醫院，可在 data/violations-hospital-overrides.json 補上 {"名稱": "代號"}。
+# 若確為評鑑醫院，可在 data/manual/violations-hospital-overrides.json 補上 {"名稱": "代號"}。
 
 乃榮醫療社團法人乃榮醫院(鄭乃榮)
 仁惠婦幼醫院(李中元)

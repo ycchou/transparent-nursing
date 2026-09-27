@@ -1,4 +1,4 @@
-import { C, alpha } from './theme.js?v=766b870c2f';
+import { C, alpha } from './theme.js?v=4ba0bc5986';
 // 醫院財務・共用視圖工具
 //
 // 供「醫院財務」頁（financials.js）與「機構總覽」頁（hospital.js）共用：

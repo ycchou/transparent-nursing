@@ -1,11 +1,11 @@
 // records-page.js — 違規紀錄頁（勞檢／性平／職安共用）的畫面：KPI、篩選、表格（手機為卡片）、分頁、詳情彈窗。
-import { getShort as getHospitalShort } from './hospital-shortname.js?v=766b870c2f';
-import { normalizeInstitutionName } from './institution-name.js?v=766b870c2f';
-import { icon, renderIcons } from './icons.js?v=766b870c2f';
-import { ensureTooltip } from './tooltip.js?v=766b870c2f';
-import { pageSlice, renderPagination } from './pagination.js?v=766b870c2f';
-import { escapeHtml } from './moderation.js?v=766b870c2f';
-import { formatROCDate, fmtFine, fineToWan, debounce } from './records-format.js?v=766b870c2f';
+import { getShort as getHospitalShort } from './hospital-shortname.js?v=4ba0bc5986';
+import { normalizeInstitutionName } from './institution-name.js?v=4ba0bc5986';
+import { icon, renderIcons } from './icons.js?v=4ba0bc5986';
+import { ensureTooltip } from './tooltip.js?v=4ba0bc5986';
+import { pageSlice, renderPagination } from './pagination.js?v=4ba0bc5986';
+import { escapeHtml } from './moderation.js?v=4ba0bc5986';
+import { formatROCDate, fmtFine, fineToWan, debounce } from './records-format.js?v=4ba0bc5986';
 
 // ============================================================
 // UI Factory：把 violations.html 那套 UI 提煉成可組態的 initRecordsPage
@@ -25,7 +25,7 @@ let _violHospitalMapLoading = null;
 function ensureViolHospitalMap() {
   if (_violHospitalMap) return Promise.resolve(_violHospitalMap);
   if (_violHospitalMapLoading) return _violHospitalMapLoading;
-  _violHospitalMapLoading = fetch('data/violations-hospital-map.json?v=bedb0c4373', { cache: 'default' })
+  _violHospitalMapLoading = fetch('data/violations-hospital-map.json?v=49366079f6', { cache: 'default' })
     .then((r) => (r.ok ? r.json() : { map: {} }))
     .then((d) => { _violHospitalMap = (d && d.map) || {}; return _violHospitalMap; })
     .catch(() => { _violHospitalMap = {}; return _violHospitalMap; });

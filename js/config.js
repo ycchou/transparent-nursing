@@ -2,8 +2,8 @@
 //
 // 資料來源由 js/env.js 的 MODE 決定：mock 讀下面的 csvUrlMock（data/mock/*.csv），
 // live 讀 env.js 的 LIVE.csvUrls（Google Sheet 發布 CSV）。這裡不必再改。
-import { C } from './theme.js?v=766b870c2f';
-import { csvUrlFor } from './env.js?v=766b870c2f';
+import { C } from './theme.js?v=4ba0bc5986';
+import { csvUrlFor } from './env.js?v=4ba0bc5986';
 
 export const SITE = {
   name: '護理職場透明化運動',
@@ -346,3 +346,12 @@ export function getAllFields(slug) {
   if (!cat) return COMMON_FIELDS;
   return [...COMMON_FIELDS, ...cat.specificFields];
 }
+
+// 違規紀錄（勞檢／性平／職安）的公開 Google Sheet（欄位 0–8 三支共用：id／地點／公告日／事業單位／處分日／文號／法條／法條說明／罰鍰）。
+// 違規紀錄頁、機構總覽、tools/build-violations-map.py 都讀這裡——換 Sheet 只改這一處。
+// storageKey 是瀏覽器端快取鍵，各頁共用同一份快取。
+export const VIOL_FEEDS = [
+  { key: 'labor', tag: '勞檢', lawShort: '勞基法', url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSRqnLPDCLdMztF2BjdA_W6jgZNahmxLmlOEz5C5Cg67WrMcy8O05Gb3jbizDrjr03O0tu-WQ2Qv9dN/pub?gid=190468784&single=true&output=csv', storageKey: 'nursing_viol_v2' },
+  { key: 'gender', tag: '性平', lawShort: '性平法', url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSpvfTkfNPgrf4dtpZrpRmign7EB9ISShRslgAhVcxRu-WO3G9I4W5efjSjMan_RnId0-rDvju4gzfy/pub?gid=1540285352&single=true&output=csv', storageKey: 'nursing_gender_v1' },
+  { key: 'osha', tag: '職安', lawShort: '職安法', url: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9_GMqmZfaampaPKcnetc5UqhvKueTvDYBO71LhKbTY9E1sdlie-wHM0krYmEkQFSurFRh-bdevS1_/pub?gid=1130584206&single=true&output=csv', storageKey: 'nursing_osha_v1' },
+];

@@ -6,7 +6,7 @@
 表單腳本不同。改共用部分只改樣板一處；新增表單類別：在 forms.json 加一筆＋寫 js/form-<slug>.js。
 
   · 不要直接改 participate-<slug>.html——下次建置會被覆蓋；validate-data.py 會檢查是否一致
-  · 產生時沿用現有頁面的 ?v= 雜湊，之後由 stamp-assets.py 依內容更新（build-all.py 會依序執行）
+  · 產生時沿用現有頁面的 modulepreload 清單與 ?v= 雜湊，之後由 stamp-assets.py 依內容更新（build-all.py 會依序執行）
 
 用法：python tools/build-forms.py [--check]   （--check：只檢查是否最新，過期時 exit 1）
 """
@@ -50,6 +50,16 @@ def sort_preloads(html):
     return '\n'.join(out[:-1])
 
 
+PRELOAD_BLOCK_RE = re.compile(r'(?:[ \t]*<link rel="modulepreload"[^>]*>\n)+')
+
+
+def keep_preloads(new, old):
+    """modulepreload 清單歸 stamp-assets.py 管（依實際 import 圖產生），沿用現有頁面的那一段；
+    否則拆／加模組後，樣板裡手寫的清單會跟頁面不一致、--check 永遠失敗。新頁面才用樣板的。"""
+    blk = PRELOAD_BLOCK_RE.search(old or '')
+    return PRELOAD_BLOCK_RE.sub(lambda _: blk.group(0), new, count=1) if blk else new
+
+
 def keep_versions(new, old):
     """沿用舊檔對同一資產的 ?v= 雜湊，產生的頁面立即可用（內容有變時 stamp-assets 會再更新）。"""
     ver = {m.group(1): m.group(0) for m in V_RE.finditer(old or '')}
@@ -70,7 +80,7 @@ def main():
     for form in forms:
         path = os.path.join(ROOT, f'participate-{form["slug"]}.html')
         old = open(path, encoding='utf-8').read() if os.path.exists(path) else None
-        new = keep_versions(sort_preloads(render(tpl, form)), old)
+        new = keep_versions(keep_preloads(sort_preloads(render(tpl, form)), old), old)
         if old is not None and strip_v(old) == strip_v(new):
             continue
         if check:

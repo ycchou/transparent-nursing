@@ -35,13 +35,17 @@ OVERRIDES_FILE = os.path.join(ROOT, 'data', 'manual', 'violations-hospital-overr
 OUT_MAP = os.path.join(ROOT, 'data', 'violations-hospital-map.json')
 OUT_UNMATCHED = os.path.join(ROOT, 'data', 'violations-hospital-map.unmatched.txt')
 
-# 三支違規 CSV published URL —— 須與 js/violations.js、js/gender.js、js/osha.js
-# 內的 CSV_URL 保持一致（若前端換 Sheet，這裡也要換）。
-FEEDS = {
-    'labor': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSRqnLPDCLdMztF2BjdA_W6jgZNahmxLmlOEz5C5Cg67WrMcy8O05Gb3jbizDrjr03O0tu-WQ2Qv9dN/pub?gid=190468784&single=true&output=csv',
-    'gender': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSpvfTkfNPgrf4dtpZrpRmign7EB9ISShRslgAhVcxRu-WO3G9I4W5efjSjMan_RnId0-rDvju4gzfy/pub?gid=1540285352&single=true&output=csv',
-    'osha': 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9_GMqmZfaampaPKcnetc5UqhvKueTvDYBO71LhKbTY9E1sdlie-wHM0krYmEkQFSurFRh-bdevS1_/pub?gid=1130584206&single=true&output=csv',
-}
+# 三支違規 CSV 的網址集中在 js/config.js 的 VIOL_FEEDS（前端與本工具共用；換 Sheet 只改那一處）
+def load_feeds():
+    with open(os.path.join(ROOT, 'js', 'config.js'), encoding='utf-8') as fp:
+        src = fp.read()
+    block = re.search(r"export const VIOL_FEEDS = \[(.*?)\n\];", src, re.S).group(1)
+    feeds = dict(re.findall(r"key: '(\w+)'.*?url: '([^']+)'", block))
+    assert set(feeds) == {'labor', 'gender', 'osha'}, f'js/config.js 的 VIOL_FEEDS 應有 labor／gender／osha：{sorted(feeds)}'
+    return feeds
+
+
+FEEDS = load_feeds()
 
 INSTITUTION_COL = 3   # 事業單位名稱 欄索引（三支皆為 index 3）
 JI_MAX_OWNER_LEN = 4  # 「X即Y」的負責人姓名長度上限

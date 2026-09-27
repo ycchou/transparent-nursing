@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-06T01:31:29.357134+08:00",
+  "generatedAt": "2026-09-27T13:21:05.824853+08:00",
   "note": "違規機構名稱 → 機構代號對照表；只含命中評鑑醫院者。由 tools/build-violations-map.py 產生。",
   "count": 473,
   "map": {

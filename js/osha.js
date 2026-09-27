@@ -2,12 +2,12 @@
 // 資料來源：勞動部職業安全衛生法違規紀錄
 // CSV 比勞檢多 3 欄：職業災害之罹災人數 / 發生日期 / 發生地點（位於備註前）
 
-import { parseROCDate, parseFine, extractLawArticles, shortenLocation, getCachedCount } from './records-format.js?v=766b870c2f';
-import { createCsvLoader } from './csv-loader.js?v=766b870c2f';
-import { initRecordsPage } from './records-page.js?v=766b870c2f';
+import { parseROCDate, parseFine, extractLawArticles, shortenLocation, getCachedCount } from './records-format.js?v=4ba0bc5986';
+import { createCsvLoader } from './csv-loader.js?v=4ba0bc5986';
+import { initRecordsPage } from './records-page.js?v=4ba0bc5986';
+import { VIOL_FEEDS } from './config.js?v=4ba0bc5986';
 
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9_GMqmZfaampaPKcnetc5UqhvKueTvDYBO71LhKbTY9E1sdlie-wHM0krYmEkQFSurFRh-bdevS1_/pub?gid=1130584206&single=true&output=csv';
-const STORAGE_KEY = 'nursing_osha_v1';
+const FEED = VIOL_FEEDS.find((x) => x.key === 'osha');   // Sheet 網址與快取鍵集中在 config.js
 const LOG_TAG = '[osha]';
 
 // 職業安全衛生法 條號 → 白話標籤
@@ -74,8 +74,8 @@ const extraModalFields = (row) => [
 ];
 
 const loader = createCsvLoader({
-  csvUrl: CSV_URL,
-  storageKey: STORAGE_KEY,
+  csvUrl: FEED.url,
+  storageKey: FEED.storageKey,
   logTag: LOG_TAG,
   parseRow,
 });
@@ -91,4 +91,4 @@ export const initOsha = initRecordsPage({
 });
 
 export function preloadOsha() { loader.preload(); }
-export function getOshaCount() { return getCachedCount(STORAGE_KEY); }
+export function getOshaCount() { return getCachedCount(FEED.storageKey); }

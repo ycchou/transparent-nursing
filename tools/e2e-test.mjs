@@ -7,6 +7,7 @@
  *   · 違規紀錄：篩選地點 → 筆數改變；下一頁 → 列表換頁；點一筆 → 詳情彈窗開關
  *   · 機構總覽：用網址開一家醫院 → 五個分頁逐一切換都有內容
  *   · 護病比：縣市／層級／合規篩選 → 醫院清單跟著變
+ *   · 機構名稱自動完成：選醫學中心＋地點 → 點欄位開出醫院選單 → 搜尋、點選帶入院名
  *   · 填寫表單：空白送出 → 標出錯誤；填完＋同意＋驗證碼 → 送出（測試模式）→ 感謝畫面；
  *     另測草稿：填一欄後重新整理 → 出現「繼續填寫」提示
  *   · 底部導覽列：打開「資料查詢」→ 點護病比 → 換到護病比頁
@@ -133,6 +134,36 @@ const FLOWS = [
       $('.dform-submit-btn').click();
       const thanks = await waitFor(() => visible($('.dform-thanks-modal')) && $('.dform-thanks-modal'));
       expect(thanks, '填完送出後沒有出現感謝畫面（仍有錯誤欄位：' + $$('.dform-field.has-error').map((e) => e.dataset.name).join('、') + '）');
+      return fails;`,
+  },
+  {
+    name: '機構名稱自動完成',
+    url: 'participate-icu.html',
+    run: `
+      await waitFor(() => $('#f-institutionName'));
+      const lv = $('.dform-field[data-name="institutionType"] input[value="醫學中心"]');
+      if (!expect(lv, '找不到機構層級「醫學中心」選項')) return fails;
+      lv.click();
+      // 手機底部選單要「層級＋地點」都選了才會開
+      const loc = $('#f-location');
+      if (!expect(loc, '找不到地點欄位')) return fails;
+      loc.value = [...loc.options].find((o) => o.value.includes('桃園'))?.value || loc.options[1].value;
+      loc.dispatchEvent(new Event('change', { bubbles: true }));
+      await wait(200);
+      if (!$('.dform-picker-sheet.open')) { $('#f-institutionName').focus(); $('#f-institutionName').click(); }
+      $('#f-institutionName').click();
+      // 手機：底部選單；桌機：下拉建議
+      const sheet = await waitFor(() => $('.dform-picker-sheet.open'));
+      if (!expect(sheet, '點機構名稱沒有打開醫院選單')) return fails;
+      const search = sheet.querySelector('.dform-picker-search');
+      search.value = '長庚'; search.dispatchEvent(new Event('input', { bubbles: true }));
+      const item = await waitFor(() => sheet.querySelector('.dform-picker-item'));
+      if (!expect(item, '搜尋「長庚」沒有出現醫院')) return fails;
+      expect(/長庚/.test(item.textContent), '搜尋結果不含「長庚」');
+      const name = item.dataset.name;
+      item.click();
+      await wait(300);
+      expect($('#f-institutionName').value === name, '點選醫院後欄位沒有帶入院名（' + $('#f-institutionName').value + '）');
       return fails;`,
   },
   {

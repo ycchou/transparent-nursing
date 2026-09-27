@@ -1,12 +1,12 @@
 // 性平紀錄頁面 — 使用共用的 records-page.js／csv-loader.js
 // 資料來源：勞動部性別平等工作法違規紀錄
 
-import { parseROCDate, parseFine, extractLawArticles, shortenLocation, getCachedCount } from './records-format.js?v=766b870c2f';
-import { createCsvLoader } from './csv-loader.js?v=766b870c2f';
-import { initRecordsPage } from './records-page.js?v=766b870c2f';
+import { parseROCDate, parseFine, extractLawArticles, shortenLocation, getCachedCount } from './records-format.js?v=4ba0bc5986';
+import { createCsvLoader } from './csv-loader.js?v=4ba0bc5986';
+import { initRecordsPage } from './records-page.js?v=4ba0bc5986';
+import { VIOL_FEEDS } from './config.js?v=4ba0bc5986';
 
-const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSpvfTkfNPgrf4dtpZrpRmign7EB9ISShRslgAhVcxRu-WO3G9I4W5efjSjMan_RnId0-rDvju4gzfy/pub?gid=1540285352&single=true&output=csv';
-const STORAGE_KEY = 'nursing_gender_v1';
+const FEED = VIOL_FEEDS.find((x) => x.key === 'gender');   // Sheet 網址與快取鍵集中在 config.js
 const LOG_TAG = '[gender]';
 
 // 性別平等工作法 條號 → 白話標籤
@@ -57,8 +57,8 @@ const parseRow = (r) => {
 };
 
 const loader = createCsvLoader({
-  csvUrl: CSV_URL,
-  storageKey: STORAGE_KEY,
+  csvUrl: FEED.url,
+  storageKey: FEED.storageKey,
   logTag: LOG_TAG,
   parseRow,
 });
@@ -73,4 +73,4 @@ export const initGender = initRecordsPage({
 });
 
 export function preloadGender() { loader.preload(); }
-export function getGenderCount() { return getCachedCount(STORAGE_KEY); }
+export function getGenderCount() { return getCachedCount(FEED.storageKey); }
