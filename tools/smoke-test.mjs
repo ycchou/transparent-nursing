@@ -75,7 +75,7 @@ try {
     }
   }
 } finally {
-  s.close();
+  await s.close();
 }
 for (const [u, where] of s.missing) failures.push(`${where}：本站資源找不到 ${u}`);
 

@@ -105,8 +105,13 @@ function findChrome() {
 
 async function launchChrome(profile) {
   const chrome = spawn(findChrome(), ['--headless=new', '--no-sandbox', '--hide-scrollbars', '--remote-debugging-port=0',
-    '--font-render-hinting=none', '--disable-gpu', '--no-first-run', `--user-data-dir=${profile}`, 'about:blank'],
-    { stdio: ['ignore', 'ignore', 'pipe'] });
+    '--font-render-hinting=none', '--disable-gpu', '--no-first-run', '--no-default-browser-check',
+    // 關掉 Chrome 自己的背景連線（元件更新、拼字字典下載、翻譯…）：對測試無用、會在關閉後還寫檔
+    '--disable-background-networking', '--disable-component-update', '--disable-sync', '--disable-default-apps',
+    '--disable-spell-checking', '--disable-features=Translate,OptimizationHints,MediaRouter,DownloadBubble',
+    `--user-data-dir=${profile}`, 'about:blank'],
+    // detached：Chrome 自成一個程序群組，關閉時可以連子程序（繪圖、zygote…）一起結束
+    { stdio: ['ignore', 'ignore', 'pipe'], detached: process.platform !== 'win32' });
   const wsUrl = await new Promise((resolve, reject) => {
     let buf = '';
     chrome.stderr.on('data', (d) => { buf += d; const m = buf.match(/DevTools listening on (ws:\/\/\S+)/); if (m) resolve(m[1]); });
@@ -134,14 +139,32 @@ export async function openSession({ root = REPO } = {}) {
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   const base = `http://127.0.0.1:${server.address().port}`;
 
-  fs.mkdirSync(path.join(REPO, '.build-cache'), { recursive: true });
-  const profile = fs.mkdtempSync(path.join(REPO, '.build-cache', 'chrome-'));
+  const cacheDir = path.join(REPO, '.build-cache');
+  fs.mkdirSync(cacheDir, { recursive: true });
+  // 清掉一小時前留下的暫存設定檔（關閉時偶爾刪不乾淨：Chrome 的子程序晚一步才寫完檔）
+  for (const d of fs.readdirSync(cacheDir)) {
+    const full = path.join(cacheDir, d);
+    try {
+      if (d.startsWith('chrome-') && Date.now() - fs.statSync(full).mtimeMs > 3600e3) fs.rmSync(full, { recursive: true, force: true });
+    } catch {}
+  }
+  const profile = fs.mkdtempSync(path.join(cacheDir, 'chrome-'));
   let launched;
   for (let i = 1; ; i++) {   // Chrome 偶爾第一次啟動失敗，重試一次
     try { launched = await launchChrome(profile); break; } catch (e) { if (i >= 2) throw e; await sleep(1000); }
   }
   const { chrome, wsUrl } = launched;
-  const close = () => { try { chrome.kill(); } catch {} server.close(); fs.rmSync(profile, { recursive: true, force: true }); };
+  // 關閉：先等 Chrome 真的結束再刪暫存設定檔（kill 之後 Chrome 還會寫一下檔，立刻刪會 ENOTEMPTY）；
+  // 清理失敗不影響結果
+  const close = async () => {
+    server.close();
+    if (chrome.exitCode === null) {
+      const exited = new Promise((r) => chrome.once('exit', r));
+      try { process.platform === 'win32' ? chrome.kill() : process.kill(-chrome.pid, 'SIGTERM'); } catch { try { chrome.kill(); } catch {} }
+      await Promise.race([exited, sleep(5000)]);
+    }
+    try { fs.rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 300 }); } catch {}
+  };
 
   const port = new URL(wsUrl).port;
   const tab = await (await fetch(`http://127.0.0.1:${port}/json/new?about:blank`, { method: 'PUT' })).json();

@@ -70,6 +70,6 @@ try {
     process.exitCode = 2;
   }
 } finally {
-  s.close();
+  await s.close();
 }
 process.exit(process.exitCode || 0);
