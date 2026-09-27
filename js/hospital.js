@@ -5,15 +5,15 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { renderIcons } from './icons.js?v=9b18d8af87';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=9b18d8af87';
+import { renderIcons } from './icons.js?v=cc7357b8c8';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=cc7357b8c8';
 
-import { notePwaIntent } from './pwa-prompt.js?v=9b18d8af87';
+import { notePwaIntent } from './pwa-prompt.js?v=cc7357b8c8';
 
-import { skeletonRows } from './skeleton.js?v=9b18d8af87';
-import { escapeHtml } from './moderation.js?v=9b18d8af87';
-import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=9b18d8af87';
-import { state, loadBaseData } from './hospital-data.js?v=9b18d8af87';
+import { skeletonRows } from './skeleton.js?v=cc7357b8c8';
+import { escapeHtml } from './moderation.js?v=cc7357b8c8';
+import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=cc7357b8c8';
+import { state, loadBaseData } from './hospital-data.js?v=cc7357b8c8';
 import {
   renderNurseSection,
   renderFinancialsSection,
@@ -21,7 +21,7 @@ import {
   renderPlatformSection,
   renderViolationsSection,
   copyOrShare,
-} from './hospital-sections.js?v=9b18d8af87';
+} from './hospital-sections.js?v=cc7357b8c8';
 
 // ---------- utils ----------
 function parseDeepLinkCode() {

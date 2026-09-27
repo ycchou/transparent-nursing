@@ -1,13 +1,13 @@
 // form-institution-picker.js — 表單的「機構名稱」自動建議：依選的機構層級篩選醫院（手機為底部選單），
 // 清單來自 data/hospitals-master.json（評鑑名單＋VPN 補充）。
 
-import { icon } from './icons.js?v=9b18d8af87';
+import { icon } from './icons.js?v=cc7357b8c8';
 
-import { HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=9b18d8af87';
+import { HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=cc7357b8c8';
 
-import { escapeHtml } from './moderation.js?v=9b18d8af87';
+import { escapeHtml } from './moderation.js?v=cc7357b8c8';
 
-import { showToast } from './toast.js?v=9b18d8af87';
+import { showToast } from './toast.js?v=cc7357b8c8';
 
 // ===== 機構名稱 autocomplete（依評鑑等級篩選醫院）=====
 
@@ -31,34 +31,54 @@ fetch('data/hospitals-master.json?v=71068a4948')
   .catch((e) => console.warn('[form] 機構主檔載入失敗:', e.message));
 window.addEventListener('hospitalShortNamesReady', reRenderPickerIfOpen);
 
-// 機構名稱對得到主檔時，回傳系統記載的評鑑層級（對不到回傳 null）。
-// 同名多筆且層級不同時（主檔目前沒有，保險起見），用戶目前選的若在其中就沿用，否則取第一筆。
-export function systemLevelFor(name, currentLevel = '') {
-  const n = String(name || '').trim();
-  if (!n) return null;
-  const levels = [...new Set(HOSPITALS_ALL.filter((h) => h.name === n).map((h) => h.level))];
-  if (!levels.length) return null;
-  return levels.includes(currentLevel) ? currentLevel : levels[0];
+// 將「臺北 / 臺中 / 臺南」等正規化為「台北 / 台中 / 台南」以對齊表單下拉
+function normalizeCity(s) {
+  return String(s || '').replace(/臺/g, '台');
 }
 
-// 機構類別與系統記載不一致時，一律改成系統的層級；回傳是否有更正。
-// preferLevel：用戶從下拉點選的那一筆的層級（同名多筆時以點選的為準）。
+// 機構名稱對得到主檔時，回傳系統記載的 { level, city }（對不到回傳 null）。
+// 同名多筆且層級不同時（主檔目前沒有，保險起見），用戶目前選的層級若在其中就沿用，否則取第一筆。
+export function systemRecordFor(name, currentLevel = '') {
+  const n = String(name || '').trim();
+  if (!n) return null;
+  const hits = HOSPITALS_ALL.filter((h) => h.name === n);
+  if (!hits.length) return null;
+  const h = hits.find((x) => x.level === currentLevel) || hits[0];
+  return { level: h.level, city: normalizeCity(h.city) };
+}
+
+// 機構類別／縣市與系統記載不一致（或縣市還沒選）時，一律改成系統的值；回傳是否有更動。
+// prefer：用戶從下拉點選的那一筆（同名多筆時以點選的為準）。
 let suppressAutoOpen = false;
-export function syncInstitutionLevel(preferLevel = '') {
+export function syncInstitutionLevel(prefer = {}) {
   const nameInput = document.getElementById('f-institutionName');
   const current = document.querySelector('input[name="institutionType"]:checked');
   const currentLevel = current ? current.value : '';
-  const level = preferLevel || systemLevelFor(nameInput && nameInput.value, currentLevel);
-  if (!level || level === currentLevel) return false;
-  const target = document.querySelector(`input[name="institutionType"][value="${level}"]`);
-  if (!target) return false;
-  target.checked = true;
+  const rec = prefer.level ? prefer : systemRecordFor(nameInput && nameInput.value, currentLevel);
+  if (!rec) return false;
+
+  const notes = [];
   // 補派 change 讓表單樣式／草稿更新，但不要因此重新彈出建議清單
   suppressAutoOpen = true;
-  target.dispatchEvent(new Event('change', { bubbles: true }));
+  if (rec.level !== currentLevel) {
+    const target = document.querySelector(`input[name="institutionType"][value="${rec.level}"]`);
+    if (target) {
+      target.checked = true;
+      target.dispatchEvent(new Event('change', { bubbles: true }));
+      notes.push(`機構類別「${rec.level}」`);
+    }
+  }
+  const locSel = document.getElementById('f-location');
+  const city = normalizeCity(rec.city);
+  if (locSel && city && locSel.value !== city && [...locSel.options].some((o) => o.value === city)) {
+    locSel.value = city;
+    locSel.dispatchEvent(new Event('change', { bubbles: true }));
+    notes.push(`縣市「${city}」`);
+  }
   suppressAutoOpen = false;
-  showToast(`已依系統資料將機構類別更正為「${level}」`, 'info');
-  return true;
+
+  if (notes.length) showToast(`已依系統資料帶入${notes.join('、')}`, 'info');
+  return notes.length > 0;
 }
 
 export function attachInstitutionAutocomplete() {
@@ -95,10 +115,6 @@ export function attachInstitutionAutocomplete() {
     const sel = document.getElementById('f-location');
     return sel ? sel.value : '';
   }
-  // 將「臺北 / 臺中 / 臺南」等正規化為「台北 / 台中 / 台南」以對齊表單下拉
-  function normalizeCity(s) {
-    return String(s || '').replace(/臺/g, '台');
-  }
   function isEnabled() {
     return ACCRED_LEVELS.has(selectedLevel());
   }
@@ -123,8 +139,9 @@ export function attachInstitutionAutocomplete() {
   }
 
   // 共用 filter（桌機 inline 與手機 sheet 共用）
-  function getMatches(level, loc, q) {
-    const cap = (loc || q) ? Infinity : 15;
+  // limit：桌機下拉在「沒選縣市也沒打字」時只列前 15 筆；手機底部選單可捲動，全部列出
+  function getMatches(level, loc, q, limit = Infinity) {
+    const cap = (loc || q) ? Infinity : limit;
     const primary = HOSPITALS_ALL
       .filter((h) => {
         if (h.level !== level) return false;
@@ -134,9 +151,9 @@ export function attachInstitutionAutocomplete() {
       })
       .slice(0, cap);
     let crossLevel = [];
-    if (q && loc) {
+    if (q) {
       crossLevel = HOSPITALS_ALL.filter((h) =>
-        h.level !== level && normalizeCity(h.city) === loc && matchesQuery(h, q));
+        h.level !== level && (!loc || normalizeCity(h.city) === loc) && matchesQuery(h, q)).slice(0, 30);
     }
     return { primary, crossLevel };
   }
@@ -145,7 +162,7 @@ export function attachInstitutionAutocomplete() {
     return window.matchMedia('(max-width: 640px)').matches;
   }
   function shouldUseSheet() {
-    return isMobile() && isEnabled() && selectedLocation();
+    return isMobile() && isEnabled();
   }
 
   // 從下拉選項挑選後，會補派一次 input 事件給表單驗證用；
@@ -163,7 +180,7 @@ export function attachInstitutionAutocomplete() {
     const level = selectedLevel();
     const loc = normalizeCity(selectedLocation());
     const q = nameInput.value.trim().toLowerCase();
-    const { primary, crossLevel } = getMatches(level, loc, q);
+    const { primary, crossLevel } = getMatches(level, loc, q, 15);
 
     if (primary.length === 0 && crossLevel.length === 0) {
       wrap.hidden = true;
@@ -176,7 +193,7 @@ export function attachInstitutionAutocomplete() {
       const short = HOSPITAL_SHORT_MAP.get(h.name);
       const shortHtml = short ? `<span class="suggest-short">簡稱：${highlightMatch(short, q)}</span>` : '';
       return `
-      <li class="dform-suggest-item${isCross ? ' is-cross' : ''}" role="option" data-name="${escapeHtml(h.name)}" data-level="${escapeHtml(h.level)}">
+      <li class="dform-suggest-item${isCross ? ' is-cross' : ''}" role="option" data-name="${escapeHtml(h.name)}" data-level="${escapeHtml(h.level)}" data-city="${escapeHtml(h.city)}">
         <span class="suggest-name">${highlightMatch(h.name, q)}</span>
         <span class="suggest-meta">${isCross ? `<span class="suggest-level">${escapeHtml(h.level)}</span> · ` : ''}${escapeHtml(h.city)}${shortHtml ? ' · ' + shortHtml : ''}</span>
       </li>
@@ -189,7 +206,7 @@ export function attachInstitutionAutocomplete() {
     }
     if (crossLevel.length > 0) {
       html += `<div class="dform-suggest-divider">
-        ${icon('alert-triangle', { size: 14, className: 'ico-inline' })}其他類別的同縣市醫院（您可能選錯機構類別）
+        ${icon('alert-triangle', { size: 14, className: 'ico-inline' })}其他類別的${loc ? '同縣市' : ''}醫院（您可能選錯機構類別）
       </div>`;
       html += `<ul class="dform-suggest-list" role="listbox">${crossLevel.map((h) => itemHtml(h, true)).join('')}</ul>`;
     }
@@ -206,7 +223,7 @@ export function attachInstitutionAutocomplete() {
         suppressInlineRender = true;
         nameInput.dispatchEvent(new Event('input', { bubbles: true }));
         nameInput.blur();
-        syncInstitutionLevel(li.dataset.level);
+        syncInstitutionLevel({ level: li.dataset.level, city: li.dataset.city });
       });
     });
   }
@@ -295,7 +312,7 @@ export function attachInstitutionAutocomplete() {
       const short = HOSPITAL_SHORT_MAP.get(h.name);
       const shortHtml = short ? ` · <span class="picker-short">簡稱：${highlightMatch(short, q)}</span>` : '';
       return `
-      <li class="dform-picker-item${isCross ? ' is-cross' : ''}" data-name="${escapeHtml(h.name)}" data-level="${escapeHtml(h.level)}">
+      <li class="dform-picker-item${isCross ? ' is-cross' : ''}" data-name="${escapeHtml(h.name)}" data-level="${escapeHtml(h.level)}" data-city="${escapeHtml(h.city)}">
         <span class="picker-name">${highlightMatch(h.name, q)}</span>
         <span class="picker-meta">${isCross ? `<span class="picker-level">${escapeHtml(h.level)}</span> · ` : ''}${escapeHtml(h.city)}${shortHtml}</span>
       </li>
@@ -309,7 +326,7 @@ export function attachInstitutionAutocomplete() {
         html += `<ul class="dform-picker-list">${primary.map((h) => itemHtml(h, false)).join('')}</ul>`;
       }
       if (crossLevel.length > 0) {
-        html += `<div class="dform-picker-divider">${icon('alert-triangle', { size: 14, className: 'ico-inline' })}其他類別的同縣市醫院（可能類別選錯）</div>`;
+        html += `<div class="dform-picker-divider">${icon('alert-triangle', { size: 14, className: 'ico-inline' })}其他類別的${loc ? '同縣市' : ''}醫院（可能類別選錯）</div>`;
         html += `<ul class="dform-picker-list">${crossLevel.map((h) => itemHtml(h, true)).join('')}</ul>`;
       }
     }
@@ -319,13 +336,13 @@ export function attachInstitutionAutocomplete() {
         nameInput.value = li.dataset.name;
         nameInput.dispatchEvent(new Event('input', { bubbles: true }));
         closeSheet();
-        syncInstitutionLevel(li.dataset.level);
+        syncInstitutionLevel({ level: li.dataset.level, city: li.dataset.city });
       });
     });
   }
 
   // ===== 事件 =====
-  // focus：手機 + 條件齊備 + 欄位空 → 開 sheet；其他狀況走桌機 inline
+  // focus：手機 + 已選醫/區/地 + 欄位空 → 開 sheet；其他狀況走桌機 inline
   // 欄位「已有值」時即使在手機也走鍵盤編輯，不強拉 sheet（讓用戶能微調文字）
   nameInput.addEventListener('focus', () => {
     if (shouldUseSheet() && nameInput.value === '') {
@@ -361,17 +378,18 @@ export function attachInstitutionAutocomplete() {
     if (blurHideTimerId) { clearTimeout(blurHideTimerId); blurHideTimerId = null; }
   });
 
-  // 雙條件齊備 → 手機開 sheet（欄位空才開）、桌機 focus + inline
+  // 選了醫學中心／區域／地區 → 手機開 sheet（欄位空才開）、桌機 focus + inline
   function maybeAutoOpen() {
     hint.hidden = !isEnabled();
     if (suppressAutoOpen) return;
     // sheet 開啟中 → 即時換清單（用戶在 sheet 開著時換 location/level）
     if (sheetEl && !sheetEl.hidden) {
-      if (isEnabled() && selectedLocation()) renderSheetList();
+      if (isEnabled()) renderSheetList();
       else closeSheet();
       return;
     }
-    if (isEnabled() && selectedLocation()) {
+    // 選了醫學中心／區域／地區就開清單，不必先選縣市（有選縣市時清單會依縣市篩選）
+    if (isEnabled()) {
       if (shouldUseSheet() && nameInput.value === '') {
         openSheet();
       } else if (!isMobile() && document.activeElement !== nameInput) {

@@ -8,7 +8,7 @@
  *   · 機構總覽：用網址開一家醫院 → 五個分頁逐一切換都有內容
  *   · 護病比：縣市／層級／合規篩選 → 醫院清單跟著變
  *   · 機構名稱自動完成：選醫學中心＋地點 → 點欄位開出醫院選單 → 搜尋、點選帶入院名；
- *     類別點錯時以系統記載的層級為準
+ *     類別點錯時以系統記載的層級為準；只選類別（未選縣市）也能開選單，點選後自動帶入縣市
  *   · 填寫表單：空白送出 → 標出錯誤；填完＋同意＋驗證碼 → 送出（測試模式）→ 感謝畫面；
  *     另測草稿：填一欄後重新整理 → 出現「繼續填寫」提示
  *   · 底部導覽列：打開「資料查詢」→ 點護病比 → 換到護病比頁
@@ -177,6 +177,25 @@ const FLOWS = [
       nameInput.dispatchEvent(new Event('change', { bubbles: true }));
       await wait(200);
       expect(checkedLevel() === item.dataset.level, '院名與機構類別不一致時沒有以系統層級為準（' + checkedLevel() + ' ≠ ' + item.dataset.level + '）');
+      return fails;`,
+  },
+  {
+    name: '機構名稱：只選類別',
+    url: 'participate-psych.html',
+    run: `
+      await waitFor(() => $('#f-institutionName'));
+      // 不選縣市，只選機構類別 → 醫院選單就要打開
+      $('.dform-field[data-name="institutionType"] input[value="區域醫院"]').click();
+      const sheet = await waitFor(() => $('.dform-picker-sheet.open'));
+      if (!expect(sheet, '只選機構類別（未選縣市）沒有打開醫院選單')) return fails;
+      const search = sheet.querySelector('.dform-picker-search');
+      search.value = '汐止'; search.dispatchEvent(new Event('input', { bubbles: true }));
+      const item = await waitFor(() => sheet.querySelector('.dform-picker-item'));
+      if (!expect(item, '未選縣市時搜尋「汐止」沒有出現醫院')) return fails;
+      item.click();
+      await wait(300);
+      expect($('#f-institutionName').value === item.dataset.name, '點選醫院後欄位沒有帶入院名');
+      expect($('#f-location').value === item.dataset.city.replace(/臺/g, '台'), '點選醫院後沒有自動帶入縣市（' + $('#f-location').value + '）');
       return fails;`,
   },
   {
