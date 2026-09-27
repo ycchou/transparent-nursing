@@ -1,8 +1,8 @@
 // 一鍵產生單筆資料分享圖片（1080 × 1350，IG 4:5 直式）
-import { C, alpha } from './theme.js?v=4ba0bc5986';
-import { getCategory } from './config.js?v=4ba0bc5986';
-import { icon } from './icons.js?v=4ba0bc5986';
-import { escapeHtml } from './moderation.js?v=4ba0bc5986';
+import { C, alpha } from './theme.js?v=ea9834227b';
+import { getCategory } from './config.js?v=ea9834227b';
+import { icon } from './icons.js?v=ea9834227b';
+import { escapeHtml } from './moderation.js?v=ea9834227b';
 
 const KEY_LABELS = {
   // ICU
@@ -28,6 +28,8 @@ const KEY_LABELS = {
   wardType: '病房類型',
   leaderSupport: 'Leader 協助',
   invasiveDuties: '侵入性處置',
+  // Psych (精神科)
+  psychType: '病房類型',
   // OPD (門診)
   clinicType: '門診類型',
   clinicsPerNurse: '一次顧幾診',
@@ -68,6 +70,7 @@ const SHARE_FIELDS = {
   dialysis:   ['dialysisType','hdRatio',       'batchShift',      'weeklyHours', 'overtimePolicy'],
   er:         ['erLevel',     'criticalRatio', 'violenceFreq',    'weeklyHours', 'overtimePolicy'],
   ward:       ['wardType',    'dayShiftRatio', 'nightShiftRatio', 'leaderSupport','weeklyHours'],
+  psych:      ['psychType',   'dayShiftRatio', 'nightShiftRatio', 'violenceFreq', 'weeklyHours'],
   outpatient: ['clinicType',  'clinicsPerNurse', 'weeklyPatients','shiftType', 'weeklyHours'],
   clinic:     ['clinicSpecialty', 'clinicScale', 'dailyPatients', 'weeklyHours', 'overtimePolicy'],
   or:         ['orSpecialty', 'orRole',        'dailyCases',      'weeklyHours', 'overtimePolicy'],

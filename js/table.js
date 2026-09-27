@@ -1,12 +1,12 @@
 // 表格 / 卡片 渲染、排序、Modal
-import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=4ba0bc5986';
-import { fmt, recommendPill, categoryTag } from './components.js?v=4ba0bc5986';
-import { icon } from './icons.js?v=4ba0bc5986';
-import { generateShareCard, showSharePreview } from './share-card.js?v=4ba0bc5986';
-import { ensureTooltip } from './tooltip.js?v=4ba0bc5986';
-import { pageSlice, renderPagination } from './pagination.js?v=4ba0bc5986';
-import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=4ba0bc5986';
-import { commentHtml, commentCellHtml, initCommentUnlock, isBlocked, escapeHtml } from './moderation.js?v=4ba0bc5986';
+import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=ea9834227b';
+import { fmt, recommendPill, categoryTag } from './components.js?v=ea9834227b';
+import { icon } from './icons.js?v=ea9834227b';
+import { generateShareCard, showSharePreview } from './share-card.js?v=ea9834227b';
+import { ensureTooltip } from './tooltip.js?v=ea9834227b';
+import { pageSlice, renderPagination } from './pagination.js?v=ea9834227b';
+import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=ea9834227b';
+import { commentHtml, commentCellHtml, initCommentUnlock, isBlocked, escapeHtml } from './moderation.js?v=ea9834227b';
 
 // 顯示用機構名稱：對得上評鑑醫院時改用 VPN 簡稱，否則沿用原填寫名稱。
 function displayInstitutionName(name) {
@@ -44,6 +44,7 @@ const DEFAULT_TABLE_COLUMNS = {
   dialysis:   ['location', 'institutionType', 'institutionName', 'unitName', 'hdRatio', 'weeklyHours', 'recommendIndex'],
   er:         ['location', 'institutionType', 'institutionName', 'unitName', 'criticalRatio', 'weeklyHours', 'recommendIndex'],
   ward:       ['location', 'institutionType', 'institutionName', 'unitName', 'dayShiftRatio', 'weeklyHours', 'recommendIndex'],
+  psych:      ['location', 'institutionType', 'institutionName', 'unitName', 'psychType', 'nightShiftRatio', 'recommendIndex'],
   outpatient: ['location', 'institutionType', 'institutionName', 'unitName', 'clinicsPerNurse', 'weeklyHours', 'recommendIndex'],
   clinic:     ['location', 'institutionType', 'institutionName', 'unitName', 'clinicSpecialty', 'weeklyHours', 'recommendIndex'],
   or:         ['location', 'institutionType', 'institutionName', 'unitName', 'orSpecialty', 'weeklyHours', 'recommendIndex'],
@@ -106,6 +107,8 @@ const KEY_LABELS = {
   wardType: '病房類型',
   leaderSupport: 'Leader 協助',
   invasiveDuties: '侵入性處置',
+  // Psych (精神科)
+  psychType: '病房類型',
   // OPD (門診)
   clinicType: '門診類型',
   clinicsPerNurse: '一次顧幾診',

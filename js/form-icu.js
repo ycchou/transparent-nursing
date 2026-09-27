@@ -1,13 +1,15 @@
-// 加護病房（ICU）自建表單：只定義 ICU 專屬區塊，其餘（機構基本資料 /
+// 加護病房（ICU）自建表單：只定義 ICU 專屬區塊，其餘（機構基本資料 / 輪班別與津貼 /
 // 業務與工時共用欄 / 薪資與年資 / 整體評價）沿用 form-sections.js 的共用正本。
 
-import { initDepartmentForm } from './form-engine.js?v=4ba0bc5986';
+import { initDepartmentForm } from './form-engine.js?v=ea9834227b';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
+  SHIFT_ALLOWANCE_SECTION,
+  DAILY_OVERTIME_FIELD,
   SALARY_SECTION,
   EVALUATION_SECTION,
-} from './form-sections.js?v=4ba0bc5986';
+} from './form-sections.js?v=ea9834227b';
 
 // 護病比刻度：把「常態」與「最忙時」拆成兩個純數字維度，直觀且可統計。
 // （第一線值班護理人員：照顧病人床數，例：1:2 ＝ 1 名護理師顧 2 床）
@@ -67,24 +69,10 @@ const ICU_FORM_SCHEMA = [
   { name: 'nightPeakRatio', label: '大夜・最忙時', type: 'radio', required: true,
     options: ICU_RATIO_PEAK },
 
-  { section: '輪班別與津貼',
-    intro: `「包班」指固定承包該班別、不輪回白班者；「非包班」為一般三班輪值。<br>下方津貼欄若無此制度或不適用，請填「無」。` },
-  { name: 'shiftSystem', label: '班別', type: 'radio', required: true,
-    options: ['三班制', '兩班制', '混合制', '其他'] },
-  { name: 'eveningAllowanceNonPack', label: '小夜班津貼/班（非包班）', type: 'text', required: true,
-    help: '每班津貼金額（元）；無則填「無」' },
-  { name: 'eveningAllowancePack', label: '小夜班津貼/班（包班）', type: 'text', required: true,
-    help: '每班津貼金額（元）；無則填「無」' },
-  { name: 'nightAllowanceNonPack', label: '大夜班津貼/班（非包班）', type: 'text', required: true,
-    help: '每班津貼金額（元）；無則填「無」' },
-  { name: 'nightAllowancePack', label: '大夜班津貼/班（包班）', type: 'text', required: true,
-    help: '每班津貼金額（元）；無則填「無」' },
-  { name: 'hasOnCall', label: '是否有 on call 班', type: 'radio', required: true,
-    options: ['是', '否'] },
+  ...SHIFT_ALLOWANCE_SECTION,
 
   { section: '業務與工時' },
-  { name: 'dailyOvertime', label: '每日平均加班時間', type: 'radio',
-    options: ['無', '1 小時內', '1-2 小時', '2-3 小時', '4 小時'] },
+  DAILY_OVERTIME_FIELD,
   ...WORKHOURS_FIELDS,
 
   { section: '教育訓練與制度' },

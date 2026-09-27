@@ -32,6 +32,7 @@ const PAGE_EXPECT = {
   'participate-dialysis': '.dform-section',
   'participate-outpatient': '.dform-section',
   'participate-other': '.dform-section',
+  'participate-psych': '.dform-section',
   support: '.donate-tier',
 };
 const NO_SHELL = new Set(['coming-soon']);                 // 刻意不掛 header／導覽列的頁面
