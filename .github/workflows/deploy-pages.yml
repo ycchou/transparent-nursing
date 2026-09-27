@@ -1,9 +1,11 @@
 name: Deploy to GitHub Pages
 
-# 靜態網站部署：push 到 main 或手動觸發時，將 repo 根目錄整包上傳到 GitHub Pages。
+# push 到 main（或手動觸發）：先檢查，全部通過才部署。
+# Pull Request：只跑檢查，不部署。
 on:
   push:
     branches: [main]
+  pull_request:
   workflow_dispatch:
 
 # 部署 Pages 所需的最小權限
@@ -14,11 +16,38 @@ permissions:
 
 # 同一時間只跑一個部署；新的 push 進來就取消還在進行的舊部署
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  # 部署前檢查：本機建置流程的產物必須與原始碼一致，資料結構必須正確。
+  # 任一項失敗 → 不部署，正式站維持上一個好的版本。
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: css/styles.css 與 css/src/ 一致（沒有直接改 styles.css、改了 src 也有重建）
+        run: python tools/build-css.py --check
+
+      - name: 表單頁與 templates/ 一致
+        run: python tools/build-forms.py --check
+
+      - name: 資產 ?v= 版本號是最新的（避免使用者拿到舊快取）
+        run: python tools/stamp-assets.py --check
+
+      - name: 資料結構驗證
+        run: python tools/validate-data.py
+
   deploy:
+    needs: check
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
