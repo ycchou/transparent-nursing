@@ -120,6 +120,8 @@ const ws = new WebSocket(tab.webSocketDebuggerUrl);
 await new Promise((r) => { ws.onopen = r; });
 let seq = 0;
 const pending = new Map();
+const missing = new Map();   // 本站資源回應 ≥ 400（例如 build-site.py 的白名單漏了檔案）：url → 出現頁面
+let currentTarget = '';
 const inflight = new Set();   // 以 requestId 追蹤；換頁時清空，被取消的舊請求不會卡住等待
 let lastNet = Date.now();
 ws.onmessage = (e) => {
@@ -128,6 +130,10 @@ ws.onmessage = (e) => {
   if (m.method === 'Network.requestWillBeSent') { inflight.add(m.params.requestId); lastNet = Date.now(); }
   // 收到回應標頭就算結束：背景預熱快取的 fetch() 不讀 body，永遠等不到 loadingFinished；
   // 本機伺服器傳 body 幾乎不花時間，後面還有 800ms 靜止期，不影響截圖時機
+  if (m.method === 'Network.responseReceived' && m.params.response.status >= 400 && m.params.response.url.startsWith(BASE)) {
+    const u = m.params.response.url.slice(BASE.length).split('?')[0];
+    if (!missing.has(u)) missing.set(u, currentTarget);
+  }
   if (['Network.responseReceived', 'Network.loadingFinished', 'Network.loadingFailed'].includes(m.method)) {
     inflight.delete(m.params.requestId); lastNet = Date.now();
   }
@@ -156,7 +162,8 @@ const DETERMINISM = `
     get() { return chartRef; },
     set(v) { chartRef = v; try { v.defaults.animation = false; v.defaults.animations = false; v.defaults.transitions = {}; } catch {} } });
   // 關掉平滑捲動：網站設了 html{scroll-behavior:smooth}，否則截圖前的 scrollTo(0,0) 也會慢慢捲、截到一半
-  const css = 'html{scroll-behavior:auto!important}*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}';
+  // 圖片改最近鄰縮放：縮小顯示的 logo 用平滑縮放時，headless Chrome 每次取樣結果略有不同（純雜訊）
+  const css = 'html{scroll-behavior:auto!important}img{image-rendering:pixelated!important}*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}';
   const add = () => { const st = document.createElement('style'); st.textContent = css; document.documentElement.appendChild(st); };
   if (document.documentElement) add(); else document.addEventListener('DOMContentLoaded', add);
 })();`;
@@ -172,7 +179,8 @@ async function waitQuiet(maxMs = 15000) {
     if (inflight.size === 0 && Date.now() - lastNet > 800) break;
     await sleep(100);
   }
-  await send('Runtime.evaluate', { expression: 'document.fonts.ready.then(() => true)', awaitPromise: true });
+  // 字型載完、所有圖片解碼完才截（否則縮小顯示的 logo 偶爾截到尚未完成高品質解碼的版本，像素每次略有不同）
+  await send('Runtime.evaluate', { expression: 'document.fonts.ready.then(() => Promise.all([...document.images].map((i) => i.decode().catch(() => {}))))', awaitPromise: true });
   await sleep(400);
 }
 
@@ -186,6 +194,7 @@ try {
     for (const t of PAGES) {
      for (let attempt = 1; ; attempt++) {
      try {
+      currentTarget = t.name;
       inflight.clear();
       await send('Page.navigate', { url: `${BASE}/${withMock(t.url)}` });
       await waitQuiet();
@@ -218,7 +227,12 @@ try {
     }
   }
   console.log(`\n✔ 已存到 ${path.relative(REPO, OUT)}/`);
+  if (missing.size) {
+    console.log(`⚠ 本站資源找不到（${missing.size}）：`);
+    for (const [u, where] of missing) console.log(`   ${u}  （${where}）`);
+    process.exitCode = 2;
+  }
 } finally {
   cleanup();
 }
-process.exit(0);
+process.exit(process.exitCode || 0);

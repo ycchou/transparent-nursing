@@ -56,14 +56,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 組出部署內容（只含網站會用到的檔案；原始 PDF／ODS、工具、Worker 原始碼不部署）
+        run: python tools/build-site.py _site
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # 整個 repo 根目錄就是網站內容（純靜態，無建置步驟）
-          path: '.'
+          path: '_site'
 
       - name: Deploy to GitHub Pages
         id: deployment
