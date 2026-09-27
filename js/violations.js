@@ -1,15 +1,9 @@
-// 勞檢紀錄頁面 — 使用共用的 records-common.js
+// 勞檢紀錄頁面 — 使用共用的 records-page.js／csv-loader.js
 // 資料來源：勞動部公開資料
 
-import {
-  parseROCDate,
-  parseFine,
-  extractLawArticles,
-  shortenLocation,
-  createCsvLoader,
-  initRecordsPage,
-  getCachedCount,
-} from './records-common.js?v=ea7daf2bd0';
+import { parseROCDate, parseFine, extractLawArticles, shortenLocation, getCachedCount } from './records-format.js?v=766b870c2f';
+import { createCsvLoader } from './csv-loader.js?v=766b870c2f';
+import { initRecordsPage } from './records-page.js?v=766b870c2f';
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSRqnLPDCLdMztF2BjdA_W6jgZNahmxLmlOEz5C5Cg67WrMcy8O05Gb3jbizDrjr03O0tu-WQ2Qv9dN/pub?gid=190468784&single=true&output=csv';
 const STORAGE_KEY = 'nursing_viol_v2';

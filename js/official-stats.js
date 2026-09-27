@@ -1,274 +1,23 @@
-import { C } from './theme.js?v=ea7daf2bd0';
-// 官方參考數據：衛福部護理及健康照護司「112 年醫院護理服務量調查」
-// 資料來源 PDF：https://www.nurse.org.tw/filecenter/B/8DDC60185347C25058/...
-// 公開於：社團法人臺灣護理學會（全聯會）
-//
-// ⚠️ 本檔案資料皆為官方公開統計，與使用者匿名分享資料為兩個獨立來源。
+import { C } from './theme.js?v=766b870c2f';
+// 統計摘要頁「官方參考數據」分頁的圖表與表格。
+// 數字本身在 data/official-stats.json（衛福部、勞動部、護理全聯會的公開統計）——更新數字只改 JSON，不必改程式。
+// ⚠️ 本檔資料皆為官方公開統計，與使用者匿名分享資料為兩個獨立來源。
 
-export const OFFICIAL_SOURCE = {
-  title: '112 年醫院護理服務量調查結果',
-  publisher: '衛福部護理及健康照護司',
-  publishedBy: '社團法人臺灣護理學會（全聯會）',
-  pdfUrl: 'https://www.nurse.org.tw/filecenter/B/8DDC60185347C25058/%e8%a1%9b%e7%a6%8f%e9%83%a8112%e5%b9%b4%e9%86%ab%e9%99%a2%e8%ad%b7%e7%90%86%e6%9c%8d%e5%8b%99%e9%87%8f%e8%aa%bf%e6%9f%a5%e7%b5%90%e6%9e%9c.pdf',
-  surveyYear: 112,
-  surveyedHospitals: 471,
-  respondedHospitals: 456,
-  responseRate: 96.82,
-  surveyPeriod: '113 年 1 月 22 日 ~ 2 月 19 日',
-};
+// 由 loadData() 從 JSON 填入；對外的 render* 函式都會先等資料載入
+let AVG_TENURE, CERT_ALLOWANCE, EDUCATION_DIST_2023, FIRST_TIME_PRACTICE, MOL_NURSE_TREND, MOL_SCOPE_CHANGE_YEAR, MOL_SOURCE, NET_GROWTH, NIGHT_SHIFT_PAY_2023, NIGHT_SHIFT_TREND, OFFICIAL_SOURCE, OFFICIAL_SOURCE_2, OFFICIAL_SOURCE_3, SALARY_BY_LEVEL_TREND, SALARY_BY_REGION_2022, SALARY_BY_TENURE, SALARY_OVERALL, SALARY_PUBLIC_PRIVATE, SALARY_RANGE_2022, TURNOVER_RATE, WORKPLACE_RATIO;
+// 勞動部統計範圍在 MOL_SCOPE_CHANGE_YEAR 變更（含部分工時 → 僅全時），圖表在此之前畫虛線
+let MOL_DASH_BEFORE_IDX;
 
-// 護理人員離職率（整體）
-export const TURNOVER_RATE = {
-  years: [108, 110, 111, 112],
-  values: [11.12, 10.13, 11.73, 12.61],
-  note: '單位：%。109 年因 Covid-19 暫停資料收集。',
-};
-
-// 護理人員平均年薪（整體；護理師 vs 護士）
-export const SALARY_OVERALL = {
-  years: [108, 110, 111, 112],
-  nurse: [710805, 676909, 696855, 725480],         // 護理師
-  assistant: [639702, 625109, 635998, 661217],     // 護士
-  note: '單位：元。109 年因疫情暫停資料收集。',
-};
-
-// 護理師平均年薪（依醫院層級，112 年）
-export const SALARY_BY_LEVEL_TREND = {
-  years: [108, 110, 111, 112],
-  medicalCenter: [838053, 835371, 886063, 944621],
-  regional:      [731586, 718446, 745517, 786330],
-  district:      [683393, 643306, 659354, 684970],
-  note: '單位：元。涵蓋護理師（不含護士）。',
-};
-
-// ===== 來源 D：勞動部 職類別薪資調查（102~114 年） =====
-// 醫療保健業（行業別）→ 護理人員（職類 222090）
-// 跨 13 年數據合併四份原始檔（102~106、107~110、111、112~114）
-export const MOL_SOURCE = {
-  title: '102~114 年職類別薪資調查',
-  publisher: '勞動部',
-  queryUrl: 'https://pswst.mol.gov.tw/PSDN/Query/wFrmQuery01.aspx',
-  surveyYearLatest: 114,
-  industry: '醫療保健業',
-  occupation: '護理人員 (222090)',
-};
-
-// 統計範圍變更：102-110 是「各業受僱員工」(含部分工時)，111+ 是「各業全時受僱員工」(僅全時)
-// 因此圖表 102-110 段用虛線標示，提醒讀者範圍差異
-export const MOL_SCOPE_CHANGE_YEAR = 111;
-export const MOL_DASH_BEFORE_IDX = 9; // years 陣列中 111 的索引（前 9 筆 102~110 為舊範圍）
-
-export const MOL_NURSE_TREND = {
-  years: [102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114],
-  // 每年 7 月底受僱員工人數
-  // 102-110：各業受僱員工（含部分工時）；111-114：全時
-  headcount: [
-    143273, 144634, 149474, 150104, 150452,            // 102-106
-    151080, 159623, 162025, 162776,                    // 107-110
-    161475, 159469, 160822, 163954,                    // 111-114
-  ],
-  // 7 月經常性薪資 (元)
-  // 102-110：各業（含部分工時）；111-114：全時。樣本範圍變更導致 110→111 跳升
-  monthlySalary: [
-    39927, 39194, 40768, 40804, 40707,                 // 102-106
-    41932, 43243, 43617, 42750,                        // 107-110
-    47716, 49880, 51391, 53882,                        // 111-114
-  ],
-  // 全年薪資所得 (元)
-  // 102-110：原始資料無此欄位，由月總薪資 × 12 推估
-  //   102-106 月總薪資：43,296 / 41,903 / 44,565 / 44,826 / 44,494
-  //   107-110 月總薪資：46,770 / 48,131 / 48,072 / 46,752
-  // 111：勞動部公布「過去一年總薪資」(110/8~111/7 滾動 12 個月) = 69.9 萬
-  // 112-114：勞動部公布「去年全年薪資所得」(上年 1~12 月日曆年) = 72.2 / 74.2 / 78.6 萬
-  annualIncome: [
-    43296 * 12, 41903 * 12, 44565 * 12, 44826 * 12, 44494 * 12,  // 102-106 推估
-    46770 * 12, 48131 * 12, 48072 * 12, 46752 * 12,              // 107-110 推估
-    699000,                                                        // 111 滾動 12 個月
-    722000, 742000, 786000,                                        // 112-114 日曆年
-  ],
-};
-
-// 護理師平均年薪（公立 vs 私立）— 來源衛福部 112 年調查
-export const SALARY_PUBLIC_PRIVATE = {
-  years: [108, 110, 111, 112],
-  publicNurse:    [760708, 727277, 750904, 825386],
-  publicAssist:   [641931, 632904, 666089, 732294],
-  privateNurse:   [694843, 662275, 682928, 700878],
-  privateAssist:  [639273, 623040, 628823, 659634],
-  note: '單位：元。109 年因疫情暫停資料收集。',
-};
-
-// 112 年護理師「年資別 × 層級」平均年薪
-//「未滿一年」原始為月薪，此處 × 12 估算為「未滿一年的全年化年薪」
-export const SALARY_BY_TENURE = {
-  labels: ['未滿1年*', '滿1-2年', '滿3-5年', '滿6-10年', '滿11-15年', '滿16-20年', '滿20年+'],
-  medicalCenter: [54990 * 12, 796121, 880346, 922839, 968404, 1018009, 1082006],
-  regional:      [50932 * 12, 747084, 734565, 761691, 792162, 821817, 860658],
-  district:      [44574 * 12, 617881, 621343, 666749, 689774, 744237, 769835],
-  note: '單位：元。＊未滿一年原始為月薪，此處以「月薪 × 12」估算為年化。',
-};
-
-// 護理人員夜班費（112 年，依層級與班制）
-export const NIGHT_SHIFT_PAY_2023 = {
-  // shift 對應原報告：
-  //   小夜班 / 大夜班 = 三班制固定班
-  //   小夜班 / 大夜班 = 三班制非固定班
-  //   日班 / 夜班      = 兩班制
-  labels: ['三班固定·小夜', '三班固定·大夜', '三班非固定·小夜', '三班非固定·大夜', '兩班制·日班', '兩班制·夜班'],
-  medicalCenter: [718, 988, 580, 829, 436, 1026],
-  regional:      [673, 936, 545, 795, 372, 1108],
-  district:      [587, 864, 520, 755, 415, 961],
-  note: '單位：元/班次。',
-};
-
-// 護理人員夜班費 歷年（整體）— 取「三班非固定·大夜」作為趨勢主軸（最具代表性）
-export const NIGHT_SHIFT_TREND = {
-  years: [108, 110, 111, 112],
-  threeShiftFixedSmall:    [530, 516, 572, 595],
-  threeShiftFixedLarge:    [798, 760, 831, 858],
-  threeShiftFlexSmall:     [461, 442, 499, 511],
-  threeShiftFlexLarge:     [678, 662, 738, 752],
-  twoShiftDay:             [272, 287, 333, 378],
-  twoShiftNight:           [835, 872, 973, 985],
-  note: '單位：元/班次。109 年因疫情暫停。',
-};
-
-// 專業證照津貼（護理師 / 護士；月平均）
-export const CERT_ALLOWANCE = {
-  years: [108, 110, 111, 112],
-  nurse: [3792, 3942, 3937, 4150],
-  assistant: [2759, 2812, 3052, 2915],
-  note: '單位：元/月。',
-};
-
-// 教育程度分布（112 年，整體）
-export const EDUCATION_DIST_2023 = {
-  labels: ['高職', '專科', '大學', '碩士', '博士'],
-  values: [1.13, 23.35, 70.69, 4.66, 0.17],
-  note: '單位：%。',
-};
-
-// ============================================================
-// 來源 2：護全聯會「111 年醫院護理人員薪資及人力調查」
-// ============================================================
-
-export const OFFICIAL_SOURCE_2 = {
-  title: '111 年度醫院護理人員薪資及人力調查',
-  publisher: '中華民國護理師護士公會全國聯合會（護全聯會）',
-  pdfUrl: 'https://www.nurse.org.tw/filecenter/B/8DC3229C9DD3514030/20230512-111%e5%b9%b4%e9%86%ab%e9%99%a2%e8%ad%b7%e7%90%86%e4%ba%ba%e5%93%a1%e8%96%aa%e8%b3%87%e5%8f%8a%e4%ba%ba%e5%8a%9b%e8%aa%bf%e6%9f%a5%e5%a0%b1%e5%91%8a(%e5%85%ac%e5%91%8a%e7%89%88).pdf',
-  surveyYear: 111,
-  surveyedHospitals: 259,
-  respondedHospitals: 185,
-  responseRate: 71.4,
-  surveyPeriod: '2023 年 4 月 26 日 ~ 5 月 11 日',
-};
-
-// 111 年薪資 × 年資 × 層級（avg + min-max range）
-//   1 年以內：月薪
-//   1-5 年 / 5 年以上：年薪
-export const SALARY_RANGE_2022 = {
-  '醫學中心': {
-    newcomer: { avg: 51927, min: 36349, max: 66580,  unit: '月' },
-    junior:   { avg: 794784, min: 603079, max: 1027600, unit: '年' },
-    senior:   { avg: 957621, min: 750000, max: 1140440, unit: '年' },
-  },
-  '區域醫院': {
-    newcomer: { avg: 49188, min: 36364, max: 75094,  unit: '月' },
-    junior:   { avg: 709907, min: 550482, max: 984150,  unit: '年' },
-    senior:   { avg: 795874, min: 564509, max: 1132930, unit: '年' },
-  },
-  '地區醫院': {
-    newcomer: { avg: 45281, min: 26800, max: 65050,  unit: '月' },
-    junior:   { avg: 654815, min: 321600, max: 1114916, unit: '年' },
-    senior:   { avg: 731142, min: 330000, max: 1154846, unit: '年' },
-  },
-};
-
-// 111 年薪資 × 地區 × 層級 × 年資（avg + min-max range）
-//   1 年以內：月薪
-//   1-5 年 / 5 年以上：年薪
-//   「全部」= 全國（185 家平均，等同 SALARY_RANGE_2022）
-export const SALARY_BY_REGION_2022 = {
-  all: {
-    name: '全部', totalHospitals: 185,
-    medicalCenter: { count: 17, newcomer: {avg:51927,min:36349,max:66580},  junior: {avg:794784,min:603079,max:1027600}, senior: {avg:957621,min:750000,max:1140440} },
-    regional:      { count: 71, newcomer: {avg:49188,min:36364,max:75094},  junior: {avg:709907,min:550482,max:984150},  senior: {avg:795874,min:564509,max:1132930} },
-    district:      { count: 97, newcomer: {avg:45281,min:26800,max:65050},  junior: {avg:654815,min:321600,max:1114916}, senior: {avg:731142,min:330000,max:1154846} },
-  },
-  north: {
-    name: '北區', totalHospitals: 77,
-    medicalCenter: { count: 8,  newcomer: {avg:57461,min:46600,max:66300},  junior: {avg:853485,min:780800,max:1027600}, senior: {avg:1007938,min:870000,max:1140440} },
-    regional:      { count: 32, newcomer: {avg:50683,min:37648,max:75094},  junior: {avg:723774,min:591754,max:903880},  senior: {avg:813721,min:607500,max:1132930} },
-    district:      { count: 37, newcomer: {avg:44562,min:27700,max:65000},  junior: {avg:660933,min:500000,max:1012500}, senior: {avg:767413,min:510000,max:1154846} },
-  },
-  central: {
-    name: '中區', totalHospitals: 38,
-    medicalCenter: { count: 4,  newcomer: {avg:45614,min:39500,max:51000},  junior: {avg:749304,min:632844,max:939370},  senior: {avg:864481,min:750000,max:991116} },
-    regional:      { count: 16, newcomer: {avg:46522,min:36364,max:54350},  junior: {avg:720696,min:585000,max:984150},  senior: {avg:783501,min:612000,max:1034100} },
-    district:      { count: 18, newcomer: {avg:46353,min:38106,max:65050},  junior: {avg:697749,min:589950,max:1114916}, senior: {avg:726843,min:563800,max:920000} },
-  },
-  south: {
-    name: '南區', totalHospitals: 56,
-    medicalCenter: { count: 4,  newcomer: {avg:48902,min:36349,max:66580},  junior: {avg:755310,min:603079,max:903880},  senior: {avg:982035,min:824425,max:1132930} },
-    regional:      { count: 20, newcomer: {avg:48600,min:38000,max:60775},  junior: {avg:683462,min:550482,max:903880},  senior: {avg:780981,min:564509,max:1132930} },
-    district:      { count: 32, newcomer: {avg:43764,min:26800,max:59000},  junior: {avg:606773,min:321600,max:903880},  senior: {avg:684030,min:330000,max:1132930} },
-  },
-  east: {
-    name: '東區', totalHospitals: 11,
-    medicalCenter: { count: 1,  newcomer: {avg:45000,min:45000,max:45000},  junior: {avg:665000,min:665000,max:665000},  senior: {avg:830000,min:830000,max:830000} },
-    regional:      { count: 3,  newcomer: {avg:50482,min:46245,max:55600},  junior: {avg:684332,min:622000,max:755797},  senior: {avg:770785,min:665000,max:907756} },
-    district:      { count: 7,  newcomer: {avg:49624,min:33000,max:64172},  junior: {avg:690491,min:459000,max:916029},  senior: {avg:729451,min:486000,max:988713} },
-  },
-  islands: {
-    name: '離島', totalHospitals: 3,
-    medicalCenter: null,
-    regional:      null,
-    district:      { count: 3,  newcomer: {avg:53253,min:48216,max:56570},  junior: {avg:706103,min:584248,max:778682},  senior: {avg:821677,min:636579,max:922566} },
-  },
-};
-
-// ============================================================
-// 來源 3：護理全聯會「114 年護理人力監測指標」（115/1/5 發布）
-// 資料來源：本會護理人力雲系統
-// ============================================================
-
-export const OFFICIAL_SOURCE_3 = {
-  title: '114 年護理人力監測指標',
-  publisher: '護理全聯會',
-  pdfUrl: 'https://www.nurse.org.tw/filecenter/B/8DE57369055FC22058/114%e5%b9%b4%e8%ad%b7%e7%90%86%e4%ba%ba%e5%8a%9b%e7%9b%a3%e6%b8%ac%e6%8c%87%e6%a8%99.pdf',
-  dataSource: '護理全聯會護理人力雲系統',
-  publishDate: '115 年 1 月 5 日',
-};
-
-const TUNA_YEARS = [105, 106, 107, 108, 109, 110, 111, 112, 113, 114];
-
-export const WORKPLACE_RATIO = {
-  years: TUNA_YEARS,
-  hospital: [65.5, 66.5, 66.3, 65.1, 65.0, 64.6, 64.0, 63.0, 63.0, 62.9],
-  clinic:   [13.5, 13.7, 13.8, 13.9, 14.0, 14.7, 15.4, 16.2, 16.8, 17.1],
-  longTerm: [9.8, 9.9, 10.1, 10.1, 10.3, 10.6, 10.7, 10.9, 10.9, 11.0],
-  other:    [11.3, 9.8, 9.8, 10.9, 10.6, 10.1, 10.0, 9.9, 9.2, 9.0],
-  note: '單位：%。',
-};
-
-export const AVG_TENURE = {
-  years: TUNA_YEARS,
-  values: [11.91, 12.23, 12.57, 12.94, 13.26, 13.62, 14.06, 14.51, 14.84, 15.09],
-  note: '單位：年。',
-};
-
-export const FIRST_TIME_PRACTICE = {
-  years: TUNA_YEARS,
-  values: [7966, 8496, 8384, 7827, 8030, 8445, 7524, 7453, 8364, 7741],
-  note: '單位：人。首次登錄於人力雲系統之執業會員人數。',
-};
-
-export const NET_GROWTH = {
-  years: TUNA_YEARS,
-  netIncrease: [5267, 5885, 5692, 4733, 4653, 4805, 2259, 2413, 4511, 5176],
-  growthRate:  [3.40, 3.67, 3.43, 2.76, 2.64, 2.65, 1.22, 1.28, 2.37, 2.65],
-  note: '淨增加人數 = 當年度 - 前一年度執業會員人數；成長率 = 淨增加 ÷ 前一年度 × 100%。',
-};
+let loading = null;
+function loadData() {
+  loading ||= fetch('data/official-stats.json?v=667755a70e')
+    .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status} data/official-stats.json`); return r.json(); })
+    .then((d) => {
+      ({ AVG_TENURE, CERT_ALLOWANCE, EDUCATION_DIST_2023, FIRST_TIME_PRACTICE, MOL_NURSE_TREND, MOL_SCOPE_CHANGE_YEAR, MOL_SOURCE, NET_GROWTH, NIGHT_SHIFT_PAY_2023, NIGHT_SHIFT_TREND, OFFICIAL_SOURCE, OFFICIAL_SOURCE_2, OFFICIAL_SOURCE_3, SALARY_BY_LEVEL_TREND, SALARY_BY_REGION_2022, SALARY_BY_TENURE, SALARY_OVERALL, SALARY_PUBLIC_PRIVATE, SALARY_RANGE_2022, TURNOVER_RATE, WORKPLACE_RATIO } = d);
+      MOL_DASH_BEFORE_IDX = MOL_NURSE_TREND.years.indexOf(MOL_SCOPE_CHANGE_YEAR);
+    });
+  return loading;
+}
 
 
 // ============== Chart 渲染函式 ==============
@@ -492,7 +241,8 @@ export function chartEducation(canvas) {
 }
 
 /** 渲染 4 個 KPI 數值（給上方卡片用） */
-export function renderOfficialKPI() {
+export async function renderOfficialKPI() {
+  await loadData();
   const lastIdx = SALARY_OVERALL.years.length - 1;
   const latest = {
     salary:    SALARY_OVERALL.nurse[lastIdx],
@@ -595,7 +345,8 @@ export function chartNewHireTurnover(canvas) {
 }
 
 /** 渲染 111 年薪資範圍表格 */
-export function renderSalaryRangeTable(containerEl) {
+export async function renderSalaryRangeTable(containerEl) {
+  await loadData();
   if (!containerEl) return;
   const data = SALARY_RANGE_2022;
   const fmtMoney = (n) => n.toLocaleString();
@@ -842,7 +593,8 @@ function regionTableHTML(region) {
 }
 
 /** 渲染區域薪資 section（含地區 chip 切換） */
-export function renderRegionalSalary(chipContainer, tableContainer) {
+export async function renderRegionalSalary(chipContainer, tableContainer) {
+  await loadData();
   if (!chipContainer || !tableContainer) return;
   const regions = Object.entries(SALARY_BY_REGION_2022); // [[key, region], ...]
   let activeKey = regions[0][0];
@@ -871,7 +623,8 @@ export function renderRegionalSalary(chipContainer, tableContainer) {
 }
 
 /** 渲染來源 A：衛福部 112 年（含 KPI） */
-export function renderOfficialSourceA() {
+export async function renderOfficialSourceA() {
+  await loadData();
   if (typeof Chart === 'undefined') return;
   renderOfficialKPI();
   const byId = (id) => document.getElementById(id);
@@ -885,7 +638,8 @@ export function renderOfficialSourceA() {
 }
 
 /** 渲染來源 B：護理全聯會 111 年薪資（區域選單） */
-export function renderOfficialSourceB() {
+export async function renderOfficialSourceB() {
+  await loadData();
   if (typeof Chart === 'undefined') return;
   const byId = (id) => document.getElementById(id);
   renderRegionalSalary(byId('off-region-chips'), byId('off-region-table'));
@@ -963,7 +717,8 @@ export function chartMolHeadcount(canvas) {
 }
 
 /** 渲染來源 D：勞動部 114 年職類別薪資調查 — 3 個 KPI + 3 條折線 */
-export function renderOfficialSourceD() {
+export async function renderOfficialSourceD() {
+  await loadData();
   if (typeof Chart === 'undefined') return;
   const byId = (id) => document.getElementById(id);
   const d = MOL_NURSE_TREND;
@@ -983,7 +738,8 @@ export function renderOfficialSourceD() {
 }
 
 /** 渲染來源 C：護理全聯會 114 年人力監測指標 */
-export function renderOfficialSourceC() {
+export async function renderOfficialSourceC() {
+  await loadData();
   if (typeof Chart === 'undefined') return;
   const byId = (id) => document.getElementById(id);
   if (byId('chart-off-workplace'))  chartWorkplaceRatio(byId('chart-off-workplace'));
@@ -993,7 +749,8 @@ export function renderOfficialSourceC() {
 }
 
 /** 入口：一次渲染所有官方圖表（如果不用 sub-tab 切換） */
-export function renderAllOfficial() {
+export async function renderAllOfficial() {
+  await loadData();
   renderOfficialSourceA();
   renderOfficialSourceB();
   renderOfficialSourceC();

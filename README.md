@@ -162,6 +162,7 @@
 | 產物一致性 | `build-css.py --check`、`build-forms.py --check`、`stamp-assets.py --check`、`validate-data.py` | 產生的檔案與原始碼一致、版本號最新、資料結構正確 |
 | 解析器測試 | `python -m unittest discover tests` | 固定的原始 PDF／ODS 解析結果須與 `tests/expected/` 相同；確認是應有的改變時跑 `python tests/test_parsers.py --update` |
 | 冒煙測試 | `node tools/smoke-test.mjs _site` | 開部署內容的每一頁（手機＋桌機）：無 JS 錯誤、無 404、外框與主要內容都在 |
+| 互動流程測試 | `node tools/e2e-test.mjs _site` | 模擬操作：違規紀錄篩選／換頁／彈窗、機構總覽五個分頁、護病比篩選、表單空白送出／填完送出／草稿、底部導覽 |
 
 **視覺回歸檢查**（重構、整理 CSS 時用來確認畫面沒變）：
 

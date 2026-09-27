@@ -39,6 +39,8 @@ export const SCENARIOS = [
   { name: 'personnel~chart', url: `personnel.html?code=${HOSP}`, expect: '#personnel-detail:not([hidden]) canvas' },
   { name: 'financials~chart', url: `financials.html?code=${HOSP}`, expect: 'canvas' },
   { name: 'stats~official', url: 'stats.html#official', expect: '#stats-tab-official:not([hidden]) canvas' },
+  ...['B', 'C', 'D'].map((k) => ({ name: `stats~official-${k}`, url: 'stats.html#official', expect: `#off-sub-${k}:not([hidden]) :is(canvas, table)`,
+    run: `click('#off-subtabs [data-sub="${k}"]'); await wait(300);` })),
   { name: 'platform~calc', url: 'platform.html', viewport: true, expect: '#calc-result :is(div, span)',
     run: `click('#calc-trigger'); await wait(300); type('#calc-salary', '80'); click('#calc-go');` },
   { name: 'platform~calc-share', url: 'platform.html', viewport: true, expect: 'img[alt*="預覽"]',
@@ -73,13 +75,21 @@ const withMock = (u) => { const [base, hash] = u.split('#'); return `${base}${ba
 // 每個新文件載入前注入：清 storage、固定亂數與時間、關動畫
 const DETERMINISM = `
 (() => {
-  try { localStorage.clear(); sessionStorage.clear(); } catch {}   // 每頁都當第一次造訪（資料快取、已關閉的提示等全部歸零）
+  // 每頁都當第一次造訪（資料快取、已關閉的提示等全部歸零）；互動測試要測「重新整理後草稿還在」時，
+  // 先設 sessionStorage.__keep_storage，該次載入就不清
+  try {
+    if (sessionStorage.getItem('__keep_storage')) sessionStorage.removeItem('__keep_storage');
+    else { localStorage.clear(); sessionStorage.clear(); }
+  } catch {}
   let s = 20260115;
   Math.random = () => { s = (s * 1664525 + 1013904223) % 4294967296; return s / 4294967296; };
+  // 時間固定在 2026-01-15 12:00（台北）；互動測試可用 __advanceClock(ms) 快轉（例如跳過表單「填寫太快」的 60 秒門檻）
   const FIXED = Date.UTC(2026, 0, 15, 4, 0, 0);
+  let offset = 0;
   const RealDate = Date;
-  class FixedDate extends RealDate { constructor(...a) { super(...(a.length ? a : [FIXED])); } static now() { return FIXED; } }
+  class FixedDate extends RealDate { constructor(...a) { super(...(a.length ? a : [FIXED + offset])); } static now() { return FIXED + offset; } }
   window.Date = FixedDate;
+  window.__advanceClock = (ms) => { offset += ms; };
   let chartRef;
   Object.defineProperty(window, 'Chart', { configurable: true,
     get() { return chartRef; },

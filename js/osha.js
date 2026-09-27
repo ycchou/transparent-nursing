@@ -1,16 +1,10 @@
-// 職安紀錄頁面 — 使用共用的 records-common.js
+// 職安紀錄頁面 — 使用共用的 records-page.js／csv-loader.js
 // 資料來源：勞動部職業安全衛生法違規紀錄
 // CSV 比勞檢多 3 欄：職業災害之罹災人數 / 發生日期 / 發生地點（位於備註前）
 
-import {
-  parseROCDate,
-  parseFine,
-  extractLawArticles,
-  shortenLocation,
-  createCsvLoader,
-  initRecordsPage,
-  getCachedCount,
-} from './records-common.js?v=ea7daf2bd0';
+import { parseROCDate, parseFine, extractLawArticles, shortenLocation, getCachedCount } from './records-format.js?v=766b870c2f';
+import { createCsvLoader } from './csv-loader.js?v=766b870c2f';
+import { initRecordsPage } from './records-page.js?v=766b870c2f';
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ9_GMqmZfaampaPKcnetc5UqhvKueTvDYBO71LhKbTY9E1sdlie-wHM0krYmEkQFSurFRh-bdevS1_/pub?gid=1130584206&single=true&output=csv';
 const STORAGE_KEY = 'nursing_osha_v1';

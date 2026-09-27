@@ -2,16 +2,16 @@
 //
 // 資料/圖表共用 js/financials-view.js；名稱↔代碼/簡稱重用 js/hospital-shortname.js
 
-import { renderIcons, icon } from './icons.js?v=ea7daf2bd0';
-import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=ea7daf2bd0';
+import { renderIcons, icon } from './icons.js?v=766b870c2f';
+import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=766b870c2f';
 import {
   ensureFinancialsLoaded, getAllFinancials, getFinancials, getFinancialFields,
   parseNum, formatVal, signClass, formatRocYear, renderFinancialTrendChart,
-} from './financials-view.js?v=ea7daf2bd0';
-import { reportMergedInfo } from './hospital-merges.js?v=ea7daf2bd0';
-import { skeletonRows } from './skeleton.js?v=ea7daf2bd0';
-import { escapeHtml } from './moderation.js?v=ea7daf2bd0';
-import { levelSlug } from './picker-filters.js?v=ea7daf2bd0';
+} from './financials-view.js?v=766b870c2f';
+import { reportMergedInfo } from './hospital-merges.js?v=766b870c2f';
+import { skeletonRows } from './skeleton.js?v=766b870c2f';
+import { escapeHtml } from './moderation.js?v=766b870c2f';
+import { levelSlug } from './picker-filters.js?v=766b870c2f';
 
 const LEVEL_ORDER = ['醫學中心', '區域醫院', '地區醫院', '精神科醫院', '精神科教學醫院', '診所', '其他'];
 const REGION_ORDER = ['臺北', '北區', '中區', '南區', '高屏', '東區'];

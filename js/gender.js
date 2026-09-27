@@ -1,15 +1,9 @@
-// 性平紀錄頁面 — 使用共用的 records-common.js
+// 性平紀錄頁面 — 使用共用的 records-page.js／csv-loader.js
 // 資料來源：勞動部性別平等工作法違規紀錄
 
-import {
-  parseROCDate,
-  parseFine,
-  extractLawArticles,
-  shortenLocation,
-  createCsvLoader,
-  initRecordsPage,
-  getCachedCount,
-} from './records-common.js?v=ea7daf2bd0';
+import { parseROCDate, parseFine, extractLawArticles, shortenLocation, getCachedCount } from './records-format.js?v=766b870c2f';
+import { createCsvLoader } from './csv-loader.js?v=766b870c2f';
+import { initRecordsPage } from './records-page.js?v=766b870c2f';
 
 const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSpvfTkfNPgrf4dtpZrpRmign7EB9ISShRslgAhVcxRu-WO3G9I4W5efjSjMan_RnId0-rDvju4gzfy/pub?gid=1540285352&single=true&output=csv';
 const STORAGE_KEY = 'nursing_gender_v1';

@@ -1,8 +1,8 @@
 // 一鍵產生單筆資料分享圖片（1080 × 1350，IG 4:5 直式）
-import { C, alpha } from './theme.js?v=ea7daf2bd0';
-import { getCategory } from './config.js?v=ea7daf2bd0';
-import { icon } from './icons.js?v=ea7daf2bd0';
-import { escapeHtml } from './moderation.js?v=ea7daf2bd0';
+import { C, alpha } from './theme.js?v=766b870c2f';
+import { getCategory } from './config.js?v=766b870c2f';
+import { icon } from './icons.js?v=766b870c2f';
+import { escapeHtml } from './moderation.js?v=766b870c2f';
 
 const KEY_LABELS = {
   // ICU

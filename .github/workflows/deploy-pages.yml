@@ -89,6 +89,9 @@ jobs:
       - name: 冒煙測試
         run: node tools/smoke-test.mjs _site
 
+      - name: 互動流程測試（篩選、換頁、彈窗、分頁、表單送出與草稿、底部導覽）
+        run: node tools/e2e-test.mjs _site
+
   deploy:
     needs: [check, test, smoke]
     if: github.event_name != 'pull_request'
