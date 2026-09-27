@@ -1,7 +1,7 @@
 // 精神科自建表單：只定義精神科專屬區塊，其餘（機構基本資料 / 輪班別與津貼 /
 // 業務與工時共用欄 / 薪資與年資 / 整體評價）沿用 form-sections.js 的共用正本。
 
-import { initDepartmentForm } from './form-engine.js?v=ea9834227b';
+import { initDepartmentForm } from './form-engine.js?v=9b18d8af87';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
@@ -9,7 +9,7 @@ import {
   DAILY_OVERTIME_FIELD,
   SALARY_SECTION,
   EVALUATION_SECTION,
-} from './form-sections.js?v=ea9834227b';
+} from './form-sections.js?v=9b18d8af87';
 
 // 護病比刻度：與 ICU 相同拆「常態」「最忙時」，但精神科一人顧的床數多（慢性大夜常 1:30 以上），改用區間。
 // 日間照護等沒有小夜／大夜的單位選「無此班別」。
@@ -113,13 +113,14 @@ const PSYCH_FORM_SCHEMA = [
     options: scale('很安全', '非常危險') },
   { name: 'securitySupport', label: '約束隔離時是否有防護班／警衛協助', type: 'radio',
     options: ['有，隨叫隨到', '有，但常需等待', '無，靠護理人員自己'] },
-  { name: 'postIncidentSupport', label: '暴力事件後醫院的支持', type: 'radio',
+  { name: 'postIncidentSupport', label: '暴力事件後，醫院給的支持', type: 'radio', layout: 'list',
+    help: '選最接近你單位實際狀況的一項',
     options: [
-      { value: '非常完善', label: '非常完善：即時關懷，並給予實質補償、主動檢討流程' },
-      { value: '良好', label: '良好：主管及院方及時提供關懷協助' },
-      { value: '普通', label: '普通：照常規流程，主管口頭關心，無實質資源' },
-      { value: '不太足夠', label: '不太足夠：僅例行通報，缺乏心理關懷或改善行動' },
-      { value: '非常不足', label: '非常不足：缺乏關懷，甚至檢討護理人員、需自行承擔' },
+      { value: '非常完善', label: '非常完善', desc: '立即關懷，並有實質補償、主動檢討流程' },
+      { value: '良好', label: '良好', desc: '主管及院方及時關心、提供協助' },
+      { value: '普通', label: '普通', desc: '照流程通報，主管口頭關心，沒有實質資源' },
+      { value: '不太足夠', label: '不太足夠', desc: '只有例行通報，沒有心理關懷或改善行動' },
+      { value: '非常不足', label: '非常不足', desc: '缺乏關懷，甚至檢討護理人員、要自己承擔' },
     ] },
 
   { section: '硬體環境' },

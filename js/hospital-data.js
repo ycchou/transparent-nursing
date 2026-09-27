@@ -1,14 +1,14 @@
 // hospital-data.js — 機構總覽頁的資料載入與共用狀態（醫院清單、違規對照、護病比單院小檔、眾包與違規資料）。
 
-import { loadAll } from './data-loader.js?v=ea9834227b';
+import { loadAll } from './data-loader.js?v=9b18d8af87';
 
-import { createCsvLoader } from './csv-loader.js?v=ea9834227b';
-import { parseROCDate, parseFine, shortenLocation } from './records-format.js?v=ea9834227b';
+import { createCsvLoader } from './csv-loader.js?v=9b18d8af87';
+import { parseROCDate, parseFine, shortenLocation } from './records-format.js?v=9b18d8af87';
 
-import { VIOL_FEEDS } from './config.js?v=ea9834227b';
+import { VIOL_FEEDS } from './config.js?v=9b18d8af87';
 
-const MERGED_URL = 'data/hospitals-merged.json?v=05ee0dcd69';
-const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=49366079f6';
+const MERGED_URL = 'data/hospitals-merged.json?v=d49ffd011a';
+const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=dccbdf9020';
 const ADDR_OVERLAY_URL = 'data/hospitals-address-overlay.json?v=50f6f147a8';
 
 const parseViolRow = (r) => ({
@@ -121,7 +121,7 @@ const _nrCodeCache = new Map();
 export async function loadNurseByCode(code) {
   if (_nrCodeCache.has(code)) return _nrCodeCache.get(code);
   try {
-    const r = await fetch(`data/nurse-ratio/by-code/${code}.json?v=5cc1ee8233`, { cache: 'default' });
+    const r = await fetch(`data/nurse-ratio/by-code/${code}.json?v=052ea02218`, { cache: 'default' });
     const d = r.ok ? await r.json() : null;
     _nrCodeCache.set(code, d);
     return d;

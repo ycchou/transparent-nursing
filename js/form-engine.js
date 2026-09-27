@@ -2,14 +2,14 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=ea9834227b';
-import { renderIcons, icon } from './icons.js?v=ea9834227b';
-import { markContributed } from './contribution-gate.js?v=ea9834227b';
+import { mountLayout } from './components.js?v=9b18d8af87';
+import { renderIcons, icon } from './icons.js?v=9b18d8af87';
+import { markContributed } from './contribution-gate.js?v=9b18d8af87';
 
-import { showToast } from './toast.js?v=ea9834227b';
-import { submitEndpoint as envSubmitEndpoint } from './env.js?v=ea9834227b';
-import { notePwaIntent } from './pwa-prompt.js?v=ea9834227b';
-import { attachInstitutionAutocomplete } from './form-institution-picker.js?v=ea9834227b';
+import { showToast } from './toast.js?v=9b18d8af87';
+import { submitEndpoint as envSubmitEndpoint } from './env.js?v=9b18d8af87';
+import { notePwaIntent } from './pwa-prompt.js?v=9b18d8af87';
+import { attachInstitutionAutocomplete, syncInstitutionLevel } from './form-institution-picker.js?v=9b18d8af87';
 import {
   generateCaptcha,
   attachCaptcha,
@@ -19,7 +19,7 @@ import {
   turnstileToken,
   resetTurnstile,
   TURNSTILE_REPLACES_LOCAL_CAPTCHA,
-} from './form-captcha.js?v=ea9834227b';
+} from './form-captcha.js?v=9b18d8af87';
 
 const DRAFT_DEBOUNCE_MS = 500;
 
@@ -54,11 +54,12 @@ function debounce(fn, ms) {
 
 // ===== 渲染 =====
 
-// 將 schema 的 options（string 或 {value,label}）正規化為 {value,label} 陣列
+// 將 schema 的 options（string 或 {value,label,desc}）正規化為 {value,label,desc} 陣列
+// desc：選項下方的小字說明（搭配 field.layout = 'list' 以直式卡片呈現）
 function normalizeOptions(options) {
   return (options || []).map((o) => (typeof o === 'object' && o !== null)
-    ? { value: String(o.value), label: o.label != null ? String(o.label) : String(o.value) }
-    : { value: String(o), label: String(o) });
+    ? { value: String(o.value), label: o.label != null ? String(o.label) : String(o.value), desc: o.desc || '' }
+    : { value: String(o), label: String(o), desc: '' });
 }
 
 function renderField(field) {
@@ -95,13 +96,15 @@ function renderField(field) {
     const opts = normalizeOptions(field.options);
     const hasOther = opts.some((o) => o.value === '其他');
     inputHtml = `
-      <div class="dform-options" role="${inputType === 'radio' ? 'radiogroup' : 'group'}" aria-labelledby="lab-${field.name}">
+      <div class="dform-options${field.layout === 'list' ? ' dform-options--list' : ''}" role="${inputType === 'radio' ? 'radiogroup' : 'group'}" aria-labelledby="lab-${field.name}">
         ${opts.map((o, i) => {
           const id = optionId(field.name, o.value, i);
           return `
             <label class="dform-option" for="${id}">
               <input type="${inputType}" id="${id}" name="${field.name}" value="${safeAttr(o.value)}" />
-              <span>${o.label}</span>
+              ${o.desc
+                ? `<span class="dform-option-title">${o.label}</span><span class="dform-option-desc">${o.desc}</span>`
+                : `<span>${o.label}</span>`}
             </label>`;
         }).join('')}
       </div>
@@ -426,6 +429,8 @@ async function onSubmit(e) {
     return;
   }
 
+  // 機構名稱對得到主檔時，機構類別一律以系統記載為準（用戶可能點錯類別）
+  syncInstitutionLevel();
   const data = serializeForm();
   const errors = validate(data);
   if (errors.length) {

@@ -7,7 +7,8 @@
  *   · 違規紀錄：篩選地點 → 筆數改變；下一頁 → 列表換頁；點一筆 → 詳情彈窗開關
  *   · 機構總覽：用網址開一家醫院 → 五個分頁逐一切換都有內容
  *   · 護病比：縣市／層級／合規篩選 → 醫院清單跟著變
- *   · 機構名稱自動完成：選醫學中心＋地點 → 點欄位開出醫院選單 → 搜尋、點選帶入院名
+ *   · 機構名稱自動完成：選醫學中心＋地點 → 點欄位開出醫院選單 → 搜尋、點選帶入院名；
+ *     類別點錯時以系統記載的層級為準
  *   · 填寫表單：空白送出 → 標出錯誤；填完＋同意＋驗證碼 → 送出（測試模式）→ 感謝畫面；
  *     另測草稿：填一欄後重新整理 → 出現「繼續填寫」提示
  *   · 底部導覽列：打開「資料查詢」→ 點護病比 → 換到護病比頁
@@ -164,6 +165,18 @@ const FLOWS = [
       item.click();
       await wait(300);
       expect($('#f-institutionName').value === name, '點選醫院後欄位沒有帶入院名（' + $('#f-institutionName').value + '）');
+      // 類別點錯：改成地區醫院後再手動輸入同一個院名 → 機構類別要被更正回系統記載的層級
+      const checkedLevel = () => $('input[name="institutionType"]:checked')?.value;
+      const wrong = $('.dform-field[data-name="institutionType"] input[value="地區醫院"]');
+      wrong.click();
+      await wait(300);
+      $('.dform-picker-sheet.open .dform-picker-close')?.click();
+      await wait(300);
+      const nameInput = $('#f-institutionName');
+      nameInput.value = name;
+      nameInput.dispatchEvent(new Event('change', { bubbles: true }));
+      await wait(200);
+      expect(checkedLevel() === item.dataset.level, '院名與機構類別不一致時沒有以系統層級為準（' + checkedLevel() + ' ≠ ' + item.dataset.level + '）');
       return fails;`,
   },
   {

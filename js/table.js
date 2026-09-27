@@ -1,12 +1,12 @@
 // 表格 / 卡片 渲染、排序、Modal
-import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=ea9834227b';
-import { fmt, recommendPill, categoryTag } from './components.js?v=ea9834227b';
-import { icon } from './icons.js?v=ea9834227b';
-import { generateShareCard, showSharePreview } from './share-card.js?v=ea9834227b';
-import { ensureTooltip } from './tooltip.js?v=ea9834227b';
-import { pageSlice, renderPagination } from './pagination.js?v=ea9834227b';
-import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=ea9834227b';
-import { commentHtml, commentCellHtml, initCommentUnlock, isBlocked, escapeHtml } from './moderation.js?v=ea9834227b';
+import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=9b18d8af87';
+import { fmt, recommendPill, categoryTag } from './components.js?v=9b18d8af87';
+import { icon } from './icons.js?v=9b18d8af87';
+import { generateShareCard, showSharePreview } from './share-card.js?v=9b18d8af87';
+import { ensureTooltip } from './tooltip.js?v=9b18d8af87';
+import { pageSlice, renderPagination } from './pagination.js?v=9b18d8af87';
+import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=9b18d8af87';
+import { commentHtml, commentCellHtml, initCommentUnlock, isBlocked, escapeHtml } from './moderation.js?v=9b18d8af87';
 
 // 顯示用機構名稱：對得上評鑑醫院時改用 VPN 簡稱，否則沿用原填寫名稱。
 function displayInstitutionName(name) {

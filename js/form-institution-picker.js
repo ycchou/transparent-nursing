@@ -1,11 +1,13 @@
 // form-institution-picker.js — 表單的「機構名稱」自動建議：依選的機構層級篩選醫院（手機為底部選單），
 // 清單來自 data/hospitals-master.json（評鑑名單＋VPN 補充）。
 
-import { icon } from './icons.js?v=ea9834227b';
+import { icon } from './icons.js?v=9b18d8af87';
 
-import { HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=ea9834227b';
+import { HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=9b18d8af87';
 
-import { escapeHtml } from './moderation.js?v=ea9834227b';
+import { escapeHtml } from './moderation.js?v=9b18d8af87';
+
+import { showToast } from './toast.js?v=9b18d8af87';
 
 // ===== 機構名稱 autocomplete（依評鑑等級篩選醫院）=====
 
@@ -23,11 +25,41 @@ function reRenderPickerIfOpen() {
     input.dispatchEvent(new Event('input', { bubbles: true }));
   }
 }
-fetch('data/hospitals-master.json?v=6592884ae9')
+fetch('data/hospitals-master.json?v=71068a4948')
   .then((r) => (r.ok ? r.json() : null))
   .then((d) => { if (d && Array.isArray(d.hospitals)) { HOSPITALS_ALL = d.hospitals; reRenderPickerIfOpen(); } })
   .catch((e) => console.warn('[form] 機構主檔載入失敗:', e.message));
 window.addEventListener('hospitalShortNamesReady', reRenderPickerIfOpen);
+
+// 機構名稱對得到主檔時，回傳系統記載的評鑑層級（對不到回傳 null）。
+// 同名多筆且層級不同時（主檔目前沒有，保險起見），用戶目前選的若在其中就沿用，否則取第一筆。
+export function systemLevelFor(name, currentLevel = '') {
+  const n = String(name || '').trim();
+  if (!n) return null;
+  const levels = [...new Set(HOSPITALS_ALL.filter((h) => h.name === n).map((h) => h.level))];
+  if (!levels.length) return null;
+  return levels.includes(currentLevel) ? currentLevel : levels[0];
+}
+
+// 機構類別與系統記載不一致時，一律改成系統的層級；回傳是否有更正。
+// preferLevel：用戶從下拉點選的那一筆的層級（同名多筆時以點選的為準）。
+let suppressAutoOpen = false;
+export function syncInstitutionLevel(preferLevel = '') {
+  const nameInput = document.getElementById('f-institutionName');
+  const current = document.querySelector('input[name="institutionType"]:checked');
+  const currentLevel = current ? current.value : '';
+  const level = preferLevel || systemLevelFor(nameInput && nameInput.value, currentLevel);
+  if (!level || level === currentLevel) return false;
+  const target = document.querySelector(`input[name="institutionType"][value="${level}"]`);
+  if (!target) return false;
+  target.checked = true;
+  // 補派 change 讓表單樣式／草稿更新，但不要因此重新彈出建議清單
+  suppressAutoOpen = true;
+  target.dispatchEvent(new Event('change', { bubbles: true }));
+  suppressAutoOpen = false;
+  showToast(`已依系統資料將機構類別更正為「${level}」`, 'info');
+  return true;
+}
 
 export function attachInstitutionAutocomplete() {
   const nameInput = document.getElementById('f-institutionName');
@@ -144,7 +176,7 @@ export function attachInstitutionAutocomplete() {
       const short = HOSPITAL_SHORT_MAP.get(h.name);
       const shortHtml = short ? `<span class="suggest-short">簡稱：${highlightMatch(short, q)}</span>` : '';
       return `
-      <li class="dform-suggest-item${isCross ? ' is-cross' : ''}" role="option" data-name="${escapeHtml(h.name)}">
+      <li class="dform-suggest-item${isCross ? ' is-cross' : ''}" role="option" data-name="${escapeHtml(h.name)}" data-level="${escapeHtml(h.level)}">
         <span class="suggest-name">${highlightMatch(h.name, q)}</span>
         <span class="suggest-meta">${isCross ? `<span class="suggest-level">${escapeHtml(h.level)}</span> · ` : ''}${escapeHtml(h.city)}${shortHtml ? ' · ' + shortHtml : ''}</span>
       </li>
@@ -174,6 +206,7 @@ export function attachInstitutionAutocomplete() {
         suppressInlineRender = true;
         nameInput.dispatchEvent(new Event('input', { bubbles: true }));
         nameInput.blur();
+        syncInstitutionLevel(li.dataset.level);
       });
     });
   }
@@ -262,7 +295,7 @@ export function attachInstitutionAutocomplete() {
       const short = HOSPITAL_SHORT_MAP.get(h.name);
       const shortHtml = short ? ` · <span class="picker-short">簡稱：${highlightMatch(short, q)}</span>` : '';
       return `
-      <li class="dform-picker-item${isCross ? ' is-cross' : ''}" data-name="${escapeHtml(h.name)}">
+      <li class="dform-picker-item${isCross ? ' is-cross' : ''}" data-name="${escapeHtml(h.name)}" data-level="${escapeHtml(h.level)}">
         <span class="picker-name">${highlightMatch(h.name, q)}</span>
         <span class="picker-meta">${isCross ? `<span class="picker-level">${escapeHtml(h.level)}</span> · ` : ''}${escapeHtml(h.city)}${shortHtml}</span>
       </li>
@@ -286,6 +319,7 @@ export function attachInstitutionAutocomplete() {
         nameInput.value = li.dataset.name;
         nameInput.dispatchEvent(new Event('input', { bubbles: true }));
         closeSheet();
+        syncInstitutionLevel(li.dataset.level);
       });
     });
   }
@@ -309,6 +343,9 @@ export function attachInstitutionAutocomplete() {
     if (!isMobile()) renderInline();
   });
 
+  // 手動輸入的名稱剛好對得到主檔 → 同樣以系統層級為準
+  nameInput.addEventListener('change', () => syncInstitutionLevel());
+
   // blur 後延遲關閉，給 radio change 重新 focus 的機會（避免切類別時下拉一閃就消失）
   let blurHideTimerId = null;
   nameInput.addEventListener('blur', () => {
@@ -327,6 +364,7 @@ export function attachInstitutionAutocomplete() {
   // 雙條件齊備 → 手機開 sheet（欄位空才開）、桌機 focus + inline
   function maybeAutoOpen() {
     hint.hidden = !isEnabled();
+    if (suppressAutoOpen) return;
     // sheet 開啟中 → 即時換清單（用戶在 sheet 開著時換 location/level）
     if (sheetEl && !sheetEl.hidden) {
       if (isEnabled() && selectedLocation()) renderSheetList();

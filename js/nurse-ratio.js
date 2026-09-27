@@ -6,7 +6,7 @@
 //     hospitals: [{ id, name, level, history: { "11207": {day, eve, night} } }]
 //   }
 
-import { renderIcons } from './icons.js?v=ea9834227b';
+import { renderIcons } from './icons.js?v=9b18d8af87';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -14,12 +14,12 @@ import {
   shiftStatus,
   classifyHospital as classifyHospitalView,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=ea9834227b';
-import { skeletonRows } from './skeleton.js?v=ea9834227b';
-import { escapeHtml } from './moderation.js?v=ea9834227b';
-import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=ea9834227b';
+} from './nurse-ratio-view.js?v=9b18d8af87';
+import { skeletonRows } from './skeleton.js?v=9b18d8af87';
+import { escapeHtml } from './moderation.js?v=9b18d8af87';
+import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=9b18d8af87';
 
-const DATA_URL = 'data/nurse-ratio.json?v=5cc1ee8233';
+const DATA_URL = 'data/nurse-ratio.json?v=052ea02218';
 
 // 合規分類綁定本頁 state.data.months（共用邏輯在 nurse-ratio-view.js）
 function classifyHospital(hosp) {
