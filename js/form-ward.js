@@ -1,7 +1,7 @@
 // 病房自建表單：只定義病房專屬區塊，其餘（機構基本資料 / 輪班別與津貼 /
 // 業務與工時共用欄 / 薪資與年資 / 整體評價）沿用 form-sections.js 的共用正本。
 
-import { initDepartmentForm } from './form-engine.js?v=ff5eb14496';
+import { initDepartmentForm } from './form-engine.js?v=93fa43955b';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
@@ -9,7 +9,7 @@ import {
   DAILY_OVERTIME_FIELD,
   SALARY_SECTION,
   EVALUATION_SECTION,
-} from './form-sections.js?v=ff5eb14496';
+} from './form-sections.js?v=93fa43955b';
 
 // 護病比刻度：與 ICU／精神科相同拆「常態」「最忙時」。區間邊界大致對齊三班護病比標準
 // （醫學中心 6/9/11、區域 7/11/13、地區 10/13/15，見 nurse-ratio-view.js STANDARDS）。

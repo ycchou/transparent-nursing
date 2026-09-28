@@ -4,7 +4,8 @@
 // 1. 投稿後：送出成功時標記該類別；接下來 15 分鐘開啟該類別一律先抓網路，投稿者才看得到自己那筆。
 //    不能只在送出當下清快取：Google 發布 CSV 與 tn-sheets Worker 要數分鐘才更新，
 //    立刻重抓只會拿到舊資料、又被快取 10 分鐘，投稿者還是看不到自己那筆。
-// 2. 下拉重新整理（pull-to-refresh.js）：重新載入前設標記，重新載入後的這一頁所有資料都抓最新，
+// 2. 重新整理：PWA 下拉（pull-to-refresh.js，重新載入前設標記）或瀏覽器原生重新整理
+//    （Navigation Timing type='reload'）。這一頁所有資料都抓最新，
 //    而且 sheet-fetch.js 會直連 Google（不讀可能落後的 Worker 快照）。
 //
 // key 刻意不用 nursing_csv_ 前綴：data-loader 與各頁的舊快取清理會刪掉該前綴的 key。
@@ -17,11 +18,19 @@ const SUBMIT_KEY = (slug) => `tn:fresh_until:${slug}`;
 const RELOAD_KEY = 'tn:force_fresh';
 const RELOAD_VALID_MS = 10 * 1000;
 const forcedByReload = (() => {
+  let flagged = false;
   try {
     const at = Number(sessionStorage.getItem(RELOAD_KEY));
     if (at) sessionStorage.removeItem(RELOAD_KEY);
-    return !!at && Date.now() - at < RELOAD_VALID_MS;
-  } catch { return false; }
+    flagged = !!at && Date.now() - at < RELOAD_VALID_MS;
+  } catch {}
+  // 瀏覽器原生的重新整理（手機下拉、重新整理鈕、F5）也一樣抓最新
+  let reloaded = false;
+  try {
+    const nav = performance.getEntriesByType('navigation')[0];
+    reloaded = !!nav && nav.type === 'reload';
+  } catch {}
+  return flagged || reloaded;
 })();
 
 /** 送出成功後呼叫：接下來 15 分鐘該類別不讀快取 */
