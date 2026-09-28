@@ -1,7 +1,7 @@
 // hospital-sections.js — 機構總覽頁五個分頁的內容：三班護病比、財務概況、人力監控、分享平台、違規紀錄（含違規詳情彈窗）。
-import { icon, renderIcons } from './icons.js?v=7065d0fdf0';
-import { getShort } from './hospital-shortname.js?v=7065d0fdf0';
-import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=7065d0fdf0';
+import { icon, renderIcons } from './icons.js?v=9bc2af9f89';
+import { getShort } from './hospital-shortname.js?v=9bc2af9f89';
+import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=9bc2af9f89';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -9,11 +9,11 @@ import {
   shiftStatus,
   classifyHospital,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=7065d0fdf0';
+} from './nurse-ratio-view.js?v=9bc2af9f89';
 
-import { renderKpiStrip } from './stats-kpi.js?v=7065d0fdf0';
-import { renderTable, showDetailModal } from './table.js?v=7065d0fdf0';
-import { hasContributed } from './contribution-gate.js?v=7065d0fdf0';
+import { renderKpiStrip } from './stats-kpi.js?v=9bc2af9f89';
+import { renderTable, showDetailModal } from './table.js?v=9bc2af9f89';
+import { hasContributed } from './contribution-gate.js?v=9bc2af9f89';
 
 import {
   loadFinancialsHospital,
@@ -22,22 +22,22 @@ import {
   formatRocYear as finRocYear,
   renderFinancialTrendChart,
   signClass as finSignClass,
-} from './financials-view.js?v=7065d0fdf0';
-import { levelSlug } from './picker-filters.js?v=7065d0fdf0';
-import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=7065d0fdf0';
+} from './financials-view.js?v=9bc2af9f89';
+import { levelSlug } from './picker-filters.js?v=9bc2af9f89';
+import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=9bc2af9f89';
 import {
   loadPersonnelHospital,
   ensurePersonnelIndex,
   renderStaffChart as renderPmStaffChart,
   renderBedChart as renderPmBedChart,
   latestMonthTable,
-} from './personnel-view.js?v=7065d0fdf0';
+} from './personnel-view.js?v=9bc2af9f89';
 
-import { fineToWan, formatROCDate } from './records-format.js?v=7065d0fdf0';
-import { skeletonRows } from './skeleton.js?v=7065d0fdf0';
-import { escapeHtml } from './moderation.js?v=7065d0fdf0';
+import { fineToWan, formatROCDate } from './records-format.js?v=9bc2af9f89';
+import { skeletonRows } from './skeleton.js?v=9bc2af9f89';
+import { escapeHtml } from './moderation.js?v=9bc2af9f89';
 
-import { state, loadNurseByCode, ensurePlatformRows, ensureViolRows } from './hospital-data.js?v=7065d0fdf0';
+import { state, loadNurseByCode, ensurePlatformRows, ensureViolRows } from './hospital-data.js?v=9bc2af9f89';
 
 // 共用院區頁簽：多院區時以 .tabs 頁簽切換，內容區惰性重繪（重用 css .tabs/.tab）。
 // tabs: [{ label, data }]；renderPanel(data, panelEl) 每次切換都重畫（圖表用新 canvas）。

@@ -1,5 +1,6 @@
 // csv-loader.js — 從公開 CSV（Google Sheet 發布）載入資料：PapaParse 動態載入＋localStorage 快取＋背景刷新。
-import { extractLawArticles } from './records-format.js?v=7065d0fdf0';
+import { extractLawArticles } from './records-format.js?v=9bc2af9f89';
+import { fetchCsvText } from './sheet-fetch.js?v=9bc2af9f89';
 
 // ============================================================
 // PapaParse 動態載入（讓沒掛 <script> 的頁面也能 preload）
@@ -61,9 +62,7 @@ export function createCsvLoader(cfg) {
     const timer = setTimeout(() => ctrl.abort(), fetchTimeoutMs);
     let text;
     try {
-      const res = await fetch(csvUrl, { cache: 'no-store', signal: ctrl.signal });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      text = await res.text();
+      text = await fetchCsvText(csvUrl, ctrl.signal);
     } finally {
       clearTimeout(timer);
     }
