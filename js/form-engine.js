@@ -2,16 +2,16 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=ad6568ae44';
-import { renderIcons, icon } from './icons.js?v=ad6568ae44';
-import { markContributed } from './contribution-gate.js?v=ad6568ae44';
+import { mountLayout } from './components.js?v=35a3f3e9e4';
+import { renderIcons, icon } from './icons.js?v=35a3f3e9e4';
+import { markContributed } from './contribution-gate.js?v=35a3f3e9e4';
 
-import { showToast } from './toast.js?v=ad6568ae44';
-import { submitEndpoint as envSubmitEndpoint } from './env.js?v=ad6568ae44';
-import { notePwaIntent } from './pwa-prompt.js?v=ad6568ae44';
-import { markSubmitted } from './fresh-data.js?v=ad6568ae44';
-import { saveUnlockCode, unlockLink } from './unlock.js?v=ad6568ae44';
-import { attachInstitutionAutocomplete, syncInstitutionLevel } from './form-institution-picker.js?v=ad6568ae44';
+import { showToast } from './toast.js?v=35a3f3e9e4';
+import { submitEndpoint as envSubmitEndpoint } from './env.js?v=35a3f3e9e4';
+import { notePwaIntent } from './pwa-prompt.js?v=35a3f3e9e4';
+import { markSubmitted } from './fresh-data.js?v=35a3f3e9e4';
+import { saveUnlockCode, unlockLink, unlockNoticeHtml, wireInstallGuide } from './unlock.js?v=35a3f3e9e4';
+import { attachInstitutionAutocomplete, syncInstitutionLevel } from './form-institution-picker.js?v=35a3f3e9e4';
 import {
   generateCaptcha,
   attachCaptcha,
@@ -21,7 +21,7 @@ import {
   turnstileToken,
   resetTurnstile,
   TURNSTILE_REPLACES_LOCAL_CAPTCHA,
-} from './form-captcha.js?v=ad6568ae44';
+} from './form-captcha.js?v=35a3f3e9e4';
 
 const DRAFT_DEBOUNCE_MS = 500;
 
@@ -635,7 +635,8 @@ function showThanks(opts = {}) {
           <div class="dform-unlock-title">${icon('key-round', { size: 16, className: 'ico-inline' })}你的解鎖碼（請保存）</div>
           <div class="dform-unlock-code" id="thanks-unlock-code">${opts.unlockCode}</div>
           <p class="dform-unlock-hint">換手機、換瀏覽器或清除瀏覽資料後，輸入這組碼或打開解鎖連結，
-            就能再次看到分享平台完整內容（最多 5 台裝置、永久有效）。解鎖碼無法反查你填了什麼。</p>
+            就能再次看到分享平台完整內容。永久有效，且無法反查你填了什麼。</p>
+          ${unlockNoticeHtml()}
           <div class="dform-unlock-actions">
             <button type="button" class="btn btn-secondary" id="thanks-copy-code">${icon('copy', { size: 14 })}<span>複製解鎖碼</span></button>
             <button type="button" class="btn btn-secondary" id="thanks-share-link">${icon('share', { size: 14 })}<span>傳送解鎖連結</span></button>
@@ -656,7 +657,7 @@ function showThanks(opts = {}) {
   renderIcons(modal);
 
   // 有解鎖碼：不自動跳頁，留時間保存；複製／分享按鈕
-  if (opts.unlockCode) wireUnlockActions(modal, opts.unlockCode);
+  if (opts.unlockCode) { wireUnlockActions(modal, opts.unlockCode); wireInstallGuide(modal); }
 
   // 10 秒倒數 → 自動跳首頁（有解鎖碼時不倒數）
   let secondsLeft = 10;

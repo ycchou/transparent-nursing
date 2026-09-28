@@ -4,8 +4,9 @@
 // 匿名性：碼只在後端存雜湊、不與投稿資料列關聯；裝置 ID 是本瀏覽器隨機產生的字串（存 localStorage），
 // 只用來計算「這組碼已解鎖幾台裝置」（每碼上限 5 台），不是裝置指紋。
 
-import { LIVE } from './env.js?v=ad6568ae44';
-import { markContributed, hasContributed } from './contribution-gate.js?v=ad6568ae44';
+import { LIVE } from './env.js?v=35a3f3e9e4';
+import { markContributed, hasContributed } from './contribution-gate.js?v=35a3f3e9e4';
+import { icon } from './icons.js?v=35a3f3e9e4';
 
 const DEVICE_KEY = 'tn:device_id';
 const CODE_KEY = 'tn:unlock_code';   // 本裝置投稿時拿到的碼，方便日後在填寫頁再看一次
@@ -26,6 +27,37 @@ function deviceId() {
   }
 }
 
+export const UNLOCK_MAX_USES = 5;   // 與 worker-submit 的 UNLOCK_MAX_DEVICES 一致
+
+function inStandaloneApp() {
+  try {
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  } catch { return false; }
+}
+
+/**
+ * 解鎖碼的額度說明＋引導改用主畫面 App（感謝畫面、填寫頁共用）。
+ * 重點：額度是算「瀏覽器／App」不是算手機——iPhone 的主畫面 App 與 Safari 資料分開，也各算 1 次。
+ * 搭配 wireInstallGuide() 讓「看教學」按鈕生效。
+ */
+export function unlockNoticeHtml() {
+  const pwa = inStandaloneApp()
+    ? `${icon('check', { size: 14, className: 'ico-inline' })}你正在使用 App 版。之後都從主畫面的圖示開啟，就不必再用解鎖碼。`
+    : `<strong>建議把網站加到主畫面，之後都從 App 開啟</strong>：資料都在同一個地方，不必重複解鎖、也更快。
+       <button type="button" class="dform-unlock-guide-btn" data-install-guide>看加到主畫面教學 →</button>`;
+  return `
+    <div class="dform-unlock-limit" role="note">
+      <div class="dform-unlock-limit-title">${icon('alert-triangle', { size: 16, className: 'ico-inline' })}每組解鎖碼最多只能解鎖 ${UNLOCK_MAX_USES} 次</div>
+      <div>每一個<strong>瀏覽器</strong>、每一個<strong>加到主畫面的 App</strong> 都各算 1 次。例如同一支手機的 Safari、Chrome、主畫面 App 就會用掉 3 次；同一個瀏覽器重複解鎖不會再扣。</div>
+    </div>
+    <div class="dform-unlock-pwa">${pwa}</div>`;
+}
+
+export function wireInstallGuide(root) {
+  root.querySelectorAll('[data-install-guide]').forEach((b) =>
+    b.addEventListener('click', () => window.__nursingShowInstallGuide && window.__nursingShowInstallGuide()));
+}
+
 /** 本裝置投稿時拿到的解鎖碼（沒有回空字串） */
 export function savedUnlockCode() {
   try { return localStorage.getItem(CODE_KEY) || ''; } catch { return ''; }
@@ -43,7 +75,7 @@ export function unlockLink(code) {
 const ERROR_TEXT = {
   format: '解鎖碼格式不對，請確認是 TN-XXXX-XXXX 的 8 碼',
   invalid: '找不到這組解鎖碼，請確認有沒有打錯',
-  limit: '這組解鎖碼已經解鎖 5 台裝置，達到上限',
+  limit: '這組解鎖碼已經用完 5 次解鎖額度（每個瀏覽器、每個主畫面 App 各算 1 次），無法再解鎖',
   rate: '今天嘗試次數太多，請明天再試',
 };
 

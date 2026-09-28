@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#FFFFFF" />
   <!-- 軟鎖總開關（js/gate.js）：鎖定期非公開頁導向 coming-soon -->
-  <script src="./js/gate.js?v=ad6568ae44"></script>
-  <script src="./js/shell.js?v=ad6568ae44"></script>
+  <script src="./js/gate.js?v=35a3f3e9e4"></script>
+  <script src="./js/shell.js?v=35a3f3e9e4"></script>
 
   <!-- SEO -->
   <title>填寫表單 — 護理職場透明化運動</title>
@@ -49,21 +49,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=a9a442fc72" />
+  <link rel="stylesheet" href="css/styles.css?v=5b008affdb" />
 
     <!-- modulepreload：平行載入 ES module 鏈（首次造訪快 30-50%） -->
-  <link rel="modulepreload" href="./js/components.js?v=ad6568ae44" />
-  <link rel="modulepreload" href="./js/config.js?v=ad6568ae44" />
-  <link rel="modulepreload" href="./js/contribution-gate.js?v=ad6568ae44" />
-  <link rel="modulepreload" href="./js/env.js?v=ad6568ae44" />
-  <link rel="modulepreload" href="./js/fresh-data.js?v=ad6568ae44" />
-  <link rel="modulepreload" href="./js/icons.js?v=ad6568ae44" />
-  <link rel="modulepreload" href="./js/pull-to-refresh.js?v=ad6568ae44" />
-  <link rel="modulepreload" href="./js/pwa-prompt.js?v=ad6568ae44" />
-  <link rel="modulepreload" href="./js/scroll-hint.js?v=ad6568ae44" />
-  <link rel="modulepreload" href="./js/theme.js?v=ad6568ae44" />
-  <link rel="modulepreload" href="./js/toast.js?v=ad6568ae44" />
-  <link rel="modulepreload" href="./js/unlock.js?v=ad6568ae44" />
+  <link rel="modulepreload" href="./js/components.js?v=35a3f3e9e4" />
+  <link rel="modulepreload" href="./js/config.js?v=35a3f3e9e4" />
+  <link rel="modulepreload" href="./js/contribution-gate.js?v=35a3f3e9e4" />
+  <link rel="modulepreload" href="./js/env.js?v=35a3f3e9e4" />
+  <link rel="modulepreload" href="./js/fresh-data.js?v=35a3f3e9e4" />
+  <link rel="modulepreload" href="./js/icons.js?v=35a3f3e9e4" />
+  <link rel="modulepreload" href="./js/pull-to-refresh.js?v=35a3f3e9e4" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=35a3f3e9e4" />
+  <link rel="modulepreload" href="./js/scroll-hint.js?v=35a3f3e9e4" />
+  <link rel="modulepreload" href="./js/theme.js?v=35a3f3e9e4" />
+  <link rel="modulepreload" href="./js/toast.js?v=35a3f3e9e4" />
+  <link rel="modulepreload" href="./js/unlock.js?v=35a3f3e9e4" />
 
   <!-- 強制清除舊版 cache -->
   <script>
@@ -123,6 +123,7 @@
         <div id="g2g-unlock-enter">
           <div class="dform-unlock-title"><span data-icon="key-round" data-size="16" class="ico-inline"></span>有解鎖碼嗎？</div>
           <p class="dform-unlock-hint" style="margin:4px 0 0 !important;">投稿成功時會拿到一組解鎖碼。換手機、換瀏覽器後輸入它，就不必等待、直接解鎖。</p>
+          <div data-unlock-notice></div>
           <form class="dform-unlock-form" id="g2g-unlock-form">
             <input id="g2g-unlock-input" placeholder="TN-XXXX-XXXX" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="解鎖碼" />
             <button type="submit" class="btn btn-primary">解鎖</button>
@@ -132,7 +133,8 @@
         <div id="g2g-unlock-mine" hidden>
           <div class="dform-unlock-title"><span data-icon="key-round" data-size="16" class="ico-inline"></span>你的解鎖碼</div>
           <div class="dform-unlock-code" id="g2g-unlock-code" style="text-align:left;"></div>
-          <p class="dform-unlock-hint" style="margin:0 !important;">換裝置時輸入這組碼即可解鎖（最多 5 台裝置、永久有效）。</p>
+          <p class="dform-unlock-hint" style="margin:0 !important;">換裝置、換瀏覽器時輸入這組碼即可解鎖，永久有效。</p>
+          <div data-unlock-notice></div>
         </div>
       </div>
     </div>
@@ -275,11 +277,11 @@
   <div id="app-footer"></div>
 
   <script type="module">
-    import { CATEGORIES } from './js/config.js?v=ad6568ae44';
-    import { mountLayout } from './js/components.js?v=ad6568ae44';
-    import { icon, renderIcons } from './js/icons.js?v=ad6568ae44';
-    import { hasContributed, markContributed } from './js/contribution-gate.js?v=ad6568ae44';
-    import { redeemUnlockCode, savedUnlockCode } from './js/unlock.js?v=ad6568ae44';
+    import { CATEGORIES } from './js/config.js?v=35a3f3e9e4';
+    import { mountLayout } from './js/components.js?v=35a3f3e9e4';
+    import { icon, renderIcons } from './js/icons.js?v=35a3f3e9e4';
+    import { hasContributed, markContributed } from './js/contribution-gate.js?v=35a3f3e9e4';
+    import { redeemUnlockCode, savedUnlockCode, unlockNoticeHtml, wireInstallGuide } from './js/unlock.js?v=35a3f3e9e4';
 
     mountLayout();
 
@@ -490,6 +492,8 @@
         msg.hidden = false;
       }
     });
+    unlockBox.querySelectorAll('[data-unlock-notice]').forEach((el) => { el.innerHTML = unlockNoticeHtml(); });
+    wireInstallGuide(unlockBox);
     renderUnlockBox();
 
     const cards = document.getElementById('form-cards');
