@@ -1,5 +1,5 @@
-import { C } from './theme.js?v=36207357ba';
-import { escapeHtml } from './moderation.js?v=36207357ba';
+import { C } from './theme.js?v=2eb48e8916';
+import { escapeHtml } from './moderation.js?v=2eb48e8916';
 // 人力監控共用視圖：職類/病床折線圖與單院資料載入。
 // 供「人力監控」頁(personnel.js)與「機構總覽」頁(hospital.js)共用，單一來源。
 // 資料忠實呈現：未填報(null)不補值，折線圖於該月中斷(spanGaps:false)。

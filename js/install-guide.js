@@ -63,7 +63,7 @@ const homeScreen = () => phone(`
   <div class="ig-status"></div>
   <div class="ig-home">
     ${'<span class="ig-appicon ig-other"></span>'.repeat(5)}
-    <span class="ig-home-app">${hl(APP_ICON)}<small>護理職場透明化</small></span>
+    <span class="ig-home-app">${hl(APP_ICON)}<small>護理職場</small></span>
     ${'<span class="ig-appicon ig-other"></span>'.repeat(6)}
   </div>`);
 

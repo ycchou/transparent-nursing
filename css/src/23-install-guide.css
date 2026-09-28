@@ -255,15 +255,12 @@
 .ig-appicon svg { width: 18px; height: 18px; }
 .ig-appicon.ig-other { background: rgba(255, 255, 255, 0.55); }
 .ig-home-app { display: flex; flex-direction: column; align-items: center; gap: 7px; color: #fff; min-width: 0; }  /* gap 讓名稱不被脈動圓圈壓到 */
-/* App 名稱：跟真實主畫面一樣單行、太長顯示刪節號，不換行 */
+/* App 名稱：單行、不換行（4 個字，比圖示略寬也照樣顯示完整） */
 .ig-home-app small {
   display: block;
-  max-width: 32px;
   font-size: 6.5px;
   line-height: 1.2;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 /* 電腦瀏覽器 */
