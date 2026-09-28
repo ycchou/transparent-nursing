@@ -1,7 +1,6 @@
 // csv-loader.js — 從公開 CSV（Google Sheet 發布）載入資料：PapaParse 動態載入＋localStorage 快取＋背景刷新。
-import { extractLawArticles } from './records-format.js?v=5189b01e4d';
-import { fetchCsvText } from './sheet-fetch.js?v=5189b01e4d';
-import { isForcedFresh } from './fresh-data.js?v=5189b01e4d';
+import { extractLawArticles } from './records-format.js?v=c7b071261e';
+import { fetchCsvText } from './sheet-fetch.js?v=c7b071261e';
 
 // ============================================================
 // PapaParse 動態載入（讓沒掛 <script> 的頁面也能 preload）
@@ -135,17 +134,7 @@ export function createCsvLoader(cfg) {
       .finally(() => { _refreshing = false; });
   }
 
-  // 下拉重新整理後的這一頁：先抓一次最新（同頁多次 load 共用同一個請求），失敗才走下方快取流程
-  let _forcedFetch = null;
-
   async function load() {
-    if (isForcedFresh()) {
-      _forcedFetch ||= fetchAndParse()
-        .then((rows) => { writeLocal(rows); return rows; })
-        .catch((e) => { console.warn(`${logTag} 重新整理抓最新失敗，改用快取:`, e.message); return null; });
-      const rows = await _forcedFetch;
-      if (rows) return rows;
-    }
     const cached = readLocal();
     if (cached && cached.veryFresh) return cached.data;
     if (cached && cached.valid) {

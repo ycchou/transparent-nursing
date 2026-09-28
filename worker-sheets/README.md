@@ -8,9 +8,12 @@ Cloudflare Worker + KV。把分享平台（10 類）與違規紀錄（勞檢／�
 
 運作方式：
 - **Cron 每 5 分鐘**重抓全部來源，內容有變（或距上次寫入超過 1 小時）才寫 KV，控制在免費方案每日 1000 次寫入內。
-- 請求路徑與 Google 相同：`/spreadsheets/d/e/<pubId>/pub?gid=<gid>&single=true&output=csv`。
-  前端 `js/sheet-fetch.js` 把網址的 `https://docs.google.com` 換成本 Worker；Worker 失敗時自動退回直連 Google。
-- 不在白名單的 Sheet 回 404 → 前端退回直連，**新增 Sheet 忘了加白名單也不會壞，只是比較慢**。
+- 違規紀錄 3 份在 `SOURCES` 標 `'daily'`：更新頻率低，Cron 每天只在台北 04:00 那輪抓。
+- **合併包** `/spreadsheets/d/e/<pubId>/bundle`：同一試算表白名單內所有分頁一次回傳 JSON `{ gid: csv }`。
+  分享平台 10 類同在一個試算表，前端（`js/sheet-fetch.js`）一次請求拿齊；Cron 另存合併快照，每次只讀 1 次 KV。
+- 單份路徑與 Google 相同（前端已改用合併包，保留給舊版快取的頁面）：`/spreadsheets/d/e/<pubId>/pub?gid=<gid>&single=true&output=csv`。
+- 前端 Worker 失敗（網路錯誤、非 2xx）時自動退回直連 Google。
+- 不在白名單的 Sheet：合併包裡沒有它（或回 404）→ 前端退回直連，**新增 Sheet 忘了加白名單也不會壞，只是比較慢**。
 - Google 回非 CSV（例如 Sheet 被取消發布）時不覆蓋 KV，維持最後一份好的快照。
 - 資料新鮮度：Google 發布 CSV 本身約 1–5 分鐘，加上最多 5 分鐘（Cron）＋ 1 分鐘（KV 邊緣快取）＋ 1 分鐘（isolate 記憶體）。
 

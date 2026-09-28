@@ -2,16 +2,16 @@
 //
 // 資料/圖表共用 js/financials-view.js；名稱↔代碼/簡稱重用 js/hospital-shortname.js
 
-import { renderIcons, icon } from './icons.js?v=5189b01e4d';
-import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=5189b01e4d';
+import { renderIcons, icon } from './icons.js?v=c7b071261e';
+import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=c7b071261e';
 import {
   ensureFinancialsLoaded, getAllFinancials, getFinancials, getFinancialFields,
   parseNum, formatVal, signClass, formatRocYear, renderFinancialTrendChart,
-} from './financials-view.js?v=5189b01e4d';
-import { reportMergedInfo, registerFormerCodes, readCodeParam } from './hospital-merges.js?v=5189b01e4d';
-import { skeletonRows } from './skeleton.js?v=5189b01e4d';
-import { escapeHtml } from './moderation.js?v=5189b01e4d';
-import { levelSlug } from './picker-filters.js?v=5189b01e4d';
+} from './financials-view.js?v=c7b071261e';
+import { reportMergedInfo, registerFormerCodes, readCodeParam } from './hospital-merges.js?v=c7b071261e';
+import { skeletonRows } from './skeleton.js?v=c7b071261e';
+import { escapeHtml } from './moderation.js?v=c7b071261e';
+import { levelSlug } from './picker-filters.js?v=c7b071261e';
 
 const LEVEL_ORDER = ['醫學中心', '區域醫院', '地區醫院', '精神科醫院', '精神科教學醫院', '診所', '其他'];
 const REGION_ORDER = ['臺北', '北區', '中區', '南區', '高屏', '東區'];

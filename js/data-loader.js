@@ -1,9 +1,9 @@
 // CSV 載入 + 解析 + 雙層 cache（記憶體 + localStorage）
 // 之後把 CATEGORIES[].csvUrl 改成 Google Sheet 發布 CSV URL 即可
-import { CATEGORIES } from './config.js?v=5189b01e4d';
-import { currentMode } from './env.js?v=5189b01e4d';
-import { fetchCsvText } from './sheet-fetch.js?v=5189b01e4d';
-import { needsFreshData } from './fresh-data.js?v=5189b01e4d';
+import { CATEGORIES } from './config.js?v=c7b071261e';
+import { currentMode } from './env.js?v=c7b071261e';
+import { fetchCsvText } from './sheet-fetch.js?v=c7b071261e';
+import { needsFreshData, isForcedFresh } from './fresh-data.js?v=c7b071261e';
 
 // 記憶體 cache：同 session 內不重抓
 const cache = new Map();
@@ -129,7 +129,8 @@ async function fetchAndParseOnce(slug) {
 
   let text;
   try {
-    text = await fetchCsvText(cat.csvUrl, ctrl.signal);
+    // 重新整理後的這一頁：直連 Google 拿最新（Worker 快照可能落後數分鐘）
+    text = await fetchCsvText(cat.csvUrl, ctrl.signal, { preferDirect: isForcedFresh() });
   } finally {
     clearTimeout(timer);
   }
