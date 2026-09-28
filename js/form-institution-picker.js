@@ -1,13 +1,13 @@
 // form-institution-picker.js — 表單的「機構名稱」自動建議：依選的機構層級篩選醫院（手機為底部選單），
 // 清單來自 data/hospitals-master.json（評鑑名單＋VPN 補充）。
 
-import { icon } from './icons.js?v=d722392f87';
+import { icon } from './icons.js?v=97a7aba99d';
 
-import { HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=d722392f87';
+import { HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=97a7aba99d';
 
-import { escapeHtml } from './moderation.js?v=d722392f87';
+import { escapeHtml } from './moderation.js?v=97a7aba99d';
 
-import { showToast } from './toast.js?v=d722392f87';
+import { showToast } from './toast.js?v=97a7aba99d';
 
 // ===== 機構名稱 autocomplete（依評鑑等級篩選醫院）=====
 
@@ -245,7 +245,7 @@ export function attachInstitutionAutocomplete() {
       <div class="dform-picker-panel">
         <div class="dform-picker-header">
           <h3 id="dform-picker-title">選擇機構名稱</h3>
-          <button type="button" class="dform-picker-close" data-close="1" aria-label="關閉">×</button>
+          <button type="button" class="dform-picker-close" data-close="1" aria-label="關閉">${icon('x', { size: 20 })}</button>
         </div>
         <div class="dform-picker-search-wrap">
           <input class="dform-picker-search" type="search" placeholder="搜尋醫院關鍵字..." autocomplete="off" inputmode="search" enterkeyhint="search" />

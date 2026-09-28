@@ -3,8 +3,8 @@
 // 固定右下角、不可拖曳；點擊 → 開內建捐款彈窗（重用 mountDonate widget）。
 // 可按關閉鍵：當天不再出現，隔天再跳出（localStorage，各頁共用同一 key）。
 
-import { mountDonate } from './donate.js?v=d722392f87';
-import { icon } from './icons.js?v=d722392f87';
+import { mountDonate } from './donate.js?v=97a7aba99d';
+import { icon } from './icons.js?v=97a7aba99d';
 
 const DEFAULT_LINK = 'support.html';
 const CLOSED_KEY = 'tn_fab_closed';
@@ -70,7 +70,7 @@ export function mountDonateFab({ link = DEFAULT_LINK, onActivate } = {}) {
     <button type="button" class="donate-fab-btn" aria-label="支持我們（前往捐款）">
       <span class="donate-heart" aria-hidden="true">${icon('heart-full', { size: 20 })}</span>
     </button>
-    <button type="button" class="donate-fab-close" aria-label="關閉">×</button>
+    <button type="button" class="donate-fab-close" aria-label="關閉">${icon('x', { size: 12 })}</button>
   `;
   document.body.appendChild(fab);
 

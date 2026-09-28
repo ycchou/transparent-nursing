@@ -5,8 +5,9 @@
 // - 本地埋點（trackPwa）：dispatch CustomEvent + localStorage 累計（未接外部服務）
 // import { initPWAPrompt, showInstallGuide, notePwaIntent, isAppInstalled } from './pwa-prompt.js?v=...';
 
-import { C } from './theme.js?v=d722392f87';
-import { showToast } from './toast.js?v=d722392f87';
+import { C } from './theme.js?v=97a7aba99d';
+import { showToast } from './toast.js?v=97a7aba99d';
+import { icon } from './icons.js?v=97a7aba99d';
 
 const DISMISS_KEY = '__nursing_pwa_dismissed';          // 最近一次關閉/延後的時間戳
 const DISMISS_COUNT_KEY = '__nursing_pwa_dismiss_count'; // 累計「主動關閉」次數
@@ -203,7 +204,7 @@ function bannerHTML(platform, reason) {
         <div class="pwa-prompt-text">${subtext}</div>
       </div>
       ${actionBtn}
-      <button id="pwa-prompt-close" class="pwa-prompt-close" type="button" aria-label="關閉">×</button>
+      <button id="pwa-prompt-close" class="pwa-prompt-close" type="button" aria-label="關閉">${icon('x', { size: 18 })}</button>
     </div>
   `;
 }
@@ -295,7 +296,7 @@ export async function showInstallGuide() {
 
   let guide;
   try {
-    guide = await import('./install-guide.js?v=d722392f87');
+    guide = await import('./install-guide.js?v=97a7aba99d');
   } catch {
     showToast('教學載入失敗，請檢查網路後再試一次', 'error');
     return;
@@ -318,7 +319,7 @@ export async function showInstallGuide() {
             像 App 一樣使用：全螢幕、開啟更快、不必重複解鎖，免下載免註冊
           </div>
         </div>
-        <button class="modal-close" aria-label="關閉" id="pwa-modal-close">×</button>
+        <button class="modal-close" aria-label="關閉" id="pwa-modal-close">${icon('x', { size: 18 })}</button>
       </div>
       <div class="modal-body">${guide.installGuideHtml({ canOneTap: !!deferredInstallPrompt })}</div>
     </div>

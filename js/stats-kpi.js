@@ -1,8 +1,8 @@
 // 薪資百分位數 KPI 條 + 可拖曳浮動氣泡式薪資試算工具
 // 給 platform.html 使用：依目前篩選後的資料即時計算
-import { C, alpha } from './theme.js?v=d722392f87';
-import { icon } from './icons.js?v=d722392f87';
-import { notePwaIntent } from './pwa-prompt.js?v=d722392f87';
+import { C, alpha } from './theme.js?v=97a7aba99d';
+import { icon } from './icons.js?v=97a7aba99d';
+import { notePwaIntent } from './pwa-prompt.js?v=97a7aba99d';
 
 /** 線性插值法百分位數（標準 type-7） */
 export function percentile(sortedValues, p) {
@@ -128,7 +128,7 @@ export function mountSalaryCalculator(getRows, getConditions) {
       <div class="calc-modal-panel">
         <div class="calc-modal-header">
           <h3 id="calc-modal-title"><span class="calc-modal-title-icon">${icon('calculator', { size: 20 })}</span> 薪資百分位試算</h3>
-          <button class="calc-modal-close" type="button" aria-label="關閉" data-close="1">×</button>
+          <button class="calc-modal-close" type="button" aria-label="關閉" data-close="1">${icon('x', { size: 18 })}</button>
         </div>
         <div class="calc-modal-body">
           <div class="calc-form">
@@ -592,7 +592,7 @@ export function mountSalaryCalculator(getRows, getConditions) {
       });
       const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 0.95));
       const dataUrl = canvas.toDataURL('image/png');
-      const { showSharePreview } = await import('./share-card.js?v=d722392f87');
+      const { showSharePreview } = await import('./share-card.js?v=97a7aba99d');
       showSharePreview(blob, dataUrl, `salary-percentile-${Date.now()}.png`);
       // 高意圖時刻：做完薪資試算並產生分享圖 → 當頁嘗試顯示安裝提示
       notePwaIntent('salary_calc', { showNow: true });

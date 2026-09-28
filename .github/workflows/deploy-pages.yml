@@ -46,6 +46,9 @@ jobs:
       - name: 資料結構驗證
         run: python tools/validate-data.py
 
+      - name: UI 規則檢查（關閉鈕不可用文字 ×，一律用 SVG 圖示）
+        run: python tools/lint-ui.py
+
   # 資料解析器測試：固定的原始 PDF／ODS 解析結果必須與 tests/expected/ 相同
   test:
     runs-on: ubuntu-latest

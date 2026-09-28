@@ -2118,18 +2118,7 @@ body.viol-modal-open { overflow: hidden; }
   place-items: center;
 }
 .modal-close:hover { background: var(--border); color: var(--ink); }
-/* 統一所有關閉鈕的 ×／圖示置中（含只靠 line-height 未置中的幾個） */
-.modal-close,
-.pwa-prompt-close,
-.donate-fab-close,
-.calc-modal-close,
-.dform-picker-close {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  text-align: center;
-}
+/* 所有關閉鈕的置中統一寫在 24-close-buttons.css（最後載入，不會被各元件的樣式蓋掉） */
 
 .modal-grid {
   display: grid;
@@ -6201,3 +6190,35 @@ html.ptr-enabled body {
   color: var(--ink);
 }
 .ig-footnote { margin: 12px 0 0; font-size: var(--fs-2xs); color: var(--muted); }
+/* ============================================================
+   關閉鈕統一置中（全站唯一的一份，刻意放在最後載入）
+   ------------------------------------------------------------
+   規則：關閉鈕一律放 icon('x') 的 SVG，不要用文字「×」——
+   各字型的 × 基線不同，怎麼調都無法真正置中（這是反覆歪掉的根因）。
+   tools/lint-ui.py 會在 CI 檢查，出現文字 × 的關閉鈕會讓部署失敗。
+   各元件只管尺寸、底色、位置；置中由這裡負責。
+   新增關閉鈕：沿用下列任一 class，或加進這個清單。
+   ============================================================ */
+.modal-close,
+.pwa-prompt-close,
+.donate-fab-close,
+.calc-modal-close,
+.dform-picker-close {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  line-height: 0 !important;
+  font-size: 0;            /* 殘留的空白文字節點不佔高度、不把圖示擠偏 */
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+.modal-close > svg,
+.pwa-prompt-close > svg,
+.donate-fab-close > svg,
+.calc-modal-close > svg,
+.dform-picker-close > svg {
+  display: block;
+  flex-shrink: 0;
+  margin: 0;
+}
