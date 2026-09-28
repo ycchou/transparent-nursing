@@ -1,7 +1,7 @@
 // 病房自建表單：只定義病房專屬區塊，其餘（機構基本資料 / 輪班別與津貼 /
 // 業務與工時共用欄 / 薪資與年資 / 整體評價）沿用 form-sections.js 的共用正本。
 
-import { initDepartmentForm } from './form-engine.js?v=c384e7733e';
+import { initDepartmentForm } from './form-engine.js?v=f51f0826bd';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
@@ -9,20 +9,12 @@ import {
   DAILY_OVERTIME_FIELD,
   SALARY_SECTION,
   EVALUATION_SECTION,
-} from './form-sections.js?v=c384e7733e';
+} from './form-sections.js?v=f51f0826bd';
 
 // 護病比刻度：與 ICU／精神科相同拆「常態」「最忙時」。區間邊界大致對齊三班護病比標準
-// （醫學中心 6/9/11、區域 7/11/13、地區 10/13/15，見 nurse-ratio-view.js STANDARDS）。
-const WARD_RATIO = ['1:6 以下', '1:7-8', '1:9-10', '1:11-12', '1:13-15', '1:16 以上'];
-
-// 1-5 分量表：一律「5 分＝負擔最重」，與精神科表單方向一致。
-const scale = (low, high) => [
-  { value: '1', label: `1（${low}）` },
-  { value: '2', label: '2' },
-  { value: '3', label: '3' },
-  { value: '4', label: '4' },
-  { value: '5', label: `5（${high}）` },
-];
+// （醫學中心 6/9/11、區域 7/11/13、地區 10/13/15，見 nurse-ratio-view.js STANDARDS）；
+// 大夜常見 1:16 以上，再細分到 1:20 以上。
+const WARD_RATIO = ['1:6 以下', '1:7-8', '1:9-10', '1:11-12', '1:13-15', '1:16-17', '1:18-19', '1:20 以上'];
 
 // 護病比配置引導文字：可展開查看完整法規條文
 const RATIO_INTRO = `<strong>一般病房護病比標準</strong><br><br>
@@ -46,18 +38,28 @@ const RATIO_INTRO = `<strong>一般病房護病比標準</strong><br><br>
   </div>
 </details>`;
 
+// 輪班別與津貼：沿用共用區塊，但病房的班別不提供「其他」，
+// 且 on call 選「是」時多一題自由描述樣態。
+const WARD_SHIFT_SECTION = SHIFT_ALLOWANCE_SECTION.flatMap((f) => {
+  if (f.name === 'shiftSystem') return [{ ...f, options: f.options.filter((o) => o !== '其他') }];
+  if (f.name === 'hasOnCall') {
+    return [f, { name: 'onCallPattern', label: 'on call 樣態', type: 'textarea', rows: 3, maxLength: 150,
+      showIf: { field: 'hasOnCall', equals: '是' },
+      help: '例：多久輪一次、需待命的時段、被叫回的頻率、有無 on call 費或補休' }];
+  }
+  return [f];
+});
+
 const WARD_FORM_SCHEMA = [
   ...buildInstitutionSection({
-    unitNameHelp: '例：內科病房、一般外科病房、婦產科病房、兒科病房、安寧病房、呼吸照護病房 (RCW)',
+    unitNameHelp: '例：內科病房、一般外科病房、婦產科病房、兒科病房、安寧病房',
     jobTitleHelp: '例：N0、N1、N2、N3、專科護理師',
   }),
 
   { section: '病房單位資訊' },
   { name: 'wardType', label: '病房類型', type: 'radio', required: true,
-    options: ['內科', '外科', '婦產科', '兒科', '安寧', '呼吸照護（RCW）', '專責／隔離', '綜合（混合科）', '其他'],
+    options: ['內科', '外科', '婦產科', '兒科', '安寧', '綜合（混合科）', '其他'],
     help: '精神科病房請改填「精神科」表單' },
-  { name: 'bedCount', label: '單位病床數', type: 'number', min: 0, step: 1,
-    help: '你所在病房的開放床數' },
 
   { section: '護病比配置', intro: RATIO_INTRO },
   { name: 'dayShiftRatio', label: '白班・常態護病比', type: 'radio', required: true,
@@ -73,21 +75,21 @@ const WARD_FORM_SCHEMA = [
   { name: 'nightPeakRatio', label: '大夜・最忙時', type: 'radio', required: true,
     options: WARD_RATIO },
 
-  ...SHIFT_ALLOWANCE_SECTION,
+  ...WARD_SHIFT_SECTION,
 
   { section: '人力與支援' },
   { name: 'leaderSupport', label: 'Leader／組長', type: 'radio', layout: 'list',
     help: '選最接近你單位常態的一項',
     options: [
-      { value: '不佔床，全班協助', label: '不佔床，全班協助', desc: '不分床，整班都能支援各床、處理突發狀況' },
-      { value: '不佔床，但少協助', label: '不佔床，但少協助', desc: '不分床，但忙於行政、帳務，很少下來幫忙' },
-      { value: '要佔床，有空才協助', label: '要佔床，有空才協助', desc: '自己也分床，顧好自己的病人才有餘力幫忙' },
-      { value: '無 Leader', label: '無 Leader', desc: '單位沒有 Leader／組長的設置' },
+      '不佔床，需協助功能性護理',
+      '不佔床，主責行政，少量協助功能性護理',
+      '佔床（下來當主護），有空協助其他同事',
     ] },
-  { name: 'nonNursingStaff', label: '單位有哪些非護理人力', type: 'checkbox',
-    options: ['護佐', '照服員', '書記', '傳送'], help: '可複選；皆無則不勾' },
-  { name: 'floatFreq', label: '被借調（float）支援其他單位的頻率', type: 'radio',
-    options: ['從不', '每月 1-2 次', '每週 1-2 次', '每週多次'] },
+  { name: 'nonNursingHelp', label: '單位有無非護理人力（護佐、照服員、病房助理）可以協助照護工作？',
+    type: 'radio', options: ['有', '無'] },
+  { name: 'nonNursingHelpShifts', label: '哪些班別有非護理人力協助', type: 'checkbox', required: true,
+    options: ['白班（D）', '小夜（E）', '大夜（N）'], help: '可複選',
+    showIf: { field: 'nonNursingHelp', equals: '有' } },
   { name: 'newbieIndependence', label: '新人多久開始獨立照護', type: 'radio',
     options: ['1 個月內', '1-2 個月', '2-3 個月', '3 個月以上', '不一定'],
     help: '從到職到不需學姊帶、自己分床的時間' },
@@ -97,11 +99,6 @@ const WARD_FORM_SCHEMA = [
   { section: '業務與工時' },
   DAILY_OVERTIME_FIELD,
   ...WORKHOURS_FIELDS,
-  { name: 'nonNursingDuties', label: '需要由護理師做的非護理業務', type: 'checkbox',
-    options: ['傳送病人／檢體', '補貨／點班', '清潔消毒', '書記／行政', '其他'],
-    help: '可複選；皆無則不勾' },
-  { name: 'nonNursingBurden', label: '非護理業務負擔', type: 'radio',
-    options: scale('很輕', '非常重') },
 
   ...SALARY_SECTION,
   ...EVALUATION_SECTION,

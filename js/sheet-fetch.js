@@ -9,8 +9,8 @@
 // 失敗才退回 Worker——Worker 的快照可能落後 Google 數分鐘。
 // 非 Google Sheet 的網址（例如 data/mock/*.csv）直接抓，不經 Worker。
 // Worker 原始碼與群組白名單見 worker-sheets/。
-import { LIVE } from './env.js?v=c384e7733e';
-import { VIOL_FEEDS } from './config.js?v=c384e7733e';
+import { LIVE } from './env.js?v=f51f0826bd';
+import { VIOL_FEEDS } from './config.js?v=f51f0826bd';
 
 const SHEET_ORIGIN = 'https://docs.google.com';
 const SHEET_PROXY = 'https://tn-sheets.ycchou-1005.workers.dev';

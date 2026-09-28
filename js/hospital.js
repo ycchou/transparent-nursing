@@ -5,17 +5,17 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { renderIcons } from './icons.js?v=c384e7733e';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=c384e7733e';
+import { renderIcons } from './icons.js?v=f51f0826bd';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=f51f0826bd';
 
-import { notePwaIntent } from './pwa-prompt.js?v=c384e7733e';
+import { notePwaIntent } from './pwa-prompt.js?v=f51f0826bd';
 
-import { skeletonRows } from './skeleton.js?v=c384e7733e';
-import { escapeHtml } from './moderation.js?v=c384e7733e';
-import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=c384e7733e';
-import { state, loadBaseData } from './hospital-data.js?v=c384e7733e';
+import { skeletonRows } from './skeleton.js?v=f51f0826bd';
+import { escapeHtml } from './moderation.js?v=f51f0826bd';
+import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=f51f0826bd';
+import { state, loadBaseData } from './hospital-data.js?v=f51f0826bd';
 
-import { readCodeParam } from './hospital-merges.js?v=c384e7733e';
+import { readCodeParam } from './hospital-merges.js?v=f51f0826bd';
 import {
   renderNurseSection,
   renderFinancialsSection,
@@ -23,7 +23,7 @@ import {
   renderPlatformSection,
   renderViolationsSection,
   copyOrShare,
-} from './hospital-sections.js?v=c384e7733e';
+} from './hospital-sections.js?v=f51f0826bd';
 
 // ---------- utils ----------
 // 舊碼（改制換碼）會轉成新碼並改寫網址

@@ -3630,6 +3630,8 @@ body.calc-modal-open { overflow: hidden; }
   margin-top: 18px;
 }
 .dform-field:first-of-type { margin-top: 0; }
+/* 條件題（schema showIf）未達條件時隱藏；display:flex 會蓋過 [hidden] 的預設樣式 */
+.dform-field[hidden] { display: none; }
 .dform-label {
   font-size: var(--fs-body-sm);
   font-weight: 600;

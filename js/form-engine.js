@@ -2,15 +2,15 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=c384e7733e';
-import { renderIcons, icon } from './icons.js?v=c384e7733e';
-import { markContributed } from './contribution-gate.js?v=c384e7733e';
+import { mountLayout } from './components.js?v=f51f0826bd';
+import { renderIcons, icon } from './icons.js?v=f51f0826bd';
+import { markContributed } from './contribution-gate.js?v=f51f0826bd';
 
-import { showToast } from './toast.js?v=c384e7733e';
-import { submitEndpoint as envSubmitEndpoint } from './env.js?v=c384e7733e';
-import { notePwaIntent } from './pwa-prompt.js?v=c384e7733e';
-import { markSubmitted } from './fresh-data.js?v=c384e7733e';
-import { attachInstitutionAutocomplete, syncInstitutionLevel } from './form-institution-picker.js?v=c384e7733e';
+import { showToast } from './toast.js?v=f51f0826bd';
+import { submitEndpoint as envSubmitEndpoint } from './env.js?v=f51f0826bd';
+import { notePwaIntent } from './pwa-prompt.js?v=f51f0826bd';
+import { markSubmitted } from './fresh-data.js?v=f51f0826bd';
+import { attachInstitutionAutocomplete, syncInstitutionLevel } from './form-institution-picker.js?v=f51f0826bd';
 import {
   generateCaptcha,
   attachCaptcha,
@@ -20,7 +20,7 @@ import {
   turnstileToken,
   resetTurnstile,
   TURNSTILE_REPLACES_LOCAL_CAPTCHA,
-} from './form-captcha.js?v=c384e7733e';
+} from './form-captcha.js?v=f51f0826bd';
 
 const DRAFT_DEBOUNCE_MS = 500;
 
@@ -118,7 +118,7 @@ function renderField(field) {
   const labelFor = (field.type === 'radio' || field.type === 'checkbox') ? '' : `for="f-${field.name}"`;
 
   return `
-    <div class="dform-field" data-name="${field.name}" data-required="${field.required ? '1' : '0'}" data-type="${field.type}">
+    <div class="dform-field" data-name="${field.name}" data-required="${field.required ? '1' : '0'}" data-type="${field.type}"${field.showIf ? ' hidden' : ''}>
       <label class="dform-label" id="lab-${field.name}" ${labelFor}>
         ${field.label}${required}
       </label>
@@ -195,6 +195,10 @@ function renderForm() {
     input.addEventListener('change', updateChecked);
   });
 
+  // 條件題（showIf）：控制題一變動就重算顯示與否
+  root.addEventListener('change', updateConditionalFields);
+  updateConditionalFields();
+
   // 任何欄位變動 → 清掉錯誤狀態
   root.addEventListener('input', (e) => {
     const fieldEl = e.target.closest('.dform-field');
@@ -204,6 +208,38 @@ function renderForm() {
     const fieldEl = e.target.closest('.dform-field');
     if (fieldEl) fieldEl.classList.remove('has-error');
   });
+}
+
+// ===== 條件題 =====
+// schema 欄位可設 showIf: { field: '<控制題 name>', equals: '<值>' }：控制題（radio）選到該值才顯示。
+// 隱藏時清空作答、不驗證必填，送出的值為空。
+
+function isShown(item) {
+  if (!item.showIf) return true;
+  const sel = document.querySelector(`input[type="radio"][name="${item.showIf.field}"]:checked`);
+  return !!sel && sel.value === item.showIf.equals;
+}
+
+function updateConditionalFields() {
+  for (const item of SCHEMA) {
+    if (item.section || !item.showIf) continue;
+    const el = document.querySelector(`.dform-field[data-name="${item.name}"]`);
+    if (!el) continue;
+    const show = isShown(item);
+    if (el.hidden === !show) continue;
+    el.hidden = !show;
+    if (!show) {
+      el.classList.remove('has-error');
+      el.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach((i) => {
+        i.checked = false;
+        i.closest('.dform-option')?.classList.remove('checked');
+      });
+      el.querySelectorAll('input[type="text"], input[type="number"], textarea, select').forEach((i) => {
+        i.value = '';
+        i.dispatchEvent(new Event('input'));   // 讓字數計數歸零
+      });
+    }
+  }
 }
 
 // ===== 序列化 / 反序列化 =====
@@ -277,6 +313,8 @@ function applyDataToForm(data) {
       if (el) el.value = val;
     }
   }
+  // 回填時觸發的 change 不冒泡，這裡補算一次條件題
+  updateConditionalFields();
 }
 
 // ===== 驗證 =====
@@ -284,7 +322,7 @@ function applyDataToForm(data) {
 function validate(data) {
   const errors = [];
   for (const item of SCHEMA) {
-    if (item.section || !item.required) continue;
+    if (item.section || !item.required || !isShown(item)) continue;
     const { name, type } = item;
     const val = data[name];
     const isEmpty = type === 'checkbox'

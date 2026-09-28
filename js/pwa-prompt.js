@@ -5,8 +5,8 @@
 // - 本地埋點（trackPwa）：dispatch CustomEvent + localStorage 累計（未接外部服務）
 // import { initPWAPrompt, showInstallGuide, notePwaIntent, isAppInstalled } from './pwa-prompt.js?v=...';
 
-import { C } from './theme.js?v=c384e7733e';
-import { showToast } from './toast.js?v=c384e7733e';
+import { C } from './theme.js?v=f51f0826bd';
+import { showToast } from './toast.js?v=f51f0826bd';
 
 const DISMISS_KEY = '__nursing_pwa_dismissed';          // 最近一次關閉/延後的時間戳
 const DISMISS_COUNT_KEY = '__nursing_pwa_dismiss_count'; // 累計「主動關閉」次數
