@@ -2,6 +2,14 @@
   "_說明": "participate-<slug>.html 各表單頁的差異設定；共用骨架在 templates/participate-form.html，由 tools/build-forms.py 產生頁面",
   "forms": [
     {
+      "slug": "ward",
+      "title": "病房職場資料分享",
+      "metaDescription": "病房護理師專屬表單。匿名分享病房類型、三班護病比、Leader 與人力支援、新人訓練、非護理業務、薪資、工作氣氛等真實資訊，為下一位求職護理師留下指引。",
+      "ogDescription": "匿名分享病房護理師的真實職場資訊，8-10 分鐘完成。",
+      "eyebrow": "病房",
+      "ledeHtml": "<p class=\"page-lede\">\n        以下資料將 <strong class=\"text-ink\">匿名彙整</strong>，作為其他護理師求職與工作評估的真實參考。\n        填寫時請以客觀事實為主，避免情緒性敘述。完成需約 8-10 分鐘。\n      </p>\n      <div class=\"dform-callout\">\n        <span data-icon=\"shield-check\" data-size=\"18\"></span>\n        <span>本表單不會記錄你的 IP 或任何可識別資訊。</span>\n      </div>"
+    },
+    {
       "slug": "icu",
       "title": "加護病房職場資料分享",
       "metaDescription": "加護病房 (ICU) 護理師專屬表單。匿名分享機構類別、ICU 類型、三班護病比、班別與津貼、教育訓練、薪資、工作氣氛等真實資訊，為下一位求職護理師留下指引。",

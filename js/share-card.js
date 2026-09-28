@@ -1,8 +1,8 @@
 // 一鍵產生單筆資料分享圖片（1080 × 1350，IG 4:5 直式）
-import { C, alpha } from './theme.js?v=9bc2af9f89';
-import { getCategory } from './config.js?v=9bc2af9f89';
-import { icon } from './icons.js?v=9bc2af9f89';
-import { escapeHtml } from './moderation.js?v=9bc2af9f89';
+import { C, alpha } from './theme.js?v=c60f7b9558';
+import { getCategory } from './config.js?v=c60f7b9558';
+import { icon } from './icons.js?v=c60f7b9558';
+import { escapeHtml } from './moderation.js?v=c60f7b9558';
 
 const KEY_LABELS = {
   // ICU
@@ -26,7 +26,7 @@ const KEY_LABELS = {
   violenceFreq: '暴力事件頻率',
   // Ward
   wardType: '病房類型',
-  leaderSupport: 'Leader 協助',
+  leaderSupport: 'Leader／組長',
   invasiveDuties: '侵入性處置',
   // Psych (精神科)
   psychType: '病房類型',

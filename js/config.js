@@ -2,8 +2,8 @@
 //
 // 資料來源由 js/env.js 的 MODE 決定：mock 讀下面的 csvUrlMock（data/mock/*.csv），
 // live 讀 env.js 的 LIVE.csvUrls（Google Sheet 發布 CSV）。這裡不必再改。
-import { C } from './theme.js?v=9bc2af9f89';
-import { csvUrlFor } from './env.js?v=9bc2af9f89';
+import { C } from './theme.js?v=c60f7b9558';
+import { csvUrlFor } from './env.js?v=c60f7b9558';
 
 export const SITE = {
   name: '護理職場透明化運動',
@@ -49,17 +49,39 @@ export const CATEGORIES = [
     description: '收治內、外、婦、兒、安寧等各科住院病人，是護理人力配置的主力。',
     icon: 'bed',
     csvUrlMock: 'data/mock/ward.csv',
-    formUrl: '',
-    formStatus: 'coming-soon',
+    formUrl: 'participate-ward.html',
+    formStatus: 'live',
     specificFields: [
       { key: 'wardType', label: '病房類型', type: 'enum',
-        options: ['內科', '外科', '婦產', '兒科', '精神', '安寧', '混合'] },
-      { key: 'dayShiftRatio', label: '白班護病比', type: 'string' },
-      { key: 'eveningShiftRatio', label: '小夜護病比', type: 'string' },
-      { key: 'nightShiftRatio', label: '大夜護病比', type: 'string' },
-      { key: 'leaderSupport', label: 'Leader 協助', type: 'enum',
-        options: ['全班協助', '部分協助', '無'] },
-      { key: 'invasiveDuties', label: '侵入性處置', type: 'string' },
+        options: ['內科', '外科', '婦產科', '兒科', '安寧', '呼吸照護（RCW）', '專責／隔離', '綜合（混合科）', '其他'] },
+      { key: 'bedCount', label: '單位病床數', type: 'number' },
+      { key: 'dayShiftRatio', label: '白班常態護病比', type: 'string' },
+      { key: 'dayPeakRatio', label: '白班最忙時', type: 'string' },
+      { key: 'eveningShiftRatio', label: '小夜常態護病比', type: 'string' },
+      { key: 'eveningPeakRatio', label: '小夜最忙時', type: 'string' },
+      { key: 'nightShiftRatio', label: '大夜常態護病比', type: 'string' },
+      { key: 'nightPeakRatio', label: '大夜最忙時', type: 'string' },
+      { key: 'shiftSystem', label: '班別', type: 'enum',
+        options: ['三班制', '兩班制', '混合制', '其他'] },
+      { key: 'eveningAllowanceNonPack', label: '小夜津貼/班(非包班)', type: 'string' },
+      { key: 'eveningAllowancePack', label: '小夜津貼/班(包班)', type: 'string' },
+      { key: 'nightAllowanceNonPack', label: '大夜津貼/班(非包班)', type: 'string' },
+      { key: 'nightAllowancePack', label: '大夜津貼/班(包班)', type: 'string' },
+      { key: 'hasOnCall', label: 'on call 班', type: 'enum', options: ['是', '否'] },
+      { key: 'leaderSupport', label: 'Leader／組長', type: 'enum',
+        options: ['不佔床，全班協助', '不佔床，但少協助', '要佔床，有空才協助', '無 Leader'] },
+      { key: 'nonNursingStaff', label: '非護理人力', type: 'multi' },
+      { key: 'floatFreq', label: '被借調頻率', type: 'enum',
+        options: ['從不', '每月 1-2 次', '每週 1-2 次', '每週多次'] },
+      { key: 'newbieIndependence', label: '新人獨立照護', type: 'enum',
+        options: ['1 個月內', '1-2 個月', '2-3 個月', '3 個月以上', '不一定'] },
+      { key: 'newbieNightShift', label: '新人開始上夜班', type: 'enum',
+        options: ['到職 3 個月內', '3-6 個月', '6-12 個月', '1 年以上', '不排夜班'] },
+      { key: 'dailyOvertime', label: '每日平均加班時間', type: 'enum',
+        options: ['無', '1 小時內', '1-2 小時', '2-3 小時', '4 小時'] },
+      { key: 'nonNursingDuties', label: '非護理業務', type: 'multi' },
+      { key: 'nonNursingBurden', label: '非護理業務負擔 (1-5)', type: 'number' },
+      { key: 'specialBenefits', label: '特殊福利', type: 'text' },
     ],
   },
   {
