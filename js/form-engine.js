@@ -2,15 +2,15 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=18b5b890c6';
-import { renderIcons, icon } from './icons.js?v=18b5b890c6';
-import { markContributed } from './contribution-gate.js?v=18b5b890c6';
+import { mountLayout } from './components.js?v=5204f79121';
+import { renderIcons, icon } from './icons.js?v=5204f79121';
+import { markContributed } from './contribution-gate.js?v=5204f79121';
 
-import { showToast } from './toast.js?v=18b5b890c6';
-import { submitEndpoint as envSubmitEndpoint } from './env.js?v=18b5b890c6';
-import { notePwaIntent } from './pwa-prompt.js?v=18b5b890c6';
-import { markSubmitted } from './fresh-data.js?v=18b5b890c6';
-import { attachInstitutionAutocomplete, syncInstitutionLevel } from './form-institution-picker.js?v=18b5b890c6';
+import { showToast } from './toast.js?v=5204f79121';
+import { submitEndpoint as envSubmitEndpoint } from './env.js?v=5204f79121';
+import { notePwaIntent } from './pwa-prompt.js?v=5204f79121';
+import { markSubmitted } from './fresh-data.js?v=5204f79121';
+import { attachInstitutionAutocomplete, syncInstitutionLevel } from './form-institution-picker.js?v=5204f79121';
 import {
   generateCaptcha,
   attachCaptcha,
@@ -20,7 +20,7 @@ import {
   turnstileToken,
   resetTurnstile,
   TURNSTILE_REPLACES_LOCAL_CAPTCHA,
-} from './form-captcha.js?v=18b5b890c6';
+} from './form-captcha.js?v=5204f79121';
 
 const DRAFT_DEBOUNCE_MS = 500;
 
@@ -524,6 +524,7 @@ async function onSubmit(e) {
   btn.innerHTML = `<span class="dform-spinner" aria-hidden="true"></span><span>送出中…</span>`;
 
   let moderationVerdict = '';
+  let blockedFields = [];
   try {
     if (SUBMIT_ENDPOINT) {
       // 第二階段：真正打 Apps Script
@@ -542,6 +543,7 @@ async function onSubmit(e) {
       if (!res.ok) throw new Error(submitErrorMessage(payload?.error, res.status));
       // Worker 回傳 AI 審稿判定；被屏蔽時在感謝畫面告知投稿者（其餘欄位照常公開）
       moderationVerdict = payload?.moderation?.verdict || '';
+      blockedFields = Array.isArray(payload?.moderation?.blockedFields) ? payload.moderation.blockedFields : [];
     } else {
       // 第一階段：模擬送出
       console.log('[DFORM] would submit:', data);
@@ -552,7 +554,11 @@ async function onSubmit(e) {
     saveSubmitRecord({ day: taipeiToday(), count: rec2.count + 1, lastTs: Date.now() });
     markSubmitted(CATEGORY_SLUG);   // 分享平台接下來 15 分鐘不讀這一類的快取，投稿者才看得到自己那筆
     clearDraft();
-    showThanks({ blocked: moderationVerdict === 'block' });
+    // 被屏蔽的欄位轉成題目名稱；舊版 Worker 沒回 blockedFields 時退回「短評」
+    const blockedLabels = blockedFields
+      .map((k) => SCHEMA.find((f) => f.name === k)?.label)
+      .filter(Boolean);
+    showThanks({ blocked: moderationVerdict === 'block', blockedLabels });
   } catch (err) {
     console.error(err);
     const msg = err instanceof TypeError ? '連線失敗，請檢查網路後再試一次' : err.message;
@@ -592,7 +598,8 @@ function showThanks(opts = {}) {
       </p>
       ${opts.blocked ? `
         <p class="dform-thanks-blocked">
-          ${icon('lock', { size: 16, className: 'ico-inline' })}你填寫的短評經自動檢查後判定可能違反平台使用規範，
+          ${icon('lock', { size: 16, className: 'ico-inline' })}你填寫的${(opts.blockedLabels && opts.blockedLabels.length
+            ? opts.blockedLabels : ['個人短評']).map((l) => `「${l}」`).join('、')}經自動檢查後判定可能違反平台使用規範，
           在分享平台上會先以模糊方式呈現；其餘欄位照常公開。
           若你認為判定有誤，可來信平台說明。
         </p>` : ''}

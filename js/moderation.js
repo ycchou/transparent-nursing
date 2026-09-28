@@ -31,18 +31,37 @@ export function escapeHtml(s) {
     .replaceAll('"', '&quot;').replaceAll("'", '&#39;');
 }
 
-// 送 AI 審稿的自由文字欄位（與 worker-submit 的 MOD_FIELDS 對應）。
-// 判定是整筆一個結果，無法分辨是哪一欄違規 → 判 block 時這幾欄一律模糊。
+// 送 AI 審稿的自由文字欄位（與 worker-submit 的 MOD_FIELDS 對應）。各欄分開審、分開模糊、分開解鎖。
 export const MOD_TEXT_FIELDS = ['comment', 'specialBenefits', 'onCallPattern'];
 
-/** 這筆是否被 AI 審稿屏蔽（且確實有需要遮的自由文字） */
-export function isBlocked(row) {
-  return String(row?.modVerdict || '').toLowerCase() === 'block'
-    && MOD_TEXT_FIELDS.some((k) => !!row?.[k]);
+// 單欄判定欄名：comment → modComment，值為 allow ／ review[:代碼] ／ block:代碼
+const fieldModKey = (key) => 'mod' + key[0].toUpperCase() + key.slice(1);
+
+/**
+ * 某一欄的審稿判定 { verdict, code }。
+ * 新資料列有逐欄判定（modComment…）；舊資料列只有整筆的 modVerdict / modCode，沿用整筆判定。
+ */
+export function fieldVerdict(row, key = 'comment') {
+  const own = String(row?.[fieldModKey(key)] || '').trim();
+  if (own) {
+    const [verdict, code = ''] = own.split(':');
+    return { verdict: verdict.toLowerCase(), code: code.toUpperCase() };
+  }
+  return { verdict: String(row?.modVerdict || '').toLowerCase(), code: String(row?.modCode || '').toUpperCase() };
 }
 
-export function blockReason(row) {
-  return BLOCK_REASONS[String(row?.modCode || '').toUpperCase()] || FALLBACK_REASON;
+/** 這一欄是否被屏蔽（有字且判定 block） */
+export function isFieldBlocked(row, key = 'comment') {
+  return !!row?.[key] && fieldVerdict(row, key).verdict === 'block';
+}
+
+/** 這筆是否有任一欄被屏蔽（用來暫停分享圖與永久連結） */
+export function isBlocked(row) {
+  return MOD_TEXT_FIELDS.some((k) => isFieldBlocked(row, k));
+}
+
+export function blockReason(row, key = 'comment') {
+  return BLOCK_REASONS[fieldVerdict(row, key).code] || FALLBACK_REASON;
 }
 
 /**
@@ -82,9 +101,10 @@ export function mathChallenge() {
  * @param {Object} opts { compact:boolean, key:string } compact 用於卡片（行數更少）；key 預設 'comment'
  */
 export function commentHtml(row, opts = {}) {
-  const text = row?.[opts.key || 'comment'] || '';
+  const key = opts.key || 'comment';
+  const text = row?.[key] || '';
   if (!text) return '';
-  if (!isBlocked(row)) return escapeHtml(text);
+  if (!isFieldBlocked(row, key)) return escapeHtml(text);
 
   const compact = !!opts.compact;
   const q = mathChallenge();
@@ -93,7 +113,7 @@ export function commentHtml(row, opts = {}) {
          data-answer="${q.answer}">
       <div class="comment-blocked-text" aria-hidden="true">${escapeHtml(text)}</div>
       <div class="comment-blocked-foot">
-        <span class="comment-blocked-reason">已隱藏 · ${blockReason(row)}</span>
+        <span class="comment-blocked-reason">已隱藏 · ${blockReason(row, key)}</span>
         <button type="button" class="comment-unlock-toggle">展開</button>
       </div>
       <div class="comment-unlock" hidden>
@@ -110,10 +130,10 @@ export function commentHtml(row, opts = {}) {
 export function commentCellHtml(row, key = 'comment') {
   const text = row?.[key] || '';
   if (!text) return '';
-  if (!isBlocked(row)) {
+  if (!isFieldBlocked(row, key)) {
     return `<span class="truncate" title="${escapeHtml(text)}">${escapeHtml(text)}</span>`;
   }
-  return `<span class="comment-cell-blocked" title="點開這筆可展開">已隱藏 · ${blockReason(row)}</span>`;
+  return `<span class="comment-cell-blocked" title="點開這筆可展開">已隱藏 · ${blockReason(row, key)}</span>`;
 }
 
 /** 全域解鎖事件（委派，重複呼叫安全）。答對數學題就把區塊換成原文。 */

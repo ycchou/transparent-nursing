@@ -232,17 +232,36 @@ const MOD_SAFETY = [
   'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'HARM_CATEGORY_DANGEROUS_CONTENT',
 ].map((category) => ({ category, threshold: 'BLOCK_NONE' }));
 
-function joinFreeText(fields) {
-  return MOD_FIELDS
-    .map((k) => { const v = fields[k]; return Array.isArray(v) ? v.join(' ') : String(v || ''); })
-    .filter((s) => s.trim())
-    .join('\n')
-    .slice(0, MOD_MAX_CHARS);
+const fieldText = (fields, k) => {
+  const v = fields[k];
+  return (Array.isArray(v) ? v.join(' ') : String(v || '')).slice(0, MOD_MAX_CHARS);
+};
+
+// 各自由文字欄位「分開」審：一欄違規只遮那一欄。平行呼叫，等待時間約等於審一欄。
+// 回 { perField: { 欄名: 結果 }, overall: 最嚴重的那一欄的結果 }；空白欄不審、不列入 perField。
+const SEVERITY = { allow: 0, review: 1, block: 2 };
+async function moderateFields(fields, env) {
+  const keys = MOD_FIELDS.filter((k) => fieldText(fields, k).trim());
+  const results = await Promise.all(keys.map((k) => moderate(fieldText(fields, k), env)));
+  const perField = Object.fromEntries(keys.map((k, i) => [k, results[i]]));
+  let overall = { status: 'skip', verdict: 'allow', code: '', reason: '' };
+  for (const r of results) {
+    if (overall.status === 'skip' || SEVERITY[r.verdict] > SEVERITY[overall.verdict]) overall = { ...r };
+  }
+  // 內部稽核用：各欄理由串在一起寫進 audit 分頁的 modReason
+  overall.reason = keys.map((k, i) => `${k}:${results[i].verdict}${results[i].reason ? ' ' + results[i].reason : ''}`)
+    .join('；').slice(0, 300);
+  if (results.some((r) => r.status === 'error')) overall.status = 'error';
+  return { perField, overall };
 }
 
-// 回 { status, verdict, code, reason }。status: ok | skip | error
-async function moderate(fields, env) {
-  const text = joinFreeText(fields);
+// 公開 CSV 用的單欄判定值：allow ／ review[:代碼] ／ block:代碼（前端 moderation.js 解析）
+const fieldModValue = (r) => (r.code ? `${r.verdict}:${r.code}` : r.verdict);
+// 單欄判定欄名：comment → modComment
+const fieldModKey = (k) => 'mod' + k[0].toUpperCase() + k.slice(1);
+
+// 審一段文字。回 { status, verdict, code, reason }。status: ok | skip | error
+async function moderate(text, env) {
   if (!text.trim()) return { status: 'skip', verdict: 'allow', code: '', reason: '' };
   if (!env.GEMINI_API_KEY) return { status: 'error', verdict: 'allow', code: '', reason: 'no-key' };
 
@@ -330,15 +349,17 @@ export default {
       const spam = looksLikeSpam(clean);
       if (spam) return json({ error: 'spam', reason: spam }, cors, 422);
 
-      // ④ AI 審稿（不擋投稿，只決定前端是否打馬賽克；失敗一律放行）
-      const mod = await moderate(clean, env);
+      // ④ AI 審稿（不擋投稿，只決定前端是否打馬賽克；失敗一律放行）。各自由文字欄位分開審
+      const { perField, overall: mod } = await moderateFields(clean, env);
 
       // 轉發 Apps Script（只送白名單欄位，加 shared secret）
       const out = new URLSearchParams();
       for (const [k, v] of Object.entries(clean)) {
         (Array.isArray(v) ? v : [v]).forEach((x) => out.append(k, x));
       }
-      out.append('modVerdict', mod.verdict);   // allow | review | block
+      // 各欄判定（modComment / modSpecialBenefits / modOnCallPattern）：前端依此「逐欄」決定模糊與解鎖
+      for (const [k, r] of Object.entries(perField)) out.append(fieldModKey(k), fieldModValue(r));
+      out.append('modVerdict', mod.verdict);   // 最嚴重那一欄：allow | review | block（舊資料列只有這欄）
       out.append('modCode', mod.code);         // block 必有 A–J；review 可能有
       out.append('modStatus', mod.status);     // ok | skip | error
       out.append('modReason', mod.reason);     // AI 原文理由（內部複查用，勿發布到 CSV）
@@ -348,7 +369,11 @@ export default {
       // 回傳判定給前端，讓投稿者當下就知道短評被屏蔽（不回 AI 原文理由）
       return json({
         ok: true,
-        moderation: { verdict: mod.verdict, code: mod.code },
+        moderation: {
+          verdict: mod.verdict,
+          code: mod.code,
+          blockedFields: Object.keys(perField).filter((k) => perField[k].verdict === 'block'),
+        },
         ...(ignored.length ? { ignored } : {}),   // 被丟棄的未知欄名（表單新增欄位忘了加白名單時會看到）
       }, cors);
     } catch (e) {
