@@ -1,9 +1,9 @@
 // CSV 載入 + 解析 + 雙層 cache（記憶體 + localStorage）
 // 之後把 CATEGORIES[].csvUrl 改成 Google Sheet 發布 CSV URL 即可
-import { CATEGORIES } from './config.js?v=afa880a173';
-import { currentMode } from './env.js?v=afa880a173';
-import { fetchCsvText } from './sheet-fetch.js?v=afa880a173';
-import { needsFreshData } from './fresh-data.js?v=afa880a173';
+import { CATEGORIES } from './config.js?v=ff5eb14496';
+import { currentMode } from './env.js?v=ff5eb14496';
+import { fetchCsvText } from './sheet-fetch.js?v=ff5eb14496';
+import { needsFreshData } from './fresh-data.js?v=ff5eb14496';
 
 // 記憶體 cache：同 session 內不重抓
 const cache = new Map();
@@ -105,8 +105,19 @@ function writeLocal(slug, rows) {
   }
 }
 
+// 進行中的抓取：slug → Promise。同一類別同時被要求（頁面載入＋背景預載等）只發一個請求
+const inflight = new Map();
+
+/** 抓 CSV 並解析；同一類別進行中的請求共用 */
+function fetchAndParse(slug) {
+  if (!inflight.has(slug)) {
+    inflight.set(slug, fetchAndParseOnce(slug).finally(() => inflight.delete(slug)));
+  }
+  return inflight.get(slug);
+}
+
 /** 真正去抓 CSV 並解析 */
-async function fetchAndParse(slug) {
+async function fetchAndParseOnce(slug) {
   const cat = CATEGORIES.find((c) => c.slug === slug);
   if (!cat) throw new Error('Unknown category: ' + slug);
 

@@ -1,7 +1,7 @@
 // form-captcha.js — 表單的人機驗證：站內自製驗證碼，live 模式有 Site Key 時改用 Cloudflare Turnstile。
-import { C } from './theme.js?v=afa880a173';
+import { C } from './theme.js?v=ff5eb14496';
 
-import { turnstileSiteKey } from './env.js?v=afa880a173';
+import { turnstileSiteKey } from './env.js?v=ff5eb14496';
 
 const CAPTCHA_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; // 避開易混字元 0/O/1/I/L
 let currentCaptcha = '';

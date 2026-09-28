@@ -1,7 +1,7 @@
 // csv-loader.js — 從公開 CSV（Google Sheet 發布）載入資料：PapaParse 動態載入＋localStorage 快取＋背景刷新。
-import { extractLawArticles } from './records-format.js?v=afa880a173';
-import { fetchCsvText } from './sheet-fetch.js?v=afa880a173';
-import { isForcedFresh } from './fresh-data.js?v=afa880a173';
+import { extractLawArticles } from './records-format.js?v=ff5eb14496';
+import { fetchCsvText } from './sheet-fetch.js?v=ff5eb14496';
+import { isForcedFresh } from './fresh-data.js?v=ff5eb14496';
 
 // ============================================================
 // PapaParse 動態載入（讓沒掛 <script> 的頁面也能 preload）
@@ -57,7 +57,14 @@ export function createCsvLoader(cfg) {
     fetchTimeoutMs = DEFAULT_FETCH_TIMEOUT_MS,
   } = cfg;
 
-  async function fetchAndParse() {
+  // 進行中的抓取共用同一個請求（load 與 preload 同時發生時不重複下載）
+  let _inflight = null;
+  function fetchAndParse() {
+    _inflight ||= fetchAndParseOnce().finally(() => { _inflight = null; });
+    return _inflight;
+  }
+
+  async function fetchAndParseOnce() {
     await ensurePapa();
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), fetchTimeoutMs);
