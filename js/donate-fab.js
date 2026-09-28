@@ -3,8 +3,8 @@
 // 固定右下角、不可拖曳；點擊 → 開內建捐款彈窗（重用 mountDonate widget）。
 // 可按關閉鍵：當天不再出現，隔天再跳出（localStorage，各頁共用同一 key）。
 
-import { mountDonate } from './donate.js?v=c60f7b9558';
-import { icon } from './icons.js?v=c60f7b9558';
+import { mountDonate } from './donate.js?v=9de368a906';
+import { icon } from './icons.js?v=9de368a906';
 
 const DEFAULT_LINK = 'support.html';
 const CLOSED_KEY = 'tn_fab_closed';

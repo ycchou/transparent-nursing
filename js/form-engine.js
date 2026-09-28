@@ -2,14 +2,15 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=c60f7b9558';
-import { renderIcons, icon } from './icons.js?v=c60f7b9558';
-import { markContributed } from './contribution-gate.js?v=c60f7b9558';
+import { mountLayout } from './components.js?v=9de368a906';
+import { renderIcons, icon } from './icons.js?v=9de368a906';
+import { markContributed } from './contribution-gate.js?v=9de368a906';
 
-import { showToast } from './toast.js?v=c60f7b9558';
-import { submitEndpoint as envSubmitEndpoint } from './env.js?v=c60f7b9558';
-import { notePwaIntent } from './pwa-prompt.js?v=c60f7b9558';
-import { attachInstitutionAutocomplete, syncInstitutionLevel } from './form-institution-picker.js?v=c60f7b9558';
+import { showToast } from './toast.js?v=9de368a906';
+import { submitEndpoint as envSubmitEndpoint } from './env.js?v=9de368a906';
+import { notePwaIntent } from './pwa-prompt.js?v=9de368a906';
+import { markSubmitted } from './fresh-after-submit.js?v=9de368a906';
+import { attachInstitutionAutocomplete, syncInstitutionLevel } from './form-institution-picker.js?v=9de368a906';
 import {
   generateCaptcha,
   attachCaptcha,
@@ -19,7 +20,7 @@ import {
   turnstileToken,
   resetTurnstile,
   TURNSTILE_REPLACES_LOCAL_CAPTCHA,
-} from './form-captcha.js?v=c60f7b9558';
+} from './form-captcha.js?v=9de368a906';
 
 const DRAFT_DEBOUNCE_MS = 500;
 
@@ -511,6 +512,7 @@ async function onSubmit(e) {
     // 反垃圾：成功送出才計入本裝置每日次數與時間戳
     const rec2 = getSubmitRecord();
     saveSubmitRecord({ day: taipeiToday(), count: rec2.count + 1, lastTs: Date.now() });
+    markSubmitted(CATEGORY_SLUG);   // 分享平台接下來 15 分鐘不讀這一類的快取，投稿者才看得到自己那筆
     clearDraft();
     showThanks({ blocked: moderationVerdict === 'block' });
   } catch (err) {

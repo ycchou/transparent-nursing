@@ -135,6 +135,7 @@ const FLOWS = [
       $('.dform-submit-btn').click();
       const thanks = await waitFor(() => visible($('.dform-thanks-modal')) && $('.dform-thanks-modal'));
       expect(thanks, '填完送出後沒有出現感謝畫面（仍有錯誤欄位：' + $$('.dform-field.has-error').map((e) => e.dataset.name).join('、') + '）');
+      expect(Number(localStorage.getItem('tn:fresh_until:icu')) > Date.now(), '送出後沒有標記 ICU 需略過快取（分享平台會看不到剛投的那筆）');
       return fails;`,
   },
   {

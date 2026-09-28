@@ -1,11 +1,14 @@
 // CSV 載入 + 解析 + 雙層 cache（記憶體 + localStorage）
 // 之後把 CATEGORIES[].csvUrl 改成 Google Sheet 發布 CSV URL 即可
-import { CATEGORIES } from './config.js?v=c60f7b9558';
-import { currentMode } from './env.js?v=c60f7b9558';
-import { fetchCsvText } from './sheet-fetch.js?v=c60f7b9558';
+import { CATEGORIES } from './config.js?v=9de368a906';
+import { currentMode } from './env.js?v=9de368a906';
+import { fetchCsvText } from './sheet-fetch.js?v=9de368a906';
+import { needsFreshData } from './fresh-after-submit.js?v=9de368a906';
 
 // 記憶體 cache：同 session 內不重抓
 const cache = new Map();
+// 本頁「投稿後重抓」的請求：slug → Promise<rows|null>（見 fresh-after-submit.js）
+const freshFetches = new Map();
 
 // localStorage cache 設定
 const CACHE_VERSION = 'v13';                 // v13: 新增 AI 審稿欄位 modVerdict/modCode（屏蔽短評）；v12: 加護病房班別新增「混合制」+ mock 全量重跑（ICU 160 筆）；v11: 新增第 10 類「診所」；v10: mock 資料擴充；v9: 推薦指數 1-5 + 精神科
@@ -145,9 +148,21 @@ function refreshInBackground(slug) {
 
 /**
  * 載入單一類別（原始：未蓋 _seq）— 內部使用
- * 流程：記憶體 cache → localStorage (fresh 直接回；stale 回 + 背景刷) → 網路
+ * 流程：（剛投稿過→每頁先抓一次網路）→ 記憶體 cache → localStorage (fresh 直接回；stale 回 + 背景刷) → 網路
  */
 async function loadCategoryRaw(slug, opts = {}) {
+  // 本裝置剛投稿過這一類：每次開頁先略過快取抓一次最新，讓投稿者看得到自己那筆；
+  // 同一頁的其他呼叫（含同時發出的）共用這一次的結果。網路失敗才退回快取。
+  if (!opts.forceRefresh && needsFreshData(slug)) {
+    if (!freshFetches.has(slug)) {
+      freshFetches.set(slug, fetchAndParse(slug)
+        .then((rows) => { cache.set(slug, rows); writeLocal(slug, rows); return rows; })
+        .catch((e) => { console.warn(`[data-loader] 投稿後重抓 ${slug} 失敗，改用快取：`, e.message); return null; }));
+    }
+    const rows = await freshFetches.get(slug);
+    if (rows) return rows;
+  }
+
   if (!opts.forceRefresh && cache.has(slug)) return cache.get(slug);
 
   if (!opts.forceRefresh) {
