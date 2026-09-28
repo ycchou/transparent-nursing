@@ -2,15 +2,15 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=93fa43955b';
-import { renderIcons, icon } from './icons.js?v=93fa43955b';
-import { markContributed } from './contribution-gate.js?v=93fa43955b';
+import { mountLayout } from './components.js?v=5189b01e4d';
+import { renderIcons, icon } from './icons.js?v=5189b01e4d';
+import { markContributed } from './contribution-gate.js?v=5189b01e4d';
 
-import { showToast } from './toast.js?v=93fa43955b';
-import { submitEndpoint as envSubmitEndpoint } from './env.js?v=93fa43955b';
-import { notePwaIntent } from './pwa-prompt.js?v=93fa43955b';
-import { markSubmitted } from './fresh-data.js?v=93fa43955b';
-import { attachInstitutionAutocomplete, syncInstitutionLevel } from './form-institution-picker.js?v=93fa43955b';
+import { showToast } from './toast.js?v=5189b01e4d';
+import { submitEndpoint as envSubmitEndpoint } from './env.js?v=5189b01e4d';
+import { notePwaIntent } from './pwa-prompt.js?v=5189b01e4d';
+import { markSubmitted } from './fresh-data.js?v=5189b01e4d';
+import { attachInstitutionAutocomplete, syncInstitutionLevel } from './form-institution-picker.js?v=5189b01e4d';
 import {
   generateCaptcha,
   attachCaptcha,
@@ -20,7 +20,7 @@ import {
   turnstileToken,
   resetTurnstile,
   TURNSTILE_REPLACES_LOCAL_CAPTCHA,
-} from './form-captcha.js?v=93fa43955b';
+} from './form-captcha.js?v=5189b01e4d';
 
 const DRAFT_DEBOUNCE_MS = 500;
 

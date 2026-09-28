@@ -1,9 +1,9 @@
 // CSV 載入 + 解析 + 雙層 cache（記憶體 + localStorage）
 // 之後把 CATEGORIES[].csvUrl 改成 Google Sheet 發布 CSV URL 即可
-import { CATEGORIES } from './config.js?v=93fa43955b';
-import { currentMode } from './env.js?v=93fa43955b';
-import { fetchCsvText } from './sheet-fetch.js?v=93fa43955b';
-import { needsFreshData } from './fresh-data.js?v=93fa43955b';
+import { CATEGORIES } from './config.js?v=5189b01e4d';
+import { currentMode } from './env.js?v=5189b01e4d';
+import { fetchCsvText } from './sheet-fetch.js?v=5189b01e4d';
+import { needsFreshData } from './fresh-data.js?v=5189b01e4d';
 
 // 記憶體 cache：同 session 內不重抓
 const cache = new Map();
@@ -313,15 +313,29 @@ export function clearCache() {
  * - 對全部類別觸發 `refreshInBackground`：靜默 fetch → 寫進 localStorage + memory cache
  * - **不清舊 cache、不阻塞、不觸發 UI 重畫**
  * - 用戶在「當次 session 中看到的永遠是當下開頁的 snapshot」，下次造訪才換新版
+ * - 分頁在背景（document.hidden）時暫停，不為沒人在看的分頁消耗 Worker 額度；
+ *   切回前景時若距上次刷新已滿 10 分鐘，立刻補刷一次
  *
  * @returns {Function} 停止函式
  */
 export function startAutoRefresh() {
-  const intervalId = setInterval(() => {
+  let lastRun = Date.now();
+  const run = () => {
+    lastRun = Date.now();
     console.info('[data-loader] 背景靜默刷新所有類別...', new Date().toLocaleTimeString());
     CATEGORIES.forEach((c) => refreshInBackground(c.slug));
+  };
+  const intervalId = setInterval(() => {
+    if (!document.hidden) run();
   }, AUTO_REFRESH_INTERVAL_MS);
-  return () => clearInterval(intervalId);
+  const onVisible = () => {
+    if (!document.hidden && Date.now() - lastRun >= AUTO_REFRESH_INTERVAL_MS) run();
+  };
+  document.addEventListener('visibilitychange', onVisible);
+  return () => {
+    clearInterval(intervalId);
+    document.removeEventListener('visibilitychange', onVisible);
+  };
 }
 
 /** Cache 統計（除錯 / 開發者主控台用） */

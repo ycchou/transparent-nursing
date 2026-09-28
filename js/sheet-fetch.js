@@ -4,7 +4,7 @@
 // Google 失敗才退回 Worker——Worker 的快照可能落後 Google 最多約 7 分鐘。
 // 非 Google Sheet 的網址（例如 data/mock/*.csv）直接抓，不經 Worker。
 // Worker 原始碼與白名單見 worker-sheets/。
-import { isForcedFresh } from './fresh-data.js?v=93fa43955b';
+import { isForcedFresh } from './fresh-data.js?v=5189b01e4d';
 
 const SHEET_ORIGIN = 'https://docs.google.com';
 const SHEET_PROXY = 'https://tn-sheets.ycchou-1005.workers.dev';

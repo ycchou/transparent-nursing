@@ -3,7 +3,7 @@
 //   mountCityFilter(el, hospitals, (city) => { state.cityFilter = city; render(); });
 //   bindChipGroup('.nurse-level-filter', 'level', (v) => { state.levelFilter = v; render(); });
 //   levelSlug('醫學中心')  // → 'mc'（層級 badge 的 CSS class 後綴）
-import { escapeHtml } from './moderation.js?v=93fa43955b';
+import { escapeHtml } from './moderation.js?v=5189b01e4d';
 
 const UNKNOWN = '(未知)';
 
