@@ -22,6 +22,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # 要部署的檔案（相對 repo 根目錄的 glob；* 不跨資料夾，** 跨資料夾）
 INCLUDE = [
     '*.html', 'manifest.json', 'robots.txt', 'sitemap.xml',
+    'sw.js',                             # Service Worker（須在網站根目錄，scope 才涵蓋全站）
     'css/styles.css',                    # 只要串接後的產物；css/src/ 是原始碼
     'js/*.js',
     'assets/**',

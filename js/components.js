@@ -1,10 +1,10 @@
 // 共用 header / footer 注入 + 工具函式
-import { SITE, CATEGORIES } from './config.js?v=c7b071261e';
-import { icon, renderIcons } from './icons.js?v=c7b071261e';
-import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=c7b071261e';
-import { initScrollHints } from './scroll-hint.js?v=c7b071261e';
-import { initPullToRefresh } from './pull-to-refresh.js?v=c7b071261e';
-import { mountModeBadge } from './env.js?v=c7b071261e';
+import { SITE, CATEGORIES } from './config.js?v=c384e7733e';
+import { icon, renderIcons } from './icons.js?v=c384e7733e';
+import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=c384e7733e';
+import { initScrollHints } from './scroll-hint.js?v=c384e7733e';
+import { initPullToRefresh } from './pull-to-refresh.js?v=c384e7733e';
+import { mountModeBadge } from './env.js?v=c384e7733e';
 
 // 主辦/協作工會 — 共用資料（footer / hero strip / about 都引用）
 export const ORGS = {
@@ -340,10 +340,20 @@ function wireNavPrefetch(root) {
   });
 }
 
+// Service Worker（sw.js）：靜態資源存在手機上，回訪秒開、離線可看已看過的頁面。
+// 等頁面載完才註冊，不跟首屏資源搶頻寬；不支援或失敗都不影響網站。
+function registerServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  const register = () => navigator.serviceWorker.register('sw.js').catch((e) => console.warn('[sw] 註冊失敗：', e.message));
+  if (document.readyState === 'complete') register();
+  else window.addEventListener('load', register, { once: true });
+}
+
 export function mountLayout() {
   initScrollHints();  // 橫向可捲動列的「左右滑動」提示（自帶 observer，處理動態頁簽）
   mountModeBadge();   // 只有用 ?data= 臨時切換資料來源時才會出現的小標記
   initPullToRefresh(); // PWA（standalone）才有的下拉重新整理，並略過資料快取抓最新
+  registerServiceWorker();
   // header
   const headerSlot = document.getElementById('app-header');
   if (headerSlot && !headerSlot.firstElementChild) headerSlot.innerHTML = SHELL.headerHTML();  // 正常已由 shell.js 畫好
@@ -384,7 +394,7 @@ export function mountLayout() {
 
   // 背景預載 platform 資料 + 樞紐大檔：切到分享平台/機構總覽/護病比/人力監控時即時顯示
   // 動態 import 避免循環依賴與初始 parse 成本
-  import('./data-loader.js?v=c7b071261e')
+  import('./data-loader.js?v=c384e7733e')
     .then(({ preloadAll, preloadStaticData }) => {
       preloadAll && preloadAll();
       preloadStaticData && preloadStaticData();
@@ -396,13 +406,13 @@ export function mountLayout() {
   wireNavPrefetch(document.getElementById('app-footer'));
 
   // 背景預載勞檢/性平/職安紀錄資料：同樣讓使用者切過去時即時顯示
-  import('./violations.js?v=c7b071261e')
+  import('./violations.js?v=c384e7733e')
     .then(({ preloadViolations }) => preloadViolations && preloadViolations())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./gender.js?v=c7b071261e')
+  import('./gender.js?v=c384e7733e')
     .then(({ preloadGender }) => preloadGender && preloadGender())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./osha.js?v=c7b071261e')
+  import('./osha.js?v=c384e7733e')
     .then(({ preloadOsha }) => preloadOsha && preloadOsha())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
 }
