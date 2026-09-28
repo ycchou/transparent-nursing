@@ -2,17 +2,17 @@
 // 資料：data/personnel-index.json（picker 清單）＋ data/personnel/{code}.json（單院時間序列）
 // 來源：衛福部「醫院醫事人力持續性監測結果」。
 
-import { renderIcons, icon } from './icons.js?v=80b0a1258d';
-import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=80b0a1258d';
+import { renderIcons, icon } from './icons.js?v=ad6568ae44';
+import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=ad6568ae44';
 import {
   CAT_COLORS, BED_COLORS, DEFAULT_ON, mLabel, baseLineCfg,
   renderStaffChart, renderBedChart, loadPersonnelHospital, latestMonthTable,
-} from './personnel-view.js?v=80b0a1258d';
-import { showToast } from './toast.js?v=80b0a1258d';
-import { registerFormerCodes, readCodeParam } from './hospital-merges.js?v=80b0a1258d';
-import { skeletonRows } from './skeleton.js?v=80b0a1258d';
-import { escapeHtml } from './moderation.js?v=80b0a1258d';
-import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=80b0a1258d';
+} from './personnel-view.js?v=ad6568ae44';
+import { showToast } from './toast.js?v=ad6568ae44';
+import { registerFormerCodes, readCodeParam } from './hospital-merges.js?v=ad6568ae44';
+import { skeletonRows } from './skeleton.js?v=ad6568ae44';
+import { escapeHtml } from './moderation.js?v=ad6568ae44';
+import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=ad6568ae44';
 
 const INDEX_URL = 'data/personnel-index.json';
 const AGG_URL = 'data/personnel-aggregate.json';

@@ -1,10 +1,10 @@
 // 共用 header / footer 注入 + 工具函式
-import { SITE, CATEGORIES } from './config.js?v=80b0a1258d';
-import { icon, renderIcons } from './icons.js?v=80b0a1258d';
-import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=80b0a1258d';
-import { initScrollHints } from './scroll-hint.js?v=80b0a1258d';
-import { initPullToRefresh } from './pull-to-refresh.js?v=80b0a1258d';
-import { mountModeBadge } from './env.js?v=80b0a1258d';
+import { SITE, CATEGORIES } from './config.js?v=ad6568ae44';
+import { icon, renderIcons } from './icons.js?v=ad6568ae44';
+import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=ad6568ae44';
+import { initScrollHints } from './scroll-hint.js?v=ad6568ae44';
+import { initPullToRefresh } from './pull-to-refresh.js?v=ad6568ae44';
+import { mountModeBadge } from './env.js?v=ad6568ae44';
 
 // 主辦/協作工會 — 共用資料（footer / hero strip / about 都引用）
 export const ORGS = {
@@ -354,6 +354,16 @@ export function mountLayout() {
   mountModeBadge();   // 只有用 ?data= 臨時切換資料來源時才會出現的小標記
   initPullToRefresh(); // PWA（standalone）才有的下拉重新整理，並略過資料快取抓最新
   registerServiceWorker();
+  // 解鎖連結（#unlock=碼）：才動態載入 unlock.js／toast.js，平常開頁不多載。
+  // 開頁時檢查一次；已在頁面上時貼上連結只會改 hash、不會重新載入，所以也聽 hashchange。
+  const tryUnlockHash = () => {
+    if (!location.hash.startsWith('#unlock=')) return;
+    Promise.all([import('./unlock.js?v=ad6568ae44'), import('./toast.js?v=ad6568ae44')])
+      .then(([u, t]) => u.handleUnlockHash({ toast: t.showToast }))
+      .catch((e) => console.warn('[unlock] 載入失敗：', e.message));
+  };
+  tryUnlockHash();
+  window.addEventListener('hashchange', tryUnlockHash);
   // header
   const headerSlot = document.getElementById('app-header');
   if (headerSlot && !headerSlot.firstElementChild) headerSlot.innerHTML = SHELL.headerHTML();  // 正常已由 shell.js 畫好
@@ -394,7 +404,7 @@ export function mountLayout() {
 
   // 背景預載 platform 資料 + 樞紐大檔：切到分享平台/機構總覽/護病比/人力監控時即時顯示
   // 動態 import 避免循環依賴與初始 parse 成本
-  import('./data-loader.js?v=80b0a1258d')
+  import('./data-loader.js?v=ad6568ae44')
     .then(({ preloadAll, preloadStaticData }) => {
       preloadAll && preloadAll();
       preloadStaticData && preloadStaticData();
@@ -406,13 +416,13 @@ export function mountLayout() {
   wireNavPrefetch(document.getElementById('app-footer'));
 
   // 背景預載勞檢/性平/職安紀錄資料：同樣讓使用者切過去時即時顯示
-  import('./violations.js?v=80b0a1258d')
+  import('./violations.js?v=ad6568ae44')
     .then(({ preloadViolations }) => preloadViolations && preloadViolations())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./gender.js?v=80b0a1258d')
+  import('./gender.js?v=ad6568ae44')
     .then(({ preloadGender }) => preloadGender && preloadGender())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./osha.js?v=80b0a1258d')
+  import('./osha.js?v=ad6568ae44')
     .then(({ preloadOsha }) => preloadOsha && preloadOsha())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
 }

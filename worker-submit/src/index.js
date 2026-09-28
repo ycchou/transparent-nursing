@@ -319,6 +319,85 @@ async function moderate(text, env) {
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ⑤ 跨裝置解鎖碼
+//
+// 投稿成功時發一組碼（例 TN-7KQ2-M9XA），投稿者在其他裝置／瀏覽器輸入或點解鎖連結即可解鎖
+// 分享平台完整內容。資料庫只存碼的雜湊與建立日期，刻意不與投稿資料列關聯。永久有效。
+// 每碼最多解鎖 UNLOCK_MAX_DEVICES 台裝置（同一台重複解鎖不重複計）；解鎖嘗試依 IP 雜湊每日限流。
+// ─────────────────────────────────────────────────────────────────────────────
+
+const UNLOCK_ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';   // 去掉 0/O、1/I/L 等易混字元
+const UNLOCK_LEN = 8;
+const UNLOCK_MAX_DEVICES = 5;
+const UNLOCK_ATTEMPTS_PER_DAY = 20;
+
+function newUnlockCode() {
+  const bytes = crypto.getRandomValues(new Uint8Array(UNLOCK_LEN));
+  const s = [...bytes].map((b) => UNLOCK_ALPHABET[b % UNLOCK_ALPHABET.length]).join('');
+  return `TN-${s.slice(0, 4)}-${s.slice(4)}`;
+}
+
+// 使用者輸入的碼 → 8 個字元（去掉 TN 前綴、連字號、空白，轉大寫）；格式不對回空字串
+function normalizeUnlockCode(input) {
+  let s = String(input || '').toUpperCase().replace(/[^0-9A-Z]/g, '');
+  if (s.length === UNLOCK_LEN + 2 && s.startsWith('TN')) s = s.slice(2);
+  return s.length === UNLOCK_LEN && [...s].every((c) => UNLOCK_ALPHABET.includes(c)) ? s : '';
+}
+
+const unlockHash = (env, norm) => sha256((env.SALT || 'tn-submit-fallback-salt') + '|unlock|' + norm);
+
+// 投稿成功後呼叫；失敗回 null（不影響投稿本身）
+async function issueUnlockCode(env, day) {
+  try {
+    const code = newUnlockCode();
+    await env.DB.prepare('INSERT INTO unlock_codes(code_hash, created_day) VALUES(?, ?)')
+      .bind(await unlockHash(env, normalizeUnlockCode(code)), day).run();
+    return code;
+  } catch (e) {
+    console.warn('解鎖碼發放失敗：', e.message);
+    return null;
+  }
+}
+
+// POST /unlock  body（form 或 JSON）：code、device
+async function handleUnlock(request, env, cors) {
+  const day = taipeiDay();
+  const ip = request.headers.get('CF-Connecting-IP') || '0.0.0.0';
+  const salt = env.SALT || 'tn-submit-fallback-salt';
+
+  const rk = await sha256(salt + '|unlock|' + ip + '|' + day);
+  const row = await env.DB.prepare('SELECT count FROM unlock_rate WHERE k = ?').bind(rk).first();
+  if (row && row.count >= UNLOCK_ATTEMPTS_PER_DAY) return json({ error: 'rate' }, cors, 429);
+  await env.DB.prepare(
+    'INSERT INTO unlock_rate(k, day, count) VALUES(?, ?, 1) ON CONFLICT(k) DO UPDATE SET count = count + 1'
+  ).bind(rk, day).run();
+
+  const type = request.headers.get('Content-Type') || '';
+  const body = type.includes('application/json')
+    ? await request.json().catch(() => ({}))
+    : Object.fromEntries(await request.formData().catch(() => new FormData()));
+  const norm = normalizeUnlockCode(body.code);
+  const device = String(body.device || '');
+  if (!norm) return json({ error: 'format' }, cors, 400);
+  if (!/^[\w-]{16,64}$/.test(device)) return json({ error: 'device' }, cors, 400);
+
+  const codeHash = await unlockHash(env, norm);
+  const found = await env.DB.prepare('SELECT 1 FROM unlock_codes WHERE code_hash = ?').bind(codeHash).first();
+  if (!found) return json({ error: 'invalid' }, cors, 404);
+
+  const deviceHash = await sha256(salt + '|device|' + device);
+  const already = await env.DB.prepare('SELECT 1 FROM unlock_devices WHERE code_hash = ? AND device_hash = ?')
+    .bind(codeHash, deviceHash).first();
+  if (already) return json({ ok: true }, cors);
+
+  const used = await env.DB.prepare('SELECT COUNT(*) AS n FROM unlock_devices WHERE code_hash = ?').bind(codeHash).first();
+  if ((used?.n || 0) >= UNLOCK_MAX_DEVICES) return json({ error: 'limit', max: UNLOCK_MAX_DEVICES }, cors, 409);
+  await env.DB.prepare('INSERT INTO unlock_devices(code_hash, device_hash, day) VALUES(?, ?, ?)')
+    .bind(codeHash, deviceHash, day).run();
+  return json({ ok: true }, cors);
+}
+
 export default {
   async fetch(request, env) {
     const origin = request.headers.get('Origin');
@@ -326,6 +405,11 @@ export default {
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
     if (request.method !== 'POST') return json({ error: 'method' }, cors, 405);
     if (!originAllowed(origin)) return json({ error: 'forbidden' }, cors, 403);
+
+    if (new URL(request.url).pathname === '/unlock') {
+      try { return await handleUnlock(request, env, cors); }
+      catch (e) { return json({ error: String(e) }, cors, 500); }
+    }
 
     try {
       const form = await request.formData();
@@ -366,6 +450,8 @@ export default {
       out.append('secret', env.APPS_SCRIPT_SECRET || '');
       const r = await fetch(env.APPS_SCRIPT_URL, { method: 'POST', body: out });
       if (!r.ok) return json({ error: 'upstream', status: r.status }, cors, 502);
+      // ⑤ 投稿成功才發解鎖碼（發放失敗不影響投稿，前端沒拿到碼就不顯示）
+      const unlockCode = await issueUnlockCode(env, day);
       // 回傳判定給前端，讓投稿者當下就知道短評被屏蔽（不回 AI 原文理由）
       return json({
         ok: true,
@@ -374,6 +460,7 @@ export default {
           code: mod.code,
           blockedFields: Object.keys(perField).filter((k) => perField[k].verdict === 'block'),
         },
+        ...(unlockCode ? { unlockCode } : {}),    // 跨裝置解鎖碼
         ...(ignored.length ? { ignored } : {}),   // 被丟棄的未知欄名（表單新增欄位忘了加白名單時會看到）
       }, cors);
     } catch (e) {
@@ -385,5 +472,6 @@ export default {
   async scheduled(event, env, ctx) {
     const cutoff = dayMinus(taipeiDay(), 1);
     ctx.waitUntil(env.DB.prepare('DELETE FROM sub_rate WHERE day < ?').bind(cutoff).run());
+    ctx.waitUntil(env.DB.prepare('DELETE FROM unlock_rate WHERE day < ?').bind(cutoff).run());
   },
 };

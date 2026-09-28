@@ -4443,6 +4443,74 @@ body.dform-thanks-open { overflow: hidden; }
   .dform-submit-btn { width: 100%; min-width: 0; }
 }
 
+
+/* 感謝畫面：跨裝置解鎖碼（js/form-engine.js showThanks）；填寫頁「輸入解鎖碼」也共用 .dform-unlock-* */
+.dform-unlock-box {
+  margin: 16px auto 20px;
+  max-width: 30em;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+  border: 1px dashed var(--primary);
+  text-align: center;
+}
+.dform-unlock-title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--ink);
+}
+.dform-unlock-code {
+  margin: 8px 0 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--primary);
+  user-select: all;
+}
+.dform-unlock-hint {
+  margin: 0 0 12px !important;
+  font-size: var(--fs-xs) !important;
+  color: var(--muted) !important;
+  line-height: 1.6;
+}
+.dform-unlock-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.dform-unlock-actions .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: var(--fs-sm);
+}
+.dform-unlock-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.dform-unlock-form input {
+  flex: 1 1 12em;
+  min-width: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--fs-body-sm);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.dform-unlock-msg {
+  margin-top: 6px;
+  font-size: var(--fs-xs);
+  color: var(--danger);
+}
 /* ============================================================
    Soft Give-to-Get：未貢獻者限筆數 CTA + participate 自助勾選
    ============================================================ */

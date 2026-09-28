@@ -2,15 +2,16 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=80b0a1258d';
-import { renderIcons, icon } from './icons.js?v=80b0a1258d';
-import { markContributed } from './contribution-gate.js?v=80b0a1258d';
+import { mountLayout } from './components.js?v=ad6568ae44';
+import { renderIcons, icon } from './icons.js?v=ad6568ae44';
+import { markContributed } from './contribution-gate.js?v=ad6568ae44';
 
-import { showToast } from './toast.js?v=80b0a1258d';
-import { submitEndpoint as envSubmitEndpoint } from './env.js?v=80b0a1258d';
-import { notePwaIntent } from './pwa-prompt.js?v=80b0a1258d';
-import { markSubmitted } from './fresh-data.js?v=80b0a1258d';
-import { attachInstitutionAutocomplete, syncInstitutionLevel } from './form-institution-picker.js?v=80b0a1258d';
+import { showToast } from './toast.js?v=ad6568ae44';
+import { submitEndpoint as envSubmitEndpoint } from './env.js?v=ad6568ae44';
+import { notePwaIntent } from './pwa-prompt.js?v=ad6568ae44';
+import { markSubmitted } from './fresh-data.js?v=ad6568ae44';
+import { saveUnlockCode, unlockLink } from './unlock.js?v=ad6568ae44';
+import { attachInstitutionAutocomplete, syncInstitutionLevel } from './form-institution-picker.js?v=ad6568ae44';
 import {
   generateCaptcha,
   attachCaptcha,
@@ -20,7 +21,7 @@ import {
   turnstileToken,
   resetTurnstile,
   TURNSTILE_REPLACES_LOCAL_CAPTCHA,
-} from './form-captcha.js?v=80b0a1258d';
+} from './form-captcha.js?v=ad6568ae44';
 
 const DRAFT_DEBOUNCE_MS = 500;
 
@@ -529,6 +530,7 @@ async function onSubmit(e) {
 
   let moderationVerdict = '';
   let blockedFields = [];
+  let unlockCode = '';
   try {
     if (SUBMIT_ENDPOINT) {
       // 第二階段：真正打 Apps Script
@@ -548,6 +550,8 @@ async function onSubmit(e) {
       // Worker 回傳 AI 審稿判定；被屏蔽時在感謝畫面告知投稿者（其餘欄位照常公開）
       moderationVerdict = payload?.moderation?.verdict || '';
       blockedFields = Array.isArray(payload?.moderation?.blockedFields) ? payload.moderation.blockedFields : [];
+      unlockCode = typeof payload?.unlockCode === 'string' ? payload.unlockCode : '';
+      if (unlockCode) saveUnlockCode(unlockCode);
     } else {
       // 第一階段：模擬送出
       console.log('[DFORM] would submit:', data);
@@ -563,7 +567,7 @@ async function onSubmit(e) {
     const blockedLabels = blockedFields
       .map((k) => SCHEMA.find((f) => f.name === k)?.label)
       .filter(Boolean);
-    showThanks({ blocked: moderationVerdict === 'block', blockedLabels });
+    showThanks({ blocked: moderationVerdict === 'block', blockedLabels, unlockCode });
   } catch (err) {
     console.error(err);
     const msg = err instanceof TypeError ? '連線失敗，請檢查網路後再試一次' : err.message;
@@ -572,6 +576,24 @@ async function onSubmit(e) {
     btn.disabled = false;
     btn.innerHTML = origHtml;
   }
+}
+
+// 感謝畫面的解鎖碼按鈕：複製碼；傳送連結（手機走系統分享選單，可選 LINE 傳給自己；不支援就複製連結）
+function wireUnlockActions(modal, code) {
+  const copy = async (text, okMsg) => {
+    try { await navigator.clipboard.writeText(text); showToast(okMsg, 'info'); }
+    catch { showToast('無法自動複製，請手動抄下解鎖碼：' + code, 'info'); }
+  };
+  modal.querySelector('#thanks-copy-code')?.addEventListener('click', () => copy(code, '已複製解鎖碼'));
+  modal.querySelector('#thanks-share-link')?.addEventListener('click', async () => {
+    const link = unlockLink(code);
+    const text = `護理職場透明化・分享平台解鎖碼：${code}\n在其他裝置打開這個連結即可解鎖：${link}`;
+    if (navigator.share) {
+      try { await navigator.share({ title: '分享平台解鎖碼', text }); return; }
+      catch (e) { if (e && e.name === 'AbortError') return; }
+    }
+    copy(text, '已複製解鎖碼與連結，可貼到 LINE 傳給自己');
+  });
 }
 
 function showThanks(opts = {}) {
@@ -608,9 +630,20 @@ function showThanks(opts = {}) {
           在分享平台上會先以模糊方式呈現；其餘欄位照常公開。
           若你認為判定有誤，可來信平台說明。
         </p>` : ''}
+      ${opts.unlockCode ? `
+        <div class="dform-unlock-box">
+          <div class="dform-unlock-title">${icon('key-round', { size: 16, className: 'ico-inline' })}你的解鎖碼（請保存）</div>
+          <div class="dform-unlock-code" id="thanks-unlock-code">${opts.unlockCode}</div>
+          <p class="dform-unlock-hint">換手機、換瀏覽器或清除瀏覽資料後，輸入這組碼或打開解鎖連結，
+            就能再次看到分享平台完整內容（最多 5 台裝置、永久有效）。解鎖碼無法反查你填了什麼。</p>
+          <div class="dform-unlock-actions">
+            <button type="button" class="btn btn-secondary" id="thanks-copy-code">${icon('copy', { size: 14 })}<span>複製解鎖碼</span></button>
+            <button type="button" class="btn btn-secondary" id="thanks-share-link">${icon('share', { size: 14 })}<span>傳送解鎖連結</span></button>
+          </div>
+        </div>` : `
       <p class="dform-thanks-countdown" id="thanks-countdown-text">
         <span id="thanks-countdown-num">10</span> 秒後自動回首頁
-      </p>
+      </p>`}
       <div class="dform-thanks-actions">
         <button type="button" class="btn btn-secondary" id="thanks-again">再填一份</button>
         <a class="btn btn-primary" href="index.html">立即回首頁</a>
@@ -622,11 +655,14 @@ function showThanks(opts = {}) {
   document.body.classList.add('dform-thanks-open'); // 鎖背景捲動
   renderIcons(modal);
 
-  // 10 秒倒數 → 自動跳首頁
+  // 有解鎖碼：不自動跳頁，留時間保存；複製／分享按鈕
+  if (opts.unlockCode) wireUnlockActions(modal, opts.unlockCode);
+
+  // 10 秒倒數 → 自動跳首頁（有解鎖碼時不倒數）
   let secondsLeft = 10;
   const countdownNum = modal.querySelector('#thanks-countdown-num');
   const countdownText = modal.querySelector('#thanks-countdown-text');
-  const intervalId = setInterval(() => {
+  const intervalId = opts.unlockCode ? null : setInterval(() => {
     secondsLeft -= 1;
     if (countdownNum) countdownNum.textContent = String(Math.max(0, secondsLeft));
     if (secondsLeft <= 0) {

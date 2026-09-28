@@ -1,12 +1,12 @@
 // 表格 / 卡片 渲染、排序、Modal
-import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=80b0a1258d';
-import { fmt, recommendPill, categoryTag } from './components.js?v=80b0a1258d';
-import { icon } from './icons.js?v=80b0a1258d';
-import { generateShareCard, showSharePreview } from './share-card.js?v=80b0a1258d';
-import { ensureTooltip } from './tooltip.js?v=80b0a1258d';
-import { pageSlice, renderPagination } from './pagination.js?v=80b0a1258d';
-import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=80b0a1258d';
-import { commentHtml, commentCellHtml, initCommentUnlock, isBlocked, escapeHtml, MOD_TEXT_FIELDS } from './moderation.js?v=80b0a1258d';
+import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=ad6568ae44';
+import { fmt, recommendPill, categoryTag } from './components.js?v=ad6568ae44';
+import { icon } from './icons.js?v=ad6568ae44';
+import { generateShareCard, showSharePreview } from './share-card.js?v=ad6568ae44';
+import { ensureTooltip } from './tooltip.js?v=ad6568ae44';
+import { pageSlice, renderPagination } from './pagination.js?v=ad6568ae44';
+import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=ad6568ae44';
+import { commentHtml, commentCellHtml, initCommentUnlock, isBlocked, escapeHtml, MOD_TEXT_FIELDS } from './moderation.js?v=ad6568ae44';
 
 // 顯示用機構名稱：對得上評鑑醫院時改用 VPN 簡稱，否則沿用原填寫名稱。
 function displayInstitutionName(name) {
@@ -32,7 +32,8 @@ function gateCtaHtml(shownCount, fullCount, isFilteredView) {
       <a href="participate.html" class="btn btn-primary g2g-cta-btn">
         ${icon('pencil-line', { size: 16, className: 'ico-inline' })}分享你的職場資訊，解鎖完整資料 →
       </a>
-      <div class="g2g-cta-sub">完全匿名、3-5 分鐘填完。分享後即解鎖。</div>
+      <div class="g2g-cta-sub">完全匿名、3-5 分鐘填完。分享後即解鎖。
+        已在其他裝置分享過？<a href="participate.html#g2g-unlock">輸入解鎖碼</a></div>
     </div>
   `;
 }
