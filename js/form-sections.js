@@ -54,6 +54,39 @@ export const SHIFT_ALLOWANCE_SECTION = [
     options: ['是', '否'] },
 ];
 
+// 輪班別與津貼（病房版，病房／精神科共用）：班別不提供「其他」，on call 選「是」時多一題自由描述樣態
+export const WARD_SHIFT_SECTION = SHIFT_ALLOWANCE_SECTION.flatMap((f) => {
+  if (f.name === 'shiftSystem') return [{ ...f, options: f.options.filter((o) => o !== '其他') }];
+  if (f.name === 'hasOnCall') {
+    return [f, { name: 'onCallPattern', label: 'on call 樣態', type: 'textarea', rows: 3, maxLength: 150,
+      showIf: { field: 'hasOnCall', equals: '是' },
+      help: '例：多久輪一次、需待命的時段、被叫回的頻率、有無 on call 費或補休' }];
+  }
+  return [f];
+});
+
+// 非護理人力（病房／精神科共用）：有的話再問哪些班別
+export const NON_NURSING_HELP_FIELDS = [
+  { name: 'nonNursingHelp', label: '單位有無非護理人力（護佐、照服員、病房助理）可以協助照護工作？',
+    type: 'radio', options: ['有', '無'] },
+  { name: 'nonNursingHelpShifts', label: '哪些班別有非護理人力協助', type: 'checkbox', required: true,
+    options: ['白班（D）', '小夜（E）', '大夜（N）'], help: '可複選',
+    showIf: { field: 'nonNursingHelp', equals: '有' } },
+];
+
+// 新人訓練（病房／精神科共用）
+export const NEWBIE_FIELDS = [
+  { name: 'newbieIndependence', label: '新人多久開始獨立照護', type: 'radio',
+    options: ['1 個月內', '1-2 個月', '2-3 個月', '3 個月以上', '不一定'],
+    help: '從到職到不需學姊帶、自己分床的時間' },
+  { name: 'newbieNightShift', label: '新人多久開始上夜班', type: 'radio',
+    options: ['到職 3 個月內', '3-6 個月', '6-12 個月', '1 年以上', '不排夜班'] },
+];
+
+// 護病比區間刻度（病房／精神科共用）。區間邊界大致對齊三班護病比標準
+// （醫學中心 6/9/11、區域 7/11/13、地區 10/13/15，見 nurse-ratio-view.js STANDARDS）；大夜常見 1:16 以上，再細分到 1:20 以上。
+export const WARD_RATIO = ['1:6 以下', '1:7-8', '1:9-10', '1:11-12', '1:13-15', '1:16-17', '1:18-19', '1:20 以上'];
+
 // 每日平均加班時間（放在各科別「業務與工時」段）
 export const DAILY_OVERTIME_FIELD = { name: 'dailyOvertime', label: '每日平均加班時間', type: 'radio',
   options: ['無', '1 小時內', '1-2 小時', '2-3 小時', '4 小時'] };

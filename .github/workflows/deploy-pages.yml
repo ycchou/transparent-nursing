@@ -13,6 +13,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  pull-requests: read   # changes job 在 PR 上比對改動檔案用
 
 # 同一時間只跑一個部署；新的 push 進來就取消還在進行的舊部署
 concurrency:
@@ -65,9 +66,41 @@ jobs:
       - name: 解析器測試
         run: python -m unittest discover tests -v
 
+  # 判斷這次有沒有改到網站前端；沒有（例如只改 Worker、文件）就跳過冒煙測試
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: 比對改動的檔案
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            frontend:
+              - '**/*.html'
+              - 'js/**'
+              - 'css/**'
+              - 'templates/**'
+              - 'data/**'
+              - 'assets/**'
+              - 'sw.js'
+              - 'manifest.json'
+              - 'tools/build-site.py'
+              - 'tools/smoke-test.mjs'
+              - 'tools/e2e-test.mjs'
+              - 'tools/lib/**'
+              - '.github/workflows/deploy-pages.yml'
+
   # 冒煙測試：用 headless Chrome 開「實際要部署的內容」的每一頁（手機＋桌機），
-  # 確認沒有 JS 錯誤、沒有 404、外框與主要內容都有畫出來
+  # 確認沒有 JS 錯誤、沒有 404、外框與主要內容都有畫出來。
+  # 只在網站前端有改動（或手動觸發）時才跑；本機不跑，一律交給這裡。
   smoke:
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -94,7 +127,11 @@ jobs:
 
   deploy:
     needs: [check, test, smoke]
-    if: github.event_name != 'pull_request'
+    # 冒煙測試被跳過（沒改前端）也照常部署；失敗或被取消則不部署
+    if: >-
+      github.event_name != 'pull_request' && !cancelled() &&
+      needs.check.result == 'success' && needs.test.result == 'success' &&
+      (needs.smoke.result == 'success' || needs.smoke.result == 'skipped')
     runs-on: ubuntu-latest
     environment:
       name: github-pages

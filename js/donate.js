@@ -2,8 +2,8 @@
 // 金額檔位 + 自訂 → 呼叫 tn-donate Worker /create → 拿到已簽章參數 → 自動 submit 到綠界付款頁。
 // 密鑰與簽章都在 Worker，前端只送金額、不碰任何機密。
 
-import { SITE } from './config.js?v=5204f79121';
-import { icon, renderIcons } from './icons.js?v=5204f79121';
+import { SITE } from './config.js?v=80b0a1258d';
+import { icon, renderIcons } from './icons.js?v=80b0a1258d';
 
 const TIERS = [100, 300, 500, 1000, 2000];
 const DEFAULT_AMOUNT = 500;

@@ -1,19 +1,22 @@
-// 精神科自建表單：只定義精神科專屬區塊，其餘（機構基本資料 / 輪班別與津貼 /
+// 精神科自建表單：只定義精神科專屬區塊，其餘（機構基本資料 / 輪班別與津貼（病房版）/ 人力與支援 /
 // 業務與工時共用欄 / 薪資與年資 / 整體評價）沿用 form-sections.js 的共用正本。
 
-import { initDepartmentForm } from './form-engine.js?v=5204f79121';
+import { initDepartmentForm } from './form-engine.js?v=80b0a1258d';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
-  SHIFT_ALLOWANCE_SECTION,
+  WARD_SHIFT_SECTION,
+  NON_NURSING_HELP_FIELDS,
+  NEWBIE_FIELDS,
+  WARD_RATIO,
   DAILY_OVERTIME_FIELD,
   SALARY_SECTION,
   EVALUATION_SECTION,
-} from './form-sections.js?v=5204f79121';
+} from './form-sections.js?v=80b0a1258d';
 
-// 護病比刻度：與 ICU 相同拆「常態」「最忙時」，但精神科一人顧的床數多（慢性大夜常 1:30 以上），改用區間。
-// 日間照護等沒有小夜／大夜的單位選「無此班別」。
-const PSYCH_RATIO = ['1:5 以下', '1:6-10', '1:11-15', '1:16-20', '1:21-30', '1:31 以上', '無此班別'];
+// 護病比刻度：與病房相同（WARD_RATIO，拆「常態」「最忙時」），
+// 另加「無此班別」給日間照護等沒有小夜／大夜的單位。
+const PSYCH_RATIO = [...WARD_RATIO, '無此班別'];
 
 // 1-5 分量表：一律「5 分＝負擔／風險最重」，方向一致才能並排比較。
 const scale = (low, high) => [
@@ -58,10 +61,6 @@ const PSYCH_FORM_SCHEMA = [
     help: '精神科醫院／精神科教學醫院依衛福部「精神科醫院評鑑」結果區分，兩者護病比標準不同' },
   { name: 'psychType', label: '病房類型', type: 'radio', required: true,
     options: ['急性一般', '急性兒童青少年', '急性老年', '急性成癮', '慢性', '精神科加護', '精神科急診', '日間照護', '其他'] },
-  { name: 'bedCount', label: '單位病床數', type: 'number', min: 0, step: 1,
-    help: '你所在病房的開放床數（日間照護填服務量）' },
-  { name: 'nursingAides', label: '是否有護佐／照服員', type: 'radio',
-    options: ['有，每班都有', '有，僅白班', '無'] },
   { name: 'teamSupport', label: '跨專業團隊', type: 'radio',
     options: ['完整（心理/職能/社工/醫師）', '部分（缺 1-2 種）', '主要靠護理'] },
   { name: 'ehrLevel', label: '護理紀錄電子化程度', type: 'radio',
@@ -81,9 +80,14 @@ const PSYCH_FORM_SCHEMA = [
   { name: 'nightPeakRatio', label: '大夜・最忙時', type: 'radio', required: true,
     options: PSYCH_RATIO },
 
-  ...SHIFT_ALLOWANCE_SECTION,
+  ...WARD_SHIFT_SECTION,
   { name: 'psychHazardPay', label: '是否有精神科危險／特殊加給', type: 'radio',
     options: ['有', '無', '不清楚'] },
+
+  // 與病房表單共用：非護理人力（有則問 D/E/N）、新人訓練
+  { section: '人力與支援' },
+  ...NON_NURSING_HELP_FIELDS,
+  ...NEWBIE_FIELDS,
 
   { section: '業務與工時' },
   DAILY_OVERTIME_FIELD,

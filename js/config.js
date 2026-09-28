@@ -2,8 +2,8 @@
 //
 // 資料來源由 js/env.js 的 MODE 決定：mock 讀下面的 csvUrlMock（data/mock/*.csv），
 // live 讀 env.js 的 LIVE.csvUrls（Google Sheet 發布 CSV）。這裡不必再改。
-import { C } from './theme.js?v=5204f79121';
-import { csvUrlFor } from './env.js?v=5204f79121';
+import { C } from './theme.js?v=80b0a1258d';
+import { csvUrlFor } from './env.js?v=80b0a1258d';
 
 export const SITE = {
   name: '護理職場透明化運動',
@@ -281,9 +281,6 @@ export const CATEGORIES = [
         options: ['綜合醫院精神科', '精神科醫院', '精神科教學醫院', '不清楚'] },
       { key: 'psychType', label: '病房類型', type: 'enum',
         options: ['急性一般', '急性兒童青少年', '急性老年', '急性成癮', '慢性', '精神科加護', '精神科急診', '日間照護', '其他'] },
-      { key: 'bedCount', label: '單位病床數', type: 'number' },
-      { key: 'nursingAides', label: '護佐／照服員', type: 'enum',
-        options: ['有，每班都有', '有，僅白班', '無'] },
       { key: 'teamSupport', label: '跨專業團隊', type: 'enum',
         options: ['完整（心理/職能/社工/醫師）', '部分（缺 1-2 種）', '主要靠護理'] },
       { key: 'ehrLevel', label: '護理紀錄電子化', type: 'enum',
@@ -295,13 +292,20 @@ export const CATEGORIES = [
       { key: 'nightShiftRatio', label: '大夜常態護病比', type: 'string' },
       { key: 'nightPeakRatio', label: '大夜最忙時', type: 'string' },
       { key: 'shiftSystem', label: '班別', type: 'enum',
-        options: ['三班制', '兩班制', '混合制', '其他'] },
+        options: ['三班制', '兩班制', '混合制'] },
       { key: 'eveningAllowanceNonPack', label: '小夜津貼/班(非包班)', type: 'string' },
       { key: 'eveningAllowancePack', label: '小夜津貼/班(包班)', type: 'string' },
       { key: 'nightAllowanceNonPack', label: '大夜津貼/班(非包班)', type: 'string' },
       { key: 'nightAllowancePack', label: '大夜津貼/班(包班)', type: 'string' },
       { key: 'hasOnCall', label: 'on call 班', type: 'enum', options: ['是', '否'] },
+      { key: 'onCallPattern', label: 'on call 樣態', type: 'text' },
       { key: 'psychHazardPay', label: '精神科危險加給', type: 'enum', options: ['有', '無', '不清楚'] },
+      { key: 'nonNursingHelp', label: '非護理人力協助', type: 'enum', options: ['有', '無'] },
+      { key: 'nonNursingHelpShifts', label: '非護理人力班別', type: 'multi' },
+      { key: 'newbieIndependence', label: '新人獨立照護', type: 'enum',
+        options: ['1 個月內', '1-2 個月', '2-3 個月', '3 個月以上', '不一定'] },
+      { key: 'newbieNightShift', label: '新人開始上夜班', type: 'enum',
+        options: ['到職 3 個月內', '3-6 個月', '6-12 個月', '1 年以上', '不排夜班'] },
       { key: 'dailyOvertime', label: '每日平均加班時間', type: 'enum',
         options: ['無', '1 小時內', '1-2 小時', '2-3 小時', '4 小時'] },
       { key: 'adminBurden', label: '行政業務負擔 (1-5)', type: 'number' },

@@ -2,15 +2,15 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=5204f79121';
-import { renderIcons, icon } from './icons.js?v=5204f79121';
-import { markContributed } from './contribution-gate.js?v=5204f79121';
+import { mountLayout } from './components.js?v=80b0a1258d';
+import { renderIcons, icon } from './icons.js?v=80b0a1258d';
+import { markContributed } from './contribution-gate.js?v=80b0a1258d';
 
-import { showToast } from './toast.js?v=5204f79121';
-import { submitEndpoint as envSubmitEndpoint } from './env.js?v=5204f79121';
-import { notePwaIntent } from './pwa-prompt.js?v=5204f79121';
-import { markSubmitted } from './fresh-data.js?v=5204f79121';
-import { attachInstitutionAutocomplete, syncInstitutionLevel } from './form-institution-picker.js?v=5204f79121';
+import { showToast } from './toast.js?v=80b0a1258d';
+import { submitEndpoint as envSubmitEndpoint } from './env.js?v=80b0a1258d';
+import { notePwaIntent } from './pwa-prompt.js?v=80b0a1258d';
+import { markSubmitted } from './fresh-data.js?v=80b0a1258d';
+import { attachInstitutionAutocomplete, syncInstitutionLevel } from './form-institution-picker.js?v=80b0a1258d';
 import {
   generateCaptcha,
   attachCaptcha,
@@ -20,7 +20,7 @@ import {
   turnstileToken,
   resetTurnstile,
   TURNSTILE_REPLACES_LOCAL_CAPTCHA,
-} from './form-captcha.js?v=5204f79121';
+} from './form-captcha.js?v=80b0a1258d';
 
 const DRAFT_DEBOUNCE_MS = 500;
 
@@ -29,6 +29,7 @@ let SCHEMA = [];
 let DRAFT_KEY = '';
 let SUBMIT_ENDPOINT = '';  // 空字串 = 測試模式（只模擬送出）
 let CATEGORY_SLUG = '';    // 類別 slug，決定寫入 Sheet 的哪個分頁
+let DRAFT_DISABLED = false;  // 送出成功後設為 true，之後不再存草稿
 let FORM_LOAD_TS = 0;      // 表單初始化時間戳（反垃圾：填寫過快判為機器）
 const MIN_FILL_MS = 60000; // 少於 1 分鐘送出 → 視為可疑
 const TEXTAREA_MAX_LENGTH = 1000;  // 自由文字欄位字數上限（可用 field.maxLength 覆寫）
@@ -357,6 +358,7 @@ function showErrors(errorNames) {
 // ===== 草稿 =====
 
 function saveDraft() {
+  if (DRAFT_DISABLED) return;   // 已送出：不再把表單內容存回草稿
   try {
     const data = serializeForm();
     // 如果整份完全空，就不要存草稿（避免覆蓋掉先前可能恢復的草稿）
@@ -421,6 +423,8 @@ function attachDraftAutosave() {
   const handler = debounce(saveDraft, DRAFT_DEBOUNCE_MS);
   root.addEventListener('input', handler);
   root.addEventListener('change', handler);
+  // 離開頁面（點連結到其他表單、切走 App）時立刻存，不等 debounce
+  window.addEventListener('pagehide', saveDraft);
 }
 
 // ===== 送出 =====
@@ -553,6 +557,7 @@ async function onSubmit(e) {
     const rec2 = getSubmitRecord();
     saveSubmitRecord({ day: taipeiToday(), count: rec2.count + 1, lastTs: Date.now() });
     markSubmitted(CATEGORY_SLUG);   // 分享平台接下來 15 分鐘不讀這一類的快取，投稿者才看得到自己那筆
+    DRAFT_DISABLED = true;
     clearDraft();
     // 被屏蔽的欄位轉成題目名稱；舊版 Worker 沒回 blockedFields 時退回「短評」
     const blockedLabels = blockedFields
