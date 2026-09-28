@@ -4,9 +4,9 @@
 // 匿名性：碼只在後端存雜湊、不與投稿資料列關聯；裝置 ID 是本瀏覽器隨機產生的字串（存 localStorage），
 // 只用來計算「這組碼已解鎖幾台裝置」（每碼上限 5 台），不是裝置指紋。
 
-import { LIVE } from './env.js?v=97a7aba99d';
-import { markContributed, hasContributed } from './contribution-gate.js?v=97a7aba99d';
-import { icon } from './icons.js?v=97a7aba99d';
+import { LIVE } from './env.js?v=36207357ba';
+import { markContributed, hasContributed } from './contribution-gate.js?v=36207357ba';
+import { icon } from './icons.js?v=36207357ba';
 
 const DEVICE_KEY = 'tn:device_id';
 const CODE_KEY = 'tn:unlock_code';   // 本裝置投稿時拿到的碼，方便日後在填寫頁再看一次
@@ -67,6 +67,26 @@ export function saveUnlockCode(code) {
   try { localStorage.setItem(CODE_KEY, code); } catch {}
 }
 
+/** 使用者輸入的碼 → 統一格式 TN-XXXX-XXXX（格式不對回空字串；與 worker-submit 的正規化規則一致） */
+export function formatUnlockCode(input) {
+  let s = String(input || '').toUpperCase().replace(/[^0-9A-Z]/g, '');
+  if (s.length === 10 && s.startsWith('TN')) s = s.slice(2);
+  return s.length === 8 ? `TN-${s.slice(0, 4)}-${s.slice(4)}` : '';
+}
+
+/** 複製文字到剪貼簿；成功回 true */
+export async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; } catch {}
+  try {   // 舊瀏覽器／非安全環境的退路
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand('copy');
+    ta.remove();
+    return ok;
+  } catch { return false; }
+}
+
 /** 解鎖連結：點開就自動解鎖並進入分享平台 */
 export function unlockLink(code) {
   return new URL(`platform.html#unlock=${encodeURIComponent(code)}`, location.href).href;
@@ -90,6 +110,9 @@ export async function redeemUnlockCode(code) {
     const data = await res.json().catch(() => ({}));
     if (res.ok && data.ok) {
       markContributed();
+      // 記住這組碼：這台裝置之後也能在填寫頁看到、複製，下次換手機時用得到
+      const formatted = formatUnlockCode(code);
+      if (formatted) saveUnlockCode(formatted);
       return { ok: true };
     }
     return { ok: false, message: ERROR_TEXT[data.error] || `解鎖失敗（HTTP ${res.status}），請稍後再試` };

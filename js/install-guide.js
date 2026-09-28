@@ -63,7 +63,7 @@ const homeScreen = () => phone(`
   <div class="ig-status"></div>
   <div class="ig-home">
     ${'<span class="ig-appicon ig-other"></span>'.repeat(5)}
-    <span class="ig-home-app">${hl(APP_ICON)}<small>護理職場</small></span>
+    <span class="ig-home-app">${hl(APP_ICON)}<small>護理職場透明化</small></span>
     ${'<span class="ig-appicon ig-other"></span>'.repeat(6)}
   </div>`);
 
@@ -109,7 +109,7 @@ const desktopBar = () => `
 const step = (n, fig, text) =>
   `<figure class="ig-step"><div class="ig-fig">${fig}</div><figcaption><span class="ig-num">${n}</span>${text}</figcaption></figure>`;
 
-const OPEN_FROM_HOME = '之後都從主畫面的 <strong>「護理職場」圖示</strong> 開啟。';
+const OPEN_FROM_HOME = '之後都從主畫面的 <strong>「護理職場透明化」圖示</strong> 開啟。';
 const IOS_DATA_NOTE = `<p class="ig-note"><strong>iPhone 小提醒：</strong>主畫面 App 和 Safari 的資料是分開的。
   如果你是在 Safari 裡填寫表單，第一次打開 App 時請再輸入一次解鎖碼（或點解鎖連結），之後就都在 App 裡了。</p>`;
 

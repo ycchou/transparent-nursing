@@ -214,7 +214,9 @@
   background: #f2f2f7;
 }
 .ig-add-card-flat { margin: 0; background: #f8fafc; }
-.ig-add-name { font-weight: 700; }
+.ig-add-card > div { min-width: 0; }
+.ig-add-name { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ig-add-url { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ig-add-url { color: #6b7280; }
 .ig-toggle-row {
   display: flex;
@@ -252,8 +254,17 @@
 }
 .ig-appicon svg { width: 18px; height: 18px; }
 .ig-appicon.ig-other { background: rgba(255, 255, 255, 0.55); }
-.ig-home-app { display: flex; flex-direction: column; align-items: center; gap: 2px; color: #fff; }
-.ig-home-app small { font-size: 7px; }
+.ig-home-app { display: flex; flex-direction: column; align-items: center; gap: 7px; color: #fff; min-width: 0; }  /* gap 讓名稱不被脈動圓圈壓到 */
+/* App 名稱：跟真實主畫面一樣單行、太長顯示刪節號，不換行 */
+.ig-home-app small {
+  display: block;
+  max-width: 32px;
+  font-size: 6.5px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* 電腦瀏覽器 */
 .ig-desktop {

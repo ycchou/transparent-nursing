@@ -4545,6 +4545,22 @@ body.dform-thanks-open { overflow: hidden; }
   cursor: pointer;
   text-decoration: underline;
 }
+/* 填寫頁「你的解鎖碼」：碼＋一鍵複製同一列（窄螢幕自動換行） */
+.dform-unlock-mine-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 6px 0 8px;
+}
+.dform-unlock-mine-row .dform-unlock-code { margin: 0; }
+.dform-unlock-mine-row .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: var(--fs-sm);
+}
 /* ============================================================
    Soft Give-to-Get：未貢獻者限筆數 CTA + participate 自助勾選
    ============================================================ */
@@ -4905,6 +4921,29 @@ body.g2g-modal-open { overflow: hidden; }
   .g2g-modal-actions .btn { width: 100%; }
 }
 
+
+/* 解鎖卡（解鎖碼為主）：內含輸入框與說明，改成直向排列 */
+.g2g-self-claim.g2g-unlock-card { display: block; }
+.g2g-unlock-card .g2g-self-claim-body h3 { display: flex; align-items: center; gap: 6px; }
+.g2g-unlock-card .dform-unlock-form { margin-top: 12px; }
+.g2g-mine { margin-top: 14px; padding-top: 14px; border-top: 1px dashed rgba(46, 134, 171, 0.35); }
+/* 誠實商店入口：刻意低調的灰色小字連結 */
+.g2g-honor-link {
+  display: block;
+  margin-top: 14px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.g2g-honor-link:hover { color: var(--ink-soft); }
+.g2g-save-code { margin-top: 12px; font-size: var(--fs-sm); }
+.g2g-save-code summary { cursor: pointer; color: var(--primary); font-weight: 600; }
 /* ============================================================
    三班護病比頁面 (nurse-ratio.html)
    ============================================================ */
@@ -6096,7 +6135,9 @@ html.ptr-enabled body {
   background: #f2f2f7;
 }
 .ig-add-card-flat { margin: 0; background: #f8fafc; }
-.ig-add-name { font-weight: 700; }
+.ig-add-card > div { min-width: 0; }
+.ig-add-name { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ig-add-url { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ig-add-url { color: #6b7280; }
 .ig-toggle-row {
   display: flex;
@@ -6134,8 +6175,17 @@ html.ptr-enabled body {
 }
 .ig-appicon svg { width: 18px; height: 18px; }
 .ig-appicon.ig-other { background: rgba(255, 255, 255, 0.55); }
-.ig-home-app { display: flex; flex-direction: column; align-items: center; gap: 2px; color: #fff; }
-.ig-home-app small { font-size: 7px; }
+.ig-home-app { display: flex; flex-direction: column; align-items: center; gap: 7px; color: #fff; min-width: 0; }  /* gap 讓名稱不被脈動圓圈壓到 */
+/* App 名稱：跟真實主畫面一樣單行、太長顯示刪節號，不換行 */
+.ig-home-app small {
+  display: block;
+  max-width: 32px;
+  font-size: 6.5px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* 電腦瀏覽器 */
 .ig-desktop {

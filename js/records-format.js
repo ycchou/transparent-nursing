@@ -103,4 +103,4 @@ export function getCachedCount(storageKey) {
 
 // HTML escape（給 modal 內文字用）
 // 與全站共用同一份（含引號跳脫）；其他模組仍可從這裡 import
-export { escapeHtml } from './moderation.js?v=97a7aba99d';
+export { escapeHtml } from './moderation.js?v=36207357ba';

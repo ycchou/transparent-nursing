@@ -358,3 +358,26 @@ body.g2g-modal-open { overflow: hidden; }
   .g2g-modal-actions .btn { width: 100%; }
 }
 
+
+/* 解鎖卡（解鎖碼為主）：內含輸入框與說明，改成直向排列 */
+.g2g-self-claim.g2g-unlock-card { display: block; }
+.g2g-unlock-card .g2g-self-claim-body h3 { display: flex; align-items: center; gap: 6px; }
+.g2g-unlock-card .dform-unlock-form { margin-top: 12px; }
+.g2g-mine { margin-top: 14px; padding-top: 14px; border-top: 1px dashed rgba(46, 134, 171, 0.35); }
+/* 誠實商店入口：刻意低調的灰色小字連結 */
+.g2g-honor-link {
+  display: block;
+  margin-top: 14px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.g2g-honor-link:hover { color: var(--ink-soft); }
+.g2g-save-code { margin-top: 12px; font-size: var(--fs-sm); }
+.g2g-save-code summary { cursor: pointer; color: var(--primary); font-weight: 600; }

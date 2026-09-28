@@ -1,7 +1,7 @@
 // 病房自建表單：只定義病房專屬區塊，其餘（機構基本資料 / 輪班別與津貼 /
 // 業務與工時共用欄 / 薪資與年資 / 整體評價）沿用 form-sections.js 的共用正本。
 
-import { initDepartmentForm } from './form-engine.js?v=97a7aba99d';
+import { initDepartmentForm } from './form-engine.js?v=36207357ba';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
@@ -12,7 +12,7 @@ import {
   DAILY_OVERTIME_FIELD,
   SALARY_SECTION,
   EVALUATION_SECTION,
-} from './form-sections.js?v=97a7aba99d';
+} from './form-sections.js?v=36207357ba';
 
 // 護病比刻度（WARD_RATIO）、班別與 on call、非護理人力、新人訓練皆與精神科共用，定義在 form-sections.js。
 

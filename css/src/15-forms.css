@@ -974,3 +974,19 @@ body.dform-thanks-open { overflow: hidden; }
   cursor: pointer;
   text-decoration: underline;
 }
+/* 填寫頁「你的解鎖碼」：碼＋一鍵複製同一列（窄螢幕自動換行） */
+.dform-unlock-mine-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 6px 0 8px;
+}
+.dform-unlock-mine-row .dform-unlock-code { margin: 0; }
+.dform-unlock-mine-row .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: var(--fs-sm);
+}
