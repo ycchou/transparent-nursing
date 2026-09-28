@@ -1,7 +1,7 @@
 // 病房自建表單：只定義病房專屬區塊，其餘（機構基本資料 / 輪班別與津貼 /
 // 業務與工時共用欄 / 薪資與年資 / 整體評價）沿用 form-sections.js 的共用正本。
 
-import { initDepartmentForm } from './form-engine.js?v=f51f0826bd';
+import { initDepartmentForm } from './form-engine.js?v=18b5b890c6';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
@@ -9,7 +9,7 @@ import {
   DAILY_OVERTIME_FIELD,
   SALARY_SECTION,
   EVALUATION_SECTION,
-} from './form-sections.js?v=f51f0826bd';
+} from './form-sections.js?v=18b5b890c6';
 
 // 護病比刻度：與 ICU／精神科相同拆「常態」「最忙時」。區間邊界大致對齊三班護病比標準
 // （醫學中心 6/9/11、區域 7/11/13、地區 10/13/15，見 nurse-ratio-view.js STANDARDS）；
@@ -18,8 +18,7 @@ const WARD_RATIO = ['1:6 以下', '1:7-8', '1:9-10', '1:11-12', '1:13-15', '1:16
 
 // 護病比配置引導文字：可展開查看完整法規條文
 const RATIO_INTRO = `<strong>一般病房護病比標準</strong><br><br>
-重點：衛福部公告的<strong>三班護病比</strong>標準——<strong>醫學中心 白班 1:6、小夜 1:9、大夜 1:11</strong>；區域醫院 1:7、1:11、1:13；地區醫院 1:10、1:13、1:15。<br>
-請依你實際的<strong>第一線照護床數</strong>填寫（不含 Leader／組長）。
+重點：衛福部公告的<strong>三班護病比</strong>標準——<strong>醫學中心 白班 1:6、小夜 1:9、大夜 1:11</strong>；區域醫院 1:7、1:11、1:13；地區醫院 1:10、1:13、1:15。
 <details style="margin-top:12px;">
   <summary style="cursor:pointer;color:var(--primary);font-weight:600;"><span data-icon="book-open" data-size="16" class="ico-inline"></span>點此查看完整法規條文</summary>
   <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.1);">

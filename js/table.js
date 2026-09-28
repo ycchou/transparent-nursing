@@ -1,12 +1,12 @@
 // 表格 / 卡片 渲染、排序、Modal
-import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=f51f0826bd';
-import { fmt, recommendPill, categoryTag } from './components.js?v=f51f0826bd';
-import { icon } from './icons.js?v=f51f0826bd';
-import { generateShareCard, showSharePreview } from './share-card.js?v=f51f0826bd';
-import { ensureTooltip } from './tooltip.js?v=f51f0826bd';
-import { pageSlice, renderPagination } from './pagination.js?v=f51f0826bd';
-import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=f51f0826bd';
-import { commentHtml, commentCellHtml, initCommentUnlock, isBlocked, escapeHtml } from './moderation.js?v=f51f0826bd';
+import { CATEGORIES, COMMON_FIELDS, getCategory, getAllFields } from './config.js?v=18b5b890c6';
+import { fmt, recommendPill, categoryTag } from './components.js?v=18b5b890c6';
+import { icon } from './icons.js?v=18b5b890c6';
+import { generateShareCard, showSharePreview } from './share-card.js?v=18b5b890c6';
+import { ensureTooltip } from './tooltip.js?v=18b5b890c6';
+import { pageSlice, renderPagination } from './pagination.js?v=18b5b890c6';
+import { getHospitalCode, getShort, getShortByCode } from './hospital-shortname.js?v=18b5b890c6';
+import { commentHtml, commentCellHtml, initCommentUnlock, isBlocked, escapeHtml, MOD_TEXT_FIELDS } from './moderation.js?v=18b5b890c6';
 
 // 顯示用機構名稱：對得上評鑑醫院時改用 VPN 簡稱，否則沿用原填寫名稱。
 function displayInstitutionName(name) {
@@ -97,6 +97,7 @@ const KEY_LABELS = {
   onCallPay: '值班費',
   workDuties: '業務內容',
   specialBenefits: '特殊福利',
+  onCallPattern: 'on call 樣態',
   // ER
   erLevel: '急診級別',
   triageRatio: '檢傷人均',
@@ -162,14 +163,16 @@ const KEY_LABELS = {
   promotion: '升遷前景',
 };
 
-function renderCellValue(row, key) {
+function renderCellValue(row, key, opts = {}) {
   const v = row[key];
   if (key === '_category') return categoryTag(v);
   if (key === 'recommendIndex') return recommendPill(v);
   if (key === 'timestamp') return fmt.date(v);
-  if (key === 'comment') {
-    // 被 AI 審稿判定屏蔽時只顯示一行鎖定提示（解鎖框放在卡片與詳情彈窗）
-    return row.comment ? commentCellHtml(row) : escapeHtml(fmt.empty(v));
+  if (MOD_TEXT_FIELDS.includes(key)) {
+    // 被 AI 審稿判定屏蔽時：表格只顯示一行鎖定提示；詳情彈窗（opts.modal）給模糊文字＋解鎖
+    if (!v) return escapeHtml(fmt.empty(v));
+    if (opts.modal) return isBlocked(row) ? commentHtml(row, { key }) : escapeHtml(v);
+    return commentCellHtml(row, key);
   }
   // 機構名稱、單位名稱：太長時截斷顯示「...」，hover 顯示完整名稱
   if (key === 'institutionName' || key === 'unitName') {
@@ -422,7 +425,7 @@ export function showDetailModal(row, opts = {}) {
         ${fields.filter((f) => f.key !== 'institutionName' && f.key !== 'institutionType' && f.key !== 'location' && f.key !== 'jobTitle' && f.key !== 'comment').map((f) => `
           <div>
             <div class="key">${f.label}</div>
-            <div class="val">${renderCellValue(row, f.key)}</div>
+            <div class="val">${renderCellValue(row, f.key, { modal: true })}</div>
           </div>
         `).join('')}
       </div>

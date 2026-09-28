@@ -1,4 +1,4 @@
-import { C, alpha } from './theme.js?v=f51f0826bd';
+import { C, alpha } from './theme.js?v=18b5b890c6';
 // 三班護病比・共用視圖工具
 //
 // 從 nurse-ratio.js 抽出，供護病比頁與單一機構整合頁（hospital.js）共用：

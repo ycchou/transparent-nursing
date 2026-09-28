@@ -31,9 +31,14 @@ export function escapeHtml(s) {
     .replaceAll('"', '&quot;').replaceAll("'", '&#39;');
 }
 
-/** 這筆的短評是否被 AI 審稿屏蔽 */
+// 送 AI 審稿的自由文字欄位（與 worker-submit 的 MOD_FIELDS 對應）。
+// 判定是整筆一個結果，無法分辨是哪一欄違規 → 判 block 時這幾欄一律模糊。
+export const MOD_TEXT_FIELDS = ['comment', 'specialBenefits', 'onCallPattern'];
+
+/** 這筆是否被 AI 審稿屏蔽（且確實有需要遮的自由文字） */
 export function isBlocked(row) {
-  return String(row?.modVerdict || '').toLowerCase() === 'block' && !!row?.comment;
+  return String(row?.modVerdict || '').toLowerCase() === 'block'
+    && MOD_TEXT_FIELDS.some((k) => !!row?.[k]);
 }
 
 export function blockReason(row) {
@@ -70,13 +75,14 @@ export function mathChallenge() {
 }
 
 /**
- * 短評區塊 HTML。未屏蔽 → 原文；已屏蔽且未解鎖 → 模糊文字 + 一行說明 + 「展開」。
+ * 自由文字區塊 HTML（短評、特殊福利、on call 樣態）。未屏蔽 → 原文；
+ * 已屏蔽且未解鎖 → 模糊文字 + 一行說明 + 「展開」。
  * 數學題預設收著，點了展開才出現——平常看起來就只是一段被柔化的文字。
  * @param {Object} row
- * @param {Object} opts { compact:boolean } compact 用於卡片（行數更少）
+ * @param {Object} opts { compact:boolean, key:string } compact 用於卡片（行數更少）；key 預設 'comment'
  */
 export function commentHtml(row, opts = {}) {
-  const text = row?.comment || '';
+  const text = row?.[opts.key || 'comment'] || '';
   if (!text) return '';
   if (!isBlocked(row)) return escapeHtml(text);
 
@@ -93,16 +99,16 @@ export function commentHtml(row, opts = {}) {
       <div class="comment-unlock" hidden>
         <span class="comment-unlock-q">${q.text} =</span>
         <input class="comment-unlock-input" type="text" inputmode="numeric" maxlength="4"
-               aria-label="計算 ${q.text} 並輸入答案以展開短評" />
+               aria-label="計算 ${q.text} 並輸入答案以展開內容" />
         <button type="button" class="comment-unlock-btn">確認</button>
         <span class="comment-unlock-err" hidden>答案不對</span>
       </div>
     </div>`;
 }
 
-/** 短評在表格窄欄位裡的顯示（屏蔽時只給一行提示，不放解鎖） */
-export function commentCellHtml(row) {
-  const text = row?.comment || '';
+/** 自由文字在表格窄欄位裡的顯示（屏蔽時只給一行提示，不放解鎖） */
+export function commentCellHtml(row, key = 'comment') {
+  const text = row?.[key] || '';
   if (!text) return '';
   if (!isBlocked(row)) {
     return `<span class="truncate" title="${escapeHtml(text)}">${escapeHtml(text)}</span>`;

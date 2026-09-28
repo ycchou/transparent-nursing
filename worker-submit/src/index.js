@@ -168,7 +168,8 @@ async function rateLimited(env, ip, ua, day) {
 const GEMINI_MODEL = 'gemini-3.8-flash';   // 模型 ID；換模型改這行即可
 const MOD_TIMEOUT_MS = 10000;              // 逾時就放行，不讓使用者卡在送出中（關思考後實測 1.3-1.5 秒）
 const MOD_MAX_CHARS = 2000;                // 送進模型的文字上限（短評本來就短）
-const MOD_FIELDS = ['comment', 'specialBenefits'];  // 需要審的自由文字欄位
+// 需要審的自由文字欄位（與 js/moderation.js 的 MOD_TEXT_FIELDS 對應；判 block 時前端這幾欄一律模糊）
+const MOD_FIELDS = ['comment', 'specialBenefits', 'onCallPattern'];
 
 const MOD_SYSTEM_PROMPT = `你是「護理職場透明化運動」平台的內容審核員。平台讓護理人員匿名分享職場資訊，
 批評雇主、抱怨勞動條件是平台的核心用途，不是違規。
