@@ -1,0 +1,310 @@
+/* 加到主畫面：圖解教學（js/install-guide.js）。手機示意圖全用 CSS 畫，隨深淺色主題切換。 */
+
+.ig-inapp {
+  margin: 12px 0 4px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(230, 57, 70, 0.1);
+  border: 1px solid rgba(230, 57, 70, 0.4);
+  font-size: var(--fs-sm);
+  line-height: 1.6;
+  color: var(--ink);
+}
+
+.ig-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 14px 0 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.ig-tabs::-webkit-scrollbar { display: none; }
+.ig-tab {
+  flex-shrink: 0;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  cursor: pointer;
+}
+.ig-tab.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
+
+.ig-onetap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+  border: 1px solid var(--primary);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+}
+
+/* 步驟：一律兩欄往下排（手機上兩支示意手機並排剛好放得下，不必橫向滑動找第 3、4 步） */
+.ig-steps {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 12px;
+}
+.ig-steps-wide { grid-template-columns: 1fr; }
+@media (max-width: 340px) {
+  .ig-steps { grid-template-columns: 1fr; }
+}
+.ig-step {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.ig-fig { display: flex; justify-content: center; width: 100%; }
+.ig-step figcaption {
+  font-size: var(--fs-sm);
+  line-height: 1.55;
+  color: var(--ink-soft);
+  text-align: left;
+  width: 100%;
+}
+.ig-step figcaption small { color: var(--muted); }
+.ig-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  vertical-align: 1px;
+}
+
+/* ---- 手機外框 ---- */
+.ig-phone {
+  width: 150px;
+  height: 270px;
+  padding: 6px;
+  border-radius: 26px;
+  background: #1f2937;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  flex-shrink: 0;
+}
+.ig-screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #fff;
+  color: #1f2937;
+  font-size: 9px;
+  line-height: 1.3;
+  display: flex;
+  flex-direction: column;
+}
+.ig-status { height: 14px; flex-shrink: 0; }
+.ig-lines { padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+.ig-lines i { display: block; height: 7px; border-radius: 4px; background: #e5e7eb; width: 100%; }
+.ig-dim .ig-lines { opacity: 0.35; }
+
+.ig-ico { display: inline-flex; width: 16px; height: 16px; color: #2563eb; }
+.ig-ico svg { width: 100%; height: 100%; }
+.ig-ico-sm { width: 14px; height: 14px; color: #4b5563; }
+
+.ig-urlbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 8px;
+  padding: 4px 8px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: #374151;
+  flex-shrink: 0;
+}
+.ig-urlbar svg { width: 9px; height: 9px; flex-shrink: 0; }
+.ig-urlbar-top { margin-top: 2px; }
+.ig-urlbar-bottom { margin-bottom: 4px; justify-content: center; }
+.ig-url-txt { flex: 1; display: flex; align-items: center; gap: 3px; overflow: hidden; white-space: nowrap; }
+
+.ig-toolbar {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 6px 4px 10px;
+  border-top: 1px solid #e5e7eb;
+  background: #f8fafc;
+  flex-shrink: 0;
+}
+
+/* 分享選單（iOS）／下拉選單（Android） */
+.ig-sheet, .ig-menu, .ig-dialog {
+  position: absolute;
+  background: #fff;
+  color: #111827;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.15);
+}
+.ig-sheet {
+  left: 0; right: 0; bottom: 0;
+  padding: 6px 8px 12px;
+  border-radius: 14px 14px 0 0;
+  background: #f2f2f7;
+}
+.ig-sheet-grip { width: 30px; height: 4px; border-radius: 2px; background: #c7c7cc; margin: 0 auto 6px; }
+.ig-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 8px;
+  background: #fff;
+  border-bottom: 1px solid #eef0f3;
+}
+.ig-row:first-of-type { border-radius: 8px 8px 0 0; }
+.ig-row:last-child { border-radius: 0 0 8px 8px; border-bottom: 0; }
+.ig-row .ig-hl { display: flex; justify-content: space-between; width: 100%; }
+.ig-row-ico { width: 12px; height: 12px; display: inline-flex; }
+.ig-row-ico svg { width: 100%; height: 100%; }
+.ig-row-target { font-weight: 700; }
+.ig-menu {
+  top: 18px; right: 6px;
+  width: 96px;
+  border-radius: 8px;
+  overflow: visible;
+}
+.ig-menu .ig-row { border-radius: 0; }
+
+.ig-dialog {
+  left: 12px; right: 12px; top: 70px;
+  padding: 10px;
+  border-radius: 12px;
+}
+.ig-dialog-title { font-weight: 700; font-size: 10px; margin-bottom: 8px; }
+.ig-dialog-actions { display: flex; justify-content: flex-end; gap: 14px; margin-top: 10px; color: #4b5563; }
+
+.ig-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 8px;
+  color: #2563eb;
+  border-bottom: 1px solid #e5e7eb;
+}
+.ig-navbar strong { color: #111827; }
+.ig-accent { color: #2563eb; font-weight: 700; }
+.ig-add-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 8px 0;
+  padding: 8px;
+  border-radius: 10px;
+  background: #f2f2f7;
+}
+.ig-add-card-flat { margin: 0; background: #f8fafc; }
+.ig-add-name { font-weight: 700; }
+.ig-add-url { color: #6b7280; }
+.ig-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 8px 8px 0;
+  padding: 8px;
+  border-radius: 10px;
+  background: #f2f2f7;
+}
+.ig-toggle { width: 22px; height: 13px; border-radius: 7px; background: #d1d5db; position: relative; }
+.ig-toggle.on { background: #34c759; }
+.ig-toggle.on::after { content: ''; position: absolute; right: 1px; top: 1px; width: 11px; height: 11px; border-radius: 50%; background: #fff; }
+.ig-keyboard { margin-top: auto; height: 80px; background: #d1d5db; }
+
+/* 主畫面 */
+.ig-home {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px 6px;
+  padding: 14px 10px;
+  align-content: start;
+  background: linear-gradient(160deg, #a8dadc, #457b9d);
+}
+.ig-appicon {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, #2e86ab, #a8dadc);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
+}
+.ig-appicon svg { width: 18px; height: 18px; }
+.ig-appicon.ig-other { background: rgba(255, 255, 255, 0.55); }
+.ig-home-app { display: flex; flex-direction: column; align-items: center; gap: 2px; color: #fff; }
+.ig-home-app small { font-size: 7px; }
+
+/* 電腦瀏覽器 */
+.ig-desktop {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: #1f2937;
+  font-size: 11px;
+}
+.ig-desk-bar { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: #f1f5f9; }
+.ig-desk-url { flex: 1; display: flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 999px; background: #fff; overflow: hidden; white-space: nowrap; }
+.ig-desk-url svg { width: 10px; height: 10px; }
+.ig-desk-body { height: 90px; }
+
+/* 要點的按鈕：脈動圓圈 */
+.ig-hl {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 8px;
+  z-index: 1;
+}
+.ig-hl::after {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border: 2.5px solid #e63946;
+  border-radius: 10px;
+  animation: ig-pulse 1.4s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes ig-pulse {
+  0% { transform: scale(0.92); opacity: 1; }
+  70% { transform: scale(1.12); opacity: 0.25; }
+  100% { transform: scale(1.12); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ig-hl::after { animation: none; }
+}
+
+.ig-note {
+  margin: 14px 0 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(244, 162, 97, 0.14);
+  border: 1px solid rgba(244, 162, 97, 0.5);
+  font-size: var(--fs-xs);
+  line-height: 1.6;
+  color: var(--ink);
+}
+.ig-footnote { margin: 12px 0 0; font-size: var(--fs-2xs); color: var(--muted); }

@@ -788,6 +788,12 @@ body.dform-picker-open {
   transform: translateY(16px) scale(0.96);
   transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
   box-sizing: border-box;
+  /* 內容（含解鎖碼區塊）可能比手機螢幕高：限制在可視高度內、面板內自己捲動（背景已鎖捲動） */
+  max-height: calc(100vh - 40px);
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 .dform-thanks-modal.open .dform-thanks-panel {
   transform: translateY(0) scale(1);
@@ -846,7 +852,10 @@ body.dform-picker-open {
 body.dform-thanks-open { overflow: hidden; }
 
 @media (max-width: 480px) {
-  .dform-thanks-panel { padding: 32px 24px 24px; }
+  .dform-thanks-modal { padding: 12px; }
+  .dform-thanks-panel { padding: 24px 18px 20px; max-height: calc(100vh - 24px); max-height: calc(100dvh - 24px); }
+  .dform-thanks-icon { width: 56px; height: 56px; margin-bottom: 12px; }
+  .dform-thanks-icon svg { width: 34px; height: 34px; }
   .dform-thanks-panel h2 { font-size: var(--fs-xl); }
   .dform-thanks-actions { flex-direction: column; }
   .dform-thanks-actions .btn { width: 100%; justify-content: center; }

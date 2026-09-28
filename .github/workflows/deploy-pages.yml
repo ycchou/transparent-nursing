@@ -98,9 +98,12 @@ jobs:
   # 冒煙測試：用 headless Chrome 開「實際要部署的內容」的每一頁（手機＋桌機），
   # 確認沒有 JS 錯誤、沒有 404、外框與主要內容都有畫出來。
   # 只在網站前端有改動（或手動觸發）時才跑；本機不跑，一律交給這裡。
+  # commit 訊息含「[skip smoke]」時跳過（部署照常，check／test 仍會跑）。
   smoke:
     needs: changes
-    if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
+    if: >-
+      !contains(github.event.head_commit.message, '[skip smoke]') &&
+      (needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

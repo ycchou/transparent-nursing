@@ -5,8 +5,8 @@
 // - 本地埋點（trackPwa）：dispatch CustomEvent + localStorage 累計（未接外部服務）
 // import { initPWAPrompt, showInstallGuide, notePwaIntent, isAppInstalled } from './pwa-prompt.js?v=...';
 
-import { C } from './theme.js?v=35a3f3e9e4';
-import { showToast } from './toast.js?v=35a3f3e9e4';
+import { C } from './theme.js?v=d722392f87';
+import { showToast } from './toast.js?v=d722392f87';
 
 const DISMISS_KEY = '__nursing_pwa_dismissed';          // 最近一次關閉/延後的時間戳
 const DISMISS_COUNT_KEY = '__nursing_pwa_dismiss_count'; // 累計「主動關閉」次數
@@ -284,16 +284,24 @@ async function triggerNativeInstall() {
   }
 }
 
-/** 詳細教學 modal（footer 入口、banner「詳細步驟」、或主動呼叫）。 */
-export function showInstallGuide() {
+/** 詳細教學 modal（footer 入口、banner「詳細步驟」、或主動呼叫）。圖解內容在 install-guide.js（開啟時才載入）。 */
+export async function showInstallGuide() {
   const platform = detectPlatform();
   if (platform === 'installed') {
     showToast('你已經把這個網站加到主畫面囉', 'info');
     return;
   }
+  if (document.getElementById('pwa-modal')) return;
+
+  let guide;
+  try {
+    guide = await import('./install-guide.js?v=d722392f87');
+  } catch {
+    showToast('教學載入失敗，請檢查網路後再試一次', 'error');
+    return;
+  }
 
   const lastFocused = document.activeElement;
-
   const modal = document.createElement('div');
   modal.className = 'modal-backdrop open';
   modal.id = 'pwa-modal';
@@ -302,66 +310,22 @@ export function showInstallGuide() {
   modal.setAttribute('aria-modal', 'true');
   modal.setAttribute('aria-label', '把護理職場透明化加到主畫面');
   modal.innerHTML = `
-    <div class="modal" style="max-width:560px;">
+    <div class="modal" style="max-width:640px;">
       <div class="modal-header">
         <div>
-          <h3 style="margin:0;">把護理職場透明化加到主畫面</h3>
+          <h3 style="margin:0;">把網站加到主畫面</h3>
           <div style="color:var(--muted);font-size:0.9rem;margin-top:4px;">
-            像 App 一樣使用 — 全螢幕、開啟更快、免下載免註冊
+            像 App 一樣使用：全螢幕、開啟更快、不必重複解鎖，免下載免註冊
           </div>
         </div>
         <button class="modal-close" aria-label="關閉" id="pwa-modal-close">×</button>
       </div>
-
-      <!-- iOS -->
-      <div class="install-section ${platform === 'ios' ? 'install-section-current' : ''}">
-        <h4 style="margin:16px 0 8px;display:flex;align-items:center;gap:8px;">
-           iPhone / iPad（Safari）
-        </h4>
-        <ol style="color:var(--ink-soft);line-height:1.85;padding-left:1.4rem;margin:0;">
-          <li>確認你是用 <strong>Safari</strong> 瀏覽器開啟本網站</li>
-          <li>點下方中間的 <strong>分享按鈕 ${IOS_SHARE_SVG}</strong></li>
-          <li>向下滑動，選擇 <strong>「加入主畫面」</strong></li>
-          <li>確認名稱後點 <strong>「新增」</strong></li>
-        </ol>
-      </div>
-
-      <!-- Android -->
-      <div class="install-section ${platform === 'android' ? 'install-section-current' : ''}">
-        <h4 style="margin:20px 0 8px;display:flex;align-items:center;gap:8px;">
-           Android（Chrome / Edge / Firefox）
-        </h4>
-        <ol style="color:var(--ink-soft);line-height:1.85;padding-left:1.4rem;margin:0;">
-          <li>點右上角的 <strong>選單 ⋮</strong></li>
-          <li>選擇 <strong>「安裝應用程式」</strong> 或 <strong>「加到主畫面」</strong></li>
-          <li>確認安裝即可</li>
-        </ol>
-      </div>
-
-      <!-- Desktop -->
-      <div class="install-section ${platform === 'desktop' ? 'install-section-current' : ''}">
-        <h4 style="margin:20px 0 8px;display:flex;align-items:center;gap:8px;">
-           桌面（Chrome / Edge / Brave）
-        </h4>
-        <ol style="color:var(--ink-soft);line-height:1.85;padding-left:1.4rem;margin:0;">
-          <li>網址列右側會出現 <strong>安裝圖示 ⊕</strong></li>
-          <li>點它選擇 <strong>「安裝」</strong></li>
-          <li>或從瀏覽器選單 → <strong>安裝「護理職場透明化」</strong></li>
-        </ol>
-      </div>
-
-      <div style="margin-top:24px;padding:16px;background:var(--accent-soft);border-radius:12px;">
-        <div style="font-weight:600;color:var(--ink);margin-bottom:6px;">為什麼要加到主畫面？</div>
-        <ul style="color:var(--muted);font-size:0.92rem;line-height:1.7;padding-left:1.2rem;margin:0;">
-          <li>像 App 一樣有自己的圖示，一鍵開啟</li>
-          <li>全螢幕無瀏覽器工具列，畫面更大</li>
-          <li>完全免費、不用 App Store、不佔太多空間</li>
-          <li>隨時可以從主畫面長按移除</li>
-        </ul>
-      </div>
+      <div class="modal-body">${guide.installGuideHtml({ canOneTap: !!deferredInstallPrompt })}</div>
     </div>
   `;
   document.body.appendChild(modal);
+  guide.wireInstallGuide(modal);
+  trackPwa('guide_opened');
 
   const close = () => {
     modal.remove();
@@ -370,6 +334,10 @@ export function showInstallGuide() {
   };
   function esc(e) { if (e.key === 'Escape') close(); }
 
+  modal.querySelectorAll('[data-one-tap-install]').forEach((b) => b.addEventListener('click', () => {
+    close();
+    triggerNativeInstall();
+  }));
   modal.querySelector('#pwa-modal-close')?.addEventListener('click', close);
   modal.addEventListener('click', (e) => { if (e.target === modal) close(); });
   document.addEventListener('keydown', esc);
