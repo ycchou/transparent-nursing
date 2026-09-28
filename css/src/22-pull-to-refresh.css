@@ -1,0 +1,53 @@
+/* 下拉重新整理（js/pull-to-refresh.js）— 只在 PWA standalone 模式出現 */
+
+/* 關掉瀏覽器自己的下拉／回彈處理，交給 JS 指示器 */
+html.ptr-enabled,
+html.ptr-enabled body {
+  overscroll-behavior-y: contain;
+}
+
+.ptr-indicator {
+  position: fixed;
+  top: env(safe-area-inset-top, 0px);
+  left: 50%;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px 8px 10px;
+  border-radius: 999px;
+  background: var(--surface, #fff);
+  color: var(--muted);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16);
+  font-size: var(--fs-xs, 0.8rem);
+  font-weight: 600;
+  opacity: 0;
+  transform: translate(-50%, -56px);
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.ptr-indicator.is-returning {
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.ptr-indicator .ptr-icon {
+  display: inline-flex;
+}
+
+.ptr-indicator.is-ready,
+.ptr-indicator.is-refreshing {
+  color: var(--primary);
+}
+
+.ptr-indicator.is-refreshing .ptr-icon {
+  animation: ptr-spin 0.8s linear infinite;
+}
+
+@keyframes ptr-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ptr-indicator.is-refreshing .ptr-icon { animation: none; }
+}

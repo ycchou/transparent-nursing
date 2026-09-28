@@ -1,4 +1,4 @@
-# Cloudflare Worker：Google Sheet 發布 CSV 的快取代理（KV 存快照 + 每 5 分鐘排程更新）
+# Cloudflare Worker：Google Sheet 發布 CSV 的快取代理（KV 存快照 + 每分鐘排程更新）
 # 部署見 worker-sheets/README.md。KV namespace 由 `wrangler kv namespace create tn-sheets` 產生。
 name = "tn-sheets"
 main = "src/index.js"
@@ -8,6 +8,6 @@ compatibility_date = "2026-07-01"
 binding = "SHEETS"
 id = "d858a071cc50468c8f5e70cf9818b0c7"
 
-# 每 5 分鐘把所有來源重抓一次；內容有變才寫 KV（免費方案每日 1000 次寫入）。
+# 每分鐘把所有來源重抓一次；內容有變（或距上次寫入超過 1 小時）才寫 KV（免費方案每日 1000 次寫入）。
 [triggers]
-crons = ["*/5 * * * *"]
+crons = ["* * * * *"]

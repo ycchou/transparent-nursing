@@ -4,15 +4,15 @@ Cloudflare Worker + KV。把分享平台（10 類）與違規紀錄（勞檢／�
 存成 KV 快照，前端改讀快照：**約 0.2 秒**，原本直連 Google 要 **2–6 秒**。獨立部署，**不走 GitHub Pages**。
 
 - `src/index.js` — Worker 程式；`SOURCES` 是白名單（pubId + gid）
-- `wrangler.toml` — KV 綁定與 Cron（每 5 分鐘）
+- `wrangler.toml` — KV 綁定與 Cron（每分鐘）
 
 運作方式：
-- **Cron 每 5 分鐘**重抓全部來源，內容有變（或距上次寫入超過 1 小時）才寫 KV，控制在免費方案每日 1000 次寫入內。
+- **Cron 每分鐘**重抓全部來源，內容有變（或距上次寫入超過 1 小時）才寫 KV，控制在免費方案每日 1000 次寫入內。
 - 請求路徑與 Google 相同：`/spreadsheets/d/e/<pubId>/pub?gid=<gid>&single=true&output=csv`。
   前端 `js/sheet-fetch.js` 把網址的 `https://docs.google.com` 換成本 Worker；Worker 失敗時自動退回直連 Google。
 - 不在白名單的 Sheet 回 404 → 前端退回直連，**新增 Sheet 忘了加白名單也不會壞，只是比較慢**。
 - Google 回非 CSV（例如 Sheet 被取消發布）時不覆蓋 KV，維持最後一份好的快照。
-- 資料新鮮度：最多約 5 分鐘（Cron）＋ 1 分鐘（KV 邊緣快取）＋ 1 分鐘（isolate 記憶體）。
+- 資料新鮮度：Google 發布 CSV 本身約 1–5 分鐘，加上最多 1 分鐘（Cron）＋ 1 分鐘（KV 邊緣快取）＋ 1 分鐘（isolate 記憶體）。
 
 ## 新增／更換 Sheet
 

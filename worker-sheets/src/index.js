@@ -2,7 +2,7 @@
 //
 // 問題：docs.google.com 的發布 CSV 每次請求要 2–6 秒（違規紀錄 730KB 那份最慢），
 //       分享平台一次要抓 10 份，首次造訪／快取過期時使用者得乾等。
-// 做法：Cron 每 5 分鐘把白名單內的每份 CSV 抓回來存進 KV（內容有變才寫），
+// 做法：Cron 每分鐘把白名單內的每份 CSV 抓回來存進 KV（內容有變才寫），
 //       使用者請求直接讀 KV 回傳，不再等 Google。
 //
 // 端點：路徑與 Google 相同，前端只要把網址的 https://docs.google.com 換成本 Worker 即可：
@@ -34,6 +34,8 @@ const UPSTREAM_TIMEOUT_MS = 20000;
 // 同一個 isolate 內，KV 讀到的內容在記憶體留 60 秒，減少 KV 讀取次數（免費方案每日 10 萬次）
 const MEMO_MS = 60 * 1000;
 const memo = new Map();  // kvKey → { body, fetchedAt, at }
+// 本 isolate 所知 KV 內每份快照的 metadata（Cron 比對內容有沒有變用）
+const written = new Map();  // kvKey → { hash, fetchedAt }
 
 const kvKey = (id, gid) => `csv:${id}:${gid}`;
 const upstreamUrl = (id, gid) =>
@@ -68,13 +70,18 @@ async function refresh(env, id, gid) {
   const key = kvKey(id, gid);
   const body = await fetchUpstream(id, gid);
   const hash = await sha256Hex(body);
-  const prev = await env.SHEETS.getWithMetadata(key);
+  // Cron 每分鐘跑：本 isolate 記得上次寫入的 metadata 就不再讀 KV 比對，省讀取額度
+  let prevMeta = written.get(key);
+  if (!prevMeta) prevMeta = (await env.SHEETS.getWithMetadata(key)).metadata;
   const fetchedAt = Date.now();
-  const changed = !prev.metadata || prev.metadata.hash !== hash;
+  const changed = !prevMeta || prevMeta.hash !== hash;
   // 內容沒變也每小時寫一次，讓 metadata.fetchedAt 反映「最近確認過」而非停在上次變動
-  const stale = prev.metadata && fetchedAt - prev.metadata.fetchedAt > 60 * 60 * 1000;
+  const stale = prevMeta && fetchedAt - prevMeta.fetchedAt > 60 * 60 * 1000;
   if (changed || stale) {
     await env.SHEETS.put(key, body, { metadata: { hash, fetchedAt } });
+    written.set(key, { hash, fetchedAt });
+  } else {
+    written.set(key, prevMeta);
   }
   memo.set(key, { body, fetchedAt, at: fetchedAt });
   return { body, fetchedAt, changed };
