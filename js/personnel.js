@@ -2,16 +2,17 @@
 // 資料：data/personnel-index.json（picker 清單）＋ data/personnel/{code}.json（單院時間序列）
 // 來源：衛福部「醫院醫事人力持續性監測結果」。
 
-import { renderIcons, icon } from './icons.js?v=cc7357b8c8';
-import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=cc7357b8c8';
+import { renderIcons, icon } from './icons.js?v=7065d0fdf0';
+import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=7065d0fdf0';
 import {
   CAT_COLORS, BED_COLORS, DEFAULT_ON, mLabel, baseLineCfg,
   renderStaffChart, renderBedChart, loadPersonnelHospital, latestMonthTable,
-} from './personnel-view.js?v=cc7357b8c8';
-import { showToast } from './toast.js?v=cc7357b8c8';
-import { skeletonRows } from './skeleton.js?v=cc7357b8c8';
-import { escapeHtml } from './moderation.js?v=cc7357b8c8';
-import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=cc7357b8c8';
+} from './personnel-view.js?v=7065d0fdf0';
+import { showToast } from './toast.js?v=7065d0fdf0';
+import { registerFormerCodes, readCodeParam } from './hospital-merges.js?v=7065d0fdf0';
+import { skeletonRows } from './skeleton.js?v=7065d0fdf0';
+import { escapeHtml } from './moderation.js?v=7065d0fdf0';
+import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=7065d0fdf0';
 
 const INDEX_URL = 'data/personnel-index.json';
 const AGG_URL = 'data/personnel-aggregate.json';
@@ -215,10 +216,10 @@ function renderDashboard(agg) {
 // 以 ?id= 為主（可為 code 或 code-院區）；相容舊 ?code=（單院區→id=code；
 // 多院區代號→該代號第一個院區）。
 function resolveDeepLinkId() {
-  const params = new URLSearchParams(location.search);
-  const id = params.get('id');
+  // 舊碼（改制換碼）會轉成新碼並改寫網址
+  const id = readCodeParam('id');
   if (id && /^\d{10}(-.+)?$/.test(id) && state.byId.has(id)) return id;
-  const code = params.get('code');
+  const code = readCodeParam('code');
   if (code && /^\d{10}$/.test(code)) {
     if (state.byId.has(code)) return code;
     const branch = state.index.find((h) => h.code === code);
@@ -259,6 +260,7 @@ export async function initPersonnel() {
     ]);
     state.index = idx.hospitals || [];
     state.index.forEach((h) => state.byId.set(h.id, h));
+    registerFormerCodes(state.index);
 
     if (agg) { renderDashboard(agg); renderIcons(document.getElementById('pm-dash-staff')?.closest('.chart-card')); }
 

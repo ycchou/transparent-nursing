@@ -1,7 +1,7 @@
 // CSV 載入 + 解析 + 雙層 cache（記憶體 + localStorage）
 // 之後把 CATEGORIES[].csvUrl 改成 Google Sheet 發布 CSV URL 即可
-import { CATEGORIES } from './config.js?v=cc7357b8c8';
-import { currentMode } from './env.js?v=cc7357b8c8';
+import { CATEGORIES } from './config.js?v=7065d0fdf0';
+import { currentMode } from './env.js?v=7065d0fdf0';
 
 // 記憶體 cache：同 session 內不重抓
 const cache = new Map();
@@ -228,8 +228,8 @@ export function preloadAll() {
 // （HTTP 快取以完整 URL 為 key）：hospital.js / nurse-ratio.js 用帶 ?v= 版本（stamp-assets 維護）；
 // personnel.js 首抓的 picker 清單無版本號，故此處亦不帶。
 const HUB_STATIC_URLS = [
-  'data/hospitals-merged.json?v=d49ffd011a',  // 機構總覽
-  'data/nurse-ratio.json?v=052ea02218',       // 三班護病比
+  'data/hospitals-merged.json?v=351c442704',  // 機構總覽
+  'data/nurse-ratio.json?v=040b3f83fc',       // 三班護病比
   'data/personnel-index.json',                // 人力監控 picker
 ];
 

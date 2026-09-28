@@ -2,16 +2,16 @@
 //
 // 資料/圖表共用 js/financials-view.js；名稱↔代碼/簡稱重用 js/hospital-shortname.js
 
-import { renderIcons, icon } from './icons.js?v=cc7357b8c8';
-import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=cc7357b8c8';
+import { renderIcons, icon } from './icons.js?v=7065d0fdf0';
+import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=7065d0fdf0';
 import {
   ensureFinancialsLoaded, getAllFinancials, getFinancials, getFinancialFields,
   parseNum, formatVal, signClass, formatRocYear, renderFinancialTrendChart,
-} from './financials-view.js?v=cc7357b8c8';
-import { reportMergedInfo } from './hospital-merges.js?v=cc7357b8c8';
-import { skeletonRows } from './skeleton.js?v=cc7357b8c8';
-import { escapeHtml } from './moderation.js?v=cc7357b8c8';
-import { levelSlug } from './picker-filters.js?v=cc7357b8c8';
+} from './financials-view.js?v=7065d0fdf0';
+import { reportMergedInfo, registerFormerCodes, readCodeParam } from './hospital-merges.js?v=7065d0fdf0';
+import { skeletonRows } from './skeleton.js?v=7065d0fdf0';
+import { escapeHtml } from './moderation.js?v=7065d0fdf0';
+import { levelSlug } from './picker-filters.js?v=7065d0fdf0';
 
 const LEVEL_ORDER = ['醫學中心', '區域醫院', '地區醫院', '精神科醫院', '精神科教學醫院', '診所', '其他'];
 const REGION_ORDER = ['臺北', '北區', '中區', '南區', '高屏', '東區'];
@@ -64,9 +64,9 @@ function latestRow(h) {
 }
 
 // deep link
+// 舊碼（改制換碼）會轉成新碼並改寫網址
 function parseDeepLinkCode() {
-  const raw = new URL(location.href).searchParams.get('code');
-  return raw ? String(raw).trim() : null;
+  return readCodeParam('code');
 }
 function setDeepLinkUrl(code, replace = false) {
   const u = new URL(location.href);
@@ -374,6 +374,7 @@ export async function initFinancials() {
     renderTable();
     window.addEventListener('hospitalShortNamesReady', () => renderTable(), { once: true });
 
+    registerFormerCodes(getAllFinancials());
     const code = parseDeepLinkCode();
     if (code && getFinancials(code)) selectHospital(code, false);
     else if (code) setDeepLinkUrl(null, true);

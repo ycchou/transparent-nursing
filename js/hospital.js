@@ -5,15 +5,17 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { renderIcons } from './icons.js?v=cc7357b8c8';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=cc7357b8c8';
+import { renderIcons } from './icons.js?v=7065d0fdf0';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=7065d0fdf0';
 
-import { notePwaIntent } from './pwa-prompt.js?v=cc7357b8c8';
+import { notePwaIntent } from './pwa-prompt.js?v=7065d0fdf0';
 
-import { skeletonRows } from './skeleton.js?v=cc7357b8c8';
-import { escapeHtml } from './moderation.js?v=cc7357b8c8';
-import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=cc7357b8c8';
-import { state, loadBaseData } from './hospital-data.js?v=cc7357b8c8';
+import { skeletonRows } from './skeleton.js?v=7065d0fdf0';
+import { escapeHtml } from './moderation.js?v=7065d0fdf0';
+import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=7065d0fdf0';
+import { state, loadBaseData } from './hospital-data.js?v=7065d0fdf0';
+
+import { readCodeParam } from './hospital-merges.js?v=7065d0fdf0';
 import {
   renderNurseSection,
   renderFinancialsSection,
@@ -21,12 +23,12 @@ import {
   renderPlatformSection,
   renderViolationsSection,
   copyOrShare,
-} from './hospital-sections.js?v=cc7357b8c8';
+} from './hospital-sections.js?v=7065d0fdf0';
 
 // ---------- utils ----------
+// 舊碼（改制換碼）會轉成新碼並改寫網址
 function parseDeepLinkCode() {
-  const raw = new URL(location.href).searchParams.get('code');
-  return raw ? String(raw).trim() : null;
+  return readCodeParam('code');
 }
 function setDeepLinkUrl(code, replace = false) {
   const u = new URL(location.href);
@@ -61,6 +63,7 @@ function renderHospitalList() {
     if (q) {
       if (h.name.toLowerCase().includes(q)) return true;
       if (h.code.includes(q)) return true;
+      if ((h.formerCodes || []).some((c) => c.includes(q))) return true;   // 舊代號也搜得到
       const short = h.shortName || getShort(h.name);
       return !!(short && short.toLowerCase().includes(q));
     }
@@ -180,6 +183,9 @@ function renderHeader(hosp) {
   const lines = [];
   if (short && short !== hosp.name) lines.push(`簡稱：${escapeHtml(short)}`);
   lines.push(`機構代號：${escapeHtml(hosp.code)}`);
+  if (hosp.formerCodes && hosp.formerCodes.length) {
+    lines.push(`改制前代號：${hosp.formerCodes.map(escapeHtml).join('、')}（資料已合併）`);
+  }
   if (hosp.address) lines.push(`地址：${escapeHtml(hosp.address)}`);
   if (hosp.phone) lines.push(`電話：${escapeHtml(hosp.phone)}`);
   document.getElementById('hosp-code').innerHTML = lines.map((l) => `<div>${l}</div>`).join('');

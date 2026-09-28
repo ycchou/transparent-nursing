@@ -6,7 +6,8 @@
 //     hospitals: [{ id, name, level, history: { "11207": {day, eve, night} } }]
 //   }
 
-import { renderIcons } from './icons.js?v=cc7357b8c8';
+import { renderIcons } from './icons.js?v=7065d0fdf0';
+import { registerFormerCodes, readCodeParam } from './hospital-merges.js?v=7065d0fdf0';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -14,12 +15,12 @@ import {
   shiftStatus,
   classifyHospital as classifyHospitalView,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=cc7357b8c8';
-import { skeletonRows } from './skeleton.js?v=cc7357b8c8';
-import { escapeHtml } from './moderation.js?v=cc7357b8c8';
-import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=cc7357b8c8';
+} from './nurse-ratio-view.js?v=7065d0fdf0';
+import { skeletonRows } from './skeleton.js?v=7065d0fdf0';
+import { escapeHtml } from './moderation.js?v=7065d0fdf0';
+import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=7065d0fdf0';
 
-const DATA_URL = 'data/nurse-ratio.json?v=052ea02218';
+const DATA_URL = 'data/nurse-ratio.json?v=040b3f83fc';
 
 // 合規分類綁定本頁 state.data.months（共用邏輯在 nurse-ratio-view.js）
 function classifyHospital(hosp) {
@@ -38,9 +39,9 @@ const state = {
 };
 
 // URL deep-link helpers
+// 舊碼（改制換碼）會轉成新碼並改寫網址
 function parseDeepLinkId() {
-  const raw = new URL(location.href).searchParams.get('id');
-  return raw ? String(raw).trim() : null;
+  return readCodeParam('id');
 }
 function setDeepLinkUrl(id, replace = false) {
   const u = new URL(location.href);
@@ -385,6 +386,7 @@ export async function initNurseRatio() {
 
   try {
     state.data = await loadData();
+    registerFormerCodes(state.data.hospitals);
     // 套用手動 city overlay（僅補 city == null 的醫院；overlay 缺檔則 no-op）
     const cityOverlay = await loadManualCityOverlay();
     if (cityOverlay && Object.keys(cityOverlay).length) {

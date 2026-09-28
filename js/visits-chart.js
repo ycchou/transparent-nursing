@@ -1,8 +1,8 @@
 // visits-chart.js — 近 30 天每日訪客折線圖彈窗（低調、點「累積人次」才開）。
 // 純內嵌 SVG，無外部依賴；重用站上既有 .modal-backdrop / .modal 樣式。
 
-import { getVisitHistory } from './visits.js?v=cc7357b8c8';
-import { icon } from './icons.js?v=cc7357b8c8';
+import { getVisitHistory } from './visits.js?v=7065d0fdf0';
+import { icon } from './icons.js?v=7065d0fdf0';
 
 // 依日期補齊近 n 天（缺的日補 0），回傳 [{ day:'MM/DD', full:'YYYY-MM-DD', count }]
 function fillDays(history, n) {

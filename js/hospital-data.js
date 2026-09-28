@@ -1,14 +1,16 @@
 // hospital-data.js — 機構總覽頁的資料載入與共用狀態（醫院清單、違規對照、護病比單院小檔、眾包與違規資料）。
 
-import { loadAll } from './data-loader.js?v=cc7357b8c8';
+import { loadAll } from './data-loader.js?v=7065d0fdf0';
 
-import { createCsvLoader } from './csv-loader.js?v=cc7357b8c8';
-import { parseROCDate, parseFine, shortenLocation } from './records-format.js?v=cc7357b8c8';
+import { createCsvLoader } from './csv-loader.js?v=7065d0fdf0';
+import { parseROCDate, parseFine, shortenLocation } from './records-format.js?v=7065d0fdf0';
 
-import { VIOL_FEEDS } from './config.js?v=cc7357b8c8';
+import { registerFormerCodes } from './hospital-merges.js?v=7065d0fdf0';
 
-const MERGED_URL = 'data/hospitals-merged.json?v=d49ffd011a';
-const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=dccbdf9020';
+import { VIOL_FEEDS } from './config.js?v=7065d0fdf0';
+
+const MERGED_URL = 'data/hospitals-merged.json?v=351c442704';
+const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=bd99316e15';
 const ADDR_OVERLAY_URL = 'data/hospitals-address-overlay.json?v=50f6f147a8';
 
 const parseViolRow = (r) => ({
@@ -83,6 +85,8 @@ export async function loadBaseData() {
     fetchJson(ADDR_OVERLAY_URL).catch(() => ({ overlay: {} })),
   ]);
 
+  registerFormerCodes(merged.hospitals);
+
   // 地址 overlay：以代碼補 vpn-only 醫院缺的地址/縣市/電話（僅補原本缺的欄位）
   const addrOverlay = (addrDoc && addrDoc.overlay) || {};
 
@@ -121,7 +125,7 @@ const _nrCodeCache = new Map();
 export async function loadNurseByCode(code) {
   if (_nrCodeCache.has(code)) return _nrCodeCache.get(code);
   try {
-    const r = await fetch(`data/nurse-ratio/by-code/${code}.json?v=052ea02218`, { cache: 'default' });
+    const r = await fetch(`data/nurse-ratio/by-code/${code}.json?v=040b3f83fc`, { cache: 'default' });
     const d = r.ok ? await r.json() : null;
     _nrCodeCache.set(code, d);
     return d;

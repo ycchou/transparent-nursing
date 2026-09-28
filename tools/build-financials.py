@@ -27,6 +27,9 @@ from datetime import datetime, timedelta, timezone
 
 import pandas as pd
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # 讓測試以檔案路徑載入時也找得到同目錄模組
+from hospital_successors import canonical_code, former_codes
+
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
@@ -249,8 +252,11 @@ def main():
         by_year[year] = rows
         print(f"  {year} 年：{len(rows)} 家")
         for row in rows:
-            code = row["code"]
+            # 改制換碼：舊碼年度併入新碼（同年度新舊碼都有時以新碼為準）
+            code = canonical_code(row["code"])
             h = hosp.setdefault(code, {"code": code, "names": {}, "rows": {}})
+            if code != row["code"] and year in h["rows"]:
+                continue
             h["names"][year] = row["name"]
             h["rows"][year] = row
 
@@ -270,16 +276,21 @@ def main():
                 out[f"{key}Rank"] = rk
         return out
 
+    formers = former_codes()
     hospitals = []
     for code, h in hosp.items():
         latest_year = max(h["names"].keys(), key=int)
         rows_sorted = [clean_row(h["rows"][y]) for y in sorted(h["rows"].keys(), key=int)]
-        hospitals.append({
+        short = shortnames.get(code) or next((shortnames[o] for o in formers.get(code, []) if shortnames.get(o)), "")
+        rec = {
             "code": code,
             "name": h["names"][latest_year],
-            "shortName": shortnames.get(code, ""),
+            "shortName": short,
             "rows": rows_sorted,
-        })
+        }
+        if code in formers:
+            rec["formerCodes"] = formers[code]
+        hospitals.append(rec)
 
     # 排序：依最新年度整體結餘（F3）遞減，無值置後（僅影響輸出穩定性）
     def sort_key(h):

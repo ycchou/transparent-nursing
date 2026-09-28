@@ -1,4 +1,4 @@
-import { C, alpha } from './theme.js?v=cc7357b8c8';
+import { C, alpha } from './theme.js?v=7065d0fdf0';
 // 醫院財務・共用視圖工具
 //
 // 供「醫院財務」頁（financials.js）與「機構總覽」頁（hospital.js）共用：
@@ -11,7 +11,7 @@ import { C, alpha } from './theme.js?v=cc7357b8c8';
 //     rows:[{ YEAR, HOSP_CNT_TYPNAM, F1Val,F1Rank, F2Val,F2Rank, F3Val,F3Rank,
 //             F5Val, F6Val, F7Val, F8Val }] }] }
 
-const DATA_URL = 'data/hospital-financials.json?v=5ea9834039';
+const DATA_URL = 'data/hospital-financials.json?v=eca522a048';
 
 let _doc = null;
 let _byCode = null;
@@ -53,7 +53,7 @@ const _codeCache = new Map();
 export async function loadFinancialsHospital(code) {
   if (_codeCache.has(code)) return _codeCache.get(code);
   try {
-    const r = await fetch(`data/financials/${code}.json?v=5ea9834039`, { cache: 'default' });
+    const r = await fetch(`data/financials/${code}.json?v=eca522a048`, { cache: 'default' });
     const d = r.ok ? await r.json() : null;
     _codeCache.set(code, d);
     return d;

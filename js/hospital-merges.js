@@ -44,3 +44,25 @@ export function feeMergedParent(code) {
 export function reportMergedInfo(code) {
   return REPORT_MERGED[code] || null;
 }
+
+// C. 改制換碼（data/manual/hospital-successors.json）：建置時舊碼資料已併入新碼，
+//    新碼記錄帶 formerCodes。各頁載入資料後登錄，舊分享連結（?code=舊碼）即轉到新碼。
+const FORMER_TO_CURRENT = new Map();
+export function registerFormerCodes(records) {
+  (records || []).forEach((r) => (r.formerCodes || []).forEach((fc) => FORMER_TO_CURRENT.set(fc, r.code)));
+}
+export function currentCode(code) {
+  return FORMER_TO_CURRENT.get(code) || code;
+}
+// 讀網址參數（機構代號）；是舊碼就換成新碼並就地改寫網址（不新增歷史紀錄）
+export function readCodeParam(name) {
+  const u = new URL(location.href);
+  const raw = (u.searchParams.get(name) || '').trim();
+  if (!raw) return null;
+  const cur = currentCode(raw);
+  if (cur !== raw) {
+    u.searchParams.set(name, cur);
+    history.replaceState(history.state, '', u.toString());
+  }
+  return cur;
+}

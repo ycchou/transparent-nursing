@@ -27,6 +27,9 @@ from collections import defaultdict
 from multiprocessing import Pool, cpu_count
 import pdfplumber
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # 讓測試以檔案路徑載入時也找得到同目錄模組
+from hospital_successors import canonical_code, former_codes
+
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
 
@@ -338,11 +341,19 @@ def main():
                     print(f"  ...{done}/{len(todo)}")
     print(f"解析完成；錯誤 {len(errs)}", errs[:5] if errs else '')
 
-    # 依固定順序（月份→檔名）組回 store，確保與全量解析的結果一致、輸出可重現
+    # 依固定順序（月份→檔名）組回 store，確保與全量解析的結果一致、輸出可重現。
+    # 改制換碼：舊碼記錄改掛新碼（見 data/manual/hospital-successors.json）；
+    # 同月新舊碼都有時以新碼原本的記錄為準。
     store = {}   # (code, branchKey, mkey) -> rec
     for t in sorted(results):
         for rec in results[t]:
-            store[(rec['code'], normalize_branch(rec['branch']), rec['mkey'])] = rec
+            code = canonical_code(rec['code'])
+            key = (code, normalize_branch(rec['branch']), rec['mkey'])
+            if code != rec['code']:
+                if key in store:
+                    continue
+                rec = {**rec, 'code': code}
+            store[key] = rec
 
     # 套用人工修正（來源 PDF 異常值，例如數字誤植）。修正表以 code 為鍵，
     # 套用到該 code 同月份的所有院區記錄（現有修正皆單院區，key branchKey='')。
@@ -400,6 +411,7 @@ def main():
     for old in glob.glob(os.path.join(OUT_DIR, '*.json')):
         os.remove(old)
 
+    formers = former_codes()
     index = []
     for (code, fk), months_map in hosp.items():
         mkeys = sorted(months_map.keys())
@@ -425,6 +437,8 @@ def main():
             'actual': [months_map[m]['rows'].get('actual') for m in mkeys],
             'eval': [months_map[m]['rows'].get('eval') for m in mkeys],
         }
+        if code in formers:
+            out['formerCodes'] = formers[code]
         if multi:
             out['sharedCode'] = {
                 'code': code, 'branchCount': len(siblings),
@@ -435,6 +449,8 @@ def main():
         entry = {'code': code, 'id': hid, 'branch': branch_disp, 'name': name,
                  'city': last['city'], 'level': last['level'],
                  'firstMonth': mkeys[0], 'lastMonth': mkeys[-1], 'monthCount': len(mkeys)}
+        if code in formers:
+            entry['formerCodes'] = formers[code]
         if multi:
             entry['sharedCode'] = True
         index.append(entry)

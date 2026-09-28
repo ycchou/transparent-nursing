@@ -1,13 +1,13 @@
 // form-institution-picker.js — 表單的「機構名稱」自動建議：依選的機構層級篩選醫院（手機為底部選單），
 // 清單來自 data/hospitals-master.json（評鑑名單＋VPN 補充）。
 
-import { icon } from './icons.js?v=cc7357b8c8';
+import { icon } from './icons.js?v=7065d0fdf0';
 
-import { HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=cc7357b8c8';
+import { HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=7065d0fdf0';
 
-import { escapeHtml } from './moderation.js?v=cc7357b8c8';
+import { escapeHtml } from './moderation.js?v=7065d0fdf0';
 
-import { showToast } from './toast.js?v=cc7357b8c8';
+import { showToast } from './toast.js?v=7065d0fdf0';
 
 // ===== 機構名稱 autocomplete（依評鑑等級篩選醫院）=====
 
@@ -25,7 +25,7 @@ function reRenderPickerIfOpen() {
     input.dispatchEvent(new Event('input', { bubbles: true }));
   }
 }
-fetch('data/hospitals-master.json?v=71068a4948')
+fetch('data/hospitals-master.json?v=242caa808f')
   .then((r) => (r.ok ? r.json() : null))
   .then((d) => { if (d && Array.isArray(d.hospitals)) { HOSPITALS_ALL = d.hospitals; reRenderPickerIfOpen(); } })
   .catch((e) => console.warn('[form] 機構主檔載入失敗:', e.message));

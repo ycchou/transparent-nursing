@@ -17,6 +17,9 @@ import zipfile
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone, timedelta
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # 讓測試以檔案路徑載入時也找得到同目錄模組
+from hospital_successors import canonical_code, former_codes, is_former
+
 # Windows stdout 需要 utf-8 才能印中文/emoji
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
@@ -214,6 +217,8 @@ def loadAccredHospitalsIndex():
         if not code:
             continue
         code = str(code).strip()
+        if is_former(code):   # 改制前舊碼：併入新碼，不另列（見 data/manual/hospital-successors.json）
+            continue
         existing = accredIndex.setdefault(code, [])
         # 依 fullName 去重
         if any(e.get('name') == h.get('name') for e in existing):
@@ -402,6 +407,12 @@ def writeMergedHospitalsIndex(accredIndex, accredMeta, vpnHospitalsByCode):
     # 同一 VPN 簡稱被「不同機構代號」共用 → 加縣市區別（同代號多院區維持共用）
     disambiguateShortNames(records)
 
+    # 改制換碼：新碼記錄帶舊碼，供舊連結轉址
+    formers = former_codes()
+    for r in records:
+        if r['code'] in formers:
+            r['formerCodes'] = formers[r['code']]
+
     # 排序：層級 → 縣市 → 名稱
     LEVEL_ORDER = {'醫學中心': 0, '區域醫院': 1, '地區醫院': 2}
     orderedList = sorted(
@@ -471,7 +482,9 @@ def main():
                 print(f'  ⚠️  略過（無資料 sheet）: {filename}')
                 continue
             data = extractHospitalRatios(rows)  # {(code, branch): rec}
-            for (code, branchRaw), rec in data.items():
+            for (rawCode, branchRaw), rec in data.items():
+                # 改制換碼：舊碼的月份併入新碼，歷史接成同一條時間線
+                code = canonical_code(rawCode)
                 # normalize branch 用作 key，跨月份「中興」「中興院區」視為同一院區
                 branchKey = normalizeBranch(branchRaw)
                 key = (code, branchKey)
@@ -544,7 +557,10 @@ def main():
             h['name'] = f"{h['name']}·{displayBranch}"
 
     # 建立 id：單一 branch 且無 accred 拆分 → id = code；否則 id = code-branchKey
+    formers = former_codes()
     for (code, branchKey), h in hospitalsByKey.items():
+        if code in formers:
+            h['formerCodes'] = formers[code]
         siblingBranches = codesBranches[code]
         if len(siblingBranches) == 1 and siblingBranches[0] == '':
             h['id'] = code

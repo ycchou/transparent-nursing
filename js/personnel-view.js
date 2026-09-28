@@ -1,5 +1,5 @@
-import { C } from './theme.js?v=cc7357b8c8';
-import { escapeHtml } from './moderation.js?v=cc7357b8c8';
+import { C } from './theme.js?v=7065d0fdf0';
+import { escapeHtml } from './moderation.js?v=7065d0fdf0';
 // 人力監控共用視圖：職類/病床折線圖與單院資料載入。
 // 供「人力監控」頁(personnel.js)與「機構總覽」頁(hospital.js)共用，單一來源。
 // 資料忠實呈現：未填報(null)不補值，折線圖於該月中斷(spanGaps:false)。
@@ -93,7 +93,7 @@ export function renderBedChart(canvas, h, prevChart) {
 const cache = new Map();
 export async function loadPersonnelHospital(id) {
   if (cache.has(id)) return cache.get(id);
-  const r = await fetch(`data/personnel/${id}.json?v=7a2477e941`);
+  const r = await fetch(`data/personnel/${id}.json?v=644925a99a`);
   if (!r.ok) throw new Error(`HTTP ${r.status} personnel/${id}`);
   const d = await r.json();
   cache.set(id, d);
@@ -105,7 +105,7 @@ export async function loadPersonnelHospital(id) {
 let indexCache = null;
 export async function ensurePersonnelIndex() {
   if (indexCache) return indexCache;
-  const r = await fetch('data/personnel-index.json?v=7a2477e941');
+  const r = await fetch('data/personnel-index.json?v=644925a99a');
   if (!r.ok) throw new Error(`HTTP ${r.status} personnel-index`);
   const doc = await r.json();
   const byCode = new Map();

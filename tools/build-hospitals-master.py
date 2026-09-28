@@ -23,6 +23,9 @@ import json
 import subprocess
 from datetime import datetime, timezone, timedelta
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # 讓測試以檔案路徑載入時也找得到同目錄模組
+from hospital_successors import is_former
+
 if hasattr(sys.stdout, 'reconfigure'):
     sys.stdout.reconfigure(encoding='utf-8')
 
@@ -78,15 +81,22 @@ def main():
     ov = json.load(open(os.path.join(ROOT, 'data', 'hospitals-address-overlay.json'), encoding='utf-8'))
     ov = ov.get('overlay') or ov
 
+    # 人工修正（評鑑名單名稱／縣市誤植，例：0922020059 被寫成安心醫院）
+    corr = json.load(open(os.path.join(ROOT, 'data', 'manual', 'hospitals-corrections.json'),
+                          encoding='utf-8'))['corrections']
+
     entries = []
     seen_keys = set()      # (name, city) 去重
     seen_codes = set()
 
-    # 1) 評鑑合格名單（權威官方名，含 code）
+    # 1) 評鑑合格名單（權威官方名，含 code）；改制前舊碼不列（併入新碼，見 hospital-successors.json）
     for h in accred:
         code = h.get('code')
-        name = norm(h.get('name'))
-        city = norm(h.get('city'))
+        if is_former(code):
+            continue
+        c = corr.get(code) or {}
+        name = norm(c.get('fullName') or h.get('name'))
+        city = norm(c.get('city') or h.get('city'))
         level = h.get('level')
         if not name:
             continue
@@ -105,7 +115,7 @@ def main():
     unresolved = []
     for h in vpn:
         code = h['code']
-        if code in SKIP_CODES:
+        if code in SKIP_CODES or is_former(code):
             continue
         if code in MANUAL:
             rec = MANUAL[code]
