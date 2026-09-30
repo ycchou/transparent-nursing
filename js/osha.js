@@ -2,10 +2,10 @@
 // 資料來源：勞動部職業安全衛生法違規紀錄
 // CSV 比勞檢多 3 欄：職業災害之罹災人數 / 發生日期 / 發生地點（位於備註前）
 
-import { parseROCDate, parseFine, extractLawArticles, shortenLocation, getCachedCount } from './records-format.js?v=2eb48e8916';
-import { createCsvLoader } from './csv-loader.js?v=2eb48e8916';
-import { initRecordsPage } from './records-page.js?v=2eb48e8916';
-import { VIOL_FEEDS } from './config.js?v=2eb48e8916';
+import { parseROCDate, parseFine, extractLawArticles, shortenLocation, getCachedCount } from './records-format.js?v=b6ec89f547';
+import { createCsvLoader } from './csv-loader.js?v=b6ec89f547';
+import { initRecordsPage } from './records-page.js?v=b6ec89f547';
+import { VIOL_FEEDS } from './config.js?v=b6ec89f547';
 
 const FEED = VIOL_FEEDS.find((x) => x.key === 'osha');   // Sheet 網址與快取鍵集中在 config.js
 const LOG_TAG = '[osha]';

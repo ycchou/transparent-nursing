@@ -4,9 +4,9 @@
 // 匿名性：碼只在後端存雜湊、不與投稿資料列關聯；裝置 ID 是本瀏覽器隨機產生的字串（存 localStorage），
 // 只用來計算「這組碼已解鎖幾台裝置」（每碼上限 5 台），不是裝置指紋。
 
-import { LIVE } from './env.js?v=2eb48e8916';
-import { markContributed, hasContributed } from './contribution-gate.js?v=2eb48e8916';
-import { icon } from './icons.js?v=2eb48e8916';
+import { LIVE } from './env.js?v=b6ec89f547';
+import { markContributed, hasContributed } from './contribution-gate.js?v=b6ec89f547';
+import { icon } from './icons.js?v=b6ec89f547';
 
 const DEVICE_KEY = 'tn:device_id';
 const CODE_KEY = 'tn:unlock_code';   // 本裝置投稿時拿到的碼，方便日後在填寫頁再看一次

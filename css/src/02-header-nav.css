@@ -66,6 +66,10 @@ h1[id], h2[id], h3[id] {
   gap: 28px;
   align-items: center;
 }
+/* 電腦版：「填寫表單」排在頂部導覽最左邊（手機漢堡選單與底部導覽不受影響） */
+@media (min-width: 769px) {
+  .site-nav > .nav-desktop-first { order: -1; }
+}
 
 .site-nav a {
   color: var(--ink-soft);

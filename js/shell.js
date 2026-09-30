@@ -25,7 +25,8 @@
       { href: 'records.html',     label: '違規紀錄', match: ['records.html', 'violations.html', 'gender.html', 'osha.html'] },
       { href: 'stats.html',       label: '統計摘要', match: ['stats.html'] },
     ] },
-    { href: 'participate.html', label: '填寫表單', match: ['participate.html'] },
+    // desktopFirst：電腦版頂部導覽排到最左邊（CSS order，陣列順序不動 → 手機漢堡選單順序不變）
+    { href: 'participate.html', label: '填寫表單', match: ['participate.html'], desktopFirst: true },
     { href: 'about.html',       label: '關於我們', match: ['about.html'] },
     { href: 'support.html',     label: '支持我們', match: ['support.html'] },
     // 外部連結：RT 姊妹站（呼吸治療產業勞動環境公開平台）
@@ -125,7 +126,8 @@
         it.label + ' <span class="nav-external-arrow" aria-hidden="true">↗</span></a>';
     }
     if (!it.children) {
-      return '<a href="' + it.href + '" class="' + (it.match.indexOf(page) !== -1 ? 'active' : '') + '">' + it.label + '</a>';
+      var cls = [it.match.indexOf(page) !== -1 ? 'active' : '', it.desktopFirst ? 'nav-desktop-first' : ''].filter(Boolean).join(' ');
+      return '<a href="' + it.href + '" class="' + cls + '">' + it.label + '</a>';
     }
     var groupActive = it.children.some(function (c) { return c.match.indexOf(page) !== -1; });
     var links = it.children.map(function (c) {
