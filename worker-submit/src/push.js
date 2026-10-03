@@ -128,7 +128,8 @@ function buildPayload(evs) {
     return {
       title: g.name,
       body: g.labels.join('、'),
-      url: `hospital.html?code=${code}&tab=${KINDS[g.kinds[0]]}`,
+      // 新分享：帶 fresh=1，頁面略過瀏覽器的分享資料快取（js/fresh-data.js），點進去才看得到那筆
+      url: `hospital.html?code=${code}&tab=${KINDS[g.kinds[0]]}${g.kinds.includes('c') ? '&fresh=1' : ''}`,
       tag: `tn-${code}`,
     };
   }
@@ -136,7 +137,8 @@ function buildPayload(evs) {
   return {
     title: `你追蹤的 ${byCode.size} 家醫院有更新`,
     body: lines.slice(0, 4).join('\n') + (lines.length > 4 ? `\n…還有 ${lines.length - 4} 家` : ''),
-    url: 'follows.html',
+    // 含新分享時一樣帶 fresh=1：我的追蹤頁背景預載會抓最新並寫回快取，再點進機構頁就看得到
+    url: evs.some((e) => e.kind === 'c') ? 'follows.html?fresh=1' : 'follows.html',
     tag: 'tn-follows',
   };
 }

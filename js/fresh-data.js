@@ -4,7 +4,9 @@
 // 1. 投稿後：送出成功時標記該類別；接下來 15 分鐘開啟該類別一律先抓網路，投稿者才看得到自己那筆。
 //    不能只在送出當下清快取：Google 發布 CSV 與 tn-sheets Worker 要數分鐘才更新，
 //    立刻重抓只會拿到舊資料、又被快取 10 分鐘，投稿者還是看不到自己那筆。
-// 2. 重新整理：PWA 下拉（pull-to-refresh.js，重新載入前設標記）或瀏覽器原生重新整理
+// 2. 從「新分享」推播通知點進來（網址帶 ?fresh=1）：比照重新整理，這一頁抓最新，
+//    否則會讀到最多 10 分鐘前的快取、看不到通知說的那筆。讀到參數後從網址拿掉，之後分享或重開不受影響。
+// 3. 重新整理：PWA 下拉（pull-to-refresh.js，重新載入前設標記）或瀏覽器原生重新整理
 //    （Navigation Timing type='reload'）。這一頁的分享資料抓最新，而且直連 Google（不讀可能落後的
 //    Worker 快照）。違規資料（csv-loader）更新頻率低、Worker 一天才抓一次，重新整理不特別處理。
 //
@@ -30,7 +32,17 @@ const forcedByReload = (() => {
     const nav = performance.getEntriesByType('navigation')[0];
     reloaded = !!nav && nav.type === 'reload';
   } catch {}
-  return flagged || reloaded;
+  // 推播通知帶來的 ?fresh=1
+  let fromPush = false;
+  try {
+    const u = new URL(location.href);
+    if (u.searchParams.get('fresh') === '1') {
+      fromPush = true;
+      u.searchParams.delete('fresh');
+      history.replaceState(history.state, '', u.toString());
+    }
+  } catch {}
+  return flagged || reloaded || fromPush;
 })();
 
 /** 送出成功後呼叫：接下來 15 分鐘該類別不讀快取 */
