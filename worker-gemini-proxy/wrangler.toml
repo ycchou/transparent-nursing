@@ -1,0 +1,14 @@
+# Cloudflare Worker：Gemini API 中繼（固定在美國執行）。
+# 為什麼：Worker 預設在離使用者最近的節點執行，台灣流量有時會被排到香港，
+# 而 Gemini API 不支援香港 → 回 400「User location is not supported」，AI 審稿就失敗放行。
+# 這支固定在 Google Cloud us-central1 執行，tn-submit 透過 service binding 把 Gemini 請求原樣轉過來。
+# 沒有公開網址（workers_dev = false），只能被同帳號的 Worker 透過 binding 呼叫。部署見 README.md。
+name = "tn-gemini-proxy"
+main = "src/index.js"
+compatibility_date = "2026-07-01"
+workers_dev = false
+preview_urls = false
+
+[placement]
+mode = "targeted"
+region = "gcp:us-central1"

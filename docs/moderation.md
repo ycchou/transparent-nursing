@@ -116,6 +116,12 @@ npx wrangler deploy
 | `MOD_FIELDS` | `comment`, `specialBenefits` | 要審的欄位 |
 | `MOD_SYSTEM_PROMPT` | — | 判定規則，見下節 |
 
+**Gemini 經美國中繼呼叫**：Worker 在離使用者最近的節點執行，台灣流量有時被排到香港，Gemini API 不支援香港，
+會回 `400 User location is not supported`。所以 Gemini 請求一律經 `worker-gemini-proxy`（固定在 `gcp:us-central1`）轉送。
+審稿失敗時 `modReason` 會帶 Google 的錯誤訊息（例：`AI 服務錯誤 HTTP 400：…`）。
+要確認審稿正常，可呼叫 `POST /moderation/check`（帶 `Authorization: Bearer <NOTIFY_TOKEN>`），
+回傳 `status: ok` 與中繼實際執行的節點（`via.colo`，應為美國節點）。
+
 **fail-open**：逾時、HTTP 錯誤、JSON 壞掉、沒設 key，一律放行（`通過`）並記 `modStatus = 審稿失敗（已放行）`。
 寧可漏判（事後人工下架），不要因為 AI 掛掉就擋下真實投稿。
 

@@ -18,3 +18,8 @@ crons = ["0 20 * * *"]
 [[services]]
 binding = "SELF"
 service = "tn-submit"
+
+# AI 審稿的 Gemini 請求經這支中繼轉送（固定在美國執行，避免香港節點被 Gemini 拒絕）。見 ../worker-gemini-proxy/
+[[services]]
+binding = "GEMINI_PROXY"
+service = "tn-gemini-proxy"

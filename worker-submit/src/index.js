@@ -283,7 +283,8 @@ function errorText(reason) {
   if (s === 'no-key') return '未設定 AI 金鑰';
   if (s === 'bad-output') return 'AI 回應格式錯誤';
   if (s === 'TimeoutError') return 'AI 逾時';
-  if (/^http-\d+$/.test(s)) return `AI 服務錯誤 HTTP ${s.slice(5)}`;
+  const m = s.match(/^http-(\d+)(?: (.*))?$/);
+  if (m) return `AI 服務錯誤 HTTP ${m[1]}${m[2] ? '：' + m[2] : ''}`;
   return s ? `AI 呼叫失敗 ${s}` : '';
 }
 // 單欄判定欄名：comment → modComment
@@ -297,7 +298,10 @@ async function moderate(text, env) {
   try {
     // 關閉思考：實測判定結果與開啟時完全一致，但延遲從 1.7-5.5 秒（變異大）
     // 收斂到 1.3-1.5 秒。思考模式的長尾會撞上逾時 → 靜默放行，得不償失。
-    const call = (thinking) => fetch(
+    // 經 tn-gemini-proxy（固定在美國執行）轉送：Worker 若在香港節點執行，Gemini 會回 400 不支援該地區。
+    // 沒綁 GEMINI_PROXY（例如本機開發）就直接連。
+    const gfetch = env.GEMINI_PROXY ? (u, init) => env.GEMINI_PROXY.fetch(u, init) : fetch;
+    const call = (thinking) => gfetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`,
       {
         method: 'POST',
@@ -324,7 +328,13 @@ async function moderate(text, env) {
     // 免得因為一個設定欄位就整套靜默失效。
     let r = await call(false);
     if (r.status === 400) r = await call(true);
-    if (!r.ok) return { status: 'error', verdict: 'allow', code: '', reason: 'http-' + r.status };
+    if (!r.ok) {
+      // 帶上 Google 回的錯誤訊息（例：API key not valid），audit 的 modReason 才看得出原因
+      const err = await r.json().catch(() => null);
+      const msg = String(err?.error?.message || '').replace(/\s+/g, ' ').slice(0, 80);
+      console.warn('Gemini 審稿失敗', r.status, msg);
+      return { status: 'error', verdict: 'allow', code: '', reason: `http-${r.status}${msg ? ' ' + msg : ''}` };
+    }
 
     const d = await r.json();
     const raw = d?.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -439,11 +449,22 @@ export default {
     if (request.method !== 'POST') return json({ error: 'method' }, cors, 405);
 
     // 伺服器對伺服器（GitHub Actions、本 Worker 接力）：以 NOTIFY_TOKEN 驗證，不看 Origin
-    if (path === '/notify' || path === '/push/drain') {
+    if (path === '/notify' || path === '/push/drain' || path === '/moderation/check') {
       const reply = (o, s = 200) => json(o, {}, s);
       if (!(await authorized(request, env))) return reply({ error: 'unauthorized' }, 401);
       try {
         if (path === '/notify') return await handleNotify(request, env, ctx, reply);
+        // 審稿健康檢查：用一段固定文字實際呼叫 Gemini，回傳判定或錯誤原因（不寫入任何地方）
+        if (path === '/moderation/check') {
+          const r = await moderate('單位氣氛不錯，學姊會教，但人力吃緊常加班。', env);
+          // 中繼實際執行的節點（loc／colo），確認 Gemini 看到的來源地區
+          const trace = env.GEMINI_PROXY
+            ? await env.GEMINI_PROXY.fetch('https://proxy/__trace').then((x) => x.text()).catch(() => '')
+            : '';
+          const via = Object.fromEntries(trace.split('\n').map((l) => l.split('=')).filter(([k]) => k === 'loc' || k === 'colo'));
+          return reply({ model: GEMINI_MODEL, proxy: !!env.GEMINI_PROXY, via, ...r,
+            reasonText: r.status === 'error' ? errorText(r.reason) : r.reason });
+        }
         const hop = parseInt(request.headers.get('X-Hop') || '0', 10) || 0;
         return reply({ ok: true, ...(await drain(env, ctx, hop)) });
       } catch (e) { return reply({ error: String(e) }, 500); }
