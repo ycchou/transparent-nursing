@@ -12,7 +12,7 @@
  * 分頁配置：
  *   sub_<類別>  每個類別一個分頁（sub_icu、sub_ward…），各自「發布到網路 → CSV」
  *               後填進 js/env.js 的 LIVE.csvUrls。欄位隨投稿自動長出來。
- *   audit       AI 審稿的理由原文集中在這裡，**不要**發布。公開分頁只留各欄判定
+ *   audit       只記有欄位被判 review／block 的投稿（AI 理由原文），**不要**發布。公開分頁只留各欄判定
  *               （modComment＝allow/review/block、modCommentCode＝中文事由，特殊福利、on call 樣態同理），
  *               前端靠它們逐欄決定是否打馬賽克。
  */
@@ -40,6 +40,7 @@ const CATEGORIES = ['ward', 'icu', 'er', 'or', 'outpatient', 'clinic', 'dialysis
 // 只存在 audit 分頁、不進公開分頁的欄位
 const AUDIT_ONLY = ['modReason', 'modStatus'];
 // audit 分頁的欄位：每個自由文字欄位各自的判定（allow/review/block）與事由，加上被審的原文
+const AUDIT_VERDICT_COLUMNS = ['modComment', 'modSpecialBenefits', 'modOnCallPattern'];
 const AUDIT_COLUMNS = ['timestamp', 'category',
   'modComment', 'modCommentCode', 'modSpecialBenefits', 'modSpecialBenefitsCode',
   'modOnCallPattern', 'modOnCallPatternCode', 'modStatus', 'modReason',
@@ -114,8 +115,11 @@ function writeSubmission_(p) {
     return p[h] !== undefined ? safeCell_(p[h]) : '';
   }));
 
-  // ② 稽核分頁：各欄審稿判定＋AI 理由原文＋被審的文字（勿發布）。
+  // ② 稽核分頁：只記「有任一欄判定為 review 或 block」的投稿（全部通過的不記，方便直接複查）。
+  // 內容：各欄審稿判定＋AI 理由原文＋被審的文字（勿發布）。
   // 依表頭欄名寫入；舊表頭缺的欄位補在最右邊（舊的 modVerdict／modCode 欄保留，新列留空）。
+  const flagged = AUDIT_VERDICT_COLUMNS.some(function (k) { return p[k] === 'review' || p[k] === 'block'; });
+  if (!flagged) return { ok: true, sheet: 'sub_' + slug };
   const audit = ss.getSheetByName('audit') || ss.insertSheet('audit');
   if (audit.getLastRow() === 0) audit.appendRow(AUDIT_COLUMNS);
   let auditHeader = audit.getRange(1, 1, 1, audit.getLastColumn()).getValues()[0];

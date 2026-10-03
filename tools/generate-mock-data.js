@@ -848,7 +848,7 @@ function conformToForm(slug, rows) {
 // 格式與正式 Sheet 相同（worker-submit/src/index.js）：每個自由文字欄位各自兩欄
 //   mod<欄位>      allow／review／block
 //   mod<欄位>Code  中文事由（allow 留空）
-// 沒填的欄位不審、兩欄都留空。另外輸出 data/mock/audit.csv（審稿稽核分頁的 mock，seed.gs 灌進 audit）。
+// 沒填的欄位不審、兩欄都留空。另外輸出 data/mock/audit.csv（審稿稽核分頁的 mock，只含 review／block，seed.gs 灌進 audit）。
 // mock 這裡隨機讓少數幾筆呈現「屏蔽」或「待複查」，方便本機檢視馬賽克、解鎖 UI 與複查流程。
 const MOD_FIELDS = ['comment', 'specialBenefits', 'onCallPattern'];
 const MOD_FIELD_LABELS = { comment: '短評', specialBenefits: '特殊福利', onCallPattern: 'on call 樣態' };
@@ -902,6 +902,8 @@ function assignModeration(rows, slug, auditRows) {
       r[modKey(k) + 'Code'] = CODE_TEXT[res.code] || '';
     }
     const keys = Object.keys(results);
+    // audit 分頁只記有欄位被判 review／block 的投稿（與 apps-script/submit.gs 一致）
+    if (!keys.some((k) => results[k].verdict !== 'allow')) return;
     auditRows.push({
       ...Object.fromEntries(AUDIT_COLUMNS.map((c) => [c, r[c] ?? ''])),
       category: slug,

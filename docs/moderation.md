@@ -90,7 +90,9 @@
 | `modStatus` | `已審稿` / `無需審稿`（沒填自由文字）/ `審稿失敗（已放行）` | 只有 `audit` | 不用 |
 | `modReason` | 各欄判定＋AI 的 20 字理由，例 `短評：屏蔽：揭露第三人身分（提及護理長姓名）` | 只有 `audit` | **不要**（內部複查用） |
 
-`audit` 分頁另外存被審的原文（`comment`、`specialBenefits`、`onCallPattern`），方便對照。
+`audit` 分頁**只記有任一欄被判 `review` 或 `block` 的投稿**（全部 `allow` 的不記），另外存被審的原文
+（`comment`、`specialBenefits`、`onCallPattern`），打開就是待複查清單。
+⚠ 因此 AI 審稿失敗而放行的投稿（判定為 `allow`）也不會出現在 `audit`，要靠 Worker 的 log 或 `/moderation/check` 確認審稿是否正常。
 用「彙整分頁 + QUERY」發布 CSV 的話，記得把六個判定／事由欄加進 SELECT。
 
 定期看一下 `modStatus = 審稿失敗（已放行）` 的筆數：那些是 AI 沒跑成功、直接放行的投稿，
