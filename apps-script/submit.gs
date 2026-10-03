@@ -12,8 +12,8 @@
  * 分頁配置：
  *   sub_<類別>  每個類別一個分頁（sub_icu、sub_ward…），各自「發布到網路 → CSV」
  *               後填進 js/env.js 的 LIVE.csvUrls。欄位隨投稿自動長出來。
- *   audit       AI 審稿的理由原文集中在這裡，**不要**發布。公開分頁只留
- *               modVerdict / modCode 兩欄，前端靠它們決定是否打馬賽克。
+ *   audit       AI 審稿的理由原文集中在這裡，**不要**發布。公開分頁只留判定欄
+ *               （modComment… 逐欄、modVerdict / modCode 整筆，皆為中文），前端靠它們決定是否打馬賽克。
  */
 // 機密與 ID 都放「專案設定 → 指令碼屬性」，不寫在程式碼裡
 // （本 repo 是公開的，寫死會直接外流）：
@@ -173,7 +173,7 @@ function selftest() {
     category: 'other',
     institutionName: '【測試】請刪除這一列',
     comment: 'selftest',
-    modVerdict: 'allow',
+    modVerdict: '通過',
     modCode: '',
     modStatus: 'skip',
     modReason: '',

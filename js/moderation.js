@@ -34,8 +34,25 @@ export function escapeHtml(s) {
 // 送 AI 審稿的自由文字欄位（與 worker-submit 的 MOD_FIELDS 對應）。各欄分開審、分開模糊、分開解鎖。
 export const MOD_TEXT_FIELDS = ['comment', 'specialBenefits', 'onCallPattern'];
 
-// 單欄判定欄名：comment → modComment，值為 allow ／ review[:代碼] ／ block:代碼
+// 單欄判定欄名：comment → modComment。
+// 值的格式：新資料為中文「通過」／「待複查：不實指控」／「屏蔽：揭露第三人身分」（方便在試算表人工複查）；
+// 舊資料為英文 allow ／ review[:代碼] ／ block:代碼。兩種都要能讀。
 const fieldModKey = (key) => 'mod' + key[0].toUpperCase() + key.slice(1);
+
+// 中文 → 內部值。須與 worker-submit/src/index.js 的 VERDICT_TEXT／CODE_TEXT 一致
+const MOD_VERDICT_TEXT = { 通過: 'allow', 待複查: 'review', 屏蔽: 'block' };
+const MOD_CODE_TEXT = {
+  不實指控: 'A', 揭露第三人身分: 'B', 病人個案資訊: 'C', 兒少身分資訊: 'D', 性侵害被害人身分: 'E',
+  人身攻擊或威脅: 'F', 廣告或招攬: 'G', 侵害著作權: 'H', 其他違法: 'I', 亂填或無關: 'J',
+};
+const parseVerdict = (v) => {
+  const s = String(v || '').trim();
+  return MOD_VERDICT_TEXT[s] || s.toLowerCase();
+};
+const parseCode = (c) => {
+  const s = String(c || '').trim();
+  return MOD_CODE_TEXT[s] || s.toUpperCase();
+};
 
 /**
  * 某一欄的審稿判定 { verdict, code }。
@@ -44,10 +61,10 @@ const fieldModKey = (key) => 'mod' + key[0].toUpperCase() + key.slice(1);
 export function fieldVerdict(row, key = 'comment') {
   const own = String(row?.[fieldModKey(key)] || '').trim();
   if (own) {
-    const [verdict, code = ''] = own.split(':');
-    return { verdict: verdict.toLowerCase(), code: code.toUpperCase() };
+    const [verdict, code = ''] = own.split(/[:：]/);
+    return { verdict: parseVerdict(verdict), code: parseCode(code) };
   }
-  return { verdict: String(row?.modVerdict || '').toLowerCase(), code: String(row?.modCode || '').toUpperCase() };
+  return { verdict: parseVerdict(row?.modVerdict), code: parseCode(row?.modCode) };
 }
 
 /** 這一欄是否被屏蔽（有字且判定 block） */

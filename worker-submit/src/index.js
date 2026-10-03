@@ -251,15 +251,38 @@ async function moderateFields(fields, env) {
   for (const r of results) {
     if (overall.status === 'skip' || SEVERITY[r.verdict] > SEVERITY[overall.verdict]) overall = { ...r };
   }
-  // 內部稽核用：各欄理由串在一起寫進 audit 分頁的 modReason
-  overall.reason = keys.map((k, i) => `${k}:${results[i].verdict}${results[i].reason ? ' ' + results[i].reason : ''}`)
-    .join('；').slice(0, 300);
+  // 內部稽核用：各欄判定＋AI 理由串在一起寫進 audit 分頁的 modReason（中文，方便人工複查）
+  overall.reason = keys.map((k, i) => {
+    const r = results[i];
+    const why = r.status === 'error' ? errorText(r.reason) : r.reason;
+    return `${MOD_FIELD_LABELS[k] || k}：${verdictText(r)}${why ? `（${why}）` : ''}`;
+  }).join('；').slice(0, 300);
   if (results.some((r) => r.status === 'error')) overall.status = 'error';
   return { perField, overall };
 }
 
-// 公開 CSV 用的單欄判定值：allow ／ review[:代碼] ／ block:代碼（前端 moderation.js 解析）
-const fieldModValue = (r) => (r.code ? `${r.verdict}:${r.code}` : r.verdict);
+// 寫進試算表的審稿欄位一律用中文（人工複查時看得懂）。前端 js/moderation.js 的 MOD_VERDICT_TEXT／
+// MOD_CODE_TEXT 會反查回 verdict／代碼，兩邊的文字要一致；舊資料列的英文格式（block:B）前端仍相容。
+const VERDICT_TEXT = { allow: '通過', review: '待複查', block: '屏蔽' };
+const CODE_TEXT = {
+  A: '不實指控', B: '揭露第三人身分', C: '病人個案資訊', D: '兒少身分資訊', E: '性侵害被害人身分',
+  F: '人身攻擊或威脅', G: '廣告或招攬', H: '侵害著作權', I: '其他違法', J: '亂填或無關',
+};
+const STATUS_TEXT = { ok: '已審稿', skip: '無需審稿', error: '審稿失敗（已放行）' };
+const MOD_FIELD_LABELS = { comment: '短評', specialBenefits: '特殊福利', onCallPattern: 'on call 樣態' };
+
+// 單欄判定 → 「通過」／「待複查：不實指控」／「屏蔽：揭露第三人身分」
+const verdictText = (r) => (VERDICT_TEXT[r.verdict] || r.verdict) + (r.code && CODE_TEXT[r.code] ? `：${CODE_TEXT[r.code]}` : '');
+const fieldModValue = verdictText;
+
+function errorText(reason) {
+  const s = String(reason || '');
+  if (s === 'no-key') return '未設定 AI 金鑰';
+  if (s === 'bad-output') return 'AI 回應格式錯誤';
+  if (s === 'TimeoutError') return 'AI 逾時';
+  if (/^http-\d+$/.test(s)) return `AI 服務錯誤 HTTP ${s.slice(5)}`;
+  return s ? `AI 呼叫失敗 ${s}` : '';
+}
 // 單欄判定欄名：comment → modComment
 const fieldModKey = (k) => 'mod' + k[0].toUpperCase() + k.slice(1);
 
@@ -468,10 +491,10 @@ export default {
       }
       // 各欄判定（modComment / modSpecialBenefits / modOnCallPattern）：前端依此「逐欄」決定模糊與解鎖
       for (const [k, r] of Object.entries(perField)) out.append(fieldModKey(k), fieldModValue(r));
-      out.append('modVerdict', mod.verdict);   // 最嚴重那一欄：allow | review | block（舊資料列只有這欄）
-      out.append('modCode', mod.code);         // block 必有 A–J；review 可能有
-      out.append('modStatus', mod.status);     // ok | skip | error
-      out.append('modReason', mod.reason);     // AI 原文理由（內部複查用，勿發布到 CSV）
+      out.append('modVerdict', VERDICT_TEXT[mod.verdict] || mod.verdict);   // 最嚴重那一欄：通過／待複查／屏蔽
+      out.append('modCode', CODE_TEXT[mod.code] || '');                      // 事由（block 必有；review 可能有）
+      out.append('modStatus', STATUS_TEXT[mod.status] || mod.status);        // 已審稿／無需審稿／審稿失敗
+      out.append('modReason', mod.reason);     // 各欄判定＋AI 理由（內部複查用，勿發布到 CSV）
       out.append('secret', env.APPS_SCRIPT_SECRET || '');
       const r = await fetch(env.APPS_SCRIPT_URL, { method: 'POST', body: out });
       if (!r.ok) return json({ error: 'upstream', status: r.status }, cors, 502);
