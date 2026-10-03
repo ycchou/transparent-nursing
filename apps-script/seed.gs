@@ -114,19 +114,21 @@ function removeSeededRows_(sh) {
  *
  * seedAll 會沿用分頁既有的表頭、只補缺的欄位，表單刪掉或改名的舊欄位會一直留著。
  * 這支改成：刪掉所有 mock 列 → 表頭以新的 mock CSV 為準重建 → 灌入新的 mock 列。
+ * 10 個 sub_<類別> 分頁之外，也會重建 audit 分頁（審稿稽核，mock 來自 data/mock/audit.csv）。
  *   · 真投稿（dataSource ≠ 'mock'）整列保留，依欄名搬到新表頭底下
  *   · 舊表頭裡「新 CSV 沒有、但真投稿有填值」的欄位保留在最右邊，不會丟資料
  *   · 分頁本身不刪（gid 不變），「發布到網路」的 CSV 網址照常有效
  */
 function reseedAll() {
   const report = SEED_CATEGORIES.map(function (slug) { return reseedCategory(slug); });
+  report.push(reseedCategory('audit', 'audit'));   // 審稿稽核分頁（data/mock/audit.csv）
   Logger.log(report.join('\n'));
   return report.join('\n');
 }
 
-function reseedCategory(slug) {
+function reseedCategory(slug, sheetName) {
   const ss = book_();
-  const name = 'sub_' + slug;
+  const name = sheetName || 'sub_' + slug;
 
   let csv;
   try {

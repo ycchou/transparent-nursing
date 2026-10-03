@@ -12,9 +12,9 @@
  * 分頁配置：
  *   sub_<類別>  每個類別一個分頁（sub_icu、sub_ward…），各自「發布到網路 → CSV」
  *               後填進 js/env.js 的 LIVE.csvUrls。欄位隨投稿自動長出來。
- *   audit       AI 審稿的理由原文集中在這裡，**不要**發布。公開分頁只留判定欄
- *               （modComment… 逐欄判定為中文；整筆的 modVerdict 為英文 allow/review/block、modCode 為中文事由），
- *               前端靠它們決定是否打馬賽克。
+ *   audit       AI 審稿的理由原文集中在這裡，**不要**發布。公開分頁只留各欄判定
+ *               （modComment＝allow/review/block、modCommentCode＝中文事由，特殊福利、on call 樣態同理），
+ *               前端靠它們逐欄決定是否打馬賽克。
  */
 // 機密與 ID 都放「專案設定 → 指令碼屬性」，不寫在程式碼裡
 // （本 repo 是公開的，寫死會直接外流）：
@@ -39,6 +39,11 @@ const CATEGORIES = ['ward', 'icu', 'er', 'or', 'outpatient', 'clinic', 'dialysis
 
 // 只存在 audit 分頁、不進公開分頁的欄位
 const AUDIT_ONLY = ['modReason', 'modStatus'];
+// audit 分頁的欄位：每個自由文字欄位各自的判定（allow/review/block）與事由，加上被審的原文
+const AUDIT_COLUMNS = ['timestamp', 'category',
+  'modComment', 'modCommentCode', 'modSpecialBenefits', 'modSpecialBenefitsCode',
+  'modOnCallPattern', 'modOnCallPatternCode', 'modStatus', 'modReason',
+  'comment', 'specialBenefits', 'onCallPattern'];
 
 // 標記資料來源：'form' = 真投稿、'mock' = seed.gs 灌的測試資料（見 seed.gs）
 const DATA_SOURCE_COLUMN = 'dataSource';
@@ -94,7 +99,7 @@ function writeSubmission_(p) {
   if (sh.getLastRow() === 0) {
     sh.appendRow(['timestamp'].concat(publicKeys).concat([DATA_SOURCE_COLUMN]));
   }
-  // 表頭已存在但少了新欄位（例如後來才加的 modVerdict / modCode）→ 自動補在最右邊，
+  // 表頭已存在但少了新欄位（例如後來才加的審稿欄位）→ 自動補在最右邊，
   // 舊資料列該欄留空。這樣改欄位時不必手動改試算表。
   let header = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
   const missing = publicKeys.concat([DATA_SOURCE_COLUMN])
@@ -109,13 +114,21 @@ function writeSubmission_(p) {
     return p[h] !== undefined ? safeCell_(p[h]) : '';
   }));
 
-  // ② 稽核分頁：AI 審稿理由原文（勿發布）
+  // ② 稽核分頁：各欄審稿判定＋AI 理由原文＋被審的文字（勿發布）。
+  // 依表頭欄名寫入；舊表頭缺的欄位補在最右邊（舊的 modVerdict／modCode 欄保留，新列留空）。
   const audit = ss.getSheetByName('audit') || ss.insertSheet('audit');
-  if (audit.getLastRow() === 0) {
-    audit.appendRow(['timestamp', 'category', 'modVerdict', 'modCode', 'modStatus', 'modReason', 'comment']);
+  if (audit.getLastRow() === 0) audit.appendRow(AUDIT_COLUMNS);
+  let auditHeader = audit.getRange(1, 1, 1, audit.getLastColumn()).getValues()[0];
+  const auditMissing = AUDIT_COLUMNS.filter(function (k) { return auditHeader.indexOf(k) === -1; });
+  if (auditMissing.length) {
+    audit.getRange(1, auditHeader.length + 1, 1, auditMissing.length).setValues([auditMissing]);
+    auditHeader = auditHeader.concat(auditMissing);
   }
-  audit.appendRow([ts, slug, safeCell_(p.modVerdict), safeCell_(p.modCode),
-                   safeCell_(p.modStatus), safeCell_(p.modReason), safeCell_(p.comment)]);
+  audit.appendRow(auditHeader.map(function (h) {
+    if (h === 'timestamp') return ts;
+    if (h === 'category') return slug;
+    return p[h] !== undefined ? safeCell_(p[h]) : '';
+  }));
 
   return { ok: true, sheet: 'sub_' + slug };
 }
@@ -181,10 +194,10 @@ function selftest() {
     category: 'other',
     institutionName: '【測試】請刪除這一列',
     comment: 'selftest',
-    modVerdict: 'allow',
-    modCode: '',
-    modStatus: 'skip',
-    modReason: '',
+    modComment: 'allow',
+    modCommentCode: '',
+    modStatus: '已審稿',
+    modReason: '短評：通過（selftest）',
   });
   Logger.log(JSON.stringify(res));
   return res;

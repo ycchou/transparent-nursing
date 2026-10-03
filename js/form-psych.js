@@ -1,7 +1,7 @@
 // 精神科自建表單：只定義精神科專屬區塊，其餘（機構基本資料 / 輪班別與津貼（病房版）/ 人力與支援 /
 // 業務與工時共用欄 / 薪資與年資 / 整體評價）沿用 form-sections.js 的共用正本。
 
-import { initDepartmentForm } from './form-engine.js?v=816ab00609';
+import { initDepartmentForm } from './form-engine.js?v=751e4e3d72';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
@@ -12,7 +12,7 @@ import {
   DAILY_OVERTIME_FIELD,
   SALARY_SECTION,
   EVALUATION_SECTION,
-} from './form-sections.js?v=816ab00609';
+} from './form-sections.js?v=751e4e3d72';
 
 // 護病比刻度：與病房相同（WARD_RATIO，拆「常態」「最忙時」），
 // 另加「無此班別」給日間照護等沒有小夜／大夜的單位。

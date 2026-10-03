@@ -194,5 +194,5 @@ csvUrls: {
 
 **CSV 被截斷** — 發布 CSV 預設有欄位/列數上限，資料量大時改用 Apps Script 寫 endpoint 較穩。
 
-**短評沒有被打馬賽克** — 確認該分頁的 CSV 有 `modVerdict`、`modCode` 兩欄，
+**短評沒有被打馬賽克** — 確認該分頁的 CSV 有 `modComment`、`modCommentCode` 等審稿欄位，
 以及 Worker 的 `GEMINI_API_KEY` 有設（沒設時審稿整段跳過，一律 allow）。

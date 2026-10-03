@@ -3,7 +3,7 @@
 // 流程：前端 →（帶 Turnstile token）→ 本 Worker → ①驗 Turnstile ②限流 ③規則內容檢查
 //        ④AI 審稿（Gemini）→ 帶 shared secret 轉發 Apps Script（寫 Google Sheet）。
 //
-// ④ 只決定「前端要不要把短評打馬賽克」，不擋下投稿；判定寫成 modVerdict/modCode 兩欄。
+// ④ 只決定「前端要不要把自由文字打馬賽克」，不擋下投稿；每個欄位各自一組判定欄（mod<欄位>／mod<欄位>Code）。
 //
 // 限流單位＝「IP + 裝置 + 版本」：key = SHA-256(SALT | IP | 裝置桶 | day)，
 //   裝置桶把 User-Agent 壓成粗粒度「OS|瀏覽器|主版本」（例：iOS|Safari|17）。
@@ -160,11 +160,12 @@ async function rateLimited(env, ip, ua, day) {
 // ④ AI 審稿（Gemini）
 //
 // 送出當下同步呼叫，只判「自由文字」欄位（短評／特殊福利）。判定 block 時不擋下投稿，
-// 而是加上 modVerdict/modCode 兩欄一起寫進 Sheet，前端據此把短評打馬賽克 + 顯示理由。
+// 而是每個欄位各寫一組判定（例：modComment＝allow/review/block、modCommentCode＝中文事由），
+// 前端據此逐欄打馬賽克 + 顯示理由。
 //
 // 設計原則：
 //   · fail-open — AI 逾時、報錯、額度用盡一律放行（modStatus=error），寧可漏判不擋投稿。
-//   · 理由不外顯 AI 原文 — 前端只依 modCode 對照固定文案，避免理由本身複述違規內容。
+//   · 理由不外顯 AI 原文 — 前端只依事由欄對照固定文案，避免理由本身複述違規內容。
 //   · 使用者自帶的 mod* 欄位一律剔除（見轉發段），避免偽造「已通過」。
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -261,7 +262,10 @@ async function moderateFields(fields, env) {
   return { perField, overall };
 }
 
-// 寫進試算表的審稿欄位一律用中文（人工複查時看得懂）。前端 js/moderation.js 的 MOD_VERDICT_TEXT／
+// 每個自由文字欄位各自兩欄（前端 js/moderation.js 逐欄讀取）：
+//   mod<欄位>      判定 allow／review／block（英文，方便篩選）
+//   mod<欄位>Code  事由（中文，例「揭露第三人身分」；allow 留空）
+// 事由與 audit 分頁的 modReason 用中文（人工複查時看得懂）。前端 js/moderation.js 的 MOD_VERDICT_TEXT／
 // MOD_CODE_TEXT 會反查回 verdict／代碼，兩邊的文字要一致；舊資料列的英文格式（block:B）前端仍相容。
 const VERDICT_TEXT = { allow: '通過', review: '待複查', block: '屏蔽' };
 const CODE_TEXT = {
@@ -273,7 +277,6 @@ const MOD_FIELD_LABELS = { comment: '短評', specialBenefits: '特殊福利', o
 
 // 單欄判定 → 「通過」／「待複查：不實指控」／「屏蔽：揭露第三人身分」
 const verdictText = (r) => (VERDICT_TEXT[r.verdict] || r.verdict) + (r.code && CODE_TEXT[r.code] ? `：${CODE_TEXT[r.code]}` : '');
-const fieldModValue = verdictText;
 
 function errorText(reason) {
   const s = String(reason || '');
@@ -490,9 +493,12 @@ export default {
         (Array.isArray(v) ? v : [v]).forEach((x) => out.append(k, x));
       }
       // 各欄判定（modComment / modSpecialBenefits / modOnCallPattern）：前端依此「逐欄」決定模糊與解鎖
-      for (const [k, r] of Object.entries(perField)) out.append(fieldModKey(k), fieldModValue(r));
-      out.append('modVerdict', mod.verdict);   // 最嚴重那一欄：allow | review | block（刻意維持英文，方便篩選）
-      out.append('modCode', CODE_TEXT[mod.code] || '');                      // 事由（block 必有；review 可能有）
+      // 各欄判定：modComment / modSpecialBenefits / modOnCallPattern（＋同名 Code 事由欄）。
+      // 前端依此「逐欄」決定模糊與解鎖；沒填的欄位不審、不寫。不再寫整筆的 modVerdict／modCode。
+      for (const [k, r] of Object.entries(perField)) {
+        out.append(fieldModKey(k), r.verdict);
+        out.append(fieldModKey(k) + 'Code', CODE_TEXT[r.code] || '');
+      }
       out.append('modStatus', STATUS_TEXT[mod.status] || mod.status);        // 已審稿／無需審稿／審稿失敗
       out.append('modReason', mod.reason);     // 各欄判定＋AI 理由（內部複查用，勿發布到 CSV）
       out.append('secret', env.APPS_SCRIPT_SECRET || '');

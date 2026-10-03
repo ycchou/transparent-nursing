@@ -845,38 +845,73 @@ function conformToForm(slug, rows) {
 }
 
 // ============ AI 審稿欄位（mock）============
-// 真實資料由 tn-submit Worker 在送出當下寫入；格式與正式 Sheet 相同：
-//   modComment 等逐欄判定為中文（通過／屏蔽：事由），modVerdict 維持英文，modCode 為中文事由。
-// mock 這裡隨機讓少數幾筆呈現「被屏蔽」狀態，方便本機檢視馬賽克與解鎖 UI。
-const BLOCKED_SAMPLES = [
-  { code: 'B', comment: '護理長王〇〇每天在交班時點名罵人，副護理長也不敢講話。' },
-  { code: 'F', comment: '那個資深的〇姐超級機車，看到她就想吐，真的很垃圾。' },
-  { code: 'G', comment: '我們單位缺人快來，加 LINE 問我，介紹有獎金。' },
-  { code: 'C', comment: '上次那個 32 床肝癌末期的阿伯家屬一直來吵，護理師被罵到哭。' },
-  { code: 'J', comment: 'aaaaaaa 測試測試 123456' },
-];
-const BLOCK_RATE = 0.012;   // 約 1.2% 的筆數示範屏蔽
+// 格式與正式 Sheet 相同（worker-submit/src/index.js）：每個自由文字欄位各自兩欄
+//   mod<欄位>      allow／review／block
+//   mod<欄位>Code  中文事由（allow 留空）
+// 沒填的欄位不審、兩欄都留空。另外輸出 data/mock/audit.csv（審稿稽核分頁的 mock，seed.gs 灌進 audit）。
+// mock 這裡隨機讓少數幾筆呈現「屏蔽」或「待複查」，方便本機檢視馬賽克、解鎖 UI 與複查流程。
+const MOD_FIELDS = ['comment', 'specialBenefits', 'onCallPattern'];
+const MOD_FIELD_LABELS = { comment: '短評', specialBenefits: '特殊福利', onCallPattern: 'on call 樣態' };
+const modKey = (k) => 'mod' + k[0].toUpperCase() + k.slice(1);
+const MOD_COLUMNS = MOD_FIELDS.flatMap((k) => [modKey(k), modKey(k) + 'Code']);
+const AUDIT_COLUMNS = ['timestamp', 'category', ...MOD_COLUMNS, 'modStatus', 'modReason', ...MOD_FIELDS];
 
 // 與 worker-submit/src/index.js 的 CODE_TEXT 一致
-const CODE_TEXT = { B: '揭露第三人身分', C: '病人個案資訊', F: '人身攻擊或威脅', G: '廣告或招攬', J: '亂填或無關' };
-const MOD_COLUMNS = ['modComment', 'modSpecialBenefits', 'modOnCallPattern', 'modVerdict', 'modCode'];
+const CODE_TEXT = { A: '不實指控', B: '揭露第三人身分', C: '病人個案資訊', F: '人身攻擊或威脅', G: '廣告或招攬', J: '亂填或無關' };
+const VERDICT_TEXT = { allow: '通過', review: '待複查', block: '屏蔽' };
 
-function assignModeration(rows) {
+// 示範用的違規文字：field＝出現在哪一欄、reason＝AI 理由（只進 audit）
+const MOD_SAMPLES = [
+  { field: 'comment', verdict: 'block', code: 'B', reason: '提及護理長姓名',
+    text: '護理長王〇〇每天在交班時點名罵人，副護理長也不敢講話。' },
+  { field: 'comment', verdict: 'block', code: 'F', reason: '針對特定同事的人身攻擊',
+    text: '那個資深的〇姐超級機車，看到她就想吐，真的很垃圾。' },
+  { field: 'comment', verdict: 'block', code: 'G', reason: '徵才招攬並留聯絡方式',
+    text: '我們單位缺人快來，加 LINE 問我，介紹有獎金。' },
+  { field: 'comment', verdict: 'block', code: 'C', reason: '描述床號與病情',
+    text: '上次那個 32 床肝癌末期的阿伯家屬一直來吵，護理師被罵到哭。' },
+  { field: 'comment', verdict: 'block', code: 'J', reason: '無意義測試文字',
+    text: 'aaaaaaa 測試測試 123456' },
+  { field: 'comment', verdict: 'review', code: 'A', reason: '指控主管違法但無從查證',
+    text: '聽說主管會把加班時數改掉，申報的跟實際差很多。' },
+  { field: 'comment', verdict: 'review', code: 'B', reason: '疑似指涉特定人但描述模糊',
+    text: '某位資深學姊很愛針對新人，大家都知道是誰。' },
+  { field: 'specialBenefits', verdict: 'block', code: 'G', reason: '推銷保險並留聯絡方式',
+    text: '有員工團保，想了解保單可以私訊我幫你規劃。' },
+  { field: 'onCallPattern', verdict: 'review', code: 'A', reason: '指控扣薪但無從查證',
+    text: '被叫回來都不算加班，還會被扣薪水。' },
+];
+const MOD_SAMPLE_RATE = 0.015;   // 約 1.5% 的筆數示範屏蔽／待複查
+
+function assignModeration(rows, slug, auditRows) {
   rows.forEach((r) => {
-    r.modVerdict = 'allow';
-    r.modCode = '';
-    // 有填的自由文字欄位才有逐欄判定（與 Worker 一致：空白欄不審）
-    if (r.comment) r.modComment = '通過';
-    if (r.specialBenefits) r.modSpecialBenefits = '通過';
-    if (r.onCallPattern) r.modOnCallPattern = '通過';
-  });
-  rows.forEach((r) => {
-    if (!r.comment || Math.random() > BLOCK_RATE) return;
-    const sample = pick(BLOCKED_SAMPLES);
-    r.comment = sample.comment;
-    r.modVerdict = 'block';
-    r.modCode = CODE_TEXT[sample.code];
-    r.modComment = `屏蔽：${CODE_TEXT[sample.code]}`;
+    const results = {};
+    for (const k of MOD_FIELDS) {
+      r[modKey(k)] = '';
+      r[modKey(k) + 'Code'] = '';
+      if (r[k]) results[k] = { verdict: 'allow', code: '', reason: '' };
+    }
+    if (Math.random() < MOD_SAMPLE_RATE) {
+      // 只換掉本來就有填的欄位（條件題不會被硬塞值）；短評一律可用
+      const s = pick(MOD_SAMPLES.filter((x) => x.field === 'comment' || r[x.field]));
+      r[s.field] = s.text;
+      results[s.field] = { verdict: s.verdict, code: s.code, reason: s.reason };
+    }
+    for (const [k, res] of Object.entries(results)) {
+      r[modKey(k)] = res.verdict;
+      r[modKey(k) + 'Code'] = CODE_TEXT[res.code] || '';
+    }
+    const keys = Object.keys(results);
+    auditRows.push({
+      ...Object.fromEntries(AUDIT_COLUMNS.map((c) => [c, r[c] ?? ''])),
+      category: slug,
+      modStatus: keys.length ? '已審稿' : '無需審稿',
+      modReason: keys.map((k) => {
+        const res = results[k];
+        const head = VERDICT_TEXT[res.verdict] + (res.code ? `：${CODE_TEXT[res.code]}` : '');
+        return `${MOD_FIELD_LABELS[k]}：${head}${res.reason ? `（${res.reason}）` : ''}`;
+      }).join('；'),
+    });
   });
 }
 
@@ -890,6 +925,7 @@ if (realCount < MIN_REAL_ROWS) {
 for (const f of fs.readdirSync(OUT_DIR)) if (f.endsWith('.csv')) fs.unlinkSync(path.join(OUT_DIR, f));
 
 let total = 0;
+const auditRows = [];
 CFG.forEach(({ slug, cols }, i) => {
   const rows = perCat[i];
   // 按 timestamp 排序 (新→舊)；最新一筆強制加時間 (讓首頁分鐘顯示)
@@ -898,11 +934,14 @@ CFG.forEach(({ slug, cols }, i) => {
     rows[0].timestamp += ' ' + String(randint(7, 23)).padStart(2, '0') + ':' + String(randint(0, 59)).padStart(2, '0');
   }
   const formCols = conformToForm(slug, rows);
-  assignModeration(rows);
+  assignModeration(rows, slug, auditRows);
   const columns = (formCols || cols).concat(MOD_COLUMNS);
   fs.writeFileSync(path.join(OUT_DIR, `${slug}.csv`), toCsv(rows, columns), 'utf8');
   console.log(`✓ ${slug}.csv: ${rows.length} rows, ${columns.length} 欄${formCols ? '（依表單）' : ''}`);
   total += rows.length;
 });
+auditRows.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+fs.writeFileSync(path.join(OUT_DIR, 'audit.csv'), toCsv(auditRows, AUDIT_COLUMNS), 'utf8');
+console.log(`✓ audit.csv: ${auditRows.length} rows（審稿稽核分頁）`);
 const realPct = ((100 * realCount) / total).toFixed(1);
 console.log(`\nTotal: ${total} rows（真實評鑑醫院 ${realCount} 筆 / ${realPct}%，其餘為診所/其他場域）`);

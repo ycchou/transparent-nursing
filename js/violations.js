@@ -1,10 +1,10 @@
 // 勞檢紀錄頁面 — 使用共用的 records-page.js／csv-loader.js
 // 資料來源：勞動部公開資料
 
-import { parseROCDate, parseFine, extractLawArticles, shortenLocation, getCachedCount } from './records-format.js?v=816ab00609';
-import { createCsvLoader } from './csv-loader.js?v=816ab00609';
-import { initRecordsPage } from './records-page.js?v=816ab00609';
-import { VIOL_FEEDS } from './config.js?v=816ab00609';
+import { parseROCDate, parseFine, extractLawArticles, shortenLocation, getCachedCount } from './records-format.js?v=751e4e3d72';
+import { createCsvLoader } from './csv-loader.js?v=751e4e3d72';
+import { initRecordsPage } from './records-page.js?v=751e4e3d72';
+import { VIOL_FEEDS } from './config.js?v=751e4e3d72';
 
 const FEED = VIOL_FEEDS.find((x) => x.key === 'labor');   // Sheet 網址與快取鍵集中在 config.js
 const LOG_TAG = '[violations]';

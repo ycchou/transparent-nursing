@@ -7,16 +7,22 @@
 
 ## 三種判定
 
-| 判定（試算表裡寫的字） | 網站上的呈現 | 用途 |
+| 判定 | 網站上的呈現 | 用途 |
 |---|---|---|
-| `通過`（allow） | 正常顯示 | 絕大多數投稿 |
-| `待複查`（review） | **正常顯示（與通過完全相同）** | 灰色地帶，標記給人工複查 |
-| `屏蔽`（block） | 短評打模糊 + 顯示理由 + 停用分享 | 明確踩到 A–J |
+| `allow` | 正常顯示 | 絕大多數投稿 |
+| `review` | **正常顯示（與 allow 完全相同）** | 灰色地帶，標記給人工複查 |
+| `block` | 該欄打模糊 + 顯示理由 + 停用分享 | 明確踩到 A–J |
 
-試算表裡的審稿欄位寫**中文**（2026-10 起），只有整筆的 `modVerdict` 維持英文 `allow`／`review`／`block` 方便篩選。
-之前的舊資料列是英文（`block:B`），前端兩種都認得。
-逐欄判定 `modComment`／`modSpecialBenefits`／`modOnCallPattern` 的格式是「判定：事由」，
-例如 `屏蔽：揭露第三人身分`、`待複查：不實指控`、`通過`。
+**三個自由文字欄位分開審、分開判定、分開決定是否模糊**，每個欄位各自兩欄：
+
+| 被審的欄位 | 判定欄（allow／review／block） | 事由欄（中文，allow 留空） |
+|---|---|---|
+| `comment` 個人短評 | `modComment` | `modCommentCode` |
+| `specialBenefits` 特殊福利 | `modSpecialBenefits` | `modSpecialBenefitsCode` |
+| `onCallPattern` on call 樣態 | `modOnCallPattern` | `modOnCallPatternCode` |
+
+沒填的欄位不審，兩欄都留空。2026-10 起不再寫整筆的 `modVerdict`／`modCode`。
+舊資料列的格式前端仍認得：`modVerdict`／`modCode`（最早）、`modComment = block:B`、`modComment = 屏蔽：揭露第三人身分`。
 
 `review` 是給「AI 拿不定主意」的情況：疑似指涉特定個人但不足以指認、指控具體嚴重
 但無從判斷真偽、提到個案但細節不足、語氣接近攻擊但對象是職位而非個人。
@@ -27,19 +33,19 @@
 
 ### 怎麼看這疊
 
-在 `audit` 分頁（或任一 `sub_*` 分頁）對 `modVerdict` 欄開篩選器選 `review`。
+在 `audit` 分頁（或任一 `sub_*` 分頁）對 `modComment`／`modSpecialBenefits`／`modOnCallPattern` 開篩選器選 `review`。
 `audit` 分頁另有 `modReason`——寫著各欄的判定和 AI 在猶豫什麼，例如
 `短評：待複查：不實指控（指控主管詐領但無從查證）`，那是複查的重點。
 
-看完之後你只有兩個動作：不用管（留著就好），或把該筆 `sub_*` 分頁那一欄的判定
-（例如 `modComment`）改成 `屏蔽：<事由>`（10 分鐘內前端就會打上馬賽克）。
+看完之後你只有兩個動作：不用管（留著就好），或把該筆 `sub_*` 分頁那一欄的判定改成 `block`、
+事由欄填中文事由（例：`modComment = block`、`modCommentCode = 揭露第三人身分`），10 分鐘內前端就會打上馬賽克。
 
 
 ```
 前端送出 → tn-submit Worker
              ①Turnstile ②限流 ③規則檢查（連結/洗版）
              ④AI 審稿 ← Gemini
-           → Apps Script → Google Sheet（多 modVerdict / modCode / modStatus / modReason 四欄）
+           → Apps Script → Google Sheet（各欄判定＋事由；audit 分頁另有 modStatus / modReason）
            → CSV → 前端 js/moderation.js 決定是否打馬賽克
 ```
 
@@ -75,17 +81,17 @@
 
 ## Sheet 欄位
 
-Worker 會多送四欄，`apps-script/submit.gs` 會在表頭缺少時自動補在最右邊：
+`apps-script/submit.gs` 會在表頭缺少時自動補在最右邊：
 
-| 欄位 | 值 | 要不要發布到 CSV |
-|---|---|---|
-| `modComment` 等逐欄判定 | `通過` / `待複查：事由` / `屏蔽：事由` | **要**（前端優先看這欄） |
-| `modVerdict` | 最嚴重那一欄的判定：`allow` / `review` / `block`（維持英文） | **要**（舊資料列沒有逐欄判定時用） |
-| `modCode` | 最嚴重那一欄的事由（例：`揭露第三人身分`） | **要** |
-| `modStatus` | `已審稿` / `無需審稿`（沒填自由文字）/ `審稿失敗（已放行）` | 不用 |
-| `modReason` | 各欄判定＋AI 的 20 字理由 | **不要**（內部複查用） |
+| 欄位 | 值 | 在哪個分頁 | 要不要發布到 CSV |
+|---|---|---|---|
+| `modComment`／`modSpecialBenefits`／`modOnCallPattern` | `allow` / `review` / `block` | `sub_*`、`audit` | **要**（前端逐欄判斷） |
+| `modCommentCode`／`modSpecialBenefitsCode`／`modOnCallPatternCode` | 中文事由（例：`揭露第三人身分`） | `sub_*`、`audit` | **要**（前端顯示理由） |
+| `modStatus` | `已審稿` / `無需審稿`（沒填自由文字）/ `審稿失敗（已放行）` | 只有 `audit` | 不用 |
+| `modReason` | 各欄判定＋AI 的 20 字理由，例 `短評：屏蔽：揭露第三人身分（提及護理長姓名）` | 只有 `audit` | **不要**（內部複查用） |
 
-用「彙整分頁 + QUERY」發布 CSV 的話，記得把 `modVerdict`、`modCode` 加進 SELECT。
+`audit` 分頁另外存被審的原文（`comment`、`specialBenefits`、`onCallPattern`），方便對照。
+用「彙整分頁 + QUERY」發布 CSV 的話，記得把六個判定／事由欄加進 SELECT。
 
 定期看一下 `modStatus = 審稿失敗（已放行）` 的筆數：那些是 AI 沒跑成功、直接放行的投稿，
 量大代表 key 過期或額度用完。
@@ -131,9 +137,9 @@ JSON 解析失敗 → 靜默 fail-open：表面上一切正常，實際上每一
 ## 誤判怎麼辦
 
 目前沒有申訴流程。投稿者在送出後的感謝畫面會看到「短評已被屏蔽」的提示與來信說明的指引；
-你收到申訴後，直接去 Sheet 把那筆被屏蔽那一欄的判定（例如 `modComment`）改成 `通過` 即可（CSV 10 分鐘內會刷新）。
-反之，AI 漏判、事後接獲檢舉，把該欄改成 `屏蔽：<事由>`（例：`屏蔽：揭露第三人身分`）就能馬上打模糊。
-注意前端**優先看逐欄判定**，只改 `modVerdict` 對有逐欄判定的資料列沒有作用。
+你收到申訴後，直接去 Sheet 把那筆被屏蔽那一欄的判定（例如 `modComment`）改成 `allow` 即可（CSV 10 分鐘內會刷新）。
+反之，AI 漏判、事後接獲檢舉，把該欄改成 `block`、對應的事由欄填中文事由（例：`modCommentCode = 揭露第三人身分`）就能馬上打模糊。
+只改 `audit` 分頁沒有作用——前端讀的是 `sub_*` 分頁發布的 CSV。
 
 ## 人工批次複查提示詞
 

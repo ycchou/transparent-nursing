@@ -34,9 +34,9 @@ export function escapeHtml(s) {
 // 送 AI 審稿的自由文字欄位（與 worker-submit 的 MOD_FIELDS 對應）。各欄分開審、分開模糊、分開解鎖。
 export const MOD_TEXT_FIELDS = ['comment', 'specialBenefits', 'onCallPattern'];
 
-// 單欄判定欄名：comment → modComment。
-// 值的格式：新資料為中文「通過」／「待複查：不實指控」／「屏蔽：揭露第三人身分」（方便在試算表人工複查）；
-// 舊資料為英文 allow ／ review[:代碼] ／ block:代碼。兩種都要能讀。
+// 逐欄判定：comment → modComment（判定）＋ modCommentCode（事由）。
+// 目前格式：modComment＝allow／review／block，modCommentCode＝中文事由（例「揭露第三人身分」）。
+// 舊格式也要能讀：modComment＝「屏蔽：揭露第三人身分」或「block:B」；更早的列只有整筆 modVerdict／modCode。
 const fieldModKey = (key) => 'mod' + key[0].toUpperCase() + key.slice(1);
 
 // 中文 → 內部值。須與 worker-submit/src/index.js 的 VERDICT_TEXT／CODE_TEXT 一致
@@ -59,9 +59,11 @@ const parseCode = (c) => {
  * 新資料列有逐欄判定（modComment…）；舊資料列只有整筆的 modVerdict / modCode，沿用整筆判定。
  */
 export function fieldVerdict(row, key = 'comment') {
-  const own = String(row?.[fieldModKey(key)] || '').trim();
+  const col = fieldModKey(key);
+  const own = String(row?.[col] || '').trim();
   if (own) {
-    const [verdict, code = ''] = own.split(/[:：]/);
+    const [verdict, inlineCode = ''] = own.split(/[:：]/);
+    const code = String(row?.[col + 'Code'] || '').trim() || inlineCode;
     return { verdict: parseVerdict(verdict), code: parseCode(code) };
   }
   return { verdict: parseVerdict(row?.modVerdict), code: parseCode(row?.modCode) };
