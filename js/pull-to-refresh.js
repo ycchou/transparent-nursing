@@ -5,7 +5,7 @@
 // （見 fresh-data.js）。以下情況不啟動：頁面不在頂端、有 modal／選單鎖住捲動、
 // 手指落在自己可捲動且不在頂端的區塊內、手勢以橫向為主（表格、頁簽列左右滑）。
 
-import { reloadWithFreshData } from './fresh-data.js?v=483b4e6a5f';
+import { reloadWithFreshData } from './fresh-data.js?v=9c413ac48c';
 
 const THRESHOLD = 64;   // 指示器位移超過這個值放開才重新整理（px）
 const MAX_PULL = 96;    // 指示器最多往下拉到的位置（px）

@@ -1,6 +1,6 @@
 // Chart.js 視覺化封裝
-import { C } from './theme.js?v=483b4e6a5f';
-import { CATEGORIES } from './config.js?v=483b4e6a5f';
+import { C } from './theme.js?v=9c413ac48c';
+import { CATEGORIES } from './config.js?v=9c413ac48c';
 
 const FONT_FAMILY = "'Noto Sans TC', 'Inter', sans-serif";
 const PALETTE = [C.primaryFill, C.success, C.dangerFill, C.warning, C.purple, C.accent, C.ink, C.inkSoft];

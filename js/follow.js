@@ -7,8 +7,8 @@
 // 追蹤清單的正本在本機 localStorage；每次變動整份同步到 tn-submit Worker 的 /push/subscribe。
 // 伺服器只存推播端點＋機構代號與類型，不存 IP、不與投稿關聯（見 worker-submit/src/push.js）。
 
-import { LIVE } from './env.js?v=483b4e6a5f';
-import { showToast } from './toast.js?v=483b4e6a5f';
+import { LIVE } from './env.js?v=9c413ac48c';
+import { showToast } from './toast.js?v=9c413ac48c';
 
 const FOLLOW_KEY = 'tn:follows';          // { 機構代號: { name, kinds: 'cfr', at } }
 const ENDPOINT_KEY = 'tn:push_endpoint';  // 上次同步到伺服器的推播端點（換了就重新同步）
@@ -62,7 +62,7 @@ const STATUS_MSG = {
 
 // 非 App 模式：引導安裝。教學本身在 pwa-prompt.js（含 iOS／Android／桌機圖解與一鍵安裝）
 export async function guideToInstall(name = '') {
-  const { showInstallGuide } = await import('./pwa-prompt.js?v=483b4e6a5f');
+  const { showInstallGuide } = await import('./pwa-prompt.js?v=9c413ac48c');
   const who = name ? `「${escapeText(name)}」` : '醫院';
   showInstallGuide({
     lead: `<strong>追蹤${who}需要先把網站加到主畫面</strong>，推播通知只能送到安裝好的 App。<br>

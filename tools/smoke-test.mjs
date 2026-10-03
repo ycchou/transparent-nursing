@@ -34,6 +34,7 @@ const PAGE_EXPECT = {
   'participate-other': '.dform-section',
   'participate-psych': '.dform-section',
   'participate-er': '.dform-section',
+  'participate-special': '.dform-section',
   'participate-ward': '.dform-section',
   support: '.donate-tier',
 };

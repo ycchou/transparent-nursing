@@ -2,8 +2,8 @@
 //
 // 資料來源由 js/env.js 的 MODE 決定：mock 讀下面的 csvUrlMock（data/mock/*.csv），
 // live 讀 env.js 的 LIVE.csvUrls（Google Sheet 發布 CSV）。這裡不必再改。
-import { C } from './theme.js?v=483b4e6a5f';
-import { csvUrlFor } from './env.js?v=483b4e6a5f';
+import { C } from './theme.js?v=9c413ac48c';
+import { csvUrlFor } from './env.js?v=9c413ac48c';
 
 export const SITE = {
   name: '護理職場透明化運動',
@@ -375,17 +375,43 @@ export const CATEGORIES = [
     description: '執行心導管、電燒、內視鏡、血管攝影、高壓氧等檢查與介入治療，技術專精、風險高，常需 on-call 並面對輻射暴露。',
     icon: 'zap',
     csvUrlMock: 'data/mock/special.csv',
-    formUrl: '',
-    formStatus: 'coming-soon',
+    formUrl: 'participate-special.html',
+    formStatus: 'live',
     specificFields: [
       { key: 'specialType', label: '單位類型', type: 'enum',
-        options: ['心導管室', '電燒室 (EP Lab)', '內視鏡室', '胃鏡室', '血管攝影室', '介入治療中心', '高壓氧', '其他'] },
+        options: ['心導管室', '電燒室 (EP Lab)', '內視鏡室', '血管攝影室', '介入治療中心', '高壓氧', '其他'] },
+      { key: 'specialRole', label: '主要負責工作', type: 'multi' },
       { key: 'dailyCases', label: '每日案件數', type: 'string' },
-      { key: 'onCallRequired', label: 'On-call 制度', type: 'enum',
-        options: ['有，常被 call', '有，少被 call', '無'] },
+      { key: 'staffPerCase', label: '每檯護理人力', type: 'string' },
+      { key: 'multiRoom', label: '兼顧多間檢查室', type: 'enum', options: ['經常', '偶爾', '不會'] },
+      { key: 'onCallRequired', label: 'On call', type: 'enum', options: ['需要', '不需要'] },
+      { key: 'onCallFreq', label: '每月 on call 次數', type: 'string' },
+      { key: 'onCallCallback', label: '被叫回頻率', type: 'enum',
+        options: ['幾乎每次都被叫回', '經常', '偶爾', '很少'] },
+      { key: 'onCallArrival', label: '叫回到院時限', type: 'string' },
+      { key: 'onCallPay', label: '未出勤值班費', type: 'string' },
+      { key: 'restInterval11h', label: '出勤後 11 小時間隔', type: 'enum', options: ['有', '無'] },
+      { key: 'nextDayAfterCall', label: '叫回後隔天', type: 'enum',
+        options: ['照常上班', '可晚到或補休', '隔天休假', '視情況'] },
       { key: 'radiationExposure', label: '輻射暴露', type: 'enum',
-        options: ['高頻率', '中等', '少量', '無'] },
-      { key: 'dayShiftRatio', label: '白班人均', type: 'string' },
+        options: ['幾乎每天', '每週數次', '偶爾', '無（如內視鏡、高壓氧）'] },
+      { key: 'radiationProtection', label: '防護裝備', type: 'enum',
+        options: ['充足且合身', '有但不足或老舊', '幾乎沒有', '不適用'] },
+      { key: 'dosimeter', label: '劑量計', type: 'enum',
+        options: ['有配戴，定期告知', '有配戴，但沒告知結果', '沒有配戴', '不適用'] },
+      { key: 'radiationHealthCheck', label: '輻射特殊體檢', type: 'enum', options: ['有', '無', '不清楚', '不適用'] },
+      { key: 'radiationPay', label: '輻射／危險加給', type: 'enum', options: ['有', '無', '不清楚'] },
+      { key: 'leadApronBurden', label: '鉛衣身體負擔 (1-5)', type: 'number' },
+      { key: 'trainingPeriod', label: '新人訓練期間', type: 'enum',
+        options: ['1 個月內', '1-3 個月', '3-6 個月', '6 個月以上', '不一定'] },
+      { key: 'certLeave', label: '證照公假', type: 'enum',
+        options: ['全程給公假', '僅部分給假', '需用自己休假（放假天去上課）'] },
+      { key: 'certFee', label: '證照費用補助', type: 'enum', options: ['全額公費', '部分補助', '完全自費'] },
+      { key: 'dailyOvertime', label: '每日平均加班時間', type: 'enum',
+        options: ['無', '1 小時內', '1-2 小時', '2-3 小時', '4 小時'] },
+      { key: 'lunchBreak', label: '休息一小時', type: 'enum',
+        options: ['有，完整 1 小時', '有，但常被中斷／縮短', '無'] },
+      { key: 'specialBenefits', label: '特殊福利', type: 'text' },
     ],
   },
   {

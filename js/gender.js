@@ -1,10 +1,10 @@
 // 性平紀錄頁面 — 使用共用的 records-page.js／csv-loader.js
 // 資料來源：勞動部性別平等工作法違規紀錄
 
-import { parseROCDate, parseFine, extractLawArticles, shortenLocation, getCachedCount } from './records-format.js?v=483b4e6a5f';
-import { createCsvLoader } from './csv-loader.js?v=483b4e6a5f';
-import { initRecordsPage } from './records-page.js?v=483b4e6a5f';
-import { VIOL_FEEDS } from './config.js?v=483b4e6a5f';
+import { parseROCDate, parseFine, extractLawArticles, shortenLocation, getCachedCount } from './records-format.js?v=9c413ac48c';
+import { createCsvLoader } from './csv-loader.js?v=9c413ac48c';
+import { initRecordsPage } from './records-page.js?v=9c413ac48c';
+import { VIOL_FEEDS } from './config.js?v=9c413ac48c';
 
 const FEED = VIOL_FEEDS.find((x) => x.key === 'gender');   // Sheet 網址與快取鍵集中在 config.js
 const LOG_TAG = '[gender]';

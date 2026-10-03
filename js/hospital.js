@@ -5,20 +5,20 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { renderIcons } from './icons.js?v=483b4e6a5f';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=483b4e6a5f';
+import { renderIcons } from './icons.js?v=9c413ac48c';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=9c413ac48c';
 
-import { notePwaIntent } from './pwa-prompt.js?v=483b4e6a5f';
+import { notePwaIntent } from './pwa-prompt.js?v=9c413ac48c';
 
-import { skeletonRows } from './skeleton.js?v=483b4e6a5f';
-import { escapeHtml } from './moderation.js?v=483b4e6a5f';
-import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=483b4e6a5f';
-import { state, loadBaseData } from './hospital-data.js?v=483b4e6a5f';
+import { skeletonRows } from './skeleton.js?v=9c413ac48c';
+import { escapeHtml } from './moderation.js?v=9c413ac48c';
+import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=9c413ac48c';
+import { state, loadBaseData } from './hospital-data.js?v=9c413ac48c';
 
-import { readCodeParam } from './hospital-merges.js?v=483b4e6a5f';
-import { isFollowing, followHospital, unfollowHospital } from './follow.js?v=483b4e6a5f';
-import { showToast } from './toast.js?v=483b4e6a5f';
-import { icon } from './icons.js?v=483b4e6a5f';
+import { readCodeParam } from './hospital-merges.js?v=9c413ac48c';
+import { isFollowing, followHospital, unfollowHospital } from './follow.js?v=9c413ac48c';
+import { showToast } from './toast.js?v=9c413ac48c';
+import { icon } from './icons.js?v=9c413ac48c';
 import {
   renderNurseSection,
   renderFinancialsSection,
@@ -26,7 +26,7 @@ import {
   renderPlatformSection,
   renderViolationsSection,
   copyOrShare,
-} from './hospital-sections.js?v=483b4e6a5f';
+} from './hospital-sections.js?v=9c413ac48c';
 
 // ---------- utils ----------
 // 舊碼（改制換碼）會轉成新碼並改寫網址

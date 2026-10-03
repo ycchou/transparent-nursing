@@ -828,10 +828,27 @@ function genField(f, row) {
   return '';
 }
 
+// 各類別的合理性修正（在對齊表單之前套用，讓題目之間不互相矛盾）
+const FORM_FIXUPS = {
+  // 內視鏡、高壓氧沒有輻射暴露：輻射相關題目一律「無／不適用」，也不穿鉛衣
+  special(row) {
+    const valid = ['心導管室', '電燒室 (EP Lab)', '內視鏡室', '血管攝影室', '介入治療中心', '高壓氧', '其他'];
+    if (!valid.includes(row.specialType)) row.specialType = pick(valid.slice(0, 6));
+    if (['內視鏡室', '高壓氧'].includes(row.specialType)) {
+      Object.assign(row, { radiationExposure: '無（如內視鏡、高壓氧）', radiationProtection: '不適用',
+        dosimeter: '不適用', radiationHealthCheck: '不適用', leadApronBurden: '' });
+    } else if (row.radiationExposure === '無（如內視鏡、高壓氧）') {
+      row.radiationExposure = pick(['幾乎每天', '每週數次', '偶爾']);
+    }
+    if (row.specialType === '高壓氧') row.staffPerCase = '不適用';
+  },
+};
+
 function conformToForm(slug, rows) {
   const schema = FORM_SCHEMAS[slug];
   if (!schema) return null;
   for (const row of rows) {
+    FORM_FIXUPS[slug]?.(row);
     for (const f of schema) {
       if (f.showIf && row[f.showIf.field] !== f.showIf.equals) { row[f.name] = ''; continue; }
       const v = row[f.name];

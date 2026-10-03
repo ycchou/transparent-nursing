@@ -1,7 +1,7 @@
 // 急診自建表單：只定義急診專屬區塊，其餘（機構基本資料 / 輪班別與津貼 / 人力與支援 /
 // 業務與工時共用欄 / 職場暴力 / 薪資與年資 / 整體評價）沿用 form-sections.js 的共用正本。
 
-import { initDepartmentForm } from './form-engine.js?v=483b4e6a5f';
+import { initDepartmentForm } from './form-engine.js?v=9c413ac48c';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
@@ -16,7 +16,8 @@ import {
   VIOLENCE_FREQ_FIELD,
   VIOLENCE_RISK_FIELD,
   POST_INCIDENT_SUPPORT_FIELD,
-} from './form-sections.js?v=483b4e6a5f';
+  certFields,
+} from './form-sections.js?v=9c413ac48c';
 
 // 急診各區負荷差很多，護病比改「依區域」問，不依白／小夜／大夜（急診三班的人力配置通常相近）。
 // 重症／急救區比照加護病房的刻度；留觀／一般診療區比照病房刻度。都加「沒待過此區」。
@@ -86,10 +87,7 @@ const ER_FORM_SCHEMA = [
   ...NEWBIE_FIELDS,
 
   { section: '急救證照與訓練', intro: 'ACLS、ETTC、APLS、嬰兒急救（NRP／PALS）等急救證照的考照與複訓。' },
-  { name: 'certLeave', label: '考取或複訓急救證照是否給公假', type: 'radio', required: true,
-    options: ['全程給公假', '僅部分給假', '需用自己休假（放假天去上課）'] },
-  { name: 'certFee', label: '證照考照與受訓費用是否補助', type: 'radio', required: true,
-    options: ['全額公費', '部分補助', '完全自費'] },
+  ...certFields('急救證照'),
 
   { section: '業務與工時' },
   DAILY_OVERTIME_FIELD,

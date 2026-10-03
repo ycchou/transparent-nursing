@@ -64,6 +64,10 @@ const ALLOWED_FIELDS = new Set([
  // 急診表單（js/form-er.js）
  'erArea', 'fullBedThreshold', 'erCrowding', 'criticalPeakRatio', 'observationPeakRatio',
  'erHazardPay', 'criticalTeam', 'certLeave', 'certFee',
+ // 檢查/介入表單（js/form-special.js）
+ 'specialRole', 'staffPerCase', 'multiRoom', 'onCallFreq', 'onCallCallback', 'onCallArrival',
+ 'nextDayAfterCall', 'radiationProtection', 'dosimeter', 'radiationHealthCheck', 'radiationPay',
+ 'leadApronBurden', 'trainingPeriod',
 ]);
 
 // 自由文字（textarea）給多一點，其餘欄位都是選項或短字串。超過就截斷，不擋投稿。

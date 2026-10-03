@@ -111,6 +111,18 @@ export const POST_INCIDENT_SUPPORT_FIELD = { name: 'postIncidentSupport', label:
     { value: '非常不足', label: '非常不足', desc: '缺乏關懷，甚至檢討護理人員、要自己承擔' },
   ] };
 
+// 證照考照／複訓的公假與費用補助（急診、檢查/介入共用）；subject 例：「急救證照」「專業證照或訓練」
+export const certFields = (subject) => [
+  { name: 'certLeave', label: `考取或複訓${subject}是否給公假`, type: 'radio', required: true,
+    options: ['全程給公假', '僅部分給假', '需用自己休假（放假天去上課）'] },
+  { name: 'certFee', label: '證照考照與受訓費用是否補助', type: 'radio', required: true,
+    options: ['全額公費', '部分補助', '完全自費'] },
+];
+
+// 是否有休息一個小時（門診、診所、檢查/介入共用欄名；help 依單位）
+export const lunchBreakField = (help) => ({ name: 'lunchBreak', label: '是否有休息一個小時', type: 'radio', required: true,
+  options: ['有，完整 1 小時', '有，但常被中斷／縮短', '無'], help });
+
 // 每日平均加班時間（放在各科別「業務與工時」段）
 export const DAILY_OVERTIME_FIELD = { name: 'dailyOvertime', label: '每日平均加班時間', type: 'radio',
   options: ['無', '1 小時內', '1-2 小時', '2-3 小時', '4 小時'] };
