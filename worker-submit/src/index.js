@@ -491,7 +491,7 @@ export default {
       }
       // 各欄判定（modComment / modSpecialBenefits / modOnCallPattern）：前端依此「逐欄」決定模糊與解鎖
       for (const [k, r] of Object.entries(perField)) out.append(fieldModKey(k), fieldModValue(r));
-      out.append('modVerdict', VERDICT_TEXT[mod.verdict] || mod.verdict);   // 最嚴重那一欄：通過／待複查／屏蔽
+      out.append('modVerdict', mod.verdict);   // 最嚴重那一欄：allow | review | block（刻意維持英文，方便篩選）
       out.append('modCode', CODE_TEXT[mod.code] || '');                      // 事由（block 必有；review 可能有）
       out.append('modStatus', STATUS_TEXT[mod.status] || mod.status);        // 已審稿／無需審稿／審稿失敗
       out.append('modReason', mod.reason);     // 各欄判定＋AI 理由（內部複查用，勿發布到 CSV）
