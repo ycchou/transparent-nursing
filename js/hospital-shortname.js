@@ -10,7 +10,7 @@
 //
 // 頁面若要在載入完成後自動 re-render，可監聽 window 'hospitalShortNamesReady' event。
 
-import { normalizeInstitutionName } from './institution-name.js?v=fcf532858f';
+import { normalizeInstitutionName } from './institution-name.js?v=56fb7c03b7';
 
 const SHORT_MAP = new Map();       // 正式名稱 → 簡稱
 const CODE_MAP = new Map();        // 正規化名稱 → 機構代碼
@@ -35,7 +35,8 @@ function startLoad() {
   if (loadingPromise) return loadingPromise;
   loadingPromise = (async () => {
     try {
-      const r = await fetch('data/hospitals-merged.json', { cache: 'default' });
+      // 與 hospital-data.js 同一個帶版本號的網址：共用同一份快取，不重複下載
+      const r = await fetch('data/hospitals-merged.json?v=351c442704', { cache: 'default' });
       if (!r.ok) return;
       const d = await r.json();
       const namesByCode = new Map();

@@ -1,11 +1,11 @@
 // records-page.js — 違規紀錄頁（勞檢／性平／職安共用）的畫面：KPI、篩選、表格（手機為卡片）、分頁、詳情彈窗。
-import { getShort as getHospitalShort } from './hospital-shortname.js?v=fcf532858f';
-import { normalizeInstitutionName } from './institution-name.js?v=fcf532858f';
-import { icon, renderIcons } from './icons.js?v=fcf532858f';
-import { ensureTooltip } from './tooltip.js?v=fcf532858f';
-import { pageSlice, renderPagination } from './pagination.js?v=fcf532858f';
-import { escapeHtml } from './moderation.js?v=fcf532858f';
-import { formatROCDate, fmtFine, fineToWan, debounce } from './records-format.js?v=fcf532858f';
+import { getShort as getHospitalShort } from './hospital-shortname.js?v=56fb7c03b7';
+import { normalizeInstitutionName } from './institution-name.js?v=56fb7c03b7';
+import { icon, renderIcons } from './icons.js?v=56fb7c03b7';
+import { ensureTooltip } from './tooltip.js?v=56fb7c03b7';
+import { pageSlice, renderPagination } from './pagination.js?v=56fb7c03b7';
+import { escapeHtml } from './moderation.js?v=56fb7c03b7';
+import { formatROCDate, fmtFine, fineToWan, debounce } from './records-format.js?v=56fb7c03b7';
 
 // ============================================================
 // UI Factory：把 violations.html 那套 UI 提煉成可組態的 initRecordsPage

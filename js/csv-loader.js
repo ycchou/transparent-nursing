@@ -1,6 +1,5 @@
 // csv-loader.js — 從公開 CSV（Google Sheet 發布）載入資料：PapaParse 動態載入＋localStorage 快取＋背景刷新。
-import { extractLawArticles } from './records-format.js?v=fcf532858f';
-import { fetchCsvText } from './sheet-fetch.js?v=fcf532858f';
+import { fetchCsvText } from './sheet-fetch.js?v=56fb7c03b7';
 
 // ============================================================
 // PapaParse 動態載入（讓沒掛 <script> 的頁面也能 preload）
@@ -34,7 +33,7 @@ const DEFAULT_FETCH_TIMEOUT_MS = 15000;
 
 // localStorage 快取的 record 結構版本。改動 parseRow 產出的欄位（如新增 articles）時 +1，
 // 讓舊格式快取自動失效、重新抓取，避免新程式讀到缺欄位的舊快取而崩潰（如 r.articles.forEach）。
-const CACHE_SCHEMA_VERSION = 3;
+const CACHE_SCHEMA_VERSION = 4;   // 4：改存 CSV 原文
 
 /**
  * @param {Object} cfg
@@ -63,8 +62,25 @@ export function createCsvLoader(cfg) {
     return _inflight;
   }
 
-  async function fetchAndParseOnce() {
+  // CSV 原文 → record 陣列
+  async function parseText(text) {
     await ensurePapa();
+    return new Promise((resolve, reject) => {
+      Papa.parse(text, {
+        header: false,
+        skipEmptyLines: true,
+        complete: (results) => {
+          const rows = results.data || [];
+          const dataRows = rows.slice(headerRowIdx + 1);
+          resolve(dataRows.filter((r) => r && r[0] && String(r[0]).trim()).map(parseRow));
+        },
+        error: (err) => reject(err),
+      });
+    });
+  }
+
+  // 回傳 { rows, text }：text 存進快取，rows 給頁面用
+  async function fetchAndParseOnce() {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), fetchTimeoutMs);
     let text;
@@ -73,54 +89,31 @@ export function createCsvLoader(cfg) {
     } finally {
       clearTimeout(timer);
     }
-    return new Promise((resolve, reject) => {
-      Papa.parse(text, {
-        header: false,
-        skipEmptyLines: true,
-        complete: (results) => {
-          const rows = results.data || [];
-          const dataRows = rows.slice(headerRowIdx + 1);
-          const parsed = dataRows
-            .filter((r) => r && r[0] && String(r[0]).trim())
-            .map(parseRow);
-          resolve(parsed);
-        },
-        error: (err) => reject(err),
-      });
-    });
+    return { rows: await parseText(text), text };
   }
 
-  function readLocal() {
+  // 快取只看時間戳記（不解析），preload 判斷要不要抓時用
+  function readMeta() {
     try {
-      const raw = localStorage.getItem(storageKey);
-      if (!raw) return null;
-      const obj = JSON.parse(raw);
-      if (!obj || !obj.ts || !Array.isArray(obj.data)) return null;
-      // 結構版本不符（舊格式快取）→ 視為無效，強制重新抓取，避免讀到缺欄位的資料
-      if (obj.v !== CACHE_SCHEMA_VERSION) return null;
+      const obj = JSON.parse(localStorage.getItem(storageKey) || 'null');
+      if (!obj || !obj.ts || obj.v !== CACHE_SCHEMA_VERSION || typeof obj.text !== 'string') return null;
       const age = Date.now() - obj.ts;
-      const valid = age <= ttlMs;
-      const veryFresh = age <= staleMs;
-      // ISO 字串 → Date 物件（把 record 內所有含 'Date' 字尾的欄位都試著轉）
-      obj.data.forEach((r) => {
-        for (const k of Object.keys(r)) {
-          if (k.endsWith('Date') && typeof r[k] === 'string') {
-            const d = new Date(r[k]);
-            if (!isNaN(d.getTime())) r[k] = d;
-          }
-        }
-        // 自癒：舊快取若缺 articles（分類會退回原文），就從 lawArticle 重新抽條號
-        if (!Array.isArray(r.articles) && typeof r.lawArticle === 'string') {
-          r.articles = extractLawArticles(r.lawArticle);
-        }
-      });
-      return { data: obj.data, valid, veryFresh, age };
+      return { obj, age, valid: age <= ttlMs, veryFresh: age <= staleMs };
     } catch { return null; }
   }
 
-  function writeLocal(rows) {
+  // 快取存 CSV 原文（解析後的 JSON 大好幾倍，和分享資料加總會逼近 localStorage 上限），讀取時再解析
+  async function readLocal() {
+    const meta = readMeta();
+    if (!meta) return null;
     try {
-      localStorage.setItem(storageKey, JSON.stringify({ v: CACHE_SCHEMA_VERSION, ts: Date.now(), data: rows }));
+      return { data: await parseText(meta.obj.text), valid: meta.valid, veryFresh: meta.veryFresh, age: meta.age };
+    } catch { return null; }
+  }
+
+  function writeLocal(text) {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({ v: CACHE_SCHEMA_VERSION, ts: Date.now(), text }));
     } catch {}
   }
 
@@ -129,22 +122,22 @@ export function createCsvLoader(cfg) {
     if (_refreshing) return;
     _refreshing = true;
     fetchAndParse()
-      .then((rows) => { writeLocal(rows); })
+      .then(({ text }) => { writeLocal(text); })
       .catch((e) => console.warn(`${logTag} 背景刷新失敗:`, e.message))
       .finally(() => { _refreshing = false; });
   }
 
   async function load() {
-    const cached = readLocal();
+    const cached = await readLocal();
     if (cached && cached.veryFresh) return cached.data;
     if (cached && cached.valid) {
       refreshInBackground();
       return cached.data;
     }
     try {
-      const fresh = await fetchAndParse();
-      writeLocal(fresh);
-      return fresh;
+      const { rows, text } = await fetchAndParse();
+      writeLocal(text);
+      return rows;
     } catch (e) {
       if (cached) {
         console.warn(`${logTag} 抓 CSV 失敗，使用過期 cache:`, e.message);
@@ -155,12 +148,11 @@ export function createCsvLoader(cfg) {
   }
 
   function preload() {
-    const cached = readLocal();
-    if (cached && cached.veryFresh) return;
+    const cached = readMeta();
     if (cached && cached.valid) return;
     const trigger = () => {
       fetchAndParse()
-        .then((rows) => writeLocal(rows))
+        .then(({ text }) => writeLocal(text))
         .catch((e) => console.warn(`${logTag} preload failed:`, e.message));
     };
     if (typeof requestIdleCallback === 'function') {

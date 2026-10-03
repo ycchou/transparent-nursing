@@ -1,4 +1,4 @@
-/* ---------- 機構追蹤（推播）：機構頁的追蹤鈕、我的追蹤頁（follows.html）、安裝教學上方說明 ---------- */
+/* ---------- 機構追蹤（推播）與資料更新提示：機構頁的追蹤鈕、我的追蹤頁、安裝教學上方說明、分享平台新資料提示 ---------- */
 
 .hosp-head-actions {
   display: flex;
@@ -115,3 +115,31 @@
 @media (max-width: 640px) {
   .follow-item { align-items: flex-start; flex-direction: column; }
 }
+
+/* ---------- 分享平台：背景刷新抓到新分享時的提示（platform.html） ---------- */
+.new-data-pill {
+  position: fixed;
+  top: 76px;
+  left: 50%;
+  transform: translate(-50%, -16px);
+  z-index: 60;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--primary);
+  color: white;
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  box-shadow: 0 6px 18px rgba(29, 53, 87, 0.25);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+}
+.new-data-pill.show { opacity: 1; pointer-events: auto; transform: translate(-50%, 0); }
+.new-data-pill:hover { background: var(--primary-dark); }

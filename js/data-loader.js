@@ -1,9 +1,9 @@
 // CSV 載入 + 解析 + 雙層 cache（記憶體 + localStorage）
 // 之後把 CATEGORIES[].csvUrl 改成 Google Sheet 發布 CSV URL 即可
-import { CATEGORIES } from './config.js?v=fcf532858f';
-import { currentMode } from './env.js?v=fcf532858f';
-import { fetchCsvText } from './sheet-fetch.js?v=fcf532858f';
-import { needsFreshData, isForcedFresh } from './fresh-data.js?v=fcf532858f';
+import { CATEGORIES } from './config.js?v=56fb7c03b7';
+import { currentMode } from './env.js?v=56fb7c03b7';
+import { fetchCsvText } from './sheet-fetch.js?v=56fb7c03b7';
+import { needsFreshData, isForcedFresh } from './fresh-data.js?v=56fb7c03b7';
 
 // 記憶體 cache：同 session 內不重抓
 const cache = new Map();
@@ -11,7 +11,7 @@ const cache = new Map();
 const freshFetches = new Map();
 
 // localStorage cache 設定
-const CACHE_VERSION = 'v15';                 // v15: 審稿改逐欄判定＋事由欄（modComment/modCommentCode…）；v14: mock 依目前表單重新產生（欄位/選項對齊、審稿欄位中文）；v13: 新增 AI 審稿欄位 modVerdict/modCode（屏蔽短評）；v12: 加護病房班別新增「混合制」+ mock 全量重跑（ICU 160 筆）；v11: 新增第 10 類「診所」；v10: mock 資料擴充；v9: 推薦指數 1-5 + 精神科
+const CACHE_VERSION = 'v16';                 // v16: 快取改存 CSV 原文（比解析後的 JSON 小約 5 倍，避免 localStorage 爆量）；v15: 審稿改逐欄判定＋事由欄（modComment/modCommentCode…）；v14: mock 依目前表單重新產生（欄位/選項對齊、審稿欄位中文）；v13: 新增 AI 審稿欄位 modVerdict/modCode（屏蔽短評）；v12: 加護病房班別新增「混合制」+ mock 全量重跑（ICU 160 筆）；v11: 新增第 10 類「診所」；v10: mock 資料擴充；v9: 推薦指數 1-5 + 精神科
 const TTL_MS = 10 * 60 * 1000;                // 10 分鐘自動失效
 // key 帶資料模式：測試資料與正式資料各自 cache，切換 ?data= 不會讀到另一邊的殘留
 const STORAGE_KEY = (slug) => `nursing_csv_${CACHE_VERSION}_${currentMode()}_${slug}`;
@@ -82,33 +82,59 @@ function normalizeRow(row, slug) {
   return out;
 }
 
-/** localStorage 讀取 */
-function readLocal(slug) {
+/** CSV 原文 → 正規化後的資料列 */
+async function parseCsv(text, slug) {
+  await ensurePapa();
+  return new Promise((resolve, reject) => {
+    Papa.parse(text, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => resolve(results.data.map((r) => normalizeRow(r, slug))),
+      error: (err) => reject(err),
+    });
+  });
+}
+
+/**
+ * localStorage 讀取。快取存的是 CSV 原文（不是解析後的 JSON）：
+ * 解析後每列都重複一次欄名，3,000 筆約 260 萬字元，逼近 iOS Safari 約 5 MB 的上限，
+ * 超過時寫入會靜默失敗、等於沒有快取；原文只有約 1/5 大小，讀取時再解析（數十毫秒）。
+ */
+async function readLocal(slug) {
   try {
     const raw = localStorage.getItem(STORAGE_KEY(slug));
     if (!raw) return null;
     const item = JSON.parse(raw);
-    if (!item || !item.ts || !Array.isArray(item.data)) return null;
+    if (!item || !item.ts || typeof item.text !== 'string') return null;
     const fresh = Date.now() - item.ts <= TTL_MS;
-    return { data: item.data, ts: item.ts, fresh };
+    return { data: await parseCsv(item.text, slug), ts: item.ts, fresh };
   } catch { return null; }
 }
 
-/** localStorage 寫入；配額滿了就吞掉錯誤 */
-function writeLocal(slug, rows) {
+/** localStorage 寫入 CSV 原文；配額滿了就吞掉錯誤 */
+function writeLocal(slug, text) {
   try {
-    localStorage.setItem(STORAGE_KEY(slug),
-      JSON.stringify({ ts: Date.now(), data: rows }));
+    localStorage.setItem(STORAGE_KEY(slug), JSON.stringify({ ts: Date.now(), text }));
   } catch (e) {
     // QuotaExceededError 或 SecurityError（隱私模式）— 都不影響功能
     console.warn('[data-loader] localStorage write failed:', e.message);
   }
 }
 
+/**
+ * 背景刷新抓到的資料比畫面上的多時，通知頁面（不自動重畫，由頁面決定要不要提示使用者）。
+ * window 事件 'tn:share-data-updated'，detail = { slug, added }。
+ */
+function announceUpdate(slug, before, after) {
+  const added = after.length - (before ? before.length : after.length);
+  if (added <= 0) return;
+  try { window.dispatchEvent(new CustomEvent('tn:share-data-updated', { detail: { slug, added } })); } catch {}
+}
+
 // 進行中的抓取：slug → Promise。同一類別同時被要求（頁面載入＋背景預載等）只發一個請求
 const inflight = new Map();
 
-/** 抓 CSV 並解析；同一類別進行中的請求共用 */
+/** 抓 CSV 並解析，回傳 { rows, text }；同一類別進行中的請求共用 */
 function fetchAndParse(slug) {
   if (!inflight.has(slug)) {
     inflight.set(slug, fetchAndParseOnce(slug).finally(() => inflight.delete(slug)));
@@ -121,28 +147,17 @@ async function fetchAndParseOnce(slug) {
   const cat = CATEGORIES.find((c) => c.slug === slug);
   if (!cat) throw new Error('Unknown category: ' + slug);
 
-  // 確保 PapaParse 可用（若頁面沒掛 <script> 會自動 lazy load）
-  await ensurePapa();
-
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
 
   let text;
   try {
-    // 重新整理後的這一頁：直連 Google 拿最新（Worker 快照可能落後數分鐘）
-    text = await fetchCsvText(cat.csvUrl, ctrl.signal, { preferDirect: isForcedFresh() });
+    // 重新整理、點推播通知進來、或剛投稿過這一類：直連 Google 拿最新（Worker 快照可能落後數分鐘）
+    text = await fetchCsvText(cat.csvUrl, ctrl.signal, { preferDirect: isForcedFresh() || needsFreshData(slug) });
   } finally {
     clearTimeout(timer);
   }
-
-  return new Promise((resolve, reject) => {
-    Papa.parse(text, {
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => resolve(results.data.map((r) => normalizeRow(r, slug))),
-      error: (err) => reject(err),
-    });
-  });
+  return { rows: await parseCsv(text, slug), text };
 }
 
 /** 背景靜默刷新；失敗只 console.warn，不影響 UI */
@@ -150,9 +165,11 @@ function refreshInBackground(slug) {
   if (refreshing.has(slug)) return;
   refreshing.add(slug);
   fetchAndParse(slug)
-    .then((rows) => {
+    .then(({ rows, text }) => {
+      const before = cache.get(slug);
       cache.set(slug, rows);
-      writeLocal(slug, rows);
+      writeLocal(slug, text);
+      announceUpdate(slug, before, rows);
     })
     .catch((e) => console.warn(`[data-loader] background refresh failed for ${slug}:`, e.message))
     .finally(() => refreshing.delete(slug));
@@ -168,7 +185,7 @@ async function loadCategoryRaw(slug, opts = {}) {
   if (!opts.forceRefresh && needsFreshData(slug)) {
     if (!freshFetches.has(slug)) {
       freshFetches.set(slug, fetchAndParse(slug)
-        .then((rows) => { cache.set(slug, rows); writeLocal(slug, rows); return rows; })
+        .then(({ rows, text }) => { cache.set(slug, rows); writeLocal(slug, text); return rows; })
         .catch((e) => { console.warn(`[data-loader] 投稿後重抓 ${slug} 失敗，改用快取：`, e.message); return null; }));
     }
     const rows = await freshFetches.get(slug);
@@ -178,7 +195,7 @@ async function loadCategoryRaw(slug, opts = {}) {
   if (!opts.forceRefresh && cache.has(slug)) return cache.get(slug);
 
   if (!opts.forceRefresh) {
-    const stored = readLocal(slug);
+    const stored = await readLocal(slug);
     if (stored) {
       cache.set(slug, stored.data);
       if (!stored.fresh) refreshInBackground(slug);
@@ -186,9 +203,9 @@ async function loadCategoryRaw(slug, opts = {}) {
     }
   }
 
-  const rows = await fetchAndParse(slug);
+  const { rows, text } = await fetchAndParse(slug);
   cache.set(slug, rows);
-  writeLocal(slug, rows);
+  writeLocal(slug, text);
   return rows;
 }
 
@@ -252,11 +269,11 @@ export function preloadAll() {
 
 // 「樞紐」靜態大檔：被站內各處連過去、卻每次現抓的主檔。URL 需與各頁首抓相同
 // （HTTP 快取以完整 URL 為 key）：hospital.js / nurse-ratio.js 用帶 ?v= 版本（stamp-assets 維護）；
-// personnel.js 首抓的 picker 清單無版本號，故此處亦不帶。
+// personnel.js 首抓的 picker 清單也帶版本號（三處須一致，stamp-assets 會一起更新）。
 const HUB_STATIC_URLS = [
   'data/hospitals-merged.json?v=351c442704',  // 機構總覽
   'data/nurse-ratio.json?v=040b3f83fc',       // 三班護病比
-  'data/personnel-index.json',                // 人力監控 picker
+  'data/personnel-index.json?v=644925a99a',            // 人力監控 picker
 ];
 
 /**
@@ -340,9 +357,11 @@ export function startAutoRefresh() {
 }
 
 /** Cache 統計（除錯 / 開發者主控台用） */
-export function getCacheStats() {
-  const items = CATEGORIES.map((c) => {
-    const stored = readLocal(c.slug);
+export async function getCacheStats() {
+  return Promise.all(CATEGORIES.map(async (c) => {
+    const stored = await readLocal(c.slug);
+    let chars = 0;
+    try { chars = (localStorage.getItem(STORAGE_KEY(c.slug)) || '').length; } catch {}
     return {
       slug: c.slug,
       inMemory: cache.has(c.slug),
@@ -350,7 +369,7 @@ export function getCacheStats() {
       fresh: stored ? stored.fresh : null,
       cachedAt: stored ? new Date(stored.ts).toISOString() : null,
       rowCount: stored ? stored.data.length : 0,
+      chars,
     };
-  });
-  return items;
+  }));
 }
