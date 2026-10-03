@@ -99,7 +99,9 @@ function genWellbeing(institutionType, hours) {
   if (hoursBad) recBias -= 1.2;
   if (smallHospital) recBias -= 0.3;
   if (Math.random() < 0.12) recBias -= 1;
-  const recommendIndex = Math.max(1, Math.min(4, Math.round(recBias + (Math.random() - 0.5))));
+  if (Math.random() < 0.15) recBias += 1;   // 少數特別好的單位
+  // 推薦指數 1-5（表單選項）：平均約 3，好單位可到 4-5
+  const recommendIndex = Math.max(1, Math.min(5, Math.round(recBias + 0.3 + (Math.random() - 0.5) * 2.2)));
   let atm = 3 + Math.round((recommendIndex - 2) * 0.6 + (Math.random() - 0.5));
   atm = Math.max(1, Math.min(5, atm));
   const promotion = recommendIndex >= 3
@@ -757,8 +759,94 @@ function generateAll() {
 }
 
 
+// ============ 對齊目前的表單（js/form-<slug>.js 的 schema）============
+// 上方各類別產生器寫得早，表單之後陸續改版（新增題目、選項改成區間…）。這一步以表單 schema 為準：
+//   · 欄位＝表單現有的題目（表頭跟著重新產生），表單已刪的題目不輸出
+//   · 舊產生器的值若仍是合法選項就沿用（保留薪資、工時、推薦指數之間的關聯）；
+//     不合法或缺的才依選項重新抽。護病比「1:9」這類舊值會換算到新的區間選項
+//   · showIf 條件題：條件不成立就留空，與真實表單送出的結果一致
+// 尚未上線自建表單的類別（er／or／special）維持舊產生器的欄位。
+const { execFileSync } = require('child_process');
+const FORM_SCHEMAS = JSON.parse(execFileSync(process.execPath, [path.join(__dirname, 'lib', 'form-schemas.mjs')], { encoding: 'utf8' }));
+
+const MULTI_SEP = '、';   // 複選題的值以「、」串接（與 apps-script/submit.gs 寫入試算表的格式一致）
+const ALLOWANCES = { evening: [200, 250, 300, 400, 500, 600], night: [400, 500, 600, 800, 1000, 1200] };
+const SPECIAL_BENEFITS = ['', '', '', '員工健檢自費項目補助', '員工旅遊補助', '進修學分補助、國外研討會補助',
+  '員工餐廳伙食補助', '生日禮金、三節禮券', '宿舍（單人房）', '托兒補助', '年度自強活動', '醫療費用員工優惠'];
+const ON_CALL_PATTERNS = ['約兩週輪一次，下班後待命到隔天早上，被叫回一個月約 1-2 次，有 on call 費',
+  '假日白天待命，被叫回才算加班費', '每月輪 3-4 次，被叫回頻率低，沒有 on call 費只能補休',
+  '平日夜間待命，叫回要 30 分鐘內到院'];
+
+// 「1:6 以下」「1:7-8」「1:20 以上」「1:2」→ [下限, 上限]
+function ratioRange(opt) {
+  const m = String(opt).match(/^1:(\d+)(?:-(\d+))?\s*(以下|以上)?$/);
+  if (!m) return null;
+  const a = +m[1], b = m[2] ? +m[2] : a;
+  if (m[3] === '以下') return [-Infinity, a];
+  if (m[3] === '以上') return [a, Infinity];
+  return [a, b];
+}
+function isRatioOptions(opts) { return opts.filter((o) => ratioRange(o)).length >= 3; }
+function ratioToOption(value, opts) {
+  const m = String(value).match(/^1:(\d+)/);
+  if (!m) return null;
+  const n = +m[1];
+  return opts.find((o) => { const r = ratioRange(o); return r && n >= r[0] && n <= r[1]; }) || null;
+}
+const choosable = (opts) => opts.filter((o) => o !== '其他');
+
+function validValue(f, v) {
+  if (v === '' || v == null) return false;
+  if (f.type === 'checkbox') return String(v).split(MULTI_SEP).every((x) => f.options.includes(x));
+  if (f.options.length) return f.options.includes(String(v));
+  return v !== '—';
+}
+
+function genField(f, row) {
+  const opts = choosable(f.options);
+  // 尖峰護病比：以同班別的常態值為底，往上 0-2 格
+  const peak = f.name.match(/^(day|evening|night)PeakRatio$/);
+  if (peak && isRatioOptions(f.options)) {
+    const base = f.options.indexOf(row[`${peak[1]}ShiftRatio`]);
+    if (base >= 0) return f.options[Math.min(f.options.length - 1, base + randint(0, 2))];
+  }
+  if (f.type === 'checkbox') {
+    const k = randint(1, Math.min(3, opts.length));
+    const chosen = new Set([...opts].sort(() => Math.random() - 0.5).slice(0, k));
+    return opts.filter((o) => chosen.has(o)).join(MULTI_SEP);   // 依表單選項順序串接
+  }
+  if (opts.length) return pick(opts);
+  if (/^(evening|night)Allowance/.test(f.name)) {
+    if (Math.random() < 0.2) return '無';
+    return String(pick(ALLOWANCES[f.name.startsWith('evening') ? 'evening' : 'night']));
+  }
+  if (f.name === 'specialBenefits') return pick(SPECIAL_BENEFITS);
+  if (f.name === 'onCallPattern') return pick(ON_CALL_PATTERNS);
+  if (f.type === 'number') return String(randint(f.min ?? 0, f.max ?? 6));
+  return '';
+}
+
+function conformToForm(slug, rows) {
+  const schema = FORM_SCHEMAS[slug];
+  if (!schema) return null;
+  for (const row of rows) {
+    for (const f of schema) {
+      if (f.showIf && row[f.showIf.field] !== f.showIf.equals) { row[f.name] = ''; continue; }
+      const v = row[f.name];
+      if (validValue(f, v)) continue;
+      const mapped = isRatioOptions(f.options) ? ratioToOption(v, f.options) : null;
+      if (mapped) { row[f.name] = mapped; continue; }
+      // 選填題：舊值是「—」（不適用）或沒有值 → 約三成留空，其餘照選項抽
+      if (!f.required && (v === '—' || ((v === '' || v == null) && Math.random() < 0.3))) { row[f.name] = ''; continue; }
+      row[f.name] = genField(f, row);
+    }
+  }
+  return ['timestamp', ...schema.map((f) => f.name)];
+}
+
 // ============ AI 審稿欄位（mock）============
-// 真實資料由 tn-submit Worker 在送出當下寫入 modVerdict / modCode；
+// 真實資料由 tn-submit Worker 在送出當下寫入；格式與正式 Sheet 相同：
+//   modComment 等逐欄判定為中文（通過／屏蔽：事由），modVerdict 維持英文，modCode 為中文事由。
 // mock 這裡隨機讓少數幾筆呈現「被屏蔽」狀態，方便本機檢視馬賽克與解鎖 UI。
 const BLOCKED_SAMPLES = [
   { code: 'B', comment: '護理長王〇〇每天在交班時點名罵人，副護理長也不敢講話。' },
@@ -769,14 +857,26 @@ const BLOCKED_SAMPLES = [
 ];
 const BLOCK_RATE = 0.012;   // 約 1.2% 的筆數示範屏蔽
 
+// 與 worker-submit/src/index.js 的 CODE_TEXT 一致
+const CODE_TEXT = { B: '揭露第三人身分', C: '病人個案資訊', F: '人身攻擊或威脅', G: '廣告或招攬', J: '亂填或無關' };
+const MOD_COLUMNS = ['modComment', 'modSpecialBenefits', 'modOnCallPattern', 'modVerdict', 'modCode'];
+
 function assignModeration(rows) {
-  rows.forEach((r) => { r.modVerdict = 'allow'; r.modCode = ''; });
+  rows.forEach((r) => {
+    r.modVerdict = 'allow';
+    r.modCode = '';
+    // 有填的自由文字欄位才有逐欄判定（與 Worker 一致：空白欄不審）
+    if (r.comment) r.modComment = '通過';
+    if (r.specialBenefits) r.modSpecialBenefits = '通過';
+    if (r.onCallPattern) r.modOnCallPattern = '通過';
+  });
   rows.forEach((r) => {
     if (!r.comment || Math.random() > BLOCK_RATE) return;
     const sample = pick(BLOCKED_SAMPLES);
     r.comment = sample.comment;
     r.modVerdict = 'block';
-    r.modCode = sample.code;
+    r.modCode = CODE_TEXT[sample.code];
+    r.modComment = `屏蔽：${CODE_TEXT[sample.code]}`;
   });
 }
 
@@ -786,6 +886,9 @@ if (realCount < MIN_REAL_ROWS) {
   process.exit(1);
 }
 
+// 先刪掉舊的 mock CSV，整批重新產生（不會殘留已不存在的類別或欄位）
+for (const f of fs.readdirSync(OUT_DIR)) if (f.endsWith('.csv')) fs.unlinkSync(path.join(OUT_DIR, f));
+
 let total = 0;
 CFG.forEach(({ slug, cols }, i) => {
   const rows = perCat[i];
@@ -794,9 +897,11 @@ CFG.forEach(({ slug, cols }, i) => {
   if (rows[0] && !/\d{2}:\d{2}/.test(rows[0].timestamp)) {
     rows[0].timestamp += ' ' + String(randint(7, 23)).padStart(2, '0') + ':' + String(randint(0, 59)).padStart(2, '0');
   }
+  const formCols = conformToForm(slug, rows);
   assignModeration(rows);
-  fs.writeFileSync(path.join(OUT_DIR, `${slug}.csv`), toCsv(rows, cols.concat(['modVerdict', 'modCode'])), 'utf8');
-  console.log(`✓ ${slug}.csv: ${rows.length} rows`);
+  const columns = (formCols || cols).concat(MOD_COLUMNS);
+  fs.writeFileSync(path.join(OUT_DIR, `${slug}.csv`), toCsv(rows, columns), 'utf8');
+  console.log(`✓ ${slug}.csv: ${rows.length} rows, ${columns.length} 欄${formCols ? '（依表單）' : ''}`);
   total += rows.length;
 });
 const realPct = ((100 * realCount) / total).toFixed(1);

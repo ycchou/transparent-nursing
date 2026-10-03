@@ -1,12 +1,12 @@
 // follows-page.js — 「我的追蹤」頁（follows.html）：推播狀態、追蹤清單（逐家切換通知類型）、刪除訂閱資料。
 
-import { icon } from './icons.js?v=b00f8d4e5f';
-import { showToast } from './toast.js?v=b00f8d4e5f';
-import { escapeHtml } from './moderation.js?v=b00f8d4e5f';
+import { icon } from './icons.js?v=816ab00609';
+import { showToast } from './toast.js?v=816ab00609';
+import { escapeHtml } from './moderation.js?v=816ab00609';
 import {
   getFollows, pushStatus, guideToInstall, setKinds, unfollowHospital, deleteAll, healthCheck,
   KIND_LABELS, ALL_KINDS,
-} from './follow.js?v=b00f8d4e5f';
+} from './follow.js?v=816ab00609';
 
 function renderStatus() {
   const box = document.getElementById('follow-status');

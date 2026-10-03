@@ -3,7 +3,7 @@
 | 檔案 | 用途 |
 |---|---|
 | `submit.gs` | Web App。接 tn-submit Worker 轉發的投稿，寫進 `sub_<類別>` 與 `audit` 分頁 |
-| `seed.gs` | 一次性工具。把線上的 `data/mock/*.csv` 灌進各分頁，讓正式管線先有資料可跑 |
+| `seed.gs` | 把線上的 `data/mock/*.csv` 灌進各分頁。`seedAll` 沿用既有表頭；**表單改版後用 `reseedAll`**：刪舊 mock、依新 CSV 重建表頭再灌，真投稿保留 |
 | `appsscript.json` | 專案設定（時區、Web App 權限） |
 | `.clasp.json.example` | clasp 設定範本，複製成 `.clasp.json` 並填 scriptId |
 

@@ -60,7 +60,14 @@ function safeCell_(v) {
 
 function doPost(e) {
   try {
-    const p = (e && e.parameter) || {};
+    // e.parameter 只會拿到同名參數的第一個值；複選題（checkbox）會送多個同名值，
+    // 所以改從 e.parameters 讀，多個值以「、」串成一格（前端與 mock 都用這個分隔）。
+    const p = {};
+    const multi = (e && e.parameters) || {};
+    Object.keys(multi).forEach(function (k) {
+      const v = multi[k];
+      p[k] = Array.isArray(v) ? v.join('、') : v;
+    });
     const secret = prop_('SHARED_SECRET');
     if (!secret || p.secret !== secret) {
       return _json({ error: 'forbidden' });

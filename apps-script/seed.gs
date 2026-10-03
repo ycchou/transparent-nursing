@@ -108,3 +108,82 @@ function removeSeededRows_(sh) {
   }
   return n;
 }
+
+/**
+ * 重新產生測試資料「連表頭一起重建」：表單改版後用這支，不要用 seedAll。
+ *
+ * seedAll 會沿用分頁既有的表頭、只補缺的欄位，表單刪掉或改名的舊欄位會一直留著。
+ * 這支改成：刪掉所有 mock 列 → 表頭以新的 mock CSV 為準重建 → 灌入新的 mock 列。
+ *   · 真投稿（dataSource ≠ 'mock'）整列保留，依欄名搬到新表頭底下
+ *   · 舊表頭裡「新 CSV 沒有、但真投稿有填值」的欄位保留在最右邊，不會丟資料
+ *   · 分頁本身不刪（gid 不變），「發布到網路」的 CSV 網址照常有效
+ */
+function reseedAll() {
+  const report = SEED_CATEGORIES.map(function (slug) { return reseedCategory(slug); });
+  Logger.log(report.join('\n'));
+  return report.join('\n');
+}
+
+function reseedCategory(slug) {
+  const ss = book_();
+  const name = 'sub_' + slug;
+
+  let csv;
+  try {
+    csv = UrlFetchApp.fetch(SEED_BASE_URL + slug + '.csv', { muteHttpExceptions: true });
+  } catch (err) {
+    return name + '：抓取失敗 ' + err;
+  }
+  if (csv.getResponseCode() !== 200) return name + '：抓取失敗 HTTP ' + csv.getResponseCode();
+  const rows = Utilities.parseCsv(csv.getContentText());
+  if (!rows || rows.length < 2) return name + '：CSV 是空的';
+  const csvHeader = rows[0];
+  const body = rows.slice(1);
+
+  const sh = ss.getSheetByName(name) || ss.insertSheet(name);
+
+  // 讀出現有的真投稿（以欄名為鍵，之後依新表頭重排）
+  let oldHeader = [];
+  let kept = [];
+  if (sh.getLastRow() > 0 && sh.getLastColumn() > 0) {
+    const data = sh.getRange(1, 1, sh.getLastRow(), sh.getLastColumn()).getValues();
+    oldHeader = data[0].map(String);
+    const markCol = oldHeader.indexOf(SEED_MARK_COLUMN);
+    kept = data.slice(1)
+      .filter(function (r) { return r.join('') !== '' && (markCol === -1 || String(r[markCol]) !== 'mock'); })
+      .map(function (r) {
+        const o = {};
+        oldHeader.forEach(function (h, i) { if (h) o[h] = r[i]; });
+        return o;
+      });
+  }
+
+  const extra = oldHeader.filter(function (h) {
+    return h && h !== SEED_MARK_COLUMN && csvHeader.indexOf(h) === -1 &&
+      kept.some(function (o) { return o[h] !== '' && o[h] !== null && o[h] !== undefined; });
+  });
+  const header = csvHeader.concat(extra).concat([SEED_MARK_COLUMN]);
+
+  const keptRows = kept.map(function (o) {
+    return header.map(function (h) { return o[h] !== undefined ? o[h] : ''; });
+  });
+  const idx = {};
+  csvHeader.forEach(function (h, i) { idx[h] = i; });
+  const mockRows = body.map(function (r) {
+    return header.map(function (h) {
+      if (h === SEED_MARK_COLUMN) return 'mock';
+      return idx[h] !== undefined ? safeCell_(r[idx[h]]) : '';
+    });
+  });
+
+  // 一次寫完：先清空（保留分頁與 gid），再寫表頭＋真投稿＋mock
+  sh.clearContents();
+  const values = [header].concat(keptRows).concat(mockRows);
+  sh.getRange(1, 1, values.length, header.length).setValues(values);
+  // 舊表頭比新的寬時，右邊殘留的空欄刪掉，避免 CSV 多出空白欄
+  if (sh.getMaxColumns() > header.length) {
+    sh.deleteColumns(header.length + 1, sh.getMaxColumns() - header.length);
+  }
+  return name + '：表頭 ' + header.length + ' 欄（保留舊欄 ' + extra.length + '）；真投稿 ' +
+    keptRows.length + ' 列、mock ' + mockRows.length + ' 列';
+}
