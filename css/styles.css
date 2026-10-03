@@ -5804,6 +5804,48 @@ body.g2g-modal-open { overflow: hidden; }
   .bn-item:focus:not(:focus-visible) .bn-icon { box-shadow: none; }
   .bn-item:focus-visible .bn-icon { box-shadow: 0 0 0 2px var(--primary); }
 
+  /* ---- 選中泡泡：一顆半透明膠囊在格子之間滑動（js/components.js mountBubble）----
+     有泡泡時，各格自己的選中底色關掉，改由泡泡呈現；移動時橫向拉長一下，像液體被拖過去 */
+  .bn-item { position: relative; z-index: 1; }
+  .bn-bubble {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: transform .42s cubic-bezier(0.34, 1.28, 0.5, 1), opacity .2s ease;
+    will-change: transform;
+  }
+  .bn-bubble.show { opacity: 1; }
+  .bn-bubble-glass {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-pill);
+    background: rgba(35, 111, 143, 0.14);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.65),
+      inset 0 0 0 0.5px rgba(35, 111, 143, 0.14),
+      0 2px 8px rgba(35, 111, 143, 0.12);
+    transform-origin: center;
+  }
+  .bn-bubble.is-moving .bn-bubble-glass { animation: bn-bubble-stretch .42s cubic-bezier(0.3, 0.7, 0.4, 1); }
+  @keyframes bn-bubble-stretch {
+    0%   { transform: scale(1, 1); }
+    35%  { transform: scale(1.32, 0.86); }
+    70%  { transform: scale(0.96, 1.04); }
+    100% { transform: scale(1, 1); }
+  }
+  .bottom-nav.has-bubble .bn-item.active:not(.bn-cta) .bn-icon,
+  .bottom-nav.has-bubble .bn-item[aria-expanded="true"] .bn-icon { background: transparent; }
+  .bottom-nav.on-dark .bn-bubble-glass {
+    background: rgba(255, 255, 255, 0.16);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  .bottom-nav.on-dark.has-bubble .bn-item.active:not(.bn-cta) .bn-icon,
+  .bottom-nav.on-dark.has-bubble .bn-item[aria-expanded="true"] .bn-icon { background: transparent; }
+
   /* 「填寫」：主要動作用實心 pill，但維持在導覽列內、不凸出 */
   .bn-cta { color: var(--ink); }
   .bn-cta .bn-icon { background: var(--primary); color: #fff; box-shadow: 0 2px 8px rgba(35, 111, 143, 0.3); }
@@ -5881,7 +5923,8 @@ body.g2g-modal-open { overflow: hidden; }
   body.bn-sheet-open { overflow: hidden; }
 }
 @media (max-width: 768px) and (prefers-reduced-motion: reduce) {
-  .bn-sheet-backdrop, .bn-sheet-body, .bn-icon, .bn-icon svg, .bottom-nav { transition: none; }
+  .bn-sheet-backdrop, .bn-sheet-body, .bn-icon, .bn-icon svg, .bottom-nav, .bn-bubble { transition: none; }
+  .bn-bubble.is-moving .bn-bubble-glass { animation: none; }
 }
 
 

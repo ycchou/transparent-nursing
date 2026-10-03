@@ -1,10 +1,10 @@
 // 共用 header / footer 注入 + 工具函式
-import { SITE, CATEGORIES } from './config.js?v=ed5f8b12b6';
-import { icon, renderIcons } from './icons.js?v=ed5f8b12b6';
-import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=ed5f8b12b6';
-import { initScrollHints } from './scroll-hint.js?v=ed5f8b12b6';
-import { initPullToRefresh } from './pull-to-refresh.js?v=ed5f8b12b6';
-import { mountModeBadge } from './env.js?v=ed5f8b12b6';
+import { SITE, CATEGORIES } from './config.js?v=d4e615cbe7';
+import { icon, renderIcons } from './icons.js?v=d4e615cbe7';
+import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=d4e615cbe7';
+import { initScrollHints } from './scroll-hint.js?v=d4e615cbe7';
+import { initPullToRefresh } from './pull-to-refresh.js?v=d4e615cbe7';
+import { mountModeBadge } from './env.js?v=d4e615cbe7';
 
 // 主辦/協作工會 — 共用資料（footer / hero strip / about 都引用）
 export const ORGS = {
@@ -72,6 +72,84 @@ function bottomSheetHTML(page) {
     </div>`;
 }
 
+// ---- 底部導覽列的「泡泡」：選中格底下的半透明膠囊，換格時從舊格滑到新格（像 Instagram／iOS tab bar）----
+// 各格是不同頁面，點下去就換頁，所以分兩段：
+//   1) 點擊當下在舊頁開始滑，並把「從哪格滑到哪格、何時開始」記在 sessionStorage
+//   2) 新頁一載入就從「依經過時間推算出的中途位置」接著滑完，看起來是同一顆泡泡連續移動
+const BUBBLE_KEY = 'tn:bn-bubble';
+const BUBBLE_MS = 420;
+const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function mountBubble(nav, initial) {
+  const el = document.createElement('span');
+  el.className = 'bn-bubble';
+  el.setAttribute('aria-hidden', 'true');
+  el.innerHTML = '<span class="bn-bubble-glass"></span>';
+  nav.prepend(el);
+  nav.classList.add('has-bubble');
+  const items = [...nav.querySelectorAll('.bn-item')];
+  let current = null;
+
+  // 某格 icon 相對導覽列的位置（泡泡蓋在 icon 那塊 pill 上）
+  const rectOf = (item) => {
+    const icon = item.querySelector('.bn-icon');
+    const n = nav.getBoundingClientRect(), r = icon.getBoundingClientRect();
+    return { x: r.left - n.left, y: r.top - n.top, w: r.width, h: r.height };
+  };
+  const place = (r, animate) => {
+    el.style.transition = animate ? '' : 'none';
+    el.style.width = `${r.w}px`;
+    el.style.height = `${r.h}px`;
+    el.style.transform = `translate3d(${r.x}px, ${r.y}px, 0)`;
+    if (!animate) void el.offsetWidth;   // 先套用位置，下一次變動才會有動畫
+  };
+  const stretch = () => {
+    if (reduceMotion()) return;
+    el.classList.remove('is-moving');
+    void el.offsetWidth;
+    el.classList.add('is-moving');
+  };
+
+  function moveTo(item, { instant = false, handoff = false } = {}) {
+    if (!item) { el.classList.remove('show'); current = null; return; }
+    const from = current;
+    current = item;
+    el.classList.add('show');
+    const animate = !instant && !!from && from !== item && !reduceMotion();
+    place(rectOf(item), animate);
+    if (animate) stretch();
+    if (handoff && from) {
+      try {
+        sessionStorage.setItem(BUBBLE_KEY, JSON.stringify({ from: items.indexOf(from), to: items.indexOf(item), at: Date.now() }));
+      } catch {}
+    }
+  }
+
+  // 初始位置：若是剛從導覽列換頁過來，從上一頁滑到一半的地方接著滑
+  let handed = null;
+  try { handed = JSON.parse(sessionStorage.getItem(BUBBLE_KEY) || 'null'); sessionStorage.removeItem(BUBBLE_KEY); } catch {}
+  if (initial) {
+    const elapsed = handed ? Date.now() - handed.at : Infinity;
+    const fromItem = handed && items[handed.from];
+    if (fromItem && items[handed.to] === initial && elapsed < 1500 && !reduceMotion()) {
+      const a = rectOf(fromItem), b = rectOf(initial);
+      const t = Math.min(0.85, elapsed / BUBBLE_MS);   // 舊頁已滑到的比例（至少留一段給新頁滑）
+      el.classList.add('show');
+      place({ x: a.x + (b.x - a.x) * t, y: b.y, w: b.w, h: b.h }, false);
+      current = initial;
+      requestAnimationFrame(() => { place(b, true); stretch(); });
+    } else {
+      moveTo(initial, { instant: true });
+    }
+  }
+
+  // 版面變動（轉向、字型載入、視窗大小）時重新對齊，不做動畫
+  const realign = () => { if (current) place(rectOf(current), false); };
+  window.addEventListener('resize', realign);
+  if (document.fonts?.ready) document.fonts.ready.then(realign);
+  return { moveTo };
+}
+
 function mountBottomNav() {
   const page = currentPage();
   if (!SHELL.bottomNavEnabled(page) || document.getElementById('bn-sheet')) return;
@@ -87,10 +165,12 @@ function mountBottomNav() {
   const body = sheet.querySelector('.bn-sheet-body');
   const triggers = document.querySelectorAll('.bottom-nav [data-sheet]');
   let openKey = null;
+  let leaving = false;   // 已點了要換頁的連結：之後關面板不要把泡泡滑回去
   let lastTrigger = null;
   let openedByKeyboard = false;   // 只有鍵盤操作才搬移焦點；觸控時搬焦點會在 iOS 留下選取框
   // 記下這一頁「應該」亮的格子，之後任何暫時狀態都能還原回來
   const homeActive = [...nav.querySelectorAll('.bn-item.active')];
+  const bubble = mountBubble(nav, homeActive[0]);
 
   const close = ({ instant = false } = {}) => {
     if (!openKey) return;
@@ -98,6 +178,8 @@ function mountBottomNav() {
     body.style.transform = '';
     triggers.forEach((b) => b.setAttribute('aria-expanded', 'false'));
     document.body.classList.remove('bn-sheet-open');
+    // 面板關掉：泡泡滑回這一頁的格子（剛點了面板裡的連結、正要換頁時例外）
+    if (!leaving) bubble.moveTo(nav.querySelector('.bn-item.active'));
     openKey = null;
     if (instant) sheet.hidden = true;
     else setTimeout(() => { if (!openKey) sheet.hidden = true; }, 260);
@@ -111,6 +193,7 @@ function mountBottomNav() {
     sheet.setAttribute('aria-labelledby', `bn-sheet-title-${key}`);
     triggers.forEach((b) => b.setAttribute('aria-expanded', String(b === trigger)));
     document.body.classList.add('bn-sheet-open');
+    bubble.moveTo(trigger);
     openKey = key;
     lastTrigger = trigger;
     requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -134,9 +217,10 @@ function mountBottomNav() {
   window.addEventListener('scroll', clearPressed, { passive: true });
 
   // 2) 點下去立刻換亮（不等新頁面載完），舊格子不再殘留高亮
-  const selectTab = (tab) => {
+  const selectTab = (tab, { navigating = false } = {}) => {
     nav.querySelectorAll('.bn-item.active').forEach((el) => { el.classList.remove('active'); el.removeAttribute('aria-current'); });
     tab?.classList.add('active');
+    if (navigating) { leaving = true; bubble.moveTo(tab, { handoff: true }); }
   };
   const isPlainClick = (e) => !(e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey);
   nav.addEventListener('click', (e) => {
@@ -148,7 +232,7 @@ function mountBottomNav() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
-    selectTab(a);
+    selectTab(a, { navigating: true });
   });
   sheet.addEventListener('click', (e) => {
     const a = e.target.closest('a.bn-sheet-item');
@@ -156,7 +240,7 @@ function mountBottomNav() {
     if (a.getAttribute('href') === page) { e.preventDefault(); close(); return; }
     sheet.querySelectorAll('.bn-sheet-item.active').forEach((el) => el.classList.remove('active'));
     a.classList.add('active');
-    selectTab(nav.querySelector(`[data-sheet="${openKey}"]`));
+    selectTab(nav.querySelector(`[data-sheet="${openKey}"]`), { navigating: true });
   });
 
   // 3) 按「上一頁」時 iOS 會從快取（bfcache）原封不動還原頁面：面板開著、按壓中、
@@ -167,6 +251,8 @@ function mountBottomNav() {
     close({ instant: true });
     selectTab(null);
     homeActive.forEach((el) => el.classList.add('active'));
+    leaving = false;
+    bubble.moveTo(homeActive[0], { instant: true });
     sheet.querySelectorAll('.bn-sheet-item').forEach((a) => a.classList.toggle('active', a.getAttribute('href') === page));
     nav.classList.remove('is-hidden');
     document.body.classList.remove('bn-hidden');
@@ -358,14 +444,14 @@ export function mountLayout() {
   // 沒追蹤的人不多載任何東西
   try {
     if ((localStorage.getItem('tn:follows') || '{}').length > 2 || localStorage.getItem('tn:push_cleanup')) {
-      import('./follow.js?v=ed5f8b12b6').then((m) => m.healthCheck()).catch(() => {});
+      import('./follow.js?v=d4e615cbe7').then((m) => m.healthCheck()).catch(() => {});
     }
   } catch {}
   // 解鎖連結（#unlock=碼）：才動態載入 unlock.js／toast.js，平常開頁不多載。
   // 開頁時檢查一次；已在頁面上時貼上連結只會改 hash、不會重新載入，所以也聽 hashchange。
   const tryUnlockHash = () => {
     if (!location.hash.startsWith('#unlock=')) return;
-    Promise.all([import('./unlock.js?v=ed5f8b12b6'), import('./toast.js?v=ed5f8b12b6')])
+    Promise.all([import('./unlock.js?v=d4e615cbe7'), import('./toast.js?v=d4e615cbe7')])
       .then(([u, t]) => u.handleUnlockHash({ toast: t.showToast }))
       .catch((e) => console.warn('[unlock] 載入失敗：', e.message));
   };
@@ -411,7 +497,7 @@ export function mountLayout() {
 
   // 背景預載 platform 資料 + 樞紐大檔：切到分享平台/機構總覽/護病比/人力監控時即時顯示
   // 動態 import 避免循環依賴與初始 parse 成本
-  import('./data-loader.js?v=ed5f8b12b6')
+  import('./data-loader.js?v=d4e615cbe7')
     .then(({ preloadAll, preloadStaticData }) => {
       preloadAll && preloadAll();
       preloadStaticData && preloadStaticData();
@@ -423,13 +509,13 @@ export function mountLayout() {
   wireNavPrefetch(document.getElementById('app-footer'));
 
   // 背景預載勞檢/性平/職安紀錄資料：同樣讓使用者切過去時即時顯示
-  import('./violations.js?v=ed5f8b12b6')
+  import('./violations.js?v=d4e615cbe7')
     .then(({ preloadViolations }) => preloadViolations && preloadViolations())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./gender.js?v=ed5f8b12b6')
+  import('./gender.js?v=d4e615cbe7')
     .then(({ preloadGender }) => preloadGender && preloadGender())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./osha.js?v=ed5f8b12b6')
+  import('./osha.js?v=d4e615cbe7')
     .then(({ preloadOsha }) => preloadOsha && preloadOsha())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
 }

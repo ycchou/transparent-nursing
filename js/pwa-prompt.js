@@ -5,9 +5,9 @@
 // - 本地埋點（trackPwa）：dispatch CustomEvent + localStorage 累計（未接外部服務）
 // import { initPWAPrompt, showInstallGuide, notePwaIntent, isAppInstalled } from './pwa-prompt.js?v=...';
 
-import { C } from './theme.js?v=ed5f8b12b6';
-import { showToast } from './toast.js?v=ed5f8b12b6';
-import { icon } from './icons.js?v=ed5f8b12b6';
+import { C } from './theme.js?v=d4e615cbe7';
+import { showToast } from './toast.js?v=d4e615cbe7';
+import { icon } from './icons.js?v=d4e615cbe7';
 
 const DISMISS_KEY = '__nursing_pwa_dismissed';          // 最近一次關閉/延後的時間戳
 const DISMISS_COUNT_KEY = '__nursing_pwa_dismiss_count'; // 累計「主動關閉」次數
@@ -299,7 +299,7 @@ export async function showInstallGuide({ lead = '' } = {}) {
 
   let guide;
   try {
-    guide = await import('./install-guide.js?v=ed5f8b12b6');
+    guide = await import('./install-guide.js?v=d4e615cbe7');
   } catch {
     showToast('教學載入失敗，請檢查網路後再試一次', 'error');
     return;
