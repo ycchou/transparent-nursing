@@ -515,9 +515,7 @@
       const linkIcon = isExternal ? 'arrow-up-right' : 'arrow-right';
       return `
         <div class="card card-hover form-card">
-          <span class="form-status ${isLive ? 'form-status-live' : 'form-status-soon'}">
-            ${isLive ? '已上線' : 'COMING SOON'}
-          </span>
+          ${isLive ? '' : '<span class="form-status form-status-soon">COMING SOON</span>'}
           <div class="cat-icon-wrap" style="background:${c.color};">
             ${icon(c.icon, { size: 28 })}
           </div>
