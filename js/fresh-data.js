@@ -8,7 +8,7 @@
 //    否則會讀到最多 10 分鐘前的快取、看不到通知說的那筆。讀到參數後從網址拿掉，之後分享或重開不受影響。
 // 3. 重新整理：PWA 下拉（pull-to-refresh.js，重新載入前設標記）或瀏覽器原生重新整理
 //    （Navigation Timing type='reload'）。這一頁的分享資料抓最新，而且直連 Google（不讀可能落後的
-//    Worker 快照）。違規資料（csv-loader）更新頻率低、Worker 一天才抓一次，重新整理不特別處理。
+//    Worker 快照）。違規資料（csv-loader）更新頻率低，重新整理時只在背景向 Worker 重抓一次（不直連 Google）。
 //
 // key 刻意不用 nursing_csv_ 前綴：data-loader 與各頁的舊快取清理會刪掉該前綴的 key。
 

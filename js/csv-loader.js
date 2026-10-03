@@ -1,5 +1,6 @@
 // csv-loader.js — 從公開 CSV（Google Sheet 發布）載入資料：PapaParse 動態載入＋localStorage 快取＋背景刷新。
-import { fetchCsvText } from './sheet-fetch.js?v=56fb7c03b7';
+import { isForcedFresh } from './fresh-data.js?v=ed5f8b12b6';
+import { fetchCsvText } from './sheet-fetch.js?v=ed5f8b12b6';
 
 // ============================================================
 // PapaParse 動態載入（讓沒掛 <script> 的頁面也能 preload）
@@ -28,7 +29,9 @@ export function ensurePapa() {
 // ============================================================
 
 const DEFAULT_TTL_MS = 30 * 24 * 60 * 60 * 1000;  // 30 天
-const DEFAULT_STALE_MS = 6 * 60 * 60 * 1000;      // 6 小時
+// 超過這段時間才在背景向 tn-sheets 重抓。違規紀錄由 tn-sheets 每天台北 04:00 更新一次，
+// 所以 24 小時一次就夠；更頻繁只會一直拿到同一份、白打 Worker。
+const DEFAULT_STALE_MS = 24 * 60 * 60 * 1000;     // 24 小時
 const DEFAULT_FETCH_TIMEOUT_MS = 15000;
 
 // localStorage 快取的 record 結構版本。改動 parseRow 產出的欄位（如新增 articles）時 +1，
@@ -129,6 +132,17 @@ export function createCsvLoader(cfg) {
 
   async function load() {
     const cached = await readLocal();
+    // 使用者下拉重新整理（或按瀏覽器重新整理）：不管快取多新都重抓一次，這一頁就顯示最新；抓失敗才用快取
+    if (cached && isForcedFresh()) {
+      try {
+        const { rows, text } = await fetchAndParse();
+        writeLocal(text);
+        return rows;
+      } catch (e) {
+        console.warn(`${logTag} 重新整理時抓 CSV 失敗，使用快取:`, e.message);
+        return cached.data;
+      }
+    }
     if (cached && cached.veryFresh) return cached.data;
     if (cached && cached.valid) {
       refreshInBackground();
