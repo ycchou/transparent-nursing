@@ -1,7 +1,7 @@
 // 精神科自建表單：只定義精神科專屬區塊，其餘（機構基本資料 / 輪班別與津貼（病房版）/ 人力與支援 /
 // 業務與工時共用欄 / 薪資與年資 / 整體評價）沿用 form-sections.js 的共用正本。
 
-import { initDepartmentForm } from './form-engine.js?v=d4e615cbe7';
+import { initDepartmentForm } from './form-engine.js?v=b540de8f2d';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
@@ -12,20 +12,15 @@ import {
   DAILY_OVERTIME_FIELD,
   SALARY_SECTION,
   EVALUATION_SECTION,
-} from './form-sections.js?v=d4e615cbe7';
+  scale,
+  VIOLENCE_FREQ_FIELD,
+  VIOLENCE_RISK_FIELD,
+  POST_INCIDENT_SUPPORT_FIELD,
+} from './form-sections.js?v=b540de8f2d';
 
 // 護病比刻度：與病房相同（WARD_RATIO，拆「常態」「最忙時」），
 // 另加「無此班別」給日間照護等沒有小夜／大夜的單位。
 const PSYCH_RATIO = [...WARD_RATIO, '無此班別'];
-
-// 1-5 分量表：一律「5 分＝負擔／風險最重」，方向一致才能並排比較。
-const scale = (low, high) => [
-  { value: '1', label: `1（${low}）` },
-  { value: '2', label: '2' },
-  { value: '3', label: '3' },
-  { value: '4', label: '4' },
-  { value: '5', label: `5（${high}）` },
-];
 
 // 護病比配置引導文字：可展開查看完整法規條文
 const RATIO_INTRO = `<strong>精神科護病比設置標準</strong><br><br>
@@ -107,25 +102,15 @@ const PSYCH_FORM_SCHEMA = [
 
   { section: '職場安全',
     intro: '處理自傷、暴力、逃跑等事件時，自身安全是否受保障，以及事後團隊與醫院的支持。' },
-  { name: 'violenceFreq', label: '過去一個月遇到病人暴力（含言語）的頻率', type: 'radio', required: true,
-    options: ['完全沒有', '1-5 次', '6-10 次', '11-20 次', '幾乎每天'] },
+  VIOLENCE_FREQ_FIELD,
   { name: 'incidentFreq', label: '過去三個月病房發生自傷／自殺／逃跑事件', type: 'radio',
     options: ['無', '1-2 次', '3-5 次', '6 次以上'] },
   { name: 'restraintFreq', label: '約束／隔離頻率', type: 'radio',
     options: ['每日多次', '每週數次', '偶爾', '罕見'] },
-  { name: 'violenceRiskFeeling', label: '處理暴力事件時的危險感', type: 'radio',
-    options: scale('很安全', '非常危險') },
+  VIOLENCE_RISK_FIELD,
   { name: 'securitySupport', label: '約束隔離時是否有防護班／警衛協助', type: 'radio',
     options: ['有，隨叫隨到', '有，但常需等待', '無，靠護理人員自己'] },
-  { name: 'postIncidentSupport', label: '暴力事件後，醫院給的支持', type: 'radio', layout: 'list',
-    help: '選最接近你單位實際狀況的一項',
-    options: [
-      { value: '非常完善', label: '非常完善', desc: '立即關懷，並有實質補償、主動檢討流程' },
-      { value: '良好', label: '良好', desc: '主管及院方及時關心、提供協助' },
-      { value: '普通', label: '普通', desc: '照流程通報，主管口頭關心，沒有實質資源' },
-      { value: '不太足夠', label: '不太足夠', desc: '只有例行通報，沒有心理關懷或改善行動' },
-      { value: '非常不足', label: '非常不足', desc: '缺乏關懷，甚至檢討護理人員、要自己承擔' },
-    ] },
+  POST_INCIDENT_SUPPORT_FIELD,
 
   { section: '硬體環境' },
   { name: 'protectionRoomCount', label: '保護室（可約束隔離空間）數量', type: 'radio',

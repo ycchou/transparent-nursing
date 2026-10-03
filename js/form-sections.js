@@ -87,6 +87,30 @@ export const NEWBIE_FIELDS = [
 // （醫學中心 6/9/11、區域 7/11/13、地區 10/13/15，見 nurse-ratio-view.js STANDARDS）；大夜常見 1:16 以上，再細分到 1:20 以上。
 export const WARD_RATIO = ['1:6 以下', '1:7-8', '1:9-10', '1:11-12', '1:13-15', '1:16-17', '1:18-19', '1:20 以上'];
 
+// 1-5 分量表：一律「5 分＝負擔／風險最重」，方向一致才能並排比較（精神科、急診共用）
+export const scale = (low, high) => [
+  { value: '1', label: `1（${low}）` },
+  { value: '2', label: '2' },
+  { value: '3', label: '3' },
+  { value: '4', label: '4' },
+  { value: '5', label: `5（${high}）` },
+];
+
+// 職場暴力（精神科、急診共用）：頻率、危險感、事後支持
+export const VIOLENCE_FREQ_FIELD = { name: 'violenceFreq', label: '過去一個月遇到病人暴力（含言語）的頻率',
+  type: 'radio', required: true, options: ['完全沒有', '1-5 次', '6-10 次', '11-20 次', '幾乎每天'] };
+export const VIOLENCE_RISK_FIELD = { name: 'violenceRiskFeeling', label: '處理暴力事件時的危險感', type: 'radio',
+  options: scale('很安全', '非常危險') };
+export const POST_INCIDENT_SUPPORT_FIELD = { name: 'postIncidentSupport', label: '暴力事件後，醫院給的支持',
+  type: 'radio', layout: 'list', help: '選最接近你單位實際狀況的一項',
+  options: [
+    { value: '非常完善', label: '非常完善', desc: '立即關懷，並有實質補償、主動檢討流程' },
+    { value: '良好', label: '良好', desc: '主管及院方及時關心、提供協助' },
+    { value: '普通', label: '普通', desc: '照流程通報，主管口頭關心，沒有實質資源' },
+    { value: '不太足夠', label: '不太足夠', desc: '只有例行通報，沒有心理關懷或改善行動' },
+    { value: '非常不足', label: '非常不足', desc: '缺乏關懷，甚至檢討護理人員、要自己承擔' },
+  ] };
+
 // 每日平均加班時間（放在各科別「業務與工時」段）
 export const DAILY_OVERTIME_FIELD = { name: 'dailyOvertime', label: '每日平均加班時間', type: 'radio',
   options: ['無', '1 小時內', '1-2 小時', '2-3 小時', '4 小時'] };

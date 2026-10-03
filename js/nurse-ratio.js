@@ -6,8 +6,8 @@
 //     hospitals: [{ id, name, level, history: { "11207": {day, eve, night} } }]
 //   }
 
-import { renderIcons } from './icons.js?v=d4e615cbe7';
-import { registerFormerCodes, readCodeParam } from './hospital-merges.js?v=d4e615cbe7';
+import { renderIcons } from './icons.js?v=b540de8f2d';
+import { registerFormerCodes, readCodeParam } from './hospital-merges.js?v=b540de8f2d';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -15,10 +15,10 @@ import {
   shiftStatus,
   classifyHospital as classifyHospitalView,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=d4e615cbe7';
-import { skeletonRows } from './skeleton.js?v=d4e615cbe7';
-import { escapeHtml } from './moderation.js?v=d4e615cbe7';
-import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=d4e615cbe7';
+} from './nurse-ratio-view.js?v=b540de8f2d';
+import { skeletonRows } from './skeleton.js?v=b540de8f2d';
+import { escapeHtml } from './moderation.js?v=b540de8f2d';
+import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=b540de8f2d';
 
 const DATA_URL = 'data/nurse-ratio.json?v=040b3f83fc';
 

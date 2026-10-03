@@ -1,13 +1,13 @@
 // hospital-data.js — 機構總覽頁的資料載入與共用狀態（醫院清單、違規對照、護病比單院小檔、眾包與違規資料）。
 
-import { loadAll } from './data-loader.js?v=d4e615cbe7';
+import { loadAll } from './data-loader.js?v=b540de8f2d';
 
-import { createCsvLoader } from './csv-loader.js?v=d4e615cbe7';
-import { parseROCDate, parseFine, shortenLocation } from './records-format.js?v=d4e615cbe7';
+import { createCsvLoader } from './csv-loader.js?v=b540de8f2d';
+import { parseROCDate, parseFine, shortenLocation } from './records-format.js?v=b540de8f2d';
 
-import { registerFormerCodes } from './hospital-merges.js?v=d4e615cbe7';
+import { registerFormerCodes } from './hospital-merges.js?v=b540de8f2d';
 
-import { VIOL_FEEDS } from './config.js?v=d4e615cbe7';
+import { VIOL_FEEDS } from './config.js?v=b540de8f2d';
 
 const MERGED_URL = 'data/hospitals-merged.json?v=351c442704';
 const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=bd99316e15';

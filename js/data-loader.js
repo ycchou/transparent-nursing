@@ -1,9 +1,9 @@
 // CSV 載入 + 解析 + 雙層 cache（記憶體 + localStorage）
 // 之後把 CATEGORIES[].csvUrl 改成 Google Sheet 發布 CSV URL 即可
-import { CATEGORIES } from './config.js?v=d4e615cbe7';
-import { currentMode } from './env.js?v=d4e615cbe7';
-import { fetchCsvText } from './sheet-fetch.js?v=d4e615cbe7';
-import { needsFreshData, isForcedFresh } from './fresh-data.js?v=d4e615cbe7';
+import { CATEGORIES } from './config.js?v=b540de8f2d';
+import { currentMode } from './env.js?v=b540de8f2d';
+import { fetchCsvText } from './sheet-fetch.js?v=b540de8f2d';
+import { needsFreshData, isForcedFresh } from './fresh-data.js?v=b540de8f2d';
 
 // 記憶體 cache：同 session 內不重抓
 const cache = new Map();

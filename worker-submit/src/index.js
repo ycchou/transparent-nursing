@@ -61,6 +61,9 @@ const ALLOWED_FIELDS = new Set([
  'unitName', 'violenceFreq', 'violenceRisk', 'violenceRiskFeeling', 'wardType', 'weeklyHours',
  'weeklyPatients', 'workAtmosphere', 'workDuties', 'workplaceType', 'yearsCurrent',
  'yearsTotal',
+ // 急診表單（js/form-er.js）
+ 'erArea', 'fullBedThreshold', 'erCrowding', 'criticalPeakRatio', 'observationPeakRatio',
+ 'erHazardPay', 'criticalTeam', 'certLeave', 'certFee',
 ]);
 
 // 自由文字（textarea）給多一點，其餘欄位都是選項或短字串。超過就截斷，不擋投稿。

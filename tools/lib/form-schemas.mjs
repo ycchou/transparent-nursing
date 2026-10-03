@@ -9,7 +9,7 @@ import path from 'node:path';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', '..');
 // 已上線的自建表單（與 participate-<slug>.html 對應）
-export const FORM_SLUGS = ['ward', 'icu', 'psych', 'clinic', 'dialysis', 'outpatient', 'other'];
+export const FORM_SLUGS = ['ward', 'icu', 'er', 'psych', 'clinic', 'dialysis', 'outpatient', 'other'];
 
 const STUB = 'export function initDepartmentForm({ schema }) { (globalThis.__formSchemas ||= []).push(schema); }';
 const HOOKS = `

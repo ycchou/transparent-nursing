@@ -33,6 +33,7 @@ const PAGE_EXPECT = {
   'participate-outpatient': '.dform-section',
   'participate-other': '.dform-section',
   'participate-psych': '.dform-section',
+  'participate-er': '.dform-section',
   'participate-ward': '.dform-section',
   support: '.donate-tier',
 };

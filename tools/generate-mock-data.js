@@ -805,9 +805,11 @@ function validValue(f, v) {
 function genField(f, row) {
   const opts = choosable(f.options);
   // 尖峰護病比：以同班別的常態值為底，往上 0-2 格
-  const peak = f.name.match(/^(day|evening|night)PeakRatio$/);
+  // 對應的常態欄：dayPeakRatio → dayShiftRatio；criticalPeakRatio → criticalRatio（急診依區域）
+  const peak = f.name.match(/^(\w+)PeakRatio$/);
   if (peak && isRatioOptions(f.options)) {
-    const base = f.options.indexOf(row[`${peak[1]}ShiftRatio`]);
+    const baseKey = ['day', 'evening', 'night'].includes(peak[1]) ? `${peak[1]}ShiftRatio` : `${peak[1]}Ratio`;
+    const base = f.options.indexOf(row[baseKey]);
     if (base >= 0) return f.options[Math.min(f.options.length - 1, base + randint(0, 2))];
   }
   if (f.type === 'checkbox') {
