@@ -891,7 +891,7 @@ function assignModeration(rows, slug, auditRows) {
       r[modKey(k) + 'Code'] = '';
       if (r[k]) results[k] = { verdict: 'allow', code: '', reason: '' };
     }
-    if (Math.random() < MOD_SAMPLE_RATE) {
+    if (!r._keepClean && Math.random() < MOD_SAMPLE_RATE) {
       // 只換掉本來就有填的欄位（條件題不會被硬塞值）；短評一律可用
       const s = pick(MOD_SAMPLES.filter((x) => x.field === 'comment' || r[x.field]));
       r[s.field] = s.text;
@@ -923,6 +923,15 @@ if (realCount < MIN_REAL_ROWS) {
 
 // 先刪掉舊的 mock CSV，整批重新產生（不會殘留已不存在的類別或欄位）
 for (const f of fs.readdirSync(OUT_DIR)) if (f.endsWith('.csv')) fs.unlinkSync(path.join(OUT_DIR, f));
+
+// 冒煙測試會開 platform.html?id=1（全域最舊的那筆，見 js/data-loader.js assignGlobalSeq）測「產生分享圖」，
+// 被屏蔽的列沒有分享鈕。所以最舊的幾筆不放審稿示範，測試資料才穩定。
+{
+  const ts = (r) => { const t = new Date(r.timestamp).getTime(); return Number.isFinite(t) ? t : Infinity; };
+  const tiebreak = (r) => `${r.institutionName || ''}|${r.unitName || ''}|${r.comment || ''}`;
+  all.slice().sort((a, b) => (ts(a) - ts(b)) || tiebreak(a).localeCompare(tiebreak(b), 'zh-Hant'))
+    .slice(0, 20).forEach((r) => { r._keepClean = true; });
+}
 
 let total = 0;
 const auditRows = [];
