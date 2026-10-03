@@ -2,8 +2,8 @@
 //
 // 資料來源由 js/env.js 的 MODE 決定：mock 讀下面的 csvUrlMock（data/mock/*.csv），
 // live 讀 env.js 的 LIVE.csvUrls（Google Sheet 發布 CSV）。這裡不必再改。
-import { C } from './theme.js?v=b540de8f2d';
-import { csvUrlFor } from './env.js?v=b540de8f2d';
+import { C } from './theme.js?v=483b4e6a5f';
+import { csvUrlFor } from './env.js?v=483b4e6a5f';
 
 export const SITE = {
   name: '護理職場透明化運動',
@@ -172,7 +172,6 @@ export const CATEGORIES = [
         options: ['有，隨叫隨到', '有，但常需等待', '無，靠護理人員自己'] },
       { key: 'postIncidentSupport', label: '暴力事件後支持', type: 'enum',
         options: ['非常完善', '良好', '普通', '不太足夠', '非常不足'] },
-      { key: 'stressLevel', label: '整體壓力 (1-5)', type: 'number' },
       { key: 'specialBenefits', label: '特殊福利', type: 'text' },
     ],
   },
@@ -364,8 +363,6 @@ export const CATEGORIES = [
         options: ['0', '1', '2', '3 間以上'] },
       { key: 'hasProtectionRoom', label: '保護室狀況', type: 'enum',
         options: ['良好', '堪用', '老舊／不安全', '無保護室'] },
-      { key: 'stressLevel', label: '整體壓力 (1-5)', type: 'number' },
-      { key: 'careDifficulty', label: '病人照顧難度 (1-5)', type: 'number' },
       { key: 'specialBenefits', label: '特殊福利', type: 'text' },
     ],
   },

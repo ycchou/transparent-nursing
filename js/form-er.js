@@ -1,7 +1,7 @@
 // 急診自建表單：只定義急診專屬區塊，其餘（機構基本資料 / 輪班別與津貼 / 人力與支援 /
 // 業務與工時共用欄 / 職場暴力 / 薪資與年資 / 整體評價）沿用 form-sections.js 的共用正本。
 
-import { initDepartmentForm } from './form-engine.js?v=b540de8f2d';
+import { initDepartmentForm } from './form-engine.js?v=483b4e6a5f';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
@@ -16,7 +16,7 @@ import {
   VIOLENCE_FREQ_FIELD,
   VIOLENCE_RISK_FIELD,
   POST_INCIDENT_SUPPORT_FIELD,
-} from './form-sections.js?v=b540de8f2d';
+} from './form-sections.js?v=483b4e6a5f';
 
 // 急診各區負荷差很多，護病比改「依區域」問，不依白／小夜／大夜（急診三班的人力配置通常相近）。
 // 重症／急救區比照加護病房的刻度；留觀／一般診療區比照病房刻度。都加「沒待過此區」。
@@ -101,9 +101,6 @@ const ER_FORM_SCHEMA = [
   { name: 'securitySupport', label: '發生暴力或衝突時，警衛／保全是否能即時協助', type: 'radio',
     options: ['有，隨叫隨到', '有，但常需等待', '無，靠護理人員自己'] },
   POST_INCIDENT_SUPPORT_FIELD,
-
-  { section: '整體負擔' },
-  { name: 'stressLevel', label: '整體壓力', type: 'radio', options: scale('很低', '非常高') },
 
   ...SALARY_SECTION,
   ...EVALUATION_SECTION,

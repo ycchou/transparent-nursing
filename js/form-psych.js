@@ -1,7 +1,7 @@
 // 精神科自建表單：只定義精神科專屬區塊，其餘（機構基本資料 / 輪班別與津貼（病房版）/ 人力與支援 /
 // 業務與工時共用欄 / 薪資與年資 / 整體評價）沿用 form-sections.js 的共用正本。
 
-import { initDepartmentForm } from './form-engine.js?v=b540de8f2d';
+import { initDepartmentForm } from './form-engine.js?v=483b4e6a5f';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
@@ -16,7 +16,7 @@ import {
   VIOLENCE_FREQ_FIELD,
   VIOLENCE_RISK_FIELD,
   POST_INCIDENT_SUPPORT_FIELD,
-} from './form-sections.js?v=b540de8f2d';
+} from './form-sections.js?v=483b4e6a5f';
 
 // 護病比刻度：與病房相同（WARD_RATIO，拆「常態」「最忙時」），
 // 另加「無此班別」給日間照護等沒有小夜／大夜的單位。
@@ -117,10 +117,6 @@ const PSYCH_FORM_SCHEMA = [
     options: ['0', '1', '2', '3 間以上'] },
   { name: 'hasProtectionRoom', label: '保護室狀況', type: 'radio',
     options: ['良好', '堪用', '老舊／不安全', '無保護室'] },
-
-  { section: '整體負擔' },
-  { name: 'stressLevel', label: '整體壓力', type: 'radio', options: scale('很低', '非常高') },
-  { name: 'careDifficulty', label: '病人照顧難度', type: 'radio', options: scale('很容易', '非常困難') },
 
   ...SALARY_SECTION,
   ...EVALUATION_SECTION,
