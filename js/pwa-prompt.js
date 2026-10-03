@@ -5,9 +5,9 @@
 // - 本地埋點（trackPwa）：dispatch CustomEvent + localStorage 累計（未接外部服務）
 // import { initPWAPrompt, showInstallGuide, notePwaIntent, isAppInstalled } from './pwa-prompt.js?v=...';
 
-import { C } from './theme.js?v=b6ec89f547';
-import { showToast } from './toast.js?v=b6ec89f547';
-import { icon } from './icons.js?v=b6ec89f547';
+import { C } from './theme.js?v=31f67186c8';
+import { showToast } from './toast.js?v=31f67186c8';
+import { icon } from './icons.js?v=31f67186c8';
 
 const DISMISS_KEY = '__nursing_pwa_dismissed';          // 最近一次關閉/延後的時間戳
 const DISMISS_COUNT_KEY = '__nursing_pwa_dismiss_count'; // 累計「主動關閉」次數
@@ -285,8 +285,11 @@ async function triggerNativeInstall() {
   }
 }
 
-/** 詳細教學 modal（footer 入口、banner「詳細步驟」、或主動呼叫）。圖解內容在 install-guide.js（開啟時才載入）。 */
-export async function showInstallGuide() {
+/**
+ * 詳細教學 modal（footer 入口、banner「詳細步驟」、或主動呼叫）。圖解內容在 install-guide.js（開啟時才載入）。
+ * lead：教學上方加一段說明（例：追蹤醫院需要先安裝 App），可含 HTML。
+ */
+export async function showInstallGuide({ lead = '' } = {}) {
   const platform = detectPlatform();
   if (platform === 'installed') {
     showToast('你已經把這個網站加到主畫面囉', 'info');
@@ -296,7 +299,7 @@ export async function showInstallGuide() {
 
   let guide;
   try {
-    guide = await import('./install-guide.js?v=b6ec89f547');
+    guide = await import('./install-guide.js?v=31f67186c8');
   } catch {
     showToast('教學載入失敗，請檢查網路後再試一次', 'error');
     return;
@@ -321,7 +324,7 @@ export async function showInstallGuide() {
         </div>
         <button class="modal-close" aria-label="關閉" id="pwa-modal-close">${icon('x', { size: 18 })}</button>
       </div>
-      <div class="modal-body">${guide.installGuideHtml({ canOneTap: !!deferredInstallPrompt })}</div>
+      <div class="modal-body">${lead ? `<div class="pwa-guide-lead">${lead}</div>` : ''}${guide.installGuideHtml({ canOneTap: !!deferredInstallPrompt })}</div>
     </div>
   `;
   document.body.appendChild(modal);

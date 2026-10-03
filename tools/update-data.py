@@ -12,12 +12,15 @@
      （健保署主站有機器人驗證，這兩種只能用瀏覽器下載；下載後留在「下載」資料夾即可）
   3. tools/build-all.py 增量建置：只重跑輸入有變的步驟（人力監控另有逐檔快取）
   4. README.md 的資料範圍（人力監控、護病比）改成最新
+  5. tools/build-feed.py 比對各醫院最新財報年度／護病比月份，有新的就排進推播批次
+     （push 後部署成功，GitHub Actions 會通知追蹤這些醫院的人；先印「推播預覽」讓你確認）
 
 用法：
   python tools/update-data.py                  抓＋歸檔＋有變才建置
   python tools/update-data.py --commit         完成後 git commit（只提交資料與其衍生檔）
   python tools/update-data.py --commit --push  並 push（push 到 main 即觸發 GitHub Pages 部署）
   python tools/update-data.py --no-fetch       不連網，只歸檔手動下載的檔案並建置
+  python tools/update-data.py --silent         這次不推播（補舊資料、大修正時用；仍會更新比對基準）
 
 需要：pdfplumber（人力監控）、odfpy＋pandas（財務）
 """
@@ -150,6 +153,7 @@ def main():
     fetch = '--no-fetch' not in sys.argv
     commit = '--commit' in sys.argv
     push = '--push' in sys.argv
+    silent = '--silent' in sys.argv
     notes, new = [], []
 
     if fetch:
@@ -172,10 +176,14 @@ def main():
 
     run([PY, 'tools/build-all.py'])
     p_last, n_last = update_readme()
+    r = run([PY, 'tools/build-feed.py'] + (['--silent'] if silent else []), capture=True)
+    preview = next((l for l in r.stdout.splitlines() if l.startswith('推播預覽')), '推播預覽：（無）')
+    pushed = last_json(r.stdout).get('events', 0) if not silent else 0
 
     print('\n' + '═' * 60)
     print(f'人力監控到 {p_last}；護病比到 {n_last}')
     print('本次新增：' + ('、'.join(new) if new else '無'))
+    print(preview)
     for n in notes:
         print('⚠ ' + n)
 
@@ -185,7 +193,8 @@ def main():
             print('沒有需要提交的變更')
             return
         msg = 'data: 官方資料更新' + (f'（{"、".join(new)}）' if new else '') + \
-              f'\n\n人力監控至 {p_last}；護病比至 {n_last}。由 tools/update-data.py 產生。'
+              f'\n\n人力監控至 {p_last}；護病比至 {n_last}。由 tools/update-data.py 產生。' + \
+              (f'\n部署後推播 {pushed} 筆醫院資料更新給追蹤者。' if pushed else '')
         run(['git', 'commit', '-m', msg])
         if push:
             run(['git', 'push'])

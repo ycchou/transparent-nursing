@@ -5,17 +5,20 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { renderIcons } from './icons.js?v=b6ec89f547';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=b6ec89f547';
+import { renderIcons } from './icons.js?v=31f67186c8';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=31f67186c8';
 
-import { notePwaIntent } from './pwa-prompt.js?v=b6ec89f547';
+import { notePwaIntent } from './pwa-prompt.js?v=31f67186c8';
 
-import { skeletonRows } from './skeleton.js?v=b6ec89f547';
-import { escapeHtml } from './moderation.js?v=b6ec89f547';
-import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=b6ec89f547';
-import { state, loadBaseData } from './hospital-data.js?v=b6ec89f547';
+import { skeletonRows } from './skeleton.js?v=31f67186c8';
+import { escapeHtml } from './moderation.js?v=31f67186c8';
+import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=31f67186c8';
+import { state, loadBaseData } from './hospital-data.js?v=31f67186c8';
 
-import { readCodeParam } from './hospital-merges.js?v=b6ec89f547';
+import { readCodeParam } from './hospital-merges.js?v=31f67186c8';
+import { isFollowing, followHospital, unfollowHospital } from './follow.js?v=31f67186c8';
+import { showToast } from './toast.js?v=31f67186c8';
+import { icon } from './icons.js?v=31f67186c8';
 import {
   renderNurseSection,
   renderFinancialsSection,
@@ -23,7 +26,7 @@ import {
   renderPlatformSection,
   renderViolationsSection,
   copyOrShare,
-} from './hospital-sections.js?v=b6ec89f547';
+} from './hospital-sections.js?v=31f67186c8';
 
 // ---------- utils ----------
 // 舊碼（改制換碼）會轉成新碼並改寫網址
@@ -190,6 +193,8 @@ function renderHeader(hosp) {
   if (hosp.phone) lines.push(`電話：${escapeHtml(hosp.phone)}`);
   document.getElementById('hosp-code').innerHTML = lines.map((l) => `<div>${l}</div>`).join('');
 
+  renderFollowButton(hosp);
+
   // 本頁自己的分享連結（hospital.html?code=…）
   const shareBtn = document.getElementById('hosp-share-btn');
   if (shareBtn) {
@@ -199,6 +204,35 @@ function renderHeader(hosp) {
       copyOrShare(u.toString(), shareBtn, '分享此機構');
     };
   }
+}
+
+// 追蹤（推播）：不在 App 模式時 followHospital 會改為顯示「加到主畫面」教學
+function renderFollowButton(hosp) {
+  const btn = document.getElementById('hosp-follow-btn');
+  if (!btn) return;
+  const paint = () => {
+    const on = isFollowing(hosp.code);
+    btn.classList.toggle('is-following', on);
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.innerHTML = `${icon(on ? 'check' : 'bell', { size: 14 })} <span class="btn-label">${on ? '已追蹤' : '追蹤'}</span>`;
+  };
+  paint();
+  btn.onclick = async () => {
+    if (btn.disabled) return;
+    const name = hosp.shortName || getShort(hosp.name) || hosp.name;
+    btn.disabled = true;
+    try {
+      if (isFollowing(hosp.code)) {
+        await unfollowHospital(hosp.code);
+        showToast(`已取消追蹤${name}`, 'info');
+      } else if (await followHospital(hosp.code, name)) {
+        showToast(`已追蹤${name}：有新分享、財報、護病比時會通知你（可到「我的追蹤」調整）`, 'info');
+      }
+    } finally {
+      btn.disabled = false;
+      if (state.currentCode === hosp.code) paint();
+    }
+  };
 }
 
 function setupSearch() {
@@ -245,6 +279,9 @@ export async function initHospital() {
     const code = parseDeepLinkCode();
     if (code && state.byCode.has(code)) {
       selectHospital(code, false);
+      // 推播通知點進來會帶 &tab=（pf 分享平台／fi 財務／nr 護病比），直接打開對應頁簽
+      const tab = new URL(location.href).searchParams.get('tab');
+      if (tab && document.querySelector(`#hosp-tabs .tab[data-tab="${CSS.escape(tab)}"]`)) activateHospTab(tab);
     } else if (code) {
       setDeepLinkUrl(null, true);
     }

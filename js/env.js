@@ -17,6 +17,10 @@ export const LIVE = {
   // 所以 live 模式沒填這個的話，送出會被 Worker 以 captcha 擋掉。
   turnstileSiteKey: '0x4AAAAAAE8v4Oes5qX-yykM',
 
+  // 機構追蹤推播的 VAPID 公鑰（公開值；私鑰只放 Worker secret）。產生：node worker-submit/gen-vapid.mjs
+  // 留空 → 「追蹤」按鈕會提示推播尚未開放。推播 API 與 submitEndpoint 同一個 Worker（/push/*）。
+  vapidPublicKey: 'BEV5XJcwiYaDJ_2o23uJOdNXNL1Fi30LH2cUFSKShCJZVrmFgh4hZFyNoW_frFQFKlUJuphDIGNFfdpqYeNhZuU',
+
   // 各類別的 Google Sheet「發布到網路 → CSV」連結（見 docs/sheet-setup.md）
   // 留空的類別在 live 模式下會自動退回該類別的測試資料，並在 console 提示。
   csvUrls: {

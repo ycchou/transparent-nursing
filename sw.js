@@ -9,6 +9,8 @@
 //   jsDelivr（Chart.js、PapaParse） 網址含版本 → 快取優先
 //   其餘（Worker API、Google Sheet CSV、投稿 POST…）不經本檔，照前端原本的快取邏輯
 //
+// 另外處理機構追蹤的推播通知（push／notificationclick，見下方）。
+//
 // 改快取策略時把 CACHE_VERSION +1：啟用時會清掉舊版的快取。
 
 const CACHE_VERSION = 1;
@@ -53,6 +55,37 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(staleWhileRevalidate(event));
   }
   // 其他一律不攔截（Worker API、Google Sheet、Cloudflare Turnstile…）
+});
+
+// ===== 機構追蹤推播（js/follow.js 訂閱；tn-submit Worker 發送，內容已加密）=====
+// payload：{ title, body, url, tag }。url 是相對網站根目錄的路徑（例 hospital.html?code=…&tab=pf）。
+self.addEventListener('push', (event) => {
+  let d = {};
+  try { d = event.data ? event.data.json() : {}; } catch {}
+  const title = d.title || '護理職場透明化';
+  event.waitUntil(self.registration.showNotification(title, {
+    body: d.body || '你追蹤的醫院有更新',
+    icon: new URL('assets/apple-touch-icon-180.png', SCOPE).href,
+    badge: new URL('assets/apple-touch-icon-120.png', SCOPE).href,
+    tag: d.tag || undefined,
+    renotify: !!d.tag,
+    data: { url: new URL(d.url || 'follows.html', SCOPE).href },
+  }));
+});
+
+// 點通知：已開著的 App 視窗就切過去並導到該頁，沒有就開新視窗
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || SCOPE.href;
+  event.waitUntil((async () => {
+    const wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    const win = wins.find((w) => w.url.startsWith(SCOPE.href));
+    if (win) {
+      try { await win.focus(); } catch {}
+      try { return await win.navigate(url); } catch {}
+    }
+    return self.clients.openWindow(url);
+  })());
 });
 
 // 可存的回應：成功的同源／CORS 回應；第三方 <script>／<link> 的 opaque 回應也存（狀態碼看不到，但只存 CDN）

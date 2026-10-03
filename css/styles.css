@@ -6273,3 +6273,120 @@ html.ptr-enabled body {
   flex-shrink: 0;
   margin: 0;
 }
+/* ---------- 機構追蹤（推播）：機構頁的追蹤鈕、我的追蹤頁（follows.html）、安裝教學上方說明 ---------- */
+
+.hosp-head-actions {
+  display: flex;
+  gap: 8px;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+}
+.hosp-follow-btn {
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  gap: 6px;
+}
+.hosp-follow-btn.is-following {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: white;
+}
+.hosp-follow-btn.is-following:hover { background: var(--primary-dark); color: white; }
+.hosp-follow-btn:disabled { opacity: .6; cursor: progress; }
+
+/* 安裝教學 modal 上方的情境說明（例：追蹤醫院需要先安裝 App） */
+.pwa-guide-lead {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+  background: var(--tint-warning);
+  border: 1px solid var(--warning);
+  color: var(--ink);
+  line-height: 1.7;
+  font-size: 0.95rem;
+}
+
+/* ---------- 我的追蹤 ---------- */
+.follow-status {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.follow-status-icon {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--border-soft);
+  color: var(--primary);
+}
+.follow-status.is-ok .follow-status-icon { background: var(--tint-success); color: var(--success-text); }
+.follow-status.is-warn .follow-status-icon { background: var(--tint-warning); color: var(--warning-text); }
+.follow-status h2 { margin: 0 0 4px; font-size: 1.1rem; }
+.follow-status p { margin: 0; color: var(--muted); line-height: 1.7; }
+.follow-status .btn { margin-top: 12px; }
+
+.follow-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+.follow-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+.follow-item-name {
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+  word-break: break-word;
+}
+.follow-item-name:hover { color: var(--primary); }
+.follow-item-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.follow-kind {
+  padding: 6px 12px;
+  min-height: 36px;
+  font-size: var(--fs-sm);
+  border-radius: var(--radius-tag);
+  background: var(--border-soft);
+  color: var(--ink-soft);
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+}
+.follow-kind[aria-pressed="true"] { background: var(--primary); color: white; }
+.follow-kind:hover { border-color: var(--primary); }
+.follow-unfollow {
+  min-height: 36px;
+  padding: 6px 12px;
+  font-size: var(--fs-sm);
+  border-radius: var(--radius-tag);
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+}
+.follow-unfollow:hover { border-color: var(--danger); color: var(--danger); }
+.follow-delete-all.is-armed { background: var(--danger); border-color: var(--danger); color: white; }
+
+@media (max-width: 640px) {
+  .follow-item { align-items: flex-start; flex-direction: column; }
+}

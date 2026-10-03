@@ -71,3 +71,41 @@ wrangler deploy                   # 取得 https://tn-submit.<子網域>.workers
 curl -X POST https://tn-submit.<子網域>.workers.dev/submit \
   -H 'Origin: https://ycchou.github.io' -d 'foo=bar'
 ```
+
+## 機構追蹤推播（Web Push）
+
+使用者在**已安裝的 App（PWA）**裡追蹤醫院，有新分享、新年度財報、護病比新月份時推播通知。
+一般瀏覽器裡按「追蹤」只會顯示加到主畫面教學（iOS 只有主畫面 App 收得到推播，全平台統一規則）。
+
+- `src/push.js` — 訂閱（`/push/subscribe`、`/push/unsubscribe`）、事件 → 每人一則彙整、排隊發送（`/notify`、`/push/drain`）
+- `src/webpush.js` — RFC 8291 加密＋VAPID 簽章，只用 WebCrypto，無第三方套件
+- 前端：`js/follow.js`、`js/follows-page.js`（`follows.html`）、`sw.js` 的 push／notificationclick
+
+**事件驅動，沒有輪詢：**
+- 新分享：`/submit` 成功後在同一次執行裡排進佇列，再呼叫自己（`SELF`）的 `/push/drain` 送出
+- 財報／護病比：`tools/update-data.py` 產生 `data/feed/outbox.json` → push 後部署成功，
+  GitHub Actions 的 `notify` job 跑 `tools/send-notify.py` POST `/notify`（Worker 以批次 id 去重）
+- 免費方案單次執行最多 50 個子請求，所以每次送 40 則，剩下的由 `SELF` 接力／Actions 反覆呼叫 `/push/drain`；
+  每日 Cron 再補送一批當保險
+
+### 啟用步驟
+
+```bash
+cd worker-submit
+npx wrangler d1 execute tn-submit --remote --file=schema.sql      # 新增 push_* 資料表（IF NOT EXISTS，可重跑）
+node gen-vapid.mjs                                                  # 產生金鑰，照輸出設定 ↓
+echo -n '<公鑰>' | npx wrangler secret put VAPID_PUBLIC_KEY
+echo -n '<私鑰>' | npx wrangler secret put VAPID_PRIVATE_KEY
+echo -n 'mailto:<聯絡信箱>' | npx wrangler secret put VAPID_SUBJECT
+node -e "console.log(require('crypto').randomBytes(24).toString('hex'))"   # 產生 NOTIFY_TOKEN ↓
+echo -n '<上面那串>' | npx wrangler secret put NOTIFY_TOKEN
+npx wrangler deploy
+```
+
+然後：
+1. `js/env.js` 的 `LIVE.vapidPublicKey` 填公鑰 → `python tools/stamp-assets.py` → push。
+2. GitHub repo → Settings → Secrets and variables → Actions：
+   Secret `NOTIFY_TOKEN`（同上）、Variable `NOTIFY_URL` = `https://tn-submit.<子網域>.workers.dev/notify`。
+
+`vapidPublicKey` 留空時，App 裡按「追蹤」會顯示「推播通知即將開放」；`NOTIFY_*` 沒設時 Actions 直接略過推播。
+**換 VAPID 金鑰會讓所有既有訂閱失效**，產生一次就好。

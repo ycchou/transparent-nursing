@@ -165,3 +165,25 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  # 機構追蹤推播：部署成功後，把 data/feed/outbox.json 近 3 天的批次送給 tn-submit Worker。
+  # 只有你用 tools/update-data.py 上傳了新的財報年度／護病比月份才會有批次；其他 push 會直接略過。
+  # 需在 repo Settings 設定：Secrets → NOTIFY_TOKEN、Variables → NOTIFY_URL（沒設就略過，不影響部署）。
+  notify:
+    needs: deploy
+    if: github.event_name != 'pull_request' && needs.deploy.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: 送出推播（使用者點通知時要看得到新資料，所以排在部署之後）
+        env:
+          NOTIFY_URL: ${{ vars.NOTIFY_URL }}
+          NOTIFY_TOKEN: ${{ secrets.NOTIFY_TOKEN }}
+        run: python tools/send-notify.py

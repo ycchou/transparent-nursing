@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#FFFFFF" />
+  <!-- 軟鎖總開關（js/gate.js）：鎖定期非公開頁導向 coming-soon -->
+  <script src="./js/gate.js?v=31f67186c8"></script>
+  <script src="./js/shell.js?v=31f67186c8"></script>
+
+  <title>我的追蹤 — 護理職場透明化運動</title>
+  <meta name="description" content="管理追蹤的醫院：有新分享、新財報、護病比更新時推播通知。" />
+  <meta name="robots" content="noindex, follow" />
+  <link rel="canonical" href="https://ycchou.github.io/transparent-nursing/follows.html" />
+
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon-180.png" />
+  <link rel="manifest" href="manifest.json" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css?v=cb5d51287a" />
+
+  <link rel="modulepreload" href="./js/components.js?v=31f67186c8" />
+  <link rel="modulepreload" href="./js/config.js?v=31f67186c8" />
+  <link rel="modulepreload" href="./js/env.js?v=31f67186c8" />
+  <link rel="modulepreload" href="./js/follow.js?v=31f67186c8" />
+  <link rel="modulepreload" href="./js/follows-page.js?v=31f67186c8" />
+  <link rel="modulepreload" href="./js/fresh-data.js?v=31f67186c8" />
+  <link rel="modulepreload" href="./js/icons.js?v=31f67186c8" />
+  <link rel="modulepreload" href="./js/moderation.js?v=31f67186c8" />
+  <link rel="modulepreload" href="./js/pull-to-refresh.js?v=31f67186c8" />
+  <link rel="modulepreload" href="./js/pwa-prompt.js?v=31f67186c8" />
+  <link rel="modulepreload" href="./js/scroll-hint.js?v=31f67186c8" />
+  <link rel="modulepreload" href="./js/theme.js?v=31f67186c8" />
+  <link rel="modulepreload" href="./js/toast.js?v=31f67186c8" />
+</head>
+<body>
+  <div id="app-header"></div>
+  <script>TNShell.mount()</script>
+
+  <section class="page-head page-head--roomy">
+    <div class="container container-narrow">
+      <span class="eyebrow">Following</span>
+      <h1 class="page-title">我的追蹤</h1>
+      <p style="color:var(--muted);line-height:1.8;">追蹤醫院後，這家醫院有<strong class="text-ink">新分享</strong>、<strong class="text-ink">新年度財報</strong>或<strong class="text-ink">護病比更新</strong>時，會用推播通知你。</p>
+    </div>
+  </section>
+
+  <section style="padding-top:0;padding-bottom:64px;">
+    <div class="container container-narrow">
+      <div class="card" id="follow-status"></div>
+
+      <h2 style="margin:28px 0 12px;font-size:1.15rem;">追蹤中的醫院</h2>
+      <p style="color:var(--muted);font-size:0.9rem;margin:0 0 12px;">點選類型可切換要不要收那一類通知。</p>
+      <ul class="follow-list" id="follow-list"></ul>
+      <div id="follow-empty" class="card card-flat" style="text-align:center;color:var(--muted);padding:28px 20px;" hidden>
+        還沒有追蹤任何醫院。到 <a href="hospital.html" class="link">機構總覽</a> 選一家醫院，按名稱旁的「追蹤」即可。
+      </div>
+
+      <h2 style="margin:32px 0 12px;font-size:1.15rem;">我們存了什麼</h2>
+      <div style="color:var(--ink-soft);line-height:1.85;font-size:0.95rem;">
+        <p style="margin:0 0 8px;">追蹤清單存在<strong class="text-ink">你這台裝置上</strong>。為了送出通知，伺服器只另外保存兩樣東西：瀏覽器提供的<strong class="text-ink">推播位址</strong>（一串隨機網址，不含你的身分），以及你追蹤的<strong class="text-ink">機構代號與通知類型</strong>。</p>
+        <p style="margin:0 0 8px;">不需要帳號或 Email，也不記錄 IP，推播訂閱和你送出的分享<strong class="text-ink">沒有任何關聯</strong>。通知只會說「有 1 則新分享」，不會帶出分享內容。</p>
+        <p style="margin:0;">取消所有追蹤，或按下方按鈕，伺服器上的這些資料就會立刻刪除。</p>
+      </div>
+      <button type="button" class="btn btn-secondary follow-delete-all" id="follow-delete-all" style="margin-top:16px;">刪除這台裝置的追蹤與訂閱資料</button>
+    </div>
+  </section>
+
+  <div id="app-footer"></div>
+
+  <script type="module">
+    import { mountLayout } from './js/components.js?v=31f67186c8';
+    import { renderIcons } from './js/icons.js?v=31f67186c8';
+    import { initFollowsPage } from './js/follows-page.js?v=31f67186c8';
+    mountLayout();
+    renderIcons();
+    initFollowsPage();
+  </script>
+</body>
+</html>

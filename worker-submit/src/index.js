@@ -13,6 +13,9 @@
 // 機密皆為 Worker secret（見 README）：
 //   TURNSTILE_SECRET / APPS_SCRIPT_URL / APPS_SCRIPT_SECRET / SALT（限流雜湊鹽，不存原始 IP/UA）
 //   GEMINI_API_KEY（AI 審稿；未設定時自動略過審稿，投稿照常公開）
+//   VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY / VAPID_SUBJECT / NOTIFY_TOKEN（機構追蹤推播，見 src/push.js）
+
+import { handleSubscribe, handleUnsubscribe, handleNotify, drain, authorized, notifyNewComment } from './push.js';
 
 const ALLOWED_ORIGINS = ['https://ycchou.github.io', 'http://localhost', 'http://127.0.0.1'];
 const CAP_PER_KEY_PER_DAY = 5;  // 單一「IP+裝置+版本」每日提交上限（可調）
@@ -398,17 +401,39 @@ async function handleUnlock(request, env, cors) {
   return json({ ok: true }, cors);
 }
 
+// 投稿被 AI 判為廣告（G）或亂填（J）時不推播「有新分享」
+const NO_PUSH_CODES = new Set(['G', 'J']);
+
 export default {
-  async fetch(request, env) {
+  async fetch(request, env, ctx) {
     const origin = request.headers.get('Origin');
     const cors = corsHeaders(origin);
+    const path = new URL(request.url).pathname;
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors });
     if (request.method !== 'POST') return json({ error: 'method' }, cors, 405);
+
+    // 伺服器對伺服器（GitHub Actions、本 Worker 接力）：以 NOTIFY_TOKEN 驗證，不看 Origin
+    if (path === '/notify' || path === '/push/drain') {
+      const reply = (o, s = 200) => json(o, {}, s);
+      if (!(await authorized(request, env))) return reply({ error: 'unauthorized' }, 401);
+      try {
+        if (path === '/notify') return await handleNotify(request, env, ctx, reply);
+        const hop = parseInt(request.headers.get('X-Hop') || '0', 10) || 0;
+        return reply({ ok: true, ...(await drain(env, ctx, hop)) });
+      } catch (e) { return reply({ error: String(e) }, 500); }
+    }
+
     if (!originAllowed(origin)) return json({ error: 'forbidden' }, cors, 403);
 
-    if (new URL(request.url).pathname === '/unlock') {
+    if (path === '/unlock') {
       try { return await handleUnlock(request, env, cors); }
       catch (e) { return json({ error: String(e) }, cors, 500); }
+    }
+    if (path === '/push/subscribe' || path === '/push/unsubscribe') {
+      const reply = (o, s = 200) => json(o, cors, s);
+      try {
+        return await (path === '/push/subscribe' ? handleSubscribe : handleUnsubscribe)(request, env, reply);
+      } catch (e) { return reply({ error: String(e) }, 500); }
     }
 
     try {
@@ -452,6 +477,10 @@ export default {
       if (!r.ok) return json({ error: 'upstream', status: r.status }, cors, 502);
       // ⑤ 投稿成功才發解鎖碼（發放失敗不影響投稿，前端沒拿到碼就不顯示）
       const unlockCode = await issueUnlockCode(env, day);
+      // ⑥ 通知追蹤這家醫院的人（背景執行，不拖慢回應；內容不帶投稿文字）
+      if (!(mod.verdict === 'block' && NO_PUSH_CODES.has(mod.code))) {
+        ctx.waitUntil(notifyNewComment(env, ctx, clean.institutionName));
+      }
       // 回傳判定給前端，讓投稿者當下就知道短評被屏蔽（不回 AI 原文理由）
       return json({
         ok: true,
@@ -468,10 +497,13 @@ export default {
     }
   },
 
-  // 每日 Cron（見 wrangler.toml [triggers]）：清限流舊列
+  // 每日 Cron（見 wrangler.toml [triggers]）：清限流舊列、補送推播佇列
   async scheduled(event, env, ctx) {
     const cutoff = dayMinus(taipeiDay(), 1);
     ctx.waitUntil(env.DB.prepare('DELETE FROM sub_rate WHERE day < ?').bind(cutoff).run());
     ctx.waitUntil(env.DB.prepare('DELETE FROM unlock_rate WHERE day < ?').bind(cutoff).run());
+    ctx.waitUntil(env.DB.prepare('DELETE FROM push_rate WHERE day < ?').bind(cutoff).run());
+    // 推播佇列的保險：接力中斷而留下的通知，每天補送一批
+    ctx.waitUntil(drain(env, ctx).catch((e) => console.warn('每日補送失敗', e.message)));
   },
 };

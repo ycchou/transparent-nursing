@@ -24,6 +24,7 @@
       // 3 個違規紀錄合併進 records.html，match 陣列同時涵蓋舊 URL 讓 nav highlight 保留
       { href: 'records.html',     label: '違規紀錄', match: ['records.html', 'violations.html', 'gender.html', 'osha.html'] },
       { href: 'stats.html',       label: '統計摘要', match: ['stats.html'] },
+      { href: 'follows.html',     label: '我的追蹤', match: ['follows.html'] },
     ] },
     // desktopFirst：電腦版頂部導覽排到最左邊（CSS order，陣列順序不動 → 手機漢堡選單順序不變）
     { href: 'participate.html', label: '填寫表單', match: ['participate.html'], desktopFirst: true },
@@ -57,6 +58,7 @@
       more: {
         title: '更多',
         items: [
+          { href: 'follows.html', label: '我的追蹤', desc: '追蹤醫院，有更新推播通知你', icon: 'bell', match: ['follows.html'] },
           { href: 'about.html', label: '關於我們', desc: '運動緣起與常見問題', icon: 'info', match: ['about.html'] },
           { href: 'support.html', label: '支持我們', desc: '小額捐款，讓平台走得更遠', icon: 'heart', match: ['support.html'] },
           { href: 'terms.html', label: '服務條款', icon: 'file-text', match: ['terms.html'] },
