@@ -49,7 +49,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/styles.css?v=5f8c5ddc6d" />
+  <link rel="stylesheet" href="css/styles.css?v=bf94c74a27" />
 
     <!-- modulepreload：平行載入 ES module 鏈（首次造訪快 30-50%） -->
   <link rel="modulepreload" href="./js/components.js?v=ed5f8b12b6" />
@@ -87,20 +87,24 @@
   <div id="app-header"></div>
   <script>TNShell.mount()</script>
 
-  <section class="page-head page-head--roomy">
+  <section class="page-head page-head--roomy participate-head">
     <div class="container container-narrow" style="text-align:center;">
       <span class="eyebrow">Participate</span>
       <h1 class="page-title page-title--spaced">分享你的職場資訊，<br class="md-only"/>幫助下一個護理師</h1>
-      <p style="color:var(--muted);font-size:1.05rem;line-height:1.75;">
+      <!-- 手機／PWA：只留一行重點，讓類別選單一進來就在畫面內；完整說明在下方「隱私與資料使用」 -->
+      <p class="participate-intro-short">約 3–5 分鐘・完全匿名・<strong>送出即公開、無法撤回</strong></p>
+      <p class="participate-intro-full" style="color:var(--muted);font-size:1.05rem;line-height:1.75;">
         填寫時間約 3-5 分鐘。<strong class="text-ink">送出後即直接公開於分享平台</strong>，僅作為求職與職涯參考。
         我們不收集姓名、員工編號、IP 或 email；表單完全匿名、不可追溯、<strong style="color:var(--danger);">送出後無法撤回</strong>。
       </p>
     </div>
   </section>
 
-  <!-- 5 張表單卡 -->
-  <section style="padding-top:24px;">
+  <!-- 選類別：電腦版為說明卡片（#form-cards）；手機／PWA 為兩欄小方塊（#form-picker），一進來就看得到全部類別 -->
+  <section id="form-pick" class="form-pick-section" style="padding-top:24px;">
     <div class="container">
+      <p class="form-picker-title">選擇你的工作場域</p>
+      <div class="form-picker" id="form-picker" role="list"></div>
       <div class="grid grid-3" id="form-cards"></div>
     </div>
   </section>
@@ -251,6 +255,7 @@
   <script type="module">
     import { CATEGORIES } from './js/config.js?v=ed5f8b12b6';
     import { mountLayout } from './js/components.js?v=ed5f8b12b6';
+    import { showToast } from './js/toast.js?v=ed5f8b12b6';
     import { icon, renderIcons } from './js/icons.js?v=ed5f8b12b6';
     import { hasContributed, markContributed } from './js/contribution-gate.js?v=ed5f8b12b6';
     import { redeemUnlockCode, savedUnlockCode, unlockNoticeHtml, wireInstallGuide, copyText } from './js/unlock.js?v=ed5f8b12b6';
@@ -360,7 +365,7 @@
           <p>如果你還沒分享過自己的職場，按下這個鍵 — 就是在拿同行的真實付出走人，自己卻一份都沒留下。</p>
           <p class="g2g-modal-question"><strong>還沒填過的話 — 還來得及。按取消，去填一份吧。</strong><br/>已經填過了 — 按確定，5 分鐘後解鎖。</p>
           <div class="g2g-modal-actions">
-            <a href="#form-cards" id="g2g-modal-cancel-btn" class="btn btn-ghost">↑ 取消，我去填一份</a>
+            <a href="#form-pick" id="g2g-modal-cancel-btn" class="btn btn-ghost">↑ 取消，我去填一份</a>
             <button type="button" id="g2g-modal-confirm-btn" class="btn btn-danger">我已填過，開始等待</button>
           </div>
         </div>
@@ -383,7 +388,7 @@
         closeModal();
         // 等 modal close 動畫跑完再捲，避免 body.overflow:hidden 干擾
         setTimeout(() => {
-          const target = document.getElementById('form-cards');
+          const target = document.getElementById('form-pick');
           if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 220);
       });
@@ -411,7 +416,7 @@
           <p>這 5 分鐘的等待是給你想清楚的緩衝時間。<strong>如果心裡有那麼一點疙瘩 — 去填一份吧。</strong>3-5 分鐘填完，表單會自動為你解鎖，根本不用等到時間結束。</p>
           <div class="g2g-confirm-actions">
             <button type="button" id="g2g-cancel-btn" class="btn btn-ghost">取消等待</button>
-            <a href="#form-cards" class="btn btn-primary g2g-go-fill-btn">↑ 去填寫表單</a>
+            <a href="#form-pick" class="btn btn-primary g2g-go-fill-btn">↑ 去填寫表單</a>
           </div>
         </div>
       `;
@@ -533,6 +538,23 @@
           </div>
         </div>`;
     }).join('');
+
+    // 手機／PWA 的兩欄小方塊：整塊可點、直接進表單；未上線的變淡，點了提示改用「其他」表單
+    const otherForm = CATEGORIES.find((c) => c.slug === 'other' && c.formStatus === 'live');
+    document.getElementById('form-picker').innerHTML = ordered.map((c) => {
+      const tileIcon = `<span class="fp-icon" style="background:${c.color};">${icon(c.icon, { size: 20 })}</span>`;
+      if (c.formStatus === 'live') {
+        const ext = /^https?:\/\//i.test(c.formUrl || '') ? 'target="_blank" rel="noopener"' : '';
+        return `<a class="fp-tile" role="listitem" href="${c.formUrl}" ${ext}>${tileIcon}<span class="fp-name">${c.name}</span></a>`;
+      }
+      return `<button type="button" class="fp-tile is-soon" role="listitem" aria-disabled="true" data-name="${c.name}">
+          ${tileIcon}<span class="fp-name">${c.name}<small>即將推出</small></span></button>`;
+    }).join('');
+    document.getElementById('form-picker').addEventListener('click', (e) => {
+      const soon = e.target.closest('.fp-tile.is-soon');
+      if (!soon) return;
+      showToast(`「${soon.dataset.name}」表單還在準備中${otherForm ? '，可以先用「其他」表單填寫' : ''}`, 'info');
+    });
     renderIcons();
   </script>
 </body>

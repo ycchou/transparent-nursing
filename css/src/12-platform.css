@@ -585,3 +585,73 @@ body.calc-modal-open { overflow: hidden; }
   }
 }
 
+
+/* ---------- 填寫表單頁：手機／PWA 的類別小方塊（participate.html #form-picker） ----------
+   電腦版維持說明卡片（#form-cards）；≤640px 改成兩欄小方塊，一進頁面就看得到全部類別，不必往下滑找。 */
+.participate-intro-short,
+.form-picker-title,
+.form-picker { display: none; }
+
+@media (max-width: 640px) {
+  .participate-head { padding-top: 20px; padding-bottom: 4px; }
+  .participate-head .page-title { font-size: 1.45rem; margin-bottom: 8px; }
+  .participate-head .eyebrow { display: none; }
+  .participate-intro-full { display: none; }
+  .participate-intro-short {
+    display: block;
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.92rem;
+    line-height: 1.6;
+  }
+  .participate-intro-short strong { color: var(--danger); }
+
+  .form-pick-section { padding-top: 12px !important; }
+  .form-picker-title {
+    display: block;
+    margin: 0 0 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--ink-soft);
+  }
+  .form-picker {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  #form-cards { display: none; }
+
+  .fp-tile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 60px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--ink);
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .fp-tile:active { border-color: var(--primary); background: var(--surface-soft); }
+  .fp-icon {
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+  }
+  .fp-name { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+  .fp-name small { font-size: 0.72rem; font-weight: 500; color: var(--muted); }
+  .fp-tile.is-soon { opacity: .55; cursor: default; }
+  .fp-tile.is-soon .fp-icon { filter: grayscale(1); }
+}
