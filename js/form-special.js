@@ -3,7 +3,7 @@
 // 這類單位多半只上白班、以 on call 被叫回支援急做，且常有輻射暴露——所以不問三班護病比與夜班津貼，
 // 改問 on call 值班與輻射防護。
 
-import { initDepartmentForm } from './form-engine.js?v=9c413ac48c';
+import { initDepartmentForm } from './form-engine.js?v=e75b7b6da6';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
@@ -13,7 +13,9 @@ import {
   scale,
   certFields,
   lunchBreakField,
-} from './form-sections.js?v=9c413ac48c';
+  ON_CALL_FIELDS,
+  RADIATION_PROTECTION_FIELD,
+} from './form-sections.js?v=e75b7b6da6';
 
 const SPECIAL_FORM_SCHEMA = [
   ...buildInstitutionSection({
@@ -38,32 +40,12 @@ const SPECIAL_FORM_SCHEMA = [
     options: ['經常', '偶爾', '不會'] },
 
   { section: 'On call 值班', intro: '下班後待命、需要時被叫回院支援急做（如急性心肌梗塞的緊急心導管）。' },
-  { name: 'onCallRequired', label: '是否需要 on call', type: 'radio', required: true,
-    options: ['需要', '不需要'] },
-  { name: 'onCallFreq', label: '每月 on call 幾次', type: 'radio', required: true,
-    options: ['1-4 次', '5-8 次', '9-12 次', '13 次以上'],
-    showIf: { field: 'onCallRequired', equals: '需要' } },
-  { name: 'onCallCallback', label: 'On call 時被叫回院的頻率', type: 'radio',
-    options: ['幾乎每次都被叫回', '經常', '偶爾', '很少'],
-    showIf: { field: 'onCallRequired', equals: '需要' } },
-  { name: 'onCallArrival', label: '被叫回時要在幾分鐘內到院', type: 'radio',
-    options: ['15 分鐘內', '30 分鐘內', '60 分鐘內', '沒有規定'],
-    showIf: { field: 'onCallRequired', equals: '需要' } },
-  { name: 'onCallPay', label: '未出勤（沒被叫回）的值班費', type: 'radio',
-    options: ['無', '200-250 元', '250-300 元', '300 元以上', '其他'],
-    showIf: { field: 'onCallRequired', equals: '需要' } },
-  { name: 'restInterval11h', label: '被叫回出勤後，到下次上班之間有 11 小時間隔嗎', type: 'radio',
-    options: ['有', '無'],
-    showIf: { field: 'onCallRequired', equals: '需要' } },
-  { name: 'nextDayAfterCall', label: '半夜被叫回後，隔天是否照常上班', type: 'radio',
-    options: ['照常上班', '可晚到或補休', '隔天休假', '視情況'],
-    showIf: { field: 'onCallRequired', equals: '需要' } },
+  ...ON_CALL_FIELDS,
 
   { section: '輻射與職業安全' },
   { name: 'radiationExposure', label: '工作中的輻射暴露', type: 'radio', required: true,
     options: ['幾乎每天', '每週數次', '偶爾', '無（如內視鏡、高壓氧）'] },
-  { name: 'radiationProtection', label: '防護裝備是否充足（鉛衣、鉛眼鏡、甲狀腺護具）', type: 'radio',
-    options: ['充足且合身', '有但不足或老舊', '幾乎沒有', '不適用'] },
+  RADIATION_PROTECTION_FIELD,
   { name: 'dosimeter', label: '是否配戴劑量計並定期告知讀數', type: 'radio',
     options: ['有配戴，定期告知', '有配戴，但沒告知結果', '沒有配戴', '不適用'] },
   { name: 'radiationHealthCheck', label: '是否有輻射工作人員特殊健康檢查', type: 'radio',

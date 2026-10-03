@@ -42,6 +42,14 @@
       "ledeHtml": "<p class=\"page-lede\">\n        以下資料將 <strong class=\"text-ink\">匿名彙整</strong>，作為其他護理師求職與工作評估的真實參考。\n        填寫時請以客觀事實為主，避免情緒性敘述。完成需約 3-5 分鐘。\n      </p>\n      <div class=\"dform-callout\">\n        <span data-icon=\"shield-check\" data-size=\"18\"></span>\n        <span>本表單不會記錄你的 IP 或任何可識別資訊。</span>\n      </div>"
     },
     {
+      "slug": "or",
+      "title": "手術房職場資料分享",
+      "metaDescription": "手術房護理師專屬表單。匿名分享刀房護理配置、跨科輪刀、上台協助、值班與 on call、接刀晚刀超時、輻射與針扎等職業安全、薪資、工作氣氛等真實資訊，為下一位求職護理師留下指引。",
+      "ogDescription": "匿名分享手術房護理師的真實職場資訊，3-5 分鐘完成。",
+      "eyebrow": "手術房",
+      "ledeHtml": "<p class=\"page-lede\">\n        以下資料將 <strong class=\"text-ink\">匿名彙整</strong>，作為其他護理師求職與工作評估的真實參考。\n        填寫時請以客觀事實為主，避免情緒性敘述。完成需約 3-5 分鐘。\n      </p>\n      <div class=\"dform-callout\">\n        <span data-icon=\"shield-check\" data-size=\"18\"></span>\n        <span>本表單不會記錄你的 IP 或任何可識別資訊。</span>\n      </div>"
+    },
+    {
       "slug": "special",
       "title": "檢查/介入職場資料分享",
       "metaDescription": "心導管、電燒、內視鏡、血管攝影、高壓氧等檢查/介入單位護理師專屬表單。匿名分享每檯人力、on call 值班與叫回、輻射防護與加給、專業訓練、薪資、工作氣氛等真實資訊，為下一位求職護理師留下指引。",

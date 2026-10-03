@@ -2,16 +2,16 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=9c413ac48c';
-import { renderIcons, icon } from './icons.js?v=9c413ac48c';
-import { markContributed } from './contribution-gate.js?v=9c413ac48c';
+import { mountLayout } from './components.js?v=e75b7b6da6';
+import { renderIcons, icon } from './icons.js?v=e75b7b6da6';
+import { markContributed } from './contribution-gate.js?v=e75b7b6da6';
 
-import { showToast } from './toast.js?v=9c413ac48c';
-import { submitEndpoint as envSubmitEndpoint } from './env.js?v=9c413ac48c';
-import { notePwaIntent } from './pwa-prompt.js?v=9c413ac48c';
-import { markSubmitted } from './fresh-data.js?v=9c413ac48c';
-import { saveUnlockCode, unlockLink, unlockNoticeHtml, wireInstallGuide } from './unlock.js?v=9c413ac48c';
-import { attachInstitutionAutocomplete, syncInstitutionLevel } from './form-institution-picker.js?v=9c413ac48c';
+import { showToast } from './toast.js?v=e75b7b6da6';
+import { submitEndpoint as envSubmitEndpoint } from './env.js?v=e75b7b6da6';
+import { notePwaIntent } from './pwa-prompt.js?v=e75b7b6da6';
+import { markSubmitted } from './fresh-data.js?v=e75b7b6da6';
+import { saveUnlockCode, unlockLink, unlockNoticeHtml, wireInstallGuide } from './unlock.js?v=e75b7b6da6';
+import { attachInstitutionAutocomplete, syncInstitutionLevel } from './form-institution-picker.js?v=e75b7b6da6';
 import {
   generateCaptcha,
   attachCaptcha,
@@ -21,7 +21,7 @@ import {
   turnstileToken,
   resetTurnstile,
   TURNSTILE_REPLACES_LOCAL_CAPTCHA,
-} from './form-captcha.js?v=9c413ac48c';
+} from './form-captcha.js?v=e75b7b6da6';
 
 const DRAFT_DEBOUNCE_MS = 500;
 
@@ -213,13 +213,15 @@ function renderForm() {
 }
 
 // ===== 條件題 =====
-// schema 欄位可設 showIf: { field: '<控制題 name>', equals: '<值>' }：控制題（radio）選到該值才顯示。
+// schema 欄位可設 showIf: { field: '<控制題 name>', equals: '<值>' }：控制題（radio）選到該值才顯示；
+// 也可用 in: ['<值>', …]：選到其中任一值就顯示。
 // 隱藏時清空作答、不驗證必填，送出的值為空。
 
 function isShown(item) {
   if (!item.showIf) return true;
   const sel = document.querySelector(`input[type="radio"][name="${item.showIf.field}"]:checked`);
-  return !!sel && sel.value === item.showIf.equals;
+  if (!sel) return false;
+  return item.showIf.in ? item.showIf.in.includes(sel.value) : sel.value === item.showIf.equals;
 }
 
 function updateConditionalFields() {

@@ -68,6 +68,9 @@ const ALLOWED_FIELDS = new Set([
  'specialRole', 'staffPerCase', 'multiRoom', 'onCallFreq', 'onCallCallback', 'onCallArrival',
  'nextDayAfterCall', 'radiationProtection', 'dosimeter', 'radiationHealthCheck', 'radiationPay',
  'leadApronBurden', 'trainingPeriod',
+ // 手術房表單（js/form-or.js）
+ 'orStaffing', 'crossSpecialty', 'assistSurgery', 'orShift', 'lateCaseFreq', 'smokeEvacuation',
+ 'sharpsInjury', 'standingBurden',
 ]);
 
 // 自由文字（textarea）給多一點，其餘欄位都是選項或短字串。超過就截斷，不擋投稿。

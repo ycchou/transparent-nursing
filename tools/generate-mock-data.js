@@ -842,6 +842,13 @@ const FORM_FIXUPS = {
     }
     if (row.specialType === '高壓氧') row.staffPerCase = '不適用';
   },
+  // 值班型態與 on call 一致：固定白班＋on call → 需要；固定白班不需值班 → 不需要
+  or(row) {
+    row.orShift = pick(['固定白班＋on call', '固定白班＋on call', '三班輪值', '白班＋輪值夜間刀', '固定白班，不需值班']);
+    if (row.orShift === '固定白班＋on call') row.onCallRequired = '需要';
+    else if (row.orShift === '固定白班，不需值班') row.onCallRequired = '不需要';
+    else row.onCallRequired = pick(['需要', '不需要']);
+  },
 };
 
 function conformToForm(slug, rows) {
@@ -850,7 +857,9 @@ function conformToForm(slug, rows) {
   for (const row of rows) {
     FORM_FIXUPS[slug]?.(row);
     for (const f of schema) {
-      if (f.showIf && row[f.showIf.field] !== f.showIf.equals) { row[f.name] = ''; continue; }
+      if (f.showIf && !(f.showIf.in ? f.showIf.in.includes(row[f.showIf.field]) : row[f.showIf.field] === f.showIf.equals)) {
+        row[f.name] = ''; continue;
+      }
       const v = row[f.name];
       if (validValue(f, v)) continue;
       const mapped = isRatioOptions(f.options) ? ratioToOption(v, f.options) : null;

@@ -123,6 +123,36 @@ export const certFields = (subject) => [
 export const lunchBreakField = (help) => ({ name: 'lunchBreak', label: '是否有休息一個小時', type: 'radio', required: true,
   options: ['有，完整 1 小時', '有，但常被中斷／縮短', '無'], help });
 
+// On call 值班（檢查/介入、手術房共用）：先問是否需要，選「需要」才出現後續各題
+const ON_CALL_IF = { field: 'onCallRequired', equals: '需要' };
+export const ON_CALL_FIELDS = [
+  { name: 'onCallRequired', label: '是否需要 on call', type: 'radio', required: true,
+    options: ['需要', '不需要'] },
+  { name: 'onCallFreq', label: '每月 on call 幾次', type: 'radio', required: true,
+    options: ['1-4 次', '5-8 次', '9-12 次', '13 次以上'],
+    showIf: ON_CALL_IF },
+  { name: 'onCallCallback', label: 'On call 時被叫回院的頻率', type: 'radio',
+    options: ['幾乎每次都被叫回', '經常', '偶爾', '很少'],
+    showIf: ON_CALL_IF },
+  { name: 'onCallArrival', label: '被叫回時要在幾分鐘內到院', type: 'radio',
+    options: ['15 分鐘內', '30 分鐘內', '60 分鐘內', '沒有規定'],
+    showIf: ON_CALL_IF },
+  { name: 'onCallPay', label: '未出勤（沒被叫回）的值班費', type: 'radio',
+    options: ['無', '200-250 元', '250-300 元', '300 元以上', '其他'],
+    showIf: ON_CALL_IF },
+  { name: 'restInterval11h', label: '被叫回出勤後，到下次上班之間有 11 小時間隔嗎', type: 'radio',
+    options: ['有', '無'],
+    showIf: ON_CALL_IF },
+  { name: 'nextDayAfterCall', label: '半夜被叫回後，隔天是否照常上班', type: 'radio',
+    options: ['照常上班', '可晚到或補休', '隔天休假', '視情況'],
+    showIf: ON_CALL_IF },
+
+];
+
+// 輻射防護裝備（檢查/介入、手術房共用）
+export const RADIATION_PROTECTION_FIELD = { name: 'radiationProtection', label: '防護裝備是否充足（鉛衣、鉛眼鏡、甲狀腺護具）',
+  type: 'radio', options: ['充足且合身', '有但不足或老舊', '幾乎沒有', '不適用'] };
+
 // 每日平均加班時間（放在各科別「業務與工時」段）
 export const DAILY_OVERTIME_FIELD = { name: 'dailyOvertime', label: '每日平均加班時間', type: 'radio',
   options: ['無', '1 小時內', '1-2 小時', '2-3 小時', '4 小時'] };
