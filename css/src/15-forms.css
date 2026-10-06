@@ -990,3 +990,40 @@ body.dform-thanks-open { overflow: hidden; }
   padding: 8px 14px;
   font-size: var(--fs-sm);
 }
+
+/* 數字欄位：單位顯示在框內右側；下方即時提示（換算成元／單位疑似填錯的修正建議／範圍與合理性提醒） */
+.dform-num-wrap { position: relative; }
+.dform-num-wrap.has-unit .dform-input { padding-right: 44px; }
+.dform-num-unit {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: var(--fs-body-sm);
+  font-weight: 600;
+  pointer-events: none;
+}
+.dform-num-hint:empty { display: none; }
+.dform-num-hint {
+  margin-top: 4px;
+  font-size: var(--fs-xs);
+  line-height: 1.6;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.dform-num-hint[data-tone="warn"] { color: var(--warning-text); }
+.dform-num-hint[data-tone="error"] { color: var(--danger); }
+.dform-num-fix {
+  margin-left: 6px;
+  padding: 2px 10px;
+  min-height: 28px;
+  border: 1px solid currentColor;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.dform-num-fix:hover { background: var(--tint-warning); }

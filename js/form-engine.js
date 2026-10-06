@@ -2,16 +2,16 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=e75b7b6da6';
-import { renderIcons, icon } from './icons.js?v=e75b7b6da6';
-import { markContributed } from './contribution-gate.js?v=e75b7b6da6';
+import { mountLayout } from './components.js?v=e214c88e2f';
+import { renderIcons, icon } from './icons.js?v=e214c88e2f';
+import { markContributed } from './contribution-gate.js?v=e214c88e2f';
 
-import { showToast } from './toast.js?v=e75b7b6da6';
-import { submitEndpoint as envSubmitEndpoint } from './env.js?v=e75b7b6da6';
-import { notePwaIntent } from './pwa-prompt.js?v=e75b7b6da6';
-import { markSubmitted } from './fresh-data.js?v=e75b7b6da6';
-import { saveUnlockCode, unlockLink, unlockNoticeHtml, wireInstallGuide } from './unlock.js?v=e75b7b6da6';
-import { attachInstitutionAutocomplete, syncInstitutionLevel } from './form-institution-picker.js?v=e75b7b6da6';
+import { showToast } from './toast.js?v=e214c88e2f';
+import { submitEndpoint as envSubmitEndpoint } from './env.js?v=e214c88e2f';
+import { notePwaIntent } from './pwa-prompt.js?v=e214c88e2f';
+import { markSubmitted } from './fresh-data.js?v=e214c88e2f';
+import { saveUnlockCode, unlockLink, unlockNoticeHtml, wireInstallGuide } from './unlock.js?v=e214c88e2f';
+import { attachInstitutionAutocomplete, syncInstitutionLevel } from './form-institution-picker.js?v=e214c88e2f';
 import {
   generateCaptcha,
   attachCaptcha,
@@ -21,7 +21,7 @@ import {
   turnstileToken,
   resetTurnstile,
   TURNSTILE_REPLACES_LOCAL_CAPTCHA,
-} from './form-captcha.js?v=e75b7b6da6';
+} from './form-captcha.js?v=e214c88e2f';
 
 const DRAFT_DEBOUNCE_MS = 500;
 
@@ -76,9 +76,14 @@ function renderField(field) {
     inputHtml = `<input class="dform-input" type="${field.type}" id="f-${field.name}" name="${field.name}"
                     ${field.required ? 'required' : ''} aria-describedby="err-${field.name}" />`;
   } else if (field.type === 'number') {
-    inputHtml = `<input class="dform-input" type="number" id="f-${field.name}" name="${field.name}"
-                    inputmode="numeric" min="${field.min ?? 0}" step="${field.step ?? 1}"
-                    ${field.required ? 'required' : ''} aria-describedby="err-${field.name}" />`;
+    // 單位直接顯示在框內（萬／千／年），下方即時提示：換算成元、單位疑似填錯時一鍵修正、範圍與合理性提醒
+    inputHtml = `<div class="dform-num-wrap${field.unit ? ' has-unit' : ''}">
+                   <input class="dform-input" type="number" id="f-${field.name}" name="${field.name}"
+                    inputmode="numeric" min="${field.min ?? 0}"${field.max != null ? ` max="${field.max}"` : ''} step="${field.step ?? 1}"
+                    ${field.required ? 'required' : ''} aria-describedby="err-${field.name} hint-${field.name}" />
+                   ${field.unit ? `<span class="dform-num-unit" aria-hidden="true">${field.unit}</span>` : ''}
+                 </div>
+                 <div class="dform-num-hint" id="hint-${field.name}" aria-live="polite"></div>`;
   } else if (field.type === 'textarea') {
     // 字數上限：太長的短評會撐爆卡片版面，也會拉長 AI 審稿時間（逾時＝沒審到）
     const maxLen = field.maxLength ?? TEXTAREA_MAX_LENGTH;
@@ -197,6 +202,8 @@ function renderForm() {
     input.addEventListener('change', updateChecked);
   });
 
+  attachNumberHints(root);
+
   // 條件題（showIf）：控制題一變動就重算顯示與否
   root.addEventListener('change', updateConditionalFields);
   updateConditionalFields();
@@ -209,6 +216,86 @@ function renderForm() {
   root.addEventListener('change', (e) => {
     const fieldEl = e.target.closest('.dform-field');
     if (fieldEl) fieldEl.classList.remove('has-error');
+  });
+}
+
+// ===== 數字欄位：範圍檢查、單位換算、單位疑似填錯的修正建議、合理性提醒 =====
+// schema 數字欄位可設：
+//   min / max     硬性範圍（超出不能送出）
+//   unit          單位（顯示在框內，例「萬」「千」「年」）
+//   yuanFactor    換算成元的倍數（年薪萬 10000、月薪千 1000），下方即時顯示「＝ 650,000 元」
+//   unitGuesses   [{ test(v), fix(v), from }]：猜到單位填錯（例：年薪填成元）時，提示並提供一鍵修正
+//   warn(v, data) 回傳提醒文字（不擋送出），例：年薪比月薪×12 還低
+
+const fmtInt = (n) => Math.round(n).toLocaleString('en-US');
+
+/** 數字欄位的硬性錯誤；沒錯回空字串 */
+function numberError(field, raw) {
+  const s = String(raw ?? '').trim();
+  if (!s) return '';
+  const v = Number(s);
+  if (!Number.isFinite(v)) return '請填數字';
+  if ((field.step ?? 1) === 1 && !Number.isInteger(v)) return '請填整數';
+  const lo = field.min ?? 0;
+  if (v < lo || (field.max != null && v > field.max)) {
+    return `請填 ${lo}～${field.max} ${field.unit || ''}`.trim();
+  }
+  return '';
+}
+
+function updateNumberHint(field) {
+  const hint = document.getElementById(`hint-${field.name}`);
+  const input = document.getElementById(`f-${field.name}`);
+  if (!hint || !input) return;
+  const s = input.value.trim();
+  const v = Number(s);
+  let html = '';
+  let tone = '';
+  if (s && Number.isFinite(v)) {
+    const guess = (field.unitGuesses || []).find((g) => g.test(v));
+    const fixed = guess && guess.fix(v);
+    const err = numberError(field, s);
+    if (guess && !numberError(field, fixed)) {
+      tone = 'warn';
+      html = `${guess.from ? `看起來是用「${guess.from}」填的，` : ''}你是不是要填 <strong>${fixed} ${field.unit}</strong>？
+              <button type="button" class="dform-num-fix" data-for="${field.name}" data-value="${fixed}">改成 ${fixed}</button>`;
+    } else if (err) {
+      tone = 'error';
+      html = err;
+    } else {
+      const parts = [];
+      if (field.yuanFactor) parts.push(`＝ ${fmtInt(v * field.yuanFactor)} 元`);
+      const w = field.warn ? field.warn(v, serializeForm()) : '';
+      if (w) { tone = 'warn'; parts.push(w); }
+      html = parts.join('<br>');
+    }
+  }
+  hint.innerHTML = html;
+  hint.dataset.tone = tone;
+}
+
+function numberFields() {
+  return SCHEMA.filter((f) => !f.section && f.type === 'number');
+}
+
+function updateAllNumberHints() {
+  numberFields().forEach(updateNumberHint);
+}
+
+function attachNumberHints(root) {
+  // 任一數字欄變動都重算全部（提醒會互相參照，例如年薪對照月薪）
+  root.addEventListener('input', (e) => {
+    if (e.target.matches('.dform-num-wrap input')) updateAllNumberHints();
+  });
+  root.addEventListener('click', (e) => {
+    const btn = e.target.closest('.dform-num-fix');
+    if (!btn) return;
+    const input = document.getElementById(`f-${btn.dataset.for}`);
+    if (!input) return;
+    input.value = btn.dataset.value;
+    input.dispatchEvent(new Event('input', { bubbles: true }));   // 觸發草稿自動儲存與提示更新
+    input.closest('.dform-field')?.classList.remove('has-error');
+    input.focus();
   });
 }
 
@@ -323,12 +410,22 @@ function applyDataToForm(data) {
 
 // ===== 驗證 =====
 
+// 欄位名 → 錯誤訊息（沒有就用預設的「此為必填欄位」）
+const ERROR_MSGS = new Map();
+
 function validate(data) {
   const errors = [];
+  ERROR_MSGS.clear();
   for (const item of SCHEMA) {
-    if (item.section || !item.required || !isShown(item)) continue;
+    if (item.section || !isShown(item)) continue;
     const { name, type } = item;
     const val = data[name];
+    // 數字欄：有填就檢查範圍與整數（選填的也要檢查）
+    if (type === 'number') {
+      const err = numberError(item, val);
+      if (err) { errors.push(name); ERROR_MSGS.set(name, err); continue; }
+    }
+    if (!item.required) continue;
     const isEmpty = type === 'checkbox'
       ? (!Array.isArray(val) || val.length === 0)
       : (val == null || String(val).trim() === '');
@@ -342,10 +439,12 @@ function showErrors(errorNames) {
   document.querySelectorAll('.dform-field.has-error').forEach((el) => el.classList.remove('has-error'));
   if (errorNames.length === 0) return;
 
-  // 標紅所有有錯欄位
+  // 標紅所有有錯欄位；錯誤訊息依原因顯示（必填沒填 vs 數字超出範圍）
   errorNames.forEach((name) => {
     const fieldEl = document.querySelector(`.dform-field[data-name="${name}"]`);
     if (fieldEl) fieldEl.classList.add('has-error');
+    const msgEl = document.getElementById(`err-${name}`);
+    if (msgEl) msgEl.textContent = ERROR_MSGS.get(name) || '此為必填欄位';
   });
 
   // 平滑捲到第一個錯誤 + focus
@@ -481,7 +580,7 @@ async function onSubmit(e) {
   const errors = validate(data);
   if (errors.length) {
     showErrors(errors);
-    showToast(`還有 ${errors.length} 個必填欄位沒完成`, 'warn');
+    showToast(ERROR_MSGS.size ? `還有 ${errors.length} 個欄位需要修正` : `還有 ${errors.length} 個必填欄位沒完成`, 'warn');
     return;
   }
   // 驗證碼檢查（不分大小寫）。Turnstile 掛上時由它接手，跳過站內驗證碼
@@ -733,6 +832,7 @@ export function initDepartmentForm({ schema, draftKey, slug = '', submitEndpoint
   mountLayout();
   renderForm();
   restoreDraftIfAny();
+  updateAllNumberHints();   // 草稿還原後，數字欄的換算與提醒也要顯示
   attachDraftAutosave();
   attachInstitutionAutocomplete();
   attachCaptcha();

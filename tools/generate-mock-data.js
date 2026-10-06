@@ -123,8 +123,7 @@ function genSalary(institutionType, jobTitle) {
     annualSalary: base,
     monthlyBase: Math.round(base * 0.42),
     annualBonus: Math.round(base * 0.15),
-    yearsCurrent: randint(1, 8),
-    yearsTotal: randint(1, 13),
+    ...(() => { const cur = randint(1, 8); return { yearsCurrent: cur, yearsTotal: cur + randint(0, 6) }; })(),   // 累計 ≥ 現職
   };
 }
 
@@ -799,6 +798,10 @@ function validValue(f, v) {
   if (v === '' || v == null) return false;
   if (f.type === 'checkbox') return String(v).split(MULTI_SEP).every((x) => f.options.includes(x));
   if (f.options.length) return f.options.includes(String(v));
+  if (f.type === 'number') {
+    const n = Number(v);
+    return Number.isFinite(n) && n >= (f.min ?? 0) && (f.max == null || n <= f.max);
+  }
   return v !== '—';
 }
 

@@ -1,6 +1,6 @@
 // Chart.js 視覺化封裝
-import { C } from './theme.js?v=e75b7b6da6';
-import { CATEGORIES } from './config.js?v=e75b7b6da6';
+import { C } from './theme.js?v=e214c88e2f';
+import { CATEGORIES, isPlausible } from './config.js?v=e214c88e2f';
 
 const FONT_FAMILY = "'Noto Sans TC', 'Inter', sans-serif";
 const PALETTE = [C.primaryFill, C.success, C.dangerFill, C.warning, C.purple, C.accent, C.ink, C.inkSoft];
@@ -246,7 +246,7 @@ export function chartSalaryDistribution(canvas, rows, statsEl) {
   // 蒐集有效薪資並排序
   const salaries = rows
     .map((r) => Number(r.annualSalary))
-    .filter((s) => Number.isFinite(s) && s > 0)
+    .filter((s) => Number.isFinite(s) && s > 0 && isPlausible('annualSalary', s))   // 排除單位填錯等異常值
     .sort((a, b) => a - b);
   const stats = computeQuartiles(salaries);
 

@@ -158,13 +158,31 @@ export const DAILY_OVERTIME_FIELD = { name: 'dailyOvertime', label: '每日平�
   options: ['無', '1 小時內', '1-2 小時', '2-3 小時', '4 小時'] };
 
 // 薪資與年資（各科別完全相同）
+// 數字防呆（form-engine.js 數字欄位）：硬性範圍超出不能送出；單位疑似填錯（例：年薪填成元）時提示一鍵修正；
+// 不合常理只提醒不擋。範圍也用在統計時排除異常值（js/config.js NUMERIC_RANGES，兩邊須一致）。
 export const SALARY_SECTION = [
   { section: '薪資與年資' },
-  { name: 'yearsCurrent',   label: '現職年資（年）',   type: 'number', min: 0, step: 1 },
-  { name: 'yearsTotal',     label: '累計工作年資（年）', type: 'number', min: 0, step: 1 },
-  { name: 'annualSalary',   label: '近一年年薪（萬）',  type: 'number', min: 0, step: 1 },
-  { name: 'monthlyBase',    label: '月底薪+津貼（千）', type: 'number', min: 0, step: 1,
-    help: '單位為「千」(例：38 表示 38,000 元)' },
+  { name: 'yearsCurrent',   label: '現職年資（年）',   type: 'number', min: 0, max: 50, step: 1, unit: '年' },
+  { name: 'yearsTotal',     label: '累計工作年資（年）', type: 'number', min: 0, max: 50, step: 1, unit: '年',
+    warn: (v, d) => (d.yearsCurrent !== '' && Number(d.yearsCurrent) > v ? '現職年資比累計年資還長，請確認' : '') },
+  { name: 'annualSalary',   label: '近一年年薪（萬）',  type: 'number', min: 15, max: 200, step: 1, unit: '萬',
+    yuanFactor: 10000, help: '單位為「萬」(例：65 表示 650,000 元)，含底薪、津貼、加班費與獎金',
+    unitGuesses: [
+      { from: '元', test: (v) => v >= 10000, fix: (v) => Math.round(v / 10000) },
+      { from: '千', test: (v) => v > 200 && v < 10000, fix: (v) => Math.round(v / 10) },
+    ],
+    warn: (v, d) => {
+      const m = Number(d.monthlyBase);
+      if (m > 0 && v < (m * 12) / 10) return `年薪比「月薪 × 12」（約 ${Math.round((m * 12) / 10)} 萬）還低，年薪通常包含 12 個月薪水加獎金，確定沒填錯嗎？`;
+      if (v > 150) return '金額偏高，請確認單位是「萬」';
+      return '';
+    } },
+  { name: 'monthlyBase',    label: '月底薪+津貼（千）', type: 'number', min: 20, max: 150, step: 1, unit: '千',
+    yuanFactor: 1000, help: '單位為「千」(例：38 表示 38,000 元)',
+    unitGuesses: [
+      { from: '元', test: (v) => v >= 1000, fix: (v) => Math.round(v / 1000) },
+      { from: '萬', test: (v) => v > 0 && v < 20, fix: (v) => Math.round(v * 10) },
+    ] },
   { name: 'annualBonus',    label: '全年獎金（可詳述發放形式）', type: 'textarea', rows: 2 },
   { name: 'specialBenefits', label: '特殊福利', type: 'textarea', rows: 2,
     help: '例：自費健檢、員工旅遊補助、進修補助等' },

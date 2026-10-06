@@ -2,7 +2,7 @@
 // 證照公假公費 / 休息一小時 / 業務與工時共用欄 / 薪資與年資 / 整體評價）沿用 form-sections.js。
 // 手術房沒有「護病比」，改問一間刀房的護理人力配置；另問接刀晚刀超時、上台協助手術與職業危害。
 
-import { initDepartmentForm } from './form-engine.js?v=e75b7b6da6';
+import { initDepartmentForm } from './form-engine.js?v=e214c88e2f';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
@@ -15,7 +15,7 @@ import {
   lunchBreakField,
   ON_CALL_FIELDS,
   RADIATION_PROTECTION_FIELD,
-} from './form-sections.js?v=e75b7b6da6';
+} from './form-sections.js?v=e214c88e2f';
 
 // 值班型態：三班輪值或白班＋輪值夜間刀，才問小夜／大夜津貼
 const OR_SHIFTS = ['固定白班＋on call', '三班輪值', '白班＋輪值夜間刀', '固定白班，不需值班', '其他'];

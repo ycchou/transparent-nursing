@@ -2,8 +2,8 @@
 //
 // 資料來源由 js/env.js 的 MODE 決定：mock 讀下面的 csvUrlMock（data/mock/*.csv），
 // live 讀 env.js 的 LIVE.csvUrls（Google Sheet 發布 CSV）。這裡不必再改。
-import { C } from './theme.js?v=e75b7b6da6';
-import { csvUrlFor } from './env.js?v=e75b7b6da6';
+import { C } from './theme.js?v=e214c88e2f';
+import { csvUrlFor } from './env.js?v=e214c88e2f';
 
 export const SITE = {
   name: '護理職場透明化運動',
@@ -38,6 +38,22 @@ export const COMMON_FIELDS = [
   { key: 'recommendIndex', label: '推薦指數 (1-5)', type: 'number' },
   { key: 'comment', label: '個人短評', type: 'text' },
 ];
+
+// 數字欄位的合理範圍：表單硬性限制（js/form-sections.js SALARY_SECTION）與統計排除異常值共用，兩邊須一致。
+// 明細表照常顯示原始值；只有薪資分布、百分位、中位數等統計不採用範圍外的數字（例：年薪誤填成元的 650000）。
+export const NUMERIC_RANGES = {
+  annualSalary: [15, 200],   // 萬
+  monthlyBase: [20, 150],    // 千
+  yearsCurrent: [0, 50],
+  yearsTotal: [0, 50],
+};
+
+/** 是否為可拿來做統計的合理數值 */
+export function isPlausible(key, v) {
+  const r = NUMERIC_RANGES[key];
+  if (typeof v !== 'number' || !Number.isFinite(v)) return false;
+  return r ? v >= r[0] && v <= r[1] : true;
+}
 
 export const CATEGORIES = [
   {
