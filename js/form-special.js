@@ -3,7 +3,7 @@
 // 這類單位多半只上白班、以 on call 被叫回支援急做，且常有輻射暴露——所以不問三班護病比與夜班津貼，
 // 改問 on call 值班與輻射防護。
 
-import { initDepartmentForm } from './form-engine.js?v=e214c88e2f';
+import { initDepartmentForm } from './form-engine.js?v=a4bd5c1762';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
@@ -15,7 +15,7 @@ import {
   lunchBreakField,
   ON_CALL_FIELDS,
   RADIATION_PROTECTION_FIELD,
-} from './form-sections.js?v=e214c88e2f';
+} from './form-sections.js?v=a4bd5c1762';
 
 const SPECIAL_FORM_SCHEMA = [
   ...buildInstitutionSection({

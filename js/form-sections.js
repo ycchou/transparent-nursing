@@ -165,7 +165,7 @@ export const SALARY_SECTION = [
   { name: 'yearsCurrent',   label: '現職年資（年）',   type: 'number', min: 0, max: 50, step: 1, unit: '年' },
   { name: 'yearsTotal',     label: '累計工作年資（年）', type: 'number', min: 0, max: 50, step: 1, unit: '年',
     warn: (v, d) => (d.yearsCurrent !== '' && Number(d.yearsCurrent) > v ? '現職年資比累計年資還長，請確認' : '') },
-  { name: 'annualSalary',   label: '近一年年薪（萬）',  type: 'number', min: 15, max: 200, step: 1, unit: '萬',
+  { name: 'annualSalary',   label: '近一年年薪（萬）',  type: 'number', min: 36, max: 200, step: 1, unit: '萬',
     yuanFactor: 10000, help: '單位為「萬」(例：65 表示 650,000 元)，含底薪、津貼、加班費與獎金',
     unitGuesses: [
       { from: '元', test: (v) => v >= 10000, fix: (v) => Math.round(v / 10000) },
@@ -177,11 +177,11 @@ export const SALARY_SECTION = [
       if (v > 150) return '金額偏高，請確認單位是「萬」';
       return '';
     } },
-  { name: 'monthlyBase',    label: '月底薪+津貼（千）', type: 'number', min: 20, max: 150, step: 1, unit: '千',
+  { name: 'monthlyBase',    label: '月底薪+津貼（千）', type: 'number', min: 30, max: 150, step: 1, unit: '千',
     yuanFactor: 1000, help: '單位為「千」(例：38 表示 38,000 元)',
     unitGuesses: [
       { from: '元', test: (v) => v >= 1000, fix: (v) => Math.round(v / 1000) },
-      { from: '萬', test: (v) => v > 0 && v < 20, fix: (v) => Math.round(v * 10) },
+      { from: '萬', test: (v) => v > 0 && v < 30, fix: (v) => Math.round(v * 10) },
     ] },
   { name: 'annualBonus',    label: '全年獎金（可詳述發放形式）', type: 'textarea', rows: 2 },
   { name: 'specialBenefits', label: '特殊福利', type: 'textarea', rows: 2,

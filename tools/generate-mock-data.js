@@ -121,7 +121,7 @@ function genSalary(institutionType, jobTitle) {
   base += titleBonus + randint(-8, 8);
   return {
     annualSalary: base,
-    monthlyBase: Math.round(base * 0.42),
+    monthlyBase: Math.min(150, Math.max(30, Math.round(base * 0.42))),   // 表單範圍 30～150 千
     annualBonus: Math.round(base * 0.15),
     ...(() => { const cur = randint(1, 8); return { yearsCurrent: cur, yearsTotal: cur + randint(0, 6) }; })(),   // 累計 ≥ 現職
   };

@@ -2,8 +2,8 @@
 //
 // 資料來源由 js/env.js 的 MODE 決定：mock 讀下面的 csvUrlMock（data/mock/*.csv），
 // live 讀 env.js 的 LIVE.csvUrls（Google Sheet 發布 CSV）。這裡不必再改。
-import { C } from './theme.js?v=e214c88e2f';
-import { csvUrlFor } from './env.js?v=e214c88e2f';
+import { C } from './theme.js?v=a4bd5c1762';
+import { csvUrlFor } from './env.js?v=a4bd5c1762';
 
 export const SITE = {
   name: '護理職場透明化運動',
@@ -42,8 +42,8 @@ export const COMMON_FIELDS = [
 // 數字欄位的合理範圍：表單硬性限制（js/form-sections.js SALARY_SECTION）與統計排除異常值共用，兩邊須一致。
 // 明細表照常顯示原始值；只有薪資分布、百分位、中位數等統計不採用範圍外的數字（例：年薪誤填成元的 650000）。
 export const NUMERIC_RANGES = {
-  annualSalary: [15, 200],   // 萬
-  monthlyBase: [20, 150],    // 千
+  annualSalary: [36, 200],   // 萬
+  monthlyBase: [30, 150],    // 千
   yearsCurrent: [0, 50],
   yearsTotal: [0, 50],
 };

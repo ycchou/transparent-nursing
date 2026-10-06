@@ -1,10 +1,10 @@
 // 共用 header / footer 注入 + 工具函式
-import { SITE, CATEGORIES } from './config.js?v=e214c88e2f';
-import { icon, renderIcons } from './icons.js?v=e214c88e2f';
-import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=e214c88e2f';
-import { initScrollHints } from './scroll-hint.js?v=e214c88e2f';
-import { initPullToRefresh } from './pull-to-refresh.js?v=e214c88e2f';
-import { mountModeBadge } from './env.js?v=e214c88e2f';
+import { SITE, CATEGORIES } from './config.js?v=a4bd5c1762';
+import { icon, renderIcons } from './icons.js?v=a4bd5c1762';
+import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=a4bd5c1762';
+import { initScrollHints } from './scroll-hint.js?v=a4bd5c1762';
+import { initPullToRefresh } from './pull-to-refresh.js?v=a4bd5c1762';
+import { mountModeBadge } from './env.js?v=a4bd5c1762';
 
 // 主辦/協作工會 — 共用資料（footer / hero strip / about 都引用）
 export const ORGS = {
@@ -444,14 +444,14 @@ export function mountLayout() {
   // 沒追蹤的人不多載任何東西
   try {
     if ((localStorage.getItem('tn:follows') || '{}').length > 2 || localStorage.getItem('tn:push_cleanup')) {
-      import('./follow.js?v=e214c88e2f').then((m) => m.healthCheck()).catch(() => {});
+      import('./follow.js?v=a4bd5c1762').then((m) => m.healthCheck()).catch(() => {});
     }
   } catch {}
   // 解鎖連結（#unlock=碼）：才動態載入 unlock.js／toast.js，平常開頁不多載。
   // 開頁時檢查一次；已在頁面上時貼上連結只會改 hash、不會重新載入，所以也聽 hashchange。
   const tryUnlockHash = () => {
     if (!location.hash.startsWith('#unlock=')) return;
-    Promise.all([import('./unlock.js?v=e214c88e2f'), import('./toast.js?v=e214c88e2f')])
+    Promise.all([import('./unlock.js?v=a4bd5c1762'), import('./toast.js?v=a4bd5c1762')])
       .then(([u, t]) => u.handleUnlockHash({ toast: t.showToast }))
       .catch((e) => console.warn('[unlock] 載入失敗：', e.message));
   };
@@ -497,7 +497,7 @@ export function mountLayout() {
 
   // 背景預載 platform 資料 + 樞紐大檔：切到分享平台/機構總覽/護病比/人力監控時即時顯示
   // 動態 import 避免循環依賴與初始 parse 成本
-  import('./data-loader.js?v=e214c88e2f')
+  import('./data-loader.js?v=a4bd5c1762')
     .then(({ preloadAll, preloadStaticData }) => {
       preloadAll && preloadAll();
       preloadStaticData && preloadStaticData();
@@ -509,13 +509,13 @@ export function mountLayout() {
   wireNavPrefetch(document.getElementById('app-footer'));
 
   // 背景預載勞檢/性平/職安紀錄資料：同樣讓使用者切過去時即時顯示
-  import('./violations.js?v=e214c88e2f')
+  import('./violations.js?v=a4bd5c1762')
     .then(({ preloadViolations }) => preloadViolations && preloadViolations())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./gender.js?v=e214c88e2f')
+  import('./gender.js?v=a4bd5c1762')
     .then(({ preloadGender }) => preloadGender && preloadGender())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./osha.js?v=e214c88e2f')
+  import('./osha.js?v=a4bd5c1762')
     .then(({ preloadOsha }) => preloadOsha && preloadOsha())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
 }

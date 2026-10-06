@@ -1,4 +1,4 @@
-import { C } from './theme.js?v=e214c88e2f';
+import { C } from './theme.js?v=a4bd5c1762';
 // 統計摘要頁「官方參考數據」分頁的圖表與表格。
 // 數字本身在 data/official-stats.json（衛福部、勞動部、護理全聯會的公開統計）——更新數字只改 JSON，不必改程式。
 // ⚠️ 本檔資料皆為官方公開統計，與使用者匿名分享資料為兩個獨立來源。

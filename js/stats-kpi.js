@@ -1,9 +1,9 @@
 // 薪資百分位數 KPI 條 + 可拖曳浮動氣泡式薪資試算工具
 // 給 platform.html 使用：依目前篩選後的資料即時計算
-import { C, alpha } from './theme.js?v=e214c88e2f';
-import { icon } from './icons.js?v=e214c88e2f';
-import { isPlausible } from './config.js?v=e214c88e2f';
-import { notePwaIntent } from './pwa-prompt.js?v=e214c88e2f';
+import { C, alpha } from './theme.js?v=a4bd5c1762';
+import { icon } from './icons.js?v=a4bd5c1762';
+import { isPlausible } from './config.js?v=a4bd5c1762';
+import { notePwaIntent } from './pwa-prompt.js?v=a4bd5c1762';
 
 /** 線性插值法百分位數（標準 type-7） */
 export function percentile(sortedValues, p) {
@@ -594,7 +594,7 @@ export function mountSalaryCalculator(getRows, getConditions) {
       });
       const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 0.95));
       const dataUrl = canvas.toDataURL('image/png');
-      const { showSharePreview } = await import('./share-card.js?v=e214c88e2f');
+      const { showSharePreview } = await import('./share-card.js?v=a4bd5c1762');
       showSharePreview(blob, dataUrl, `salary-percentile-${Date.now()}.png`);
       // 高意圖時刻：做完薪資試算並產生分享圖 → 當頁嘗試顯示安裝提示
       notePwaIntent('salary_calc', { showNow: true });

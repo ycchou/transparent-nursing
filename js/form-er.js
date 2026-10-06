@@ -1,7 +1,7 @@
 // 急診自建表單：只定義急診專屬區塊，其餘（機構基本資料 / 輪班別與津貼 / 人力與支援 /
 // 業務與工時共用欄 / 職場暴力 / 薪資與年資 / 整體評價）沿用 form-sections.js 的共用正本。
 
-import { initDepartmentForm } from './form-engine.js?v=e214c88e2f';
+import { initDepartmentForm } from './form-engine.js?v=a4bd5c1762';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
@@ -17,7 +17,7 @@ import {
   VIOLENCE_RISK_FIELD,
   POST_INCIDENT_SUPPORT_FIELD,
   certFields,
-} from './form-sections.js?v=e214c88e2f';
+} from './form-sections.js?v=a4bd5c1762';
 
 // 急診各區負荷差很多，護病比改「依區域」問，不依白／小夜／大夜（急診三班的人力配置通常相近）。
 // 重症／急救區比照加護病房的刻度；留觀／一般診療區比照病房刻度。都加「沒待過此區」。
