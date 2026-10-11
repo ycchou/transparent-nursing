@@ -73,7 +73,9 @@ self.addEventListener('push', (event) => {
   }));
 });
 
-// 點通知：已開著的 App 視窗就切過去並導到該頁，沒有就開新視窗
+// 點通知：App 已開著（含在背景）→ 切到前景，並發訊息請頁面自己換到該醫院；沒開 → 直接開新視窗到該頁。
+// 不用 WindowClient.navigate()：iOS 的 PWA 上它常常不支援或靜默無效（不報錯也不換頁），點了只會回到原畫面。
+// 頁面端的接收在 js/components.js（listenForNotificationNavigate）。
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const url = (event.notification.data && event.notification.data.url) || SCOPE.href;
@@ -82,7 +84,8 @@ self.addEventListener('notificationclick', (event) => {
     const win = wins.find((w) => w.url.startsWith(SCOPE.href));
     if (win) {
       try { await win.focus(); } catch {}
-      try { return await win.navigate(url); } catch {}
+      win.postMessage({ type: 'tn:navigate', url });
+      return;
     }
     return self.clients.openWindow(url);
   })());

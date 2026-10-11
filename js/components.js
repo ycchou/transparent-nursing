@@ -1,10 +1,10 @@
 // 共用 header / footer 注入 + 工具函式
-import { SITE, CATEGORIES } from './config.js?v=66b3fdfbe7';
-import { icon, renderIcons } from './icons.js?v=66b3fdfbe7';
-import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=66b3fdfbe7';
-import { initScrollHints } from './scroll-hint.js?v=66b3fdfbe7';
-import { initPullToRefresh } from './pull-to-refresh.js?v=66b3fdfbe7';
-import { mountModeBadge } from './env.js?v=66b3fdfbe7';
+import { SITE, CATEGORIES } from './config.js?v=33a4a799b6';
+import { icon, renderIcons } from './icons.js?v=33a4a799b6';
+import { initPWAPrompt, showInstallGuide, isAppInstalled } from './pwa-prompt.js?v=33a4a799b6';
+import { initScrollHints } from './scroll-hint.js?v=33a4a799b6';
+import { initPullToRefresh } from './pull-to-refresh.js?v=33a4a799b6';
+import { mountModeBadge } from './env.js?v=33a4a799b6';
 
 // 主辦/協作工會 — 共用資料（footer / hero strip / about 都引用）
 export const ORGS = {
@@ -428,6 +428,20 @@ function wireNavPrefetch(root) {
 
 // Service Worker（sw.js）：靜態資源存在手機上，回訪秒開、離線可看已看過的頁面。
 // 等頁面載完才註冊，不跟首屏資源搶頻寬；不支援或失敗都不影響網站。
+// 點推播通知時，Service Worker 請已開著的頁面換到通知對應的頁（見 sw.js notificationclick）
+function listenForNotificationNavigate() {
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.addEventListener('message', (e) => {
+    if (!e.data || e.data.type !== 'tn:navigate' || !e.data.url) return;
+    try {
+      const u = new URL(e.data.url, location.href);
+      if (u.origin === location.origin) location.href = u.href;   // 只接受本站網址
+    } catch {}
+  });
+  // 用 addEventListener 掛的 message 監聽，要呼叫 startMessages() 才會開始收（排隊中的訊息也會送進來）
+  try { navigator.serviceWorker.startMessages(); } catch {}
+}
+
 function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
   const register = () => navigator.serviceWorker.register('sw.js').catch((e) => console.warn('[sw] 註冊失敗：', e.message));
@@ -440,18 +454,19 @@ export function mountLayout() {
   mountModeBadge();   // 只有用 ?data= 臨時切換資料來源時才會出現的小標記
   initPullToRefresh(); // PWA（standalone）才有的下拉重新整理，並略過資料快取抓最新
   registerServiceWorker();
+  listenForNotificationNavigate();
   // 有追蹤醫院（或有待補刪的訂閱）才載入 follow.js，檢查推播訂閱是否還有效（端點沒變就不連伺服器）；
   // 沒追蹤的人不多載任何東西
   try {
     if ((localStorage.getItem('tn:follows') || '{}').length > 2 || localStorage.getItem('tn:push_cleanup')) {
-      import('./follow.js?v=66b3fdfbe7').then((m) => m.healthCheck()).catch(() => {});
+      import('./follow.js?v=33a4a799b6').then((m) => m.healthCheck()).catch(() => {});
     }
   } catch {}
   // 解鎖連結（#unlock=碼）：才動態載入 unlock.js／toast.js，平常開頁不多載。
   // 開頁時檢查一次；已在頁面上時貼上連結只會改 hash、不會重新載入，所以也聽 hashchange。
   const tryUnlockHash = () => {
     if (!location.hash.startsWith('#unlock=')) return;
-    Promise.all([import('./unlock.js?v=66b3fdfbe7'), import('./toast.js?v=66b3fdfbe7')])
+    Promise.all([import('./unlock.js?v=33a4a799b6'), import('./toast.js?v=33a4a799b6')])
       .then(([u, t]) => u.handleUnlockHash({ toast: t.showToast }))
       .catch((e) => console.warn('[unlock] 載入失敗：', e.message));
   };
@@ -497,7 +512,7 @@ export function mountLayout() {
 
   // 背景預載 platform 資料 + 樞紐大檔：切到分享平台/機構總覽/護病比/人力監控時即時顯示
   // 動態 import 避免循環依賴與初始 parse 成本
-  import('./data-loader.js?v=66b3fdfbe7')
+  import('./data-loader.js?v=33a4a799b6')
     .then(({ preloadAll, preloadStaticData }) => {
       preloadAll && preloadAll();
       preloadStaticData && preloadStaticData();
@@ -509,13 +524,13 @@ export function mountLayout() {
   wireNavPrefetch(document.getElementById('app-footer'));
 
   // 背景預載勞檢/性平/職安紀錄資料：同樣讓使用者切過去時即時顯示
-  import('./violations.js?v=66b3fdfbe7')
+  import('./violations.js?v=33a4a799b6')
     .then(({ preloadViolations }) => preloadViolations && preloadViolations())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./gender.js?v=66b3fdfbe7')
+  import('./gender.js?v=33a4a799b6')
     .then(({ preloadGender }) => preloadGender && preloadGender())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
-  import('./osha.js?v=66b3fdfbe7')
+  import('./osha.js?v=33a4a799b6')
     .then(({ preloadOsha }) => preloadOsha && preloadOsha())
     .catch(() => { /* 預載失敗不影響任何 UI */ });
 }
