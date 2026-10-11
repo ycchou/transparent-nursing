@@ -273,7 +273,7 @@ export function preloadAll() {
 const HUB_STATIC_URLS = [
   'data/hospitals-merged.json?v=351c442704',  // 機構總覽
   'data/nurse-ratio.json?v=040b3f83fc',       // 三班護病比
-  'data/personnel-index.json?v=644925a99a',            // 人力監控 picker
+  'data/personnel-index.json?v=5658c3a46a',            // 人力監控 picker
 ];
 
 /**

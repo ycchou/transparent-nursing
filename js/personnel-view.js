@@ -93,7 +93,7 @@ export function renderBedChart(canvas, h, prevChart) {
 const cache = new Map();
 export async function loadPersonnelHospital(id) {
   if (cache.has(id)) return cache.get(id);
-  const r = await fetch(`data/personnel/${id}.json?v=644925a99a`);
+  const r = await fetch(`data/personnel/${id}.json?v=5658c3a46a`);
   if (!r.ok) throw new Error(`HTTP ${r.status} personnel/${id}`);
   const d = await r.json();
   cache.set(id, d);
@@ -105,7 +105,7 @@ export async function loadPersonnelHospital(id) {
 let indexCache = null;
 export async function ensurePersonnelIndex() {
   if (indexCache) return indexCache;
-  const r = await fetch('data/personnel-index.json?v=644925a99a');
+  const r = await fetch('data/personnel-index.json?v=5658c3a46a');
   if (!r.ok) throw new Error(`HTTP ${r.status} personnel-index`);
   const doc = await r.json();
   const byCode = new Map();

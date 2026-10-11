@@ -14,7 +14,7 @@ import { skeletonRows } from './skeleton.js?v=a4bd5c1762';
 import { escapeHtml } from './moderation.js?v=a4bd5c1762';
 import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=a4bd5c1762';
 
-const INDEX_URL = 'data/personnel-index.json?v=644925a99a';   // 帶版本號：改版後不會讀到舊快取（stamp-assets 維護）
+const INDEX_URL = 'data/personnel-index.json?v=5658c3a46a';   // 帶版本號：改版後不會讀到舊快取（stamp-assets 維護）
 const AGG_URL = 'data/personnel-aggregate.json';
 
 const state = {
