@@ -171,7 +171,9 @@ jobs:
   # 需在 repo Settings 設定：Secrets → NOTIFY_TOKEN、Variables → NOTIFY_URL（沒設就略過，不影響部署）。
   notify:
     needs: deploy
-    if: github.event_name != 'pull_request' && needs.deploy.result == 'success'
+    # 要寫 !cancelled()：沒寫的話 GitHub 會隱含 success()，上游任一工作被略過（例如沒改前端時冒煙測試略過）
+    # 推播就跟著被略過
+    if: github.event_name != 'pull_request' && !cancelled() && needs.deploy.result == 'success'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
