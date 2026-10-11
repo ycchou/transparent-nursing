@@ -29,7 +29,9 @@ MAX_DRAIN_CALLS = 200
 
 def post(url, token, body=None):
     req = urllib.request.Request(url, method='POST', data=json.dumps(body or {}).encode('utf-8'),
-                                 headers={'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'})
+                                 headers={'Authorization': f'Bearer {token}', 'Content-Type': 'application/json',
+                                          # Cloudflare 的瀏覽器完整性檢查會擋 Python 預設的 User-Agent（error 1010）
+                                          'User-Agent': 'tn-send-notify/1.0 (+https://github.com/ycchou/transparent-nursing)'})
     with urllib.request.urlopen(req, timeout=60) as r:
         return json.loads(r.read().decode('utf-8'))
 
