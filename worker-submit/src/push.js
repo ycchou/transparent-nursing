@@ -4,7 +4,7 @@
 //   · 新分享：/submit 投稿成功後，在同一次執行內呼叫 notifyNewComment（不多一次 Worker 請求）
 //   · 財報／護病比：你手動上傳資料 → GitHub Actions 部署成功後 POST /notify（帶 NOTIFY_TOKEN）
 //
-// 發送：事件先換算成「每個訂閱者一則彙整通知」寫進 push_queue，再分批送出。
+// 發送：事件先換算成「每個訂閱者 × 每家有更新的追蹤醫院 一則通知」寫進 push_queue，再分批送出。
 // 免費方案單次執行最多 50 個子請求，所以每批 DRAIN_CHUNK 則；剩下的由 service binding（SELF）
 // 接力呼叫 /push/drain，GitHub Actions 那邊也會反覆呼叫 /push/drain 直到清空（兩者並行也安全：
 // 取件用 DELETE … RETURNING，一則只會被一個執行拿到）。
@@ -111,42 +111,27 @@ function deleteSub(env, id) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 事件 → 每位訂閱者一則彙整通知
+// 事件 → 每位訂閱者、每家追蹤的醫院各一則通知
 // event = { code, kind: 'c'|'f'|'r', name: 醫院簡稱, label: 例「115/07 護病比」 }
 // ─────────────────────────────────────────────────────────────────────────────
 
-function buildPayload(evs) {
-  const byCode = new Map();
-  for (const e of evs) {
-    if (!byCode.has(e.code)) byCode.set(e.code, { name: e.name, kinds: [], labels: [] });
-    const g = byCode.get(e.code);
-    g.kinds.push(e.kind);
-    g.labels.push(e.label);
-  }
-  if (byCode.size === 1) {
-    const [code, g] = [...byCode][0];
-    return {
-      title: g.name,
-      body: g.labels.join('、'),
-      // 新分享：帶 fresh=1，頁面略過瀏覽器的分享資料快取（js/fresh-data.js），點進去才看得到那筆
-      url: `hospital.html?code=${code}&tab=${KINDS[g.kinds[0]]}${g.kinds.includes('c') ? '&fresh=1' : ''}`,
-      tag: `tn-${code}`,
-    };
-  }
-  const lines = [...byCode.values()].map((g) => `${g.name}：${g.labels.join('、')}`);
+// 一家醫院一則通知（同一家醫院這批有多種更新就合在同一則），點開直接到那家醫院的對應頁簽。
+// tag 依醫院區分：同一家醫院之後的通知會取代舊的，不同醫院的通知各自保留、不會互相蓋掉。
+function buildPayload(code, evs) {
+  const kinds = evs.map((e) => e.kind);
   return {
-    title: `你追蹤的 ${byCode.size} 家醫院有更新`,
-    body: lines.slice(0, 4).join('\n') + (lines.length > 4 ? `\n…還有 ${lines.length - 4} 家` : ''),
-    // 含新分享時一樣帶 fresh=1：我的追蹤頁背景預載會抓最新並寫回快取，再點進機構頁就看得到
-    url: evs.some((e) => e.kind === 'c') ? 'follows.html?fresh=1' : 'follows.html',
-    tag: 'tn-follows',
+    title: evs[0].name,
+    body: evs.map((e) => e.label).join('、'),
+    // 新分享：帶 fresh=1，頁面略過瀏覽器的分享資料快取（js/fresh-data.js），點進去才看得到那筆
+    url: `hospital.html?code=${code}&tab=${KINDS[kinds[0]]}${kinds.includes('c') ? '&fresh=1' : ''}`,
+    tag: `tn-${code}`,
   };
 }
 
 // 事件寫進發送佇列。回傳排入幾則。
 async function enqueue(env, events, ttl) {
   const codes = [...new Set(events.map((e) => e.code))];
-  const perSub = new Map();
+  const rows = [];   // 每位訂閱者 × 每家有更新的追蹤醫院 一則
   // D1 單一查詢的參數上限 100，分段查
   for (let i = 0; i < codes.length; i += 90) {
     const part = codes.slice(i, i + 90);
@@ -155,12 +140,9 @@ async function enqueue(env, events, ttl) {
     ).bind(...part).all();
     for (const r of results) {
       const evs = events.filter((e) => e.code === r.code && r.kinds.includes(e.kind));
-      if (!evs.length) continue;
-      if (!perSub.has(r.sub_id)) perSub.set(r.sub_id, []);
-      perSub.get(r.sub_id).push(...evs);
+      if (evs.length) rows.push([r.sub_id, JSON.stringify({ ...buildPayload(r.code, evs), ttl })]);
     }
   }
-  const rows = [...perSub].map(([sub, evs]) => [sub, JSON.stringify({ ...buildPayload(evs), ttl })]);
   for (let i = 0; i < rows.length; i += 50) {
     await env.DB.batch(rows.slice(i, i + 50).map(([sub, p]) =>
       env.DB.prepare('INSERT INTO push_queue(sub_id, payload) VALUES(?, ?)').bind(sub, p)));
