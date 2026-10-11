@@ -2,7 +2,7 @@
 """
 機構追蹤推播：比對「各醫院最新到哪一期」，產生這次要推播的事件。
 
-  data/feed/manifest.json  各醫院目前的最新期別（財報年度 f、護病比月份 r）——比對基準
+  data/feed/manifest.json  各醫院目前的最新期別（財報年度 f、護病比月份 r、人力監控月份 p）——比對基準
   data/feed/outbox.json    新出現的期別 → 推播批次（保留近 OUTBOX_KEEP_DAYS 天）。部署成功後，
                            GitHub Actions 把近 NOTIFY_WINDOW_DAYS 天的批次 POST 給 tn-submit /notify
 
@@ -68,13 +68,21 @@ def current_state(names):
             prev = state.setdefault(code, {}).get('r')
             latest = max(months, key=int)
             state[code]['r'] = latest if not prev or int(latest) > int(prev) else prev   # 多院區取最新
+    for h in load('data/personnel-index.json')['hospitals']:
+        code, last = h.get('code'), str(h.get('lastMonth') or '')
+        if code in names and last.isdigit():
+            prev = state.setdefault(code, {}).get('p')
+            state[code]['p'] = last if not prev or int(last) > int(prev) else prev   # 多院區取最新
     return state
+
+
+KIND_TITLES = {'f': '財報', 'r': '護病比', 'p': '人力監控'}
 
 
 def label(kind, key):
     if kind == 'f':
         return f'{key} 年財報已更新'
-    return f'{key[:3]}/{key[3:]} 護病比已更新'
+    return f'{key[:3]}/{key[3:]} {KIND_TITLES[kind]}已更新'
 
 
 def main():
@@ -91,22 +99,28 @@ def main():
     now = datetime.now(TZ)
     events = []
     if prev is not None:
+        # 新加入比對的類型（例：後來才加的人力監控 p）：舊基準裡完全沒有這一類，不能把每家都當成新資料。
+        # 只推「最新那一期」的醫院（這次真的有更新的），其餘只建立基準。
+        new_kinds = {k for k in KIND_TITLES if not any(k in v for v in prev.values())}
+        newest = {k: max((int(v[k]) for v in cur.values() if k in v), default=0) for k in new_kinds}
         for code in sorted(cur):
             for kind, key in sorted(cur[code].items()):
                 old = prev.get(code, {}).get(kind)
+                if kind in new_kinds and int(key) < newest[kind]:
+                    continue
                 if not old or int(key) > int(old):
                     events.append({'code': code, 'kind': kind, 'key': key,
                                    'name': names[code], 'label': label(kind, key)})
 
-    by_kind = {k: [e for e in events if e['kind'] == k] for k in ('f', 'r')}
+    by_kind = {k: [e for e in events if e['kind'] == k] for k in KIND_TITLES}
     print('推播預覽：', end='')
     if prev is None:
         print('第一次執行，只建立比對基準（不推播）')
     elif not events:
-        print('沒有新的財報年度或護病比月份，不推播')
+        print('沒有新的財報年度、護病比或人力監控月份，不推播')
     else:
         parts = []
-        for k, title in (('f', '財報'), ('r', '護病比')):
+        for k, title in KIND_TITLES.items():
             evs = by_kind[k]
             if evs:
                 sample = '、'.join(e['name'] for e in evs[:5]) + ('…' if len(evs) > 5 else '')
@@ -119,7 +133,7 @@ def main():
     os.makedirs(FEED, exist_ok=True)
     with open(MANIFEST, 'w', encoding='utf-8') as fp:
         json.dump({'generatedAt': now.isoformat(timespec='seconds'),
-                   'note': '各醫院最新期別（f 財報年度、r 護病比月份）；由 tools/build-feed.py 產生，推播比對基準',
+                   'note': '各醫院最新期別（f 財報年度、r 護病比月份、p 人力監控月份）；由 tools/build-feed.py 產生，推播比對基準',
                    'hospitals': cur}, fp, ensure_ascii=False, indent=0, sort_keys=True)
         fp.write('\n')
     if events and not silent:

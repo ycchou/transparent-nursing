@@ -14,8 +14,8 @@
 
 import { sendPush, b64urlDecode } from './webpush.js';
 
-// 類型代碼：c 新分享、f 財報、r 護病比（與前端 js/follow.js 一致）
-export const KINDS = { c: 'pf', f: 'fi', r: 'nr' };   // → 機構總覽頁的頁簽 key
+// 類型代碼：c 新分享、f 財報、r 護病比、p 人力監控（與前端 js/follow.js 一致）
+export const KINDS = { c: 'pf', f: 'fi', r: 'nr', p: 'pm' };   // → 機構總覽頁的頁簽 key
 const MAX_FOLLOWS = 100;
 const DRAIN_CHUNK = 40;          // 每次執行最多送幾則（免費方案子請求上限 50，留餘裕）
 const MAX_SELF_HOPS = 25;        // service binding 接力上限（Cloudflare 限制單一呼叫鏈的深度）
@@ -60,7 +60,7 @@ async function readBody(request) {
   return request.json().catch(() => ({}));
 }
 
-// POST /push/subscribe  { subscription: PushSubscription.toJSON(), follows: { 機構代號: 'cfr' } }
+// POST /push/subscribe  { subscription: PushSubscription.toJSON(), follows: { 機構代號: 'cfpr' } }
 // 每次前端追蹤清單有變就整份覆寫（本機 localStorage 是正本，伺服器只是副本）。
 export async function handleSubscribe(request, env, json) {
   const ip = request.headers.get('CF-Connecting-IP') || '0.0.0.0';
@@ -222,7 +222,7 @@ export async function handleNotify(request, env, ctx, json) {
   const body = await readBody(request);
   const batch = String(body.batch || '');
   const events = (Array.isArray(body.events) ? body.events : [])
-    .filter((e) => e && /^\d{10}$/.test(e.code) && (e.kind === 'f' || e.kind === 'r'))
+    .filter((e) => e && /^\d{10}$/.test(e.code) && ['f', 'r', 'p'].includes(e.kind))
     .map((e) => ({ code: e.code, kind: e.kind, name: String(e.name || e.code).slice(0, 30), label: String(e.label || '').slice(0, 40) }));
   if (!/^[\w-]{6,64}$/.test(batch)) return json({ error: 'batch' }, 400);
 

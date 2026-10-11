@@ -74,7 +74,7 @@ curl -X POST https://tn-submit.<子網域>.workers.dev/submit \
 
 ## 機構追蹤推播（Web Push）
 
-使用者在**已安裝的 App（PWA）**裡追蹤醫院，有新分享、新年度財報、護病比新月份時推播通知。
+使用者在**已安裝的 App（PWA）**裡追蹤醫院，有新分享、新年度財報、護病比或人力監控新月份時推播通知。
 一般瀏覽器裡按「追蹤」只會顯示加到主畫面教學（iOS 只有主畫面 App 收得到推播，全平台統一規則）。
 
 - `src/push.js` — 訂閱（`/push/subscribe`、`/push/unsubscribe`）、事件 → 每人一則彙整、排隊發送（`/notify`、`/push/drain`）

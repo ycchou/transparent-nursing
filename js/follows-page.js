@@ -1,12 +1,12 @@
 // follows-page.js — 「我的追蹤」頁（follows.html）：推播狀態、追蹤清單（逐家切換通知類型）、刪除訂閱資料。
 
-import { icon } from './icons.js?v=a4bd5c1762';
-import { showToast } from './toast.js?v=a4bd5c1762';
-import { escapeHtml } from './moderation.js?v=a4bd5c1762';
+import { icon } from './icons.js?v=66b3fdfbe7';
+import { showToast } from './toast.js?v=66b3fdfbe7';
+import { escapeHtml } from './moderation.js?v=66b3fdfbe7';
 import {
   getFollows, pushStatus, guideToInstall, setKinds, unfollowHospital, deleteAll, healthCheck,
   KIND_LABELS, ALL_KINDS,
-} from './follow.js?v=a4bd5c1762';
+} from './follow.js?v=66b3fdfbe7';
 
 function renderStatus() {
   const box = document.getElementById('follow-status');
@@ -40,7 +40,7 @@ function renderStatus() {
   } else if (n) {
     cls = 'is-ok';
     title = `通知已開啟・追蹤 ${n} 家醫院`;
-    text = '有更新時會推播到這台裝置。分享在送出後立即通知；財報與護病比在平台更新資料時通知。';
+    text = '有更新時會推播到這台裝置。分享在送出後立即通知；財報、護病比與人力監控在平台更新資料時通知。';
   } else {
     title = '還沒有追蹤醫院';
     text = '到機構總覽選一家醫院，按名稱旁的「追蹤」，第一次會詢問是否允許通知。';

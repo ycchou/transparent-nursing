@@ -5,20 +5,20 @@
 //   - 分享平台：眾包 CSV（data-loader.loadAll），以機構名稱/簡稱比對
 //   - 違規紀錄：勞檢/性平/職安三支 Sheet，以 data/violations-hospital-map.json（名稱→代號）比對
 
-import { renderIcons } from './icons.js?v=a4bd5c1762';
-import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=a4bd5c1762';
+import { renderIcons } from './icons.js?v=66b3fdfbe7';
+import { getShort, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=66b3fdfbe7';
 
-import { notePwaIntent } from './pwa-prompt.js?v=a4bd5c1762';
+import { notePwaIntent } from './pwa-prompt.js?v=66b3fdfbe7';
 
-import { skeletonRows } from './skeleton.js?v=a4bd5c1762';
-import { escapeHtml } from './moderation.js?v=a4bd5c1762';
-import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=a4bd5c1762';
-import { state, loadBaseData } from './hospital-data.js?v=a4bd5c1762';
+import { skeletonRows } from './skeleton.js?v=66b3fdfbe7';
+import { escapeHtml } from './moderation.js?v=66b3fdfbe7';
+import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=66b3fdfbe7';
+import { state, loadBaseData } from './hospital-data.js?v=66b3fdfbe7';
 
-import { readCodeParam } from './hospital-merges.js?v=a4bd5c1762';
-import { isFollowing, followHospital, unfollowHospital } from './follow.js?v=a4bd5c1762';
-import { showToast } from './toast.js?v=a4bd5c1762';
-import { icon } from './icons.js?v=a4bd5c1762';
+import { readCodeParam } from './hospital-merges.js?v=66b3fdfbe7';
+import { isFollowing, followHospital, unfollowHospital } from './follow.js?v=66b3fdfbe7';
+import { showToast } from './toast.js?v=66b3fdfbe7';
+import { icon } from './icons.js?v=66b3fdfbe7';
 import {
   renderNurseSection,
   renderFinancialsSection,
@@ -26,7 +26,7 @@ import {
   renderPlatformSection,
   renderViolationsSection,
   copyOrShare,
-} from './hospital-sections.js?v=a4bd5c1762';
+} from './hospital-sections.js?v=66b3fdfbe7';
 
 // ---------- utils ----------
 // 舊碼（改制換碼）會轉成新碼並改寫網址
@@ -226,7 +226,7 @@ function renderFollowButton(hosp) {
         await unfollowHospital(hosp.code);
         showToast(`已取消追蹤${name}`, 'info');
       } else if (await followHospital(hosp.code, name)) {
-        showToast(`已追蹤${name}：有新分享、財報、護病比時會通知你（可到「我的追蹤」調整）`, 'info');
+        showToast(`已追蹤${name}：有新分享、財報、護病比、人力監控時會通知你（可到「我的追蹤」調整）`, 'info');
       }
     } finally {
       btn.disabled = false;

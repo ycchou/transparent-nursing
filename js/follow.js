@@ -7,16 +7,16 @@
 // 追蹤清單的正本在本機 localStorage；每次變動整份同步到 tn-submit Worker 的 /push/subscribe。
 // 伺服器只存推播端點＋機構代號與類型，不存 IP、不與投稿關聯（見 worker-submit/src/push.js）。
 
-import { LIVE } from './env.js?v=a4bd5c1762';
-import { showToast } from './toast.js?v=a4bd5c1762';
+import { LIVE } from './env.js?v=66b3fdfbe7';
+import { showToast } from './toast.js?v=66b3fdfbe7';
 
-const FOLLOW_KEY = 'tn:follows';          // { 機構代號: { name, kinds: 'cfr', at } }
+const FOLLOW_KEY = 'tn:follows';          // { 機構代號: { name, kinds: 'cfpr', at } }
 const ENDPOINT_KEY = 'tn:push_endpoint';  // 上次同步到伺服器的推播端點（換了就重新同步）
 const CLEANUP_KEY = 'tn:push_cleanup';    // 清單已清空但伺服器刪除失敗 → 下次開 App 再刪一次
 
 // 類型代碼與 worker-submit/src/push.js 的 KINDS 一致
-export const KIND_LABELS = { c: '新分享', f: '財報', r: '護病比' };
-export const ALL_KINDS = 'cfr';
+export const KIND_LABELS = { c: '新分享', f: '財報', r: '護病比', p: '人力監控' };
+export const ALL_KINDS = 'cfpr';   // 新追蹤預設全收；舊追蹤（cfr）要自己到「我的追蹤」打開人力監控
 export const MAX_FOLLOWS = 100;   // 與 Worker 的 MAX_FOLLOWS 一致
 
 const API = LIVE.submitEndpoint.replace(/\/submit$/, '');
@@ -62,7 +62,7 @@ const STATUS_MSG = {
 
 // 非 App 模式：引導安裝。教學本身在 pwa-prompt.js（含 iOS／Android／桌機圖解與一鍵安裝）
 export async function guideToInstall(name = '') {
-  const { showInstallGuide } = await import('./pwa-prompt.js?v=a4bd5c1762');
+  const { showInstallGuide } = await import('./pwa-prompt.js?v=66b3fdfbe7');
   const who = name ? `「${escapeText(name)}」` : '醫院';
   showInstallGuide({
     lead: `<strong>追蹤${who}需要先把網站加到主畫面</strong>，推播通知只能送到安裝好的 App。<br>
@@ -165,7 +165,7 @@ export async function unfollowHospital(code) {
   return true;
 }
 
-/** 改某家醫院要收哪些類型（kinds 為 'cfr' 的子集；空字串＝取消追蹤） */
+/** 改某家醫院要收哪些類型（kinds 為 'cfpr' 的子集；空字串＝取消追蹤） */
 export async function setKinds(code, kinds) {
   if (!kinds) return unfollowHospital(code);
   const f = getFollows();

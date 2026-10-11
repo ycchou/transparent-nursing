@@ -1,13 +1,13 @@
 // form-institution-picker.js — 表單的「機構名稱」自動建議：依選的機構層級篩選醫院（手機為底部選單），
 // 清單來自 data/hospitals-master.json（評鑑名單＋VPN 補充）。
 
-import { icon } from './icons.js?v=a4bd5c1762';
+import { icon } from './icons.js?v=66b3fdfbe7';
 
-import { HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=a4bd5c1762';
+import { HOSPITAL_SHORT_MAP as _SHORT_MAP } from './hospital-shortname.js?v=66b3fdfbe7';
 
-import { escapeHtml } from './moderation.js?v=a4bd5c1762';
+import { escapeHtml } from './moderation.js?v=66b3fdfbe7';
 
-import { showToast } from './toast.js?v=a4bd5c1762';
+import { showToast } from './toast.js?v=66b3fdfbe7';
 
 // ===== 機構名稱 autocomplete（依評鑑等級篩選醫院）=====
 
