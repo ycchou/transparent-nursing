@@ -54,7 +54,7 @@ const ALLOWED_FIELDS = new Set([
  'onCallType', 'orRole', 'orSpecialty', 'otherCerts', 'overtimePolicy', 'patientComplaints',
  'pdCount', 'pdPeakRatio', 'postIncidentSupport', 'ppCareFreq', 'practiceRegistration',
  'promotion', 'promotionReport', 'protectionRoomCount', 'pShift', 'psychHazardPay',
- 'psychHospitalKind', 'psychType', 'radiationExposure', 'recommendIndex', 'restInterval11h',
+ 'psychHospitalKind', 'psychTeachingHospital', 'psychType', 'radiationExposure', 'recommendIndex', 'restInterval11h',
  'restraintFreq', 'roomCount', 'salaryGrowth', 'salaryStructure', 'scheduleSystem',
  'securitySupport', 'shiftPattern', 'shiftSystem', 'shiftType', 'specialBenefits',
  'specialType', 'stressLevel', 'teamSupport', 'transferDifficulty', 'triageRatio', 'tubeCare',

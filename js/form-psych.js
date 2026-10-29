@@ -1,7 +1,7 @@
 // 精神科自建表單：只定義精神科專屬區塊，其餘（機構基本資料 / 輪班別與津貼（病房版）/ 人力與支援 /
 // 業務與工時共用欄 / 薪資與年資 / 整體評價）沿用 form-sections.js 的共用正本。
 
-import { initDepartmentForm } from './form-engine.js?v=33a4a799b6';
+import { initDepartmentForm } from './form-engine.js?v=24e70189de';
 import {
   buildInstitutionSection,
   WORKHOURS_FIELDS,
@@ -14,28 +14,20 @@ import {
   EVALUATION_SECTION,
   scale,
   VIOLENCE_FREQ_FIELD,
-  VIOLENCE_RISK_FIELD,
   POST_INCIDENT_SUPPORT_FIELD,
-} from './form-sections.js?v=33a4a799b6';
+} from './form-sections.js?v=24e70189de';
 
 // 護病比刻度：與病房相同（WARD_RATIO，拆「常態」「最忙時」），
 // 另加「無此班別」給日間照護等沒有小夜／大夜的單位。
 const PSYCH_RATIO = [...WARD_RATIO, '無此班別'];
 
 // 護病比配置引導文字：可展開查看完整法規條文
-const RATIO_INTRO = `<strong>精神科護病比設置標準</strong><br><br>
-重點：急性一般病床的<strong>全日平均護病比</strong>，<strong>精神科教學醫院 ≦ 12 人、精神科醫院 ≦ 15 人</strong>（綜合醫院依層級：醫學中心 9、區域 12、地區 15）。這是三班平均值，小夜、大夜實際一人照顧的病人數通常遠高於此。
+const RATIO_INTRO = `<strong>精神科護理人力設置標準</strong><br><br>
+重點：法規訂的是<strong>「病床數 : 總護理人力」</strong>的配置底線（例：精神急性一般病床每 3.5 床 1 人，教學醫院每 2.8 床），並非每班護病比。小夜、大夜實際一人照顧的病人數通常遠高於此。
 <details style="margin-top:12px;">
   <summary style="cursor:pointer;color:var(--primary);font-weight:600;"><span data-icon="book-open" data-size="16" class="ico-inline"></span>點此查看完整法規條文</summary>
   <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(0,0,0,0.1);">
-    <strong>1.《醫療機構設置標準》第 12-1 條（全日平均護病比）</strong><br>
-    醫院及精神科醫院應依住院病人人數配置適當之護產人員；急性一般病床之全日平均護病比（每一護產人員照護之病人人數）：<br>
-    ・醫學中心：9 人以下<br>
-    ・區域醫院及精神科教學醫院：12 人以下<br>
-    ・地區醫院及精神科醫院：15 人以下<br>
-    （因人事異動不符規定者，應自事實發生之日起 30 日內補正。）<br><br>
-    <strong>2.《醫療機構設置標準》附表（三）精神科醫院設置標準表（護理人員）</strong><br>
-    此為「病床數 : 總護理人力」的配置底線，並非每班護病比。<br>
+    <strong>《醫療機構設置標準》附表（三）精神科醫院設置標準表（護理人員）</strong><br>
     ・精神急性一般病床：每 3.5 床 1 人以上（教學醫院每 2.8 床）<br>
     ・精神慢性一般病床：每 15 床 1 人以上（教學醫院每 12 床）<br>
     ・精神科日間照護單位：每 20 名服務量 1 人以上（教學醫院每 16 名）<br>
@@ -52,14 +44,11 @@ const PSYCH_FORM_SCHEMA = [
 
   { section: '精神科單位資訊' },
   { name: 'psychHospitalKind', label: '醫院屬性', type: 'radio', required: true,
-    options: ['綜合醫院精神科', '精神科醫院', '精神科教學醫院', '不清楚'],
-    help: '精神科醫院／精神科教學醫院依衛福部「精神科醫院評鑑」結果區分，兩者護病比標準不同' },
+    options: ['綜合醫院精神科', '精神專科醫院'] },
+  { name: 'psychTeachingHospital', label: '是否為教學醫院', type: 'radio', required: true,
+    options: ['是', '否', '不清楚'], help: '教學醫院的護理人力配置標準較高' },
   { name: 'psychType', label: '病房類型', type: 'radio', required: true,
     options: ['急性一般', '急性兒童青少年', '急性老年', '急性成癮', '慢性', '精神科加護', '精神科急診', '日間照護', '其他'] },
-  { name: 'teamSupport', label: '跨專業團隊', type: 'radio',
-    options: ['完整（心理/職能/社工/醫師）', '部分（缺 1-2 種）', '主要靠護理'] },
-  { name: 'ehrLevel', label: '護理紀錄電子化程度', type: 'radio',
-    options: ['全面電子化', '部分電子化', '紙本為主'] },
 
   { section: '護病比配置', intro: RATIO_INTRO },
   { name: 'dayShiftRatio', label: '白班・常態護病比', type: 'radio', required: true,
@@ -103,11 +92,8 @@ const PSYCH_FORM_SCHEMA = [
   { section: '職場安全',
     intro: '處理自傷、暴力、逃跑等事件時，自身安全是否受保障，以及事後團隊與醫院的支持。' },
   VIOLENCE_FREQ_FIELD,
-  { name: 'incidentFreq', label: '過去三個月病房發生自傷／自殺／逃跑事件', type: 'radio',
+  { name: 'incidentFreq', label: '過去一個月病房發生自傷／自殺／逃跑事件', type: 'radio',
     options: ['無', '1-2 次', '3-5 次', '6 次以上'] },
-  { name: 'restraintFreq', label: '約束／隔離頻率', type: 'radio',
-    options: ['每日多次', '每週數次', '偶爾', '罕見'] },
-  VIOLENCE_RISK_FIELD,
   { name: 'securitySupport', label: '約束隔離時是否有防護班／警衛協助', type: 'radio',
     options: ['有，隨叫隨到', '有，但常需等待', '無，靠護理人員自己'] },
   POST_INCIDENT_SUPPORT_FIELD,
@@ -115,8 +101,6 @@ const PSYCH_FORM_SCHEMA = [
   { section: '硬體環境' },
   { name: 'protectionRoomCount', label: '保護室（可約束隔離空間）數量', type: 'radio',
     options: ['0', '1', '2', '3 間以上'] },
-  { name: 'hasProtectionRoom', label: '保護室狀況', type: 'radio',
-    options: ['良好', '堪用', '老舊／不安全', '無保護室'] },
 
   ...SALARY_SECTION,
   ...EVALUATION_SECTION,

@@ -2,8 +2,8 @@
 //
 // 資料來源由 js/env.js 的 MODE 決定：mock 讀下面的 csvUrlMock（data/mock/*.csv），
 // live 讀 env.js 的 LIVE.csvUrls（Google Sheet 發布 CSV）。這裡不必再改。
-import { C } from './theme.js?v=33a4a799b6';
-import { csvUrlFor } from './env.js?v=33a4a799b6';
+import { C } from './theme.js?v=24e70189de';
+import { csvUrlFor } from './env.js?v=24e70189de';
 
 export const SITE = {
   name: '護理職場透明化運動',
@@ -359,13 +359,10 @@ export const CATEGORIES = [
     formStatus: 'live',
     specificFields: [
       { key: 'psychHospitalKind', label: '醫院屬性', type: 'enum',
-        options: ['綜合醫院精神科', '精神科醫院', '精神科教學醫院', '不清楚'] },
+        options: ['綜合醫院精神科', '精神專科醫院'] },
+      { key: 'psychTeachingHospital', label: '教學醫院', type: 'enum', options: ['是', '否', '不清楚'] },
       { key: 'psychType', label: '病房類型', type: 'enum',
         options: ['急性一般', '急性兒童青少年', '急性老年', '急性成癮', '慢性', '精神科加護', '精神科急診', '日間照護', '其他'] },
-      { key: 'teamSupport', label: '跨專業團隊', type: 'enum',
-        options: ['完整（心理/職能/社工/醫師）', '部分（缺 1-2 種）', '主要靠護理'] },
-      { key: 'ehrLevel', label: '護理紀錄電子化', type: 'enum',
-        options: ['全面電子化', '部分電子化', '紙本為主'] },
       { key: 'dayShiftRatio', label: '白班常態護病比', type: 'string' },
       { key: 'dayPeakRatio', label: '白班最忙時', type: 'string' },
       { key: 'eveningShiftRatio', label: '小夜常態護病比', type: 'string' },
@@ -398,19 +395,14 @@ export const CATEGORIES = [
       { key: 'transferDifficulty', label: '後送困難度 (1-5)', type: 'number' },
       { key: 'violenceFreq', label: '每月暴力事件頻率', type: 'enum',
         options: ['完全沒有', '1-5 次', '6-10 次', '11-20 次', '幾乎每天'] },
-      { key: 'incidentFreq', label: '三個月內自傷／逃跑事件', type: 'enum',
+      { key: 'incidentFreq', label: '一個月內自傷／逃跑事件', type: 'enum',
         options: ['無', '1-2 次', '3-5 次', '6 次以上'] },
-      { key: 'restraintFreq', label: '約束/隔離頻率', type: 'enum',
-        options: ['每日多次', '每週數次', '偶爾', '罕見'] },
-      { key: 'violenceRiskFeeling', label: '處理暴力危險感 (1-5)', type: 'number' },
       { key: 'securitySupport', label: '防護班／警衛協助', type: 'enum',
         options: ['有，隨叫隨到', '有，但常需等待', '無，靠護理人員自己'] },
       { key: 'postIncidentSupport', label: '暴力事件後支持', type: 'enum',
         options: ['非常完善', '良好', '普通', '不太足夠', '非常不足'] },
       { key: 'protectionRoomCount', label: '保護室數量', type: 'enum',
         options: ['0', '1', '2', '3 間以上'] },
-      { key: 'hasProtectionRoom', label: '保護室狀況', type: 'enum',
-        options: ['良好', '堪用', '老舊／不安全', '無保護室'] },
       { key: 'specialBenefits', label: '特殊福利', type: 'text' },
     ],
   },
