@@ -14,7 +14,7 @@ const SOURCE_URL = 'https://openinfo.mohw.gov.tw/web/C02?type=1';
 let indexPromise = null;
 function loadIndex() {
   if (!indexPromise) {
-    indexPromise = fetch('data/hospital-beds.json?v=84d8731d91')
+    indexPromise = fetch('data/hospital-beds.json?v=161f8d2468')
       .then((r) => (r.ok ? r.json() : { hospitals: [] }))
       .then((d) => ({ updated: d.updated || '', codes: new Set((d.hospitals || []).map((h) => h.code)) }))
       .catch(() => ({ updated: '', codes: new Set() }));
@@ -27,7 +27,7 @@ export async function loadBeds(code) {
   if (!code) return null;
   if (!cache.has(code)) {
     cache.set(code, loadIndex().then(({ updated, codes }) => (codes.has(code)
-      ? fetch(`data/beds/${code}.json?v=84d8731d91`).then((r) => (r.ok ? r.json() : null)).then((d) => d && { ...d, updated }).catch(() => null)
+      ? fetch(`data/beds/${code}.json?v=161f8d2468`).then((r) => (r.ok ? r.json() : null)).then((d) => d && { ...d, updated }).catch(() => null)
       : null)));
   }
   return cache.get(code);
