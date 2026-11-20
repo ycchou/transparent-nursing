@@ -30,6 +30,7 @@
 | `personnel-index.json`、`personnel-aggregate.json`、`personnel/{id}.json` | `build-personnel.py` | 醫事人力監測 PDF | ✅ personnel / hospital |
 | `hospital-financials-list.json` | `fetch-financials-list.js` | 健保署 | —（餵下一支） |
 | `hospital-financials.json` | `fetch-hospital-financials.py` | 健保署財務公開 API | ✅ financials / hospital |
+| `hospital-beds.json`、`beds/{code}.json` | `fetch-hospital-beds.py` | 衛福部醫院評鑑資訊專區（各院區登記病床設施） | ✅ personnel / hospital（病床設施） |
 | `violations-hospital-map.json` | `build-violations-map.py` | 違規 CSV＋manual overrides | ✅ records / hospital |
 
 ### 手改檔（manual，建置輸入，`data/manual/`）

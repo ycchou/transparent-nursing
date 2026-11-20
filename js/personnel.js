@@ -2,17 +2,18 @@
 // 資料：data/personnel-index.json（picker 清單）＋ data/personnel/{code}.json（單院時間序列）
 // 來源：衛福部「醫院醫事人力持續性監測結果」。
 
-import { renderIcons, icon } from './icons.js?v=1244053837';
-import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=1244053837';
+import { renderIcons, icon } from './icons.js?v=caac978e8b';
+import { getShort, getShortByCode, ensureLoaded as ensureShortLoaded } from './hospital-shortname.js?v=caac978e8b';
 import {
   CAT_COLORS, BED_COLORS, DEFAULT_ON, mLabel, baseLineCfg,
   renderStaffChart, renderBedChart, loadPersonnelHospital, latestMonthTable,
-} from './personnel-view.js?v=1244053837';
-import { showToast } from './toast.js?v=1244053837';
-import { registerFormerCodes, readCodeParam } from './hospital-merges.js?v=1244053837';
-import { skeletonRows } from './skeleton.js?v=1244053837';
-import { escapeHtml } from './moderation.js?v=1244053837';
-import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=1244053837';
+} from './personnel-view.js?v=caac978e8b';
+import { renderBedFacilities } from './beds-view.js?v=caac978e8b';
+import { showToast } from './toast.js?v=caac978e8b';
+import { registerFormerCodes, readCodeParam } from './hospital-merges.js?v=caac978e8b';
+import { skeletonRows } from './skeleton.js?v=caac978e8b';
+import { escapeHtml } from './moderation.js?v=caac978e8b';
+import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=caac978e8b';
 
 const INDEX_URL = 'data/personnel-index.json?v=06162bccd0';   // 帶版本號：改版後不會讀到舊快取（stamp-assets 維護）
 const AGG_URL = 'data/personnel-aggregate.json';
@@ -148,6 +149,7 @@ async function selectHospital(id, updateUrl = false) {
 
   state.staffChart = renderStaffChart(document.getElementById('pm-staff-chart'), h, state.staffChart);
   renderBedWithEmpty(h);
+  renderFacilities(h);
   renderLatestTable(h);
   renderIcons(detail);
   detail.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -173,6 +175,15 @@ function renderBedWithEmpty(h) {
     canvas.style.display = '';
     if (msg) msg.style.display = 'none';
   }
+}
+
+// 病床設施：衛福部登記的完整床別；無資料時整張卡片隱藏
+function renderFacilities(h) {
+  const card = document.getElementById('pm-facilities-card');
+  card.hidden = true;
+  renderBedFacilities(document.getElementById('pm-facilities'), h.code, { branch: h.branch }).then((ok) => {
+    if (state.currentId === (h.id || h.code)) card.hidden = !ok;
+  });
 }
 
 function renderLatestTable(h) {

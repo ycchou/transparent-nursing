@@ -6,6 +6,7 @@
      · 人力監控  tools/fetch-personnel.py   衛福部網站，全自動下載
      · 護病比    tools/fetch-nurse-ratio.py 政府開放資料平台（目前只到 113/12）
      · 財務      查健保署財務 API 的最新年度，有新年度就提示下載網址
+     · 病床設施  tools/fetch-hospital-beds.py 衛福部醫院評鑑資訊專區，各院區目前登記床數（全自動）
   2. 歸檔手動下載的檔案：掃 ~/Downloads 與 data/_inbox/，把
        *三班護病比*.ods                     → data/VPN登錄之各月份三班護病比/
        *財務報告醫院醫療服務申報情形*.ods    → data/財務報告醫院醫療服務申報情形/
@@ -167,6 +168,8 @@ def main():
             new += [f'護病比 {m}' for m in last_json(r.stdout).get('new', [])]
         else:
             notes.append('護病比：開放資料查詢失敗，詳見上方訊息')
+        if run([PY, 'tools/fetch-hospital-beds.py'], check=False).returncode != 0:
+            notes.append('病床設施：下載失敗，詳見上方訊息')
         fin = check_financials()
         if fin:
             notes.append(fin)

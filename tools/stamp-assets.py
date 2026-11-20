@@ -143,10 +143,12 @@ def main():
     #   personnel/${id}       → personnel-index.json
     #   nurse-ratio/by-code   → nurse-ratio.json
     #   financials/${code}    → hospital-financials.json
+    #   beds/${code}          → hospital-beds.json
     DYNAMIC_PROXY = [
         (r"(data/personnel/\$\{[^}]+\}\.json)\?v=[\w]+", 'personnel-index.json'),
         (r"(data/nurse-ratio/by-code/\$\{[^}]+\}\.json)\?v=[\w]+", 'nurse-ratio.json'),
         (r"(data/financials/\$\{[^}]+\}\.json)\?v=[\w]+", 'hospital-financials.json'),
+        (r"(data/beds/\$\{[^}]+\}\.json)\?v=[\w]+", 'hospital-beds.json'),
     ]
     for pat, proxy in DYNAMIC_PROXY:
         pf = os.path.join(ROOT, 'data', proxy)

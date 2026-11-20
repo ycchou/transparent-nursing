@@ -5664,6 +5664,47 @@ body.g2g-modal-open { overflow: hidden; }
   .jump-to-picker { display: inline-flex; width: 100%; justify-content: center; }
 }
 #hospital-picker { scroll-margin-top: calc(var(--header-h) + 16px); }
+
+/* ---- 病床設施（js/beds-view.js）：接在逐月病床圖下方，依一般／特殊病床分組的長條清單 ---- */
+.bf-general { background: var(--primary-fill); }
+.bf-special { background: var(--cat-special); }
+.bf-zones { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.bf-zone {
+  border: 1px solid var(--border); background: var(--surface); color: var(--ink-soft);
+  border-radius: var(--radius-pill); padding: 4px 12px; font-size: var(--fs-xs); cursor: pointer;
+}
+.bf-zone.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+.bf-summary {
+  background: var(--surface-soft); border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md); padding: 14px 16px; margin-bottom: 14px;
+}
+.bf-total { display: flex; align-items: baseline; gap: 4px; }
+.bf-total-num { font-size: 1.75rem; font-weight: 700; color: var(--ink); line-height: 1.1; }
+.bf-total-unit, .bf-total-label { color: var(--muted); font-size: var(--fs-xs); }
+.bf-split { display: flex; height: 8px; border-radius: var(--radius-pill); overflow: hidden; background: var(--border-soft); margin: 10px 0 6px; }
+.bf-split > span { display: block; height: 100%; }
+.bf-split-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: var(--fs-xs); color: var(--ink-soft); }
+.bf-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: 1px; }
+.bf-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 28px; }
+.bf-group-title {
+  display: flex; justify-content: space-between; font-size: var(--fs-xs); font-weight: 600;
+  color: var(--muted); border-bottom: 1px solid var(--border-soft); padding-bottom: 4px; margin: 4px 0 6px;
+}
+.bf-row { display: grid; grid-template-columns: 8.5em 1fr 4.5em; align-items: center; gap: 8px; padding: 3px 0; font-size: var(--fs-sm); }
+.bf-name { color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bf-bar { height: 6px; background: var(--border-soft); border-radius: var(--radius-pill); overflow: hidden; }
+.bf-bar > span { display: block; height: 100%; border-radius: var(--radius-pill); }
+.bf-num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink); }
+.bf-num small { font-weight: 400; color: var(--muted); }
+.bf-other { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 14px; font-size: var(--fs-xs); }
+.bf-other-label { color: var(--muted); margin-right: 2px; }
+.bf-chip { background: var(--surface-soft); border: 1px solid var(--border-soft); border-radius: var(--radius-pill); padding: 2px 10px; color: var(--ink-soft); }
+.bf-chip strong { color: var(--ink); }
+.bf-note { color: var(--muted-light); font-size: var(--fs-2xs); margin: 12px 0 0; line-height: 1.6; }
+.bf-empty { padding: 16px; color: var(--muted); text-align: center; }
+@media (max-width: 768px) {
+  .bf-groups { grid-template-columns: 1fr; }
+}
 /* ============================================================
    觸控目標 — 觸控裝置上所有可點元素至少 44×44（WCAG 2.5.5 / Apple HIG）
    外觀尺寸盡量不變，靠 min-height 或 ::after 擴大可點範圍

@@ -1,7 +1,7 @@
 // hospital-sections.js — 機構總覽頁五個分頁的內容：三班護病比、財務概況、人力監控、分享平台、違規紀錄（含違規詳情彈窗）。
-import { icon, renderIcons } from './icons.js?v=1244053837';
-import { getShort } from './hospital-shortname.js?v=1244053837';
-import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=1244053837';
+import { icon, renderIcons } from './icons.js?v=caac978e8b';
+import { getShort } from './hospital-shortname.js?v=caac978e8b';
+import { normalizeInstitutionName, institutionNameMatches } from './institution-name.js?v=caac978e8b';
 import {
   STANDARDS,
   COMPLIANCE_CLASSES,
@@ -9,11 +9,11 @@ import {
   shiftStatus,
   classifyHospital,
   renderNurseChart,
-} from './nurse-ratio-view.js?v=1244053837';
+} from './nurse-ratio-view.js?v=caac978e8b';
 
-import { renderKpiStrip } from './stats-kpi.js?v=1244053837';
-import { renderTable, showDetailModal } from './table.js?v=1244053837';
-import { hasContributed } from './contribution-gate.js?v=1244053837';
+import { renderKpiStrip } from './stats-kpi.js?v=caac978e8b';
+import { renderTable, showDetailModal } from './table.js?v=caac978e8b';
+import { hasContributed } from './contribution-gate.js?v=caac978e8b';
 
 import {
   loadFinancialsHospital,
@@ -22,22 +22,23 @@ import {
   formatRocYear as finRocYear,
   renderFinancialTrendChart,
   signClass as finSignClass,
-} from './financials-view.js?v=1244053837';
-import { levelSlug } from './picker-filters.js?v=1244053837';
-import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=1244053837';
+} from './financials-view.js?v=caac978e8b';
+import { levelSlug } from './picker-filters.js?v=caac978e8b';
+import { feeMergedParent, reportMergedInfo } from './hospital-merges.js?v=caac978e8b';
 import {
   loadPersonnelHospital,
   ensurePersonnelIndex,
   renderStaffChart as renderPmStaffChart,
   renderBedChart as renderPmBedChart,
   latestMonthTable,
-} from './personnel-view.js?v=1244053837';
+} from './personnel-view.js?v=caac978e8b';
+import { renderBedFacilities } from './beds-view.js?v=caac978e8b';
 
-import { fineToWan, formatROCDate } from './records-format.js?v=1244053837';
-import { skeletonRows } from './skeleton.js?v=1244053837';
-import { escapeHtml } from './moderation.js?v=1244053837';
+import { fineToWan, formatROCDate } from './records-format.js?v=caac978e8b';
+import { skeletonRows } from './skeleton.js?v=caac978e8b';
+import { escapeHtml } from './moderation.js?v=caac978e8b';
 
-import { state, loadNurseByCode, ensurePlatformRows, ensureViolRows } from './hospital-data.js?v=1244053837';
+import { state, loadNurseByCode, ensurePlatformRows, ensureViolRows } from './hospital-data.js?v=caac978e8b';
 
 // 共用院區頁簽：多院區時以 .tabs 頁簽切換，內容區惰性重繪（重用 css .tabs/.tab）。
 // tabs: [{ label, data }]；renderPanel(data, panelEl) 每次切換都重畫（圖表用新 canvas）。
@@ -231,6 +232,10 @@ function renderPersonnelPanel(h, panel) {
     <div class="chart-canvas-wrap" style="height:300px;"><canvas class="pm-staff-canvas"></canvas></div>
     <h4 style="margin:20px 4px 4px;font-size:0.95rem;">病床數量（逐月）</h4>
     <div class="chart-canvas-wrap" style="height:260px;"><canvas class="pm-bed-canvas"></canvas></div>
+    <div class="pm-facilities-block" hidden>
+      <h4 style="margin:24px 4px 10px;font-size:0.95rem;">病床設施（衛福部登記）</h4>
+      <div class="pm-facilities"></div>
+    </div>
     ${latestBlock}`;
   renderPmStaffChart(panel.querySelector('.pm-staff-canvas'), h, null);
   // 病床圖：無登錄床數時以提示取代（renderPmBedChart 回傳 null）
@@ -243,6 +248,9 @@ function renderPersonnelPanel(h, panel) {
     msg.textContent = '此機構無登錄病床資料。';
     bedCanvas.parentElement.appendChild(msg);
   }
+  const facBlock = panel.querySelector('.pm-facilities-block');
+  renderBedFacilities(facBlock.querySelector('.pm-facilities'), h.code, { branch: h.branch })
+    .then((ok) => { facBlock.hidden = !ok; });
   renderIcons();
 }
 
@@ -258,7 +266,14 @@ export function renderPersonnelSection(code) {
   ensurePersonnelIndex().then((idx) => {
     if (state.currentCode !== code) return;
     const campuses = idx.byCode.get(code) || [];
-    if (campuses.length === 0) { empty.hidden = false; return; }
+    if (campuses.length === 0) {
+      empty.hidden = false;
+      body.innerHTML = '<h4 style="margin:4px 4px 10px;font-size:0.95rem;">病床設施（衛福部登記）</h4><div class="pm-facilities"></div>';
+      renderBedFacilities(body.querySelector('.pm-facilities'), code).then((ok) => {
+        if (state.currentCode === code) body.hidden = !ok;
+      });
+      return;
+    }
     body.hidden = false;
     link.innerHTML = `<a href="personnel.html?id=${encodeURIComponent(campuses[0].id)}" style="color:var(--primary);text-decoration:underline;font-size:0.85rem;">查看人力監控 →</a>`;
 

@@ -53,6 +53,7 @@ STEPS = [
     ('local', ['python', 'tools/build-personnel.py'],            '監測 PDF → 人力（逐檔快取）',
      ['data/醫院醫事人力持續性監測/*/*.pdf', 'data/nurse-ratio.json', 'data/hospitals-merged.json',
       'data/manual/personnel-corrections.json', 'data/manual/hospital-successors.json', 'tools/hospital_successors.py']),
+    ('net',   ['python', 'tools/fetch-hospital-beds.py'],        '衛福部 → 病床設施（各院區登記床數）', []),
     ('net',   ['python', 'tools/build-hospitals-master.py'],     '→ 醫院主檔（表單用，需健保署）', []),
     ('local', ['python', 'tools/build-violations-map.py'],       '違規 → 名稱對照（會讀線上 Sheet）',
      ['data/hospitals-merged.json', 'data/manual/violations-hospital-overrides.json']),
