@@ -70,9 +70,9 @@ python tools/update-data.py                   # 同上但不 commit，先看結�
 
 手動下載的檔案也可以放在 `data/_inbox/`（不進版控）。
 
-**自動排程**：`.github/workflows/auto-update.yml` 每 5 天（台灣時間 03:00）在 GitHub Actions 跑
-`update-data.py --commit`，自動更新人力監控、病床設施（含 `beds-history/` 歷史快照）、違規名稱對照；
-有變動才 commit、push 並觸發部署（推播照常）。也可在 Actions 頁手動執行（Run workflow）。
+**自動排程**：本機 cron 每 5 天（03:00）跑 `tools/auto-update.sh`，即 `update-data.py --commit --push`，
+自動更新人力監控、病床設施（含 `beds-history/` 歷史快照）；有變動才 commit、push（即部署、推播照常），
+記錄寫到 `logs/auto-update.log`。衛福部 openinfo 擋國外連線，所以不放 GitHub Actions。
 三班護病比新月份、財務年度報表無法自動下載，仍照上表手動處理。歸檔時以內容雜湊判斷，重複下載的檔案不會重複歸檔。
 
 ## 重建

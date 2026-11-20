@@ -49,3 +49,6 @@ backup/
 
 # tools/build-site.py 組出的部署內容
 _site/
+
+# 本機自動更新排程的記錄（tools/auto-update.sh）
+logs/

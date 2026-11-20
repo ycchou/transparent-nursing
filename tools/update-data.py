@@ -7,7 +7,6 @@
      · 護病比    tools/fetch-nurse-ratio.py 政府開放資料平台（目前只到 113/12）
      · 財務      查健保署財務 API 的最新年度，有新年度就提示下載網址
      · 病床設施  tools/fetch-hospital-beds.py 衛福部醫院評鑑資訊專區，各院區目前登記床數（全自動）
-     · 違規對照  tools/build-violations-map.py 重讀線上違規 Sheet，補上新案件的醫院對照
   2. 歸檔手動下載的檔案：掃 ~/Downloads 與 data/_inbox/，把
        *三班護病比*.ods                     → data/VPN登錄之各月份三班護病比/
        *財務報告醫院醫療服務申報情形*.ods    → data/財務報告醫院醫療服務申報情形/
@@ -26,8 +25,8 @@
 
 需要：pdfplumber（人力監控）、odfpy＋pandas（財務）
 
-自動排程：.github/workflows/auto-update.yml 每 5 天在 GitHub Actions 跑 `update-data.py --commit`，
-有新資料才 commit、push 並觸發部署（推播照常）。護病比新月份與財務年度報表仍需手動下載後在本機跑。
+自動排程：本機 cron 每 5 天跑 `tools/auto-update.sh`（＝ update-data.py --commit --push），記錄寫到 logs/。
+（衛福部 openinfo 擋國外連線，GitHub Actions 抓不到人力監控與病床設施，所以排程放在本機。）
 """
 import glob
 import hashlib
@@ -174,9 +173,6 @@ def main():
             notes.append('護病比：開放資料查詢失敗，詳見上方訊息')
         if run([PY, 'tools/fetch-hospital-beds.py'], check=False).returncode != 0:
             notes.append('病床設施：下載失敗，詳見上方訊息')
-        # 違規紀錄的名稱對照會讀線上 Sheet：Sheet 新增案件時輸入檔不變，build-all 會略過，所以這裡每次都重跑
-        if run([PY, 'tools/build-violations-map.py'], check=False).returncode != 0:
-            notes.append('違規名稱對照：讀取線上 Sheet 失敗，詳見上方訊息')
         fin = check_financials()
         if fin:
             notes.append(fin)
