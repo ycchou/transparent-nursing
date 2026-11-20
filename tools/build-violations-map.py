@@ -238,6 +238,12 @@ def main():
         'count': len(mapping),
         'map': mapping,
     }
+    # 對照內容沒變就沿用舊的 generatedAt，避免排程每次都產生只差時間戳的 commit
+    if os.path.exists(OUT_MAP):
+        with open(OUT_MAP, encoding='utf-8') as f:
+            prev = json.load(f)
+        if {k: v for k, v in prev.items() if k != 'generatedAt'} == {k: v for k, v in out.items() if k != 'generatedAt'}:
+            out['generatedAt'] = prev.get('generatedAt', out['generatedAt'])
     with open(OUT_MAP, 'w', encoding='utf-8') as f:
         json.dump(out, f, ensure_ascii=False, indent=2)
 

@@ -131,8 +131,15 @@ def main():
     if dry:
         return
     os.makedirs(FEED, exist_ok=True)
+    # 各醫院期別沒變就沿用舊的 generatedAt，避免排程每次都產生只差時間戳的 commit
+    stamp = now.isoformat(timespec='seconds')
+    if os.path.exists(MANIFEST):
+        with open(MANIFEST, encoding='utf-8') as fp:
+            prev = json.load(fp)
+        if prev.get('hospitals') == cur:
+            stamp = prev.get('generatedAt', stamp)
     with open(MANIFEST, 'w', encoding='utf-8') as fp:
-        json.dump({'generatedAt': now.isoformat(timespec='seconds'),
+        json.dump({'generatedAt': stamp,
                    'note': '各醫院最新期別（f 財報年度、r 護病比月份、p 人力監控月份）；由 tools/build-feed.py 產生，推播比對基準',
                    'hospitals': cur}, fp, ensure_ascii=False, indent=0, sort_keys=True)
         fp.write('\n')
