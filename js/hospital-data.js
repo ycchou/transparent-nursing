@@ -10,7 +10,7 @@ import { registerFormerCodes } from './hospital-merges.js?v=5c357bee84';
 import { VIOL_FEEDS } from './config.js?v=5c357bee84';
 
 const MERGED_URL = 'data/hospitals-merged.json?v=8cc5610e0d';
-const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=31fe4394aa';
+const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=c1d276f733';
 const ADDR_OVERLAY_URL = 'data/hospitals-address-overlay.json?v=50f6f147a8';
 
 const parseViolRow = (r) => ({
