@@ -9,9 +9,13 @@
 只有「目前登記」的快照，沒有逐月歷史（逐月 4 種床別仍以人力監控 PDF 為準）。
 
 輸出：
-  data/hospital-beds.json   { updated, hospitals:[{code, name, zones:[{zone, name, total}]}] }（索引）
-  data/beds/{code}.json     { code, name, updated, zones:[{zone, name, beds:[[類別, 床名, 床數], …]}] }
+  data/hospital-beds.json   { updated, hospitals:[{code, name, zones:[{zone, name, total}]}] }（索引，updated＝最後擷取日）
+  data/beds/{code}.json     { code, name, zones:[{zone, name, beds:[[類別, 床名, 床數], …]}] }（前端讀，只有目前數字）
+  data/beds-history/{code}.json  { code, name, history:[{date, zones:[…同上]}] }（只存在 repo、不部署、畫面不用）
 床數為 0 的床別不輸出。只用標準函式庫。
+
+歷史：官方只給目前數字，所以每次擷取都跟上一筆比，「有變動才」在 history 追加一筆（date＝擷取日），
+第一筆是開始收集時的基準。官方清單上消失的醫院（歇業、改代號）：目前檔刪除、歷史檔保留，並從索引拿掉。
 
 用法：python tools/fetch-hospital-beds.py
 """
@@ -29,6 +33,7 @@ if hasattr(sys.stdout, 'reconfigure'):
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_DIR = os.path.join(ROOT, 'data', 'beds')
+HIST_DIR = os.path.join(ROOT, 'data', 'beds-history')
 INDEX = os.path.join(ROOT, 'data', 'hospital-beds.json')
 BASE = 'https://openinfo.mohw.gov.tw'
 UA = 'Mozilla/5.0 (transparent-nursing data fetcher; +https://ycchou.github.io/transparent-nursing/)'
@@ -88,19 +93,31 @@ def main():
 
     updated = datetime.date.today().isoformat()
     os.makedirs(OUT_DIR, exist_ok=True)
-    for old in glob.glob(os.path.join(OUT_DIR, '*.json')):
-        if os.path.splitext(os.path.basename(old))[0] not in by_code:
-            os.remove(old)
-    index = []
+    os.makedirs(HIST_DIR, exist_ok=True)
+    gone = [os.path.splitext(os.path.basename(f))[0] for f in glob.glob(os.path.join(OUT_DIR, '*.json'))]
+    gone = sorted(c for c in gone if c not in by_code)
+    for code in gone:
+        os.remove(os.path.join(OUT_DIR, f'{code}.json'))
+    index, changed = [], []
     for code, h in sorted(by_code.items()):
         h['zones'].sort(key=lambda z: z['zone'])
-        write_json(os.path.join(OUT_DIR, f'{code}.json'), {**h, 'updated': updated})
+        write_json(os.path.join(OUT_DIR, f'{code}.json'), h)
+        hpath = os.path.join(HIST_DIR, f'{code}.json')
+        history = json.load(open(hpath, encoding='utf-8'))['history'] if os.path.exists(hpath) else []
+        if not history or history[-1]['zones'] != h['zones']:
+            if history:
+                changed.append(code)
+            history.append({'date': updated, 'zones': h['zones']})
+            write_json(hpath, {'code': code, 'name': h['name'], 'history': history})
         index.append({'code': code, 'name': h['name'], 'zones': [
             {'zone': z['zone'], 'name': z['name'], 'total': sum(b[2] for b in z['beds'] if b[0] in BED_KINDS)}
             for z in h['zones']]})
     write_json(INDEX, {'updated': updated, 'hospitals': index})
     empty = sum(1 for z in zones if not z['beds'])
     print(f'✔ {len(by_code)} 家醫院（{len(zones)} 院區，{empty} 院區無病床資料）→ data/beds/、data/hospital-beds.json')
+    print(f'  床數有變動：{len(changed)} 家' + (f'（{"、".join(changed[:10])}{"…" if len(changed) > 10 else ""}）' if changed else ''))
+    if gone:
+        print(f'  官方清單已無（保留 beds-history、移出索引）：{"、".join(gone)}')
 
 
 if __name__ == '__main__':

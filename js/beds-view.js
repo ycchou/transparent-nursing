@@ -1,4 +1,4 @@
-import { escapeHtml } from './moderation.js?v=497b1132f4';
+import { escapeHtml } from './moderation.js?v=5c357bee84';
 // 病床設施（衛福部醫院評鑑資訊專區登記數）：依「一般／特殊病床」分組的長條清單，多院區可切換。
 // 供「人力監控」頁(personnel.js)與「機構總覽」頁(hospital-sections.js)共用；接在逐月病床圖下方，
 // 逐月圖只有人力監測申報的 4 種床別，這裡補上目前登記的完整床別（加護、隔離、透析、安寧…）。
@@ -16,8 +16,8 @@ function loadIndex() {
   if (!indexPromise) {
     indexPromise = fetch('data/hospital-beds.json?v=84d8731d91')
       .then((r) => (r.ok ? r.json() : { hospitals: [] }))
-      .then((d) => new Set((d.hospitals || []).map((h) => h.code)))
-      .catch(() => new Set());
+      .then((d) => ({ updated: d.updated || '', codes: new Set((d.hospitals || []).map((h) => h.code)) }))
+      .catch(() => ({ updated: '', codes: new Set() }));
   }
   return indexPromise;
 }
@@ -26,8 +26,8 @@ const cache = new Map();
 export async function loadBeds(code) {
   if (!code) return null;
   if (!cache.has(code)) {
-    cache.set(code, loadIndex().then((codes) => (codes.has(code)
-      ? fetch(`data/beds/${code}.json?v=84d8731d91`).then((r) => (r.ok ? r.json() : null)).catch(() => null)
+    cache.set(code, loadIndex().then(({ updated, codes }) => (codes.has(code)
+      ? fetch(`data/beds/${code}.json?v=84d8731d91`).then((r) => (r.ok ? r.json() : null)).then((d) => d && { ...d, updated }).catch(() => null)
       : null)));
   }
   return cache.get(code);
