@@ -68,7 +68,12 @@ python tools/update-data.py                   # 同上但不 commit，先看結�
 | 三班護病比 | 健保署主站有 Cloudflare 機器人驗證，程式無法下載 → 用瀏覽器到[三班護病比資訊公開](https://www.nhi.gov.tw/ch/cp-15138-b2fee-3669-1.html)下載 ODS，**留在「下載」資料夾即可**，`update-data.py` 會自動歸檔。`fetch-nurse-ratio.py` 另會檢查政府開放資料平台（目前只上架到 113/12） | 約次月底 |
 | 醫院財務 | `update-data.py` 會查健保署財務 API 的最新年度，有新年度時提示；年度報表 ODS 同樣手動下載後留在「下載」資料夾 | 每年一次 |
 
-手動下載的檔案也可以放在 `data/_inbox/`（不進版控）。歸檔時以內容雜湊判斷，重複下載的檔案不會重複歸檔。
+手動下載的檔案也可以放在 `data/_inbox/`（不進版控）。
+
+**自動排程**：`.github/workflows/auto-update.yml` 每 5 天（台灣時間 03:00）在 GitHub Actions 跑
+`update-data.py --commit`，自動更新人力監控、病床設施（含 `beds-history/` 歷史快照）、違規名稱對照；
+有變動才 commit、push 並觸發部署（推播照常）。也可在 Actions 頁手動執行（Run workflow）。
+三班護病比新月份、財務年度報表無法自動下載，仍照上表手動處理。歸檔時以內容雜湊判斷，重複下載的檔案不會重複歸檔。
 
 ## 重建
 
