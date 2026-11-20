@@ -25,7 +25,7 @@ let _violHospitalMapLoading = null;
 function ensureViolHospitalMap() {
   if (_violHospitalMap) return Promise.resolve(_violHospitalMap);
   if (_violHospitalMapLoading) return _violHospitalMapLoading;
-  _violHospitalMapLoading = fetch('data/violations-hospital-map.json?v=bd99316e15', { cache: 'default' })
+  _violHospitalMapLoading = fetch('data/violations-hospital-map.json?v=31fe4394aa', { cache: 'default' })
     .then((r) => (r.ok ? r.json() : { map: {} }))
     .then((d) => { _violHospitalMap = (d && d.map) || {}; return _violHospitalMap; })
     .catch(() => { _violHospitalMap = {}; return _violHospitalMap; });

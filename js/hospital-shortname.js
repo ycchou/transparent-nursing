@@ -36,7 +36,7 @@ function startLoad() {
   loadingPromise = (async () => {
     try {
       // 與 hospital-data.js 同一個帶版本號的網址：共用同一份快取，不重複下載
-      const r = await fetch('data/hospitals-merged.json?v=351c442704', { cache: 'default' });
+      const r = await fetch('data/hospitals-merged.json?v=8cc5610e0d', { cache: 'default' });
       if (!r.ok) return;
       const d = await r.json();
       const namesByCode = new Map();

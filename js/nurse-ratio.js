@@ -20,7 +20,7 @@ import { skeletonRows } from './skeleton.js?v=24e70189de';
 import { escapeHtml } from './moderation.js?v=24e70189de';
 import { mountCityFilter, bindChipGroup, levelSlug } from './picker-filters.js?v=24e70189de';
 
-const DATA_URL = 'data/nurse-ratio.json?v=040b3f83fc';
+const DATA_URL = 'data/nurse-ratio.json?v=01e06bc301';
 
 // 合規分類綁定本頁 state.data.months（共用邏輯在 nurse-ratio-view.js）
 function classifyHospital(hosp) {

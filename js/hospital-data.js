@@ -9,8 +9,8 @@ import { registerFormerCodes } from './hospital-merges.js?v=24e70189de';
 
 import { VIOL_FEEDS } from './config.js?v=24e70189de';
 
-const MERGED_URL = 'data/hospitals-merged.json?v=351c442704';
-const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=bd99316e15';
+const MERGED_URL = 'data/hospitals-merged.json?v=8cc5610e0d';
+const VIOL_MAP_URL = 'data/violations-hospital-map.json?v=31fe4394aa';
 const ADDR_OVERLAY_URL = 'data/hospitals-address-overlay.json?v=50f6f147a8';
 
 const parseViolRow = (r) => ({
@@ -125,7 +125,7 @@ const _nrCodeCache = new Map();
 export async function loadNurseByCode(code) {
   if (_nrCodeCache.has(code)) return _nrCodeCache.get(code);
   try {
-    const r = await fetch(`data/nurse-ratio/by-code/${code}.json?v=040b3f83fc`, { cache: 'default' });
+    const r = await fetch(`data/nurse-ratio/by-code/${code}.json?v=01e06bc301`, { cache: 'default' });
     const d = r.ok ? await r.json() : null;
     _nrCodeCache.set(code, d);
     return d;
