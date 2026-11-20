@@ -29,6 +29,7 @@ INCLUDE = [
     'slides/*.html',                     # 對外分享過網址的簡報頁
     'data/*.json',                       # 整理後的資料（原始 PDF／ODS 不部署）
     'data/financials/*.json',
+    'data/beds/*.json',
     'data/personnel/*.json',
     'data/nurse-ratio/by-code/*.json',
     'data/manual/*.json',

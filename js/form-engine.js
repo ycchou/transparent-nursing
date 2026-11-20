@@ -2,16 +2,16 @@
 // 驗證碼、送出、致謝。各科別頁面呼叫 initDepartmentForm({ schema, draftKey }) 即可。
 // 未來 Apps Script 串接時，把 submitEndpoint 傳入即可。
 
-import { mountLayout } from './components.js?v=caac978e8b';
-import { renderIcons, icon } from './icons.js?v=caac978e8b';
-import { markContributed } from './contribution-gate.js?v=caac978e8b';
+import { mountLayout } from './components.js?v=497b1132f4';
+import { renderIcons, icon } from './icons.js?v=497b1132f4';
+import { markContributed } from './contribution-gate.js?v=497b1132f4';
 
-import { showToast } from './toast.js?v=caac978e8b';
-import { submitEndpoint as envSubmitEndpoint } from './env.js?v=caac978e8b';
-import { notePwaIntent } from './pwa-prompt.js?v=caac978e8b';
-import { markSubmitted } from './fresh-data.js?v=caac978e8b';
-import { saveUnlockCode, unlockLink, unlockNoticeHtml, wireInstallGuide } from './unlock.js?v=caac978e8b';
-import { attachInstitutionAutocomplete, syncInstitutionLevel } from './form-institution-picker.js?v=caac978e8b';
+import { showToast } from './toast.js?v=497b1132f4';
+import { submitEndpoint as envSubmitEndpoint } from './env.js?v=497b1132f4';
+import { notePwaIntent } from './pwa-prompt.js?v=497b1132f4';
+import { markSubmitted } from './fresh-data.js?v=497b1132f4';
+import { saveUnlockCode, unlockLink, unlockNoticeHtml, wireInstallGuide } from './unlock.js?v=497b1132f4';
+import { attachInstitutionAutocomplete, syncInstitutionLevel } from './form-institution-picker.js?v=497b1132f4';
 import {
   generateCaptcha,
   attachCaptcha,
@@ -21,7 +21,7 @@ import {
   turnstileToken,
   resetTurnstile,
   TURNSTILE_REPLACES_LOCAL_CAPTCHA,
-} from './form-captcha.js?v=caac978e8b';
+} from './form-captcha.js?v=497b1132f4';
 
 const DRAFT_DEBOUNCE_MS = 500;
 

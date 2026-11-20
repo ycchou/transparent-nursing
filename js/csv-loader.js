@@ -1,6 +1,6 @@
 // csv-loader.js — 從公開 CSV（Google Sheet 發布）載入資料：PapaParse 動態載入＋localStorage 快取＋背景刷新。
-import { isForcedFresh } from './fresh-data.js?v=caac978e8b';
-import { fetchCsvText } from './sheet-fetch.js?v=caac978e8b';
+import { isForcedFresh } from './fresh-data.js?v=497b1132f4';
+import { fetchCsvText } from './sheet-fetch.js?v=497b1132f4';
 
 // ============================================================
 // PapaParse 動態載入（讓沒掛 <script> 的頁面也能 preload）
